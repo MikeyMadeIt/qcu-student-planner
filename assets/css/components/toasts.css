@@ -1,0 +1,49 @@
+/* Toasts: solid, theme-aware surface with a status-coloured accent. */
+
+.toast-container {
+    z-index: 9999;
+    max-width: 100vw;
+}
+
+.app-toast {
+    --toast-color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 15rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+    margin-bottom: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--toast-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(0, 0, 0, .04);
+    color: var(--text);
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+}
+
+.app-toast-danger {
+    --toast-color: var(--danger);
+}
+
+.app-toast-warning {
+    --toast-color: var(--warning);
+}
+
+.app-toast-info {
+    --toast-color: var(--info);
+}
+
+.app-toast .toast-item-icon {
+    flex-shrink: 0;
+    color: var(--toast-color);
+    font-size: 1.1rem;
+}
+
+.app-toast .toast-item-msg {
+    font-size: .86rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}

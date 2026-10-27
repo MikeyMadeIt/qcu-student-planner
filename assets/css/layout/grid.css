@@ -1,0 +1,443 @@
+/* ============================================================
+FINAL POLISH — Design System Consistency
+============================================================ */
+/* ── Typography scale ── */
+
+.page-title {
+    letter-spacing: -.02em;
+}
+
+.stat-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+/* ── Consistent button heights ── */
+/* focus rings on buttons */
+
+.btn-accent:focus-visible,
+.btn-ghost:focus-visible,
+.btn-icon:focus-visible {
+    outline: 2px solid rgba(var(--accent),.6);
+    outline-offset: 2px;
+}
+
+/* ── Form controls — unified height & look ── */
+
+.form-control,
+.form-select {
+    height: 36px;
+    font-size: .84rem;
+    border-radius: 10px;
+    padding: 0 12px;
+}
+
+textarea.form-control {
+    height: auto;
+    padding: 10px 12px;
+    line-height: 1.55;
+    resize: vertical;
+    font-size: .84rem;
+    border-radius: 10px;
+}
+
+.form-select {
+    padding-right: 32px;
+}
+
+label {
+    font-size: .77rem;
+    font-weight: 700;
+    color: var(--text-soft);
+    display: block;
+}
+
+.input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+.input-group .btn {
+    border-radius: 0 10px 10px 0;
+}
+
+/* ── Modal polish ── */
+
+.modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+    padding: 18px;
+}
+
+.modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    gap: 8px;
+}
+
+.modal-title {
+    font-size: .96rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+}
+
+/* ── Chips / badges consistent size ── */
+
+.chip {
+    font-size: .69rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    line-height: 1.4;
+}
+
+.chip-sm {
+    font-size: .62rem;
+    padding: 2px 7px;
+}
+
+.badge {
+    font-size: .69rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 3px 7px;
+}
+
+/* ── Progress bars ── */
+
+.progress {
+    height: 6px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 20px;
+}
+
+/* ── Section-title divider variant ── */
+
+.section-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 12px;
+}
+
+.section-divider::before,
+.section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.section-divider span {
+    font-size: .66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+/* ── Quick action tile ── */
+
+.quick-action:hover {
+    border-color: rgba(var(--accent),.4);
+}
+
+.quick-action i {
+    transition: transform .2s;
+}
+
+.quick-action:hover i {
+    transform: scale(1.12);
+}
+
+/* ── List rows consistent ── */
+
+.list-row {
+    transition: background .15s, border-color .15s;
+}
+
+.list-row:hover {
+    border-color: rgba(var(--accent),.2) !important;
+}
+
+/* ── Task rows ── */
+
+.task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, border-color .15s;
+    margin-top: 1px;
+}
+
+.task-check.checked {
+    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    border-color: transparent;
+    color: #fff;
+}
+
+.task-title {
+    font-weight: 700;
+    font-size: .85rem;
+}
+
+.task-meta {
+    font-size: .69rem;
+    color: var(--text-faint);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+/* ── Note cards ── */
+
+.note-card {
+    border-radius: 13px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    height: 100%;
+    border: 1px solid var(--border);
+}
+
+.note-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.2);
+}
+
+/* ── Attendance rows ── */
+
+.att-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: .83rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    margin-bottom: 6px;
+}
+
+/* ── Grade card ── */
+
+.grade-card {
+    border-radius: 13px;
+    padding: var(--card-pad-xs);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    height: 100%;
+}
+
+/* ── Dot indicators ── */
+
+.dot-color {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Calendar cells ── */
+
+.cal-cell {
+    transition: border-color .15s, background .15s;
+}
+
+.cal-cell:hover {
+    border-color: rgba(var(--accent),.35);
+}
+
+.cal-daynum {
+    font-size: .76rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+.cal-evt {
+    font-size: .6rem;
+    padding: 2px 5px;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+/* ── Scrollbars ── */
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--accent),.25);
+    border-radius: 10px;
+}
+
+/* ── Focus ring ── */
+
+:focus-visible {
+    outline: 2px solid rgba(var(--accent),.6) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── Hover lift fix — only on interactive cards ── */
+
+.hover-lift {
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.22);
+}
+
+/* ── Table polish ── */
+
+table {
+    font-size: .83rem;
+}
+
+th {
+    font-size: .71rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+td {
+    vertical-align: middle;
+}
+
+/* ── Phone typography ── */
+
+@media (max-width: 575px) {
+    .section-title {
+        font-size: .79rem;
+    }
+    .stat-num {
+        font-size: 1.35rem;
+    }
+    .page-title {
+        font-size: 1.15rem;
+    }
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px;
+    }
+}
+
+/* ── Smooth page entrance ── */
+
+.main-content > * {
+    animation: fadeIn .3s var(--ease) both;
+}
+
+.main-content > *:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.main-content > *:nth-child(2) {
+    animation-delay: .04s;
+}
+
+.main-content > *:nth-child(3) {
+    animation-delay: .08s;
+}
+
+.main-content > *:nth-child(4) {
+    animation-delay: .12s;
+}
+
+.main-content > *:nth-child(5) {
+    animation-delay: .16s;
+}
+
+/* ── Glass card consistent shadow ── */
+
+.glass {
+    box-shadow: 0 2px 12px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
+}
+
+[data-theme="dark"] .glass {
+    box-shadow: 0 4px 20px rgba(0,0,0,.3), 0 1px 4px rgba(0,0,0,.2);
+}
+
+/* ── Select dropdown arrow consistent ── */
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a7adc2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 12px !important;
+}
+
+/* ── Empty state ── */
+
+.empty-state {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--text-faint);
+}
+
+.empty-state i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 8px;
+    opacity: .5;
+}
+
+.empty-state p {
+    font-size: .84rem;
+    margin: 0;
+}
+
+/* ── Schedule toggle buttons (archive + view switchers) ── */
+
+.sched-toggle-btn {
+    height: 38px;
+    min-width: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    background: transparent;
+    transition: background .18s, color .18s, border-color .18s, box-shadow .18s;
+}
+
+.sched-toggle-btn:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.sched-toggle-btn.active {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}

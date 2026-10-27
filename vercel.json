@@ -1,0 +1,30 @@
+{
+  "redirects": [
+    { "source": "/(attendance|calendar|curriculum|grades|notes|schedule|settings|syllabus|syllabus-view|tasks|university|wallpaper)\\.html", "destination": "/pages/app/$1.html", "permanent": false },
+    { "source": "/(login|register|pending|verify|forgot-password|reset-password)\\.html", "destination": "/pages/auth/$1.html", "permanent": false }
+  ],
+  "headers": [
+    {
+      "source": "/service-worker.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [{ "key": "Content-Type", "value": "application/manifest+json" }]
+    },
+    {
+      "source": "/pages/auth/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: .72rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-soft);
+}
+
+.status-badge.pending {
+    color: var(--warning);
+    border-color: rgba(251,191,36,.35);
+    background: rgba(251,191,36,.10);
+}
+
+.status-badge.approved {
+    color: var(--success);
+    border-color: rgba(52,211,153,.35);
+    background: rgba(52,211,153,.10);
+}
+
+.status-badge.rejected {
+    color: var(--danger);
+    border-color: rgba(251,113,133,.35);
+    background: rgba(251,113,133,.10);
+}

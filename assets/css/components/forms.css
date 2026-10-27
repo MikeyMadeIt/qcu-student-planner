@@ -1,0 +1,200 @@
+/* ---------- FORM CONTROLS ---------- */
+/* Shared sizing, placeholder visibility and focus states for every text
+   input, select, textarea, checkbox and radio in the application. */
+
+.form-control,
+.form-select {
+    height: var(--input-height);
+    min-height: var(--input-height);
+    padding: 0 0.85rem;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: var(--input-radius) !important;
+    font-size: .9rem;
+    line-height: calc(var(--input-height) - 2px);
+    /* --- CRITICAL MOBILE & CHROMIUM FIX --- */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+textarea.form-control {
+    height: auto;
+    min-height: 6rem;
+    padding-block: 0.6rem;
+    line-height: 1.5;
+}
+
+/* Visible, theme-aware placeholder text everywhere. */
+.form-control::placeholder,
+textarea::placeholder,
+input::placeholder {
+    color: var(--input-placeholder-color);
+    opacity: 1;
+}
+
+.form-control:-ms-input-placeholder {
+    color: var(--input-placeholder-color);
+}
+
+.form-control::-ms-input-placeholder {
+    color: var(--input-placeholder-color);
+}
+
+/* Disabled / read-only fields stay legible but visually distinct. */
+.form-control:disabled,
+.form-control[readonly],
+.form-select:disabled {
+    opacity: .65;
+    color: var(--text-soft) !important;
+    cursor: not-allowed;
+}
+
+/* Autofill (email/password) in dark surfaces. */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text);
+    -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: rgb(var(--accent)) !important;
+    box-shadow: var(--focus-ring) !important;
+}
+
+/* Force dark/light theme options onto native dropdown popups */
+.form-select option,
+select option {
+    background-color: #121724 !important;
+    color: #eef0f8 !important;
+}
+
+[data-theme="light"] .form-select option,
+[data-theme="light"] select option {
+    background-color: #ffffff !important;
+    color: #161a26 !important;
+}
+
+/* ---------- Checkboxes & radios ---------- */
+input[type="checkbox"],
+input[type="radio"] {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    flex-shrink: 0;
+    margin: 0;
+    /* Nudge so the box lines up with the first line of its label text
+       instead of floating above or below it. */
+    position: relative;
+    top: 0.15em;
+    accent-color: rgb(var(--accent));
+    cursor: pointer;
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 3px;
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* Label text that wraps next to a checkbox keeps the box pinned to the
+   top-left instead of re-centering vertically. */
+.form-check,
+.check-row,
+label.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"],
+.check-row input[type="checkbox"],
+.check-row input[type="radio"] {
+    margin-top: 0.2rem;
+    top: 0;
+}
+
+.form-check label,
+.check-row label {
+    margin-bottom: 0;
+    line-height: 1.45;
+}
+
+/* Form labels and helper / validation text */
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.form-help,
+.form-text {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: .76rem;
+    color: var(--text-faint);
+}
+
+.form-error,
+.invalid-feedback {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: .76rem;
+    color: var(--danger);
+}
+
+/* Input-group icons (search fields, password toggles, etc.) stay centered
+   and never distort the control's height. */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    height: var(--input-height);
+}
+
+.input-group .form-control {
+    height: 100%;
+}
+
+.input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrap .form-control {
+    padding-left: 2.5rem;
+}
+
+.input-icon-wrap > i,
+.input-icon-wrap > .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--icon-size-md);
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.input-icon-wrap .password-toggle {
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+}

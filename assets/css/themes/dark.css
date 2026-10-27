@@ -1,0 +1,16 @@
+[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0F172A;
+    --bg-grad: radial-gradient(1100px 700px at 10% -10%, rgba(var(--accent),.07), transparent 60%), #0F172A;
+    --surface: rgba(30,41,59,.55);
+    --surface-solid: #111827;
+    --surface-2: rgba(51,65,85,.55);
+    --elevated: #1E293B;
+    --border: rgba(148,163,184,.16);
+    --text: #F8FAFC;
+    --text-soft: #94A3B8;
+    --text-faint: #64748B;
+    --shadow: 0 8px 24px rgba(2,6,23,.35);
+    --nav-bg: rgba(17,24,39,.82);
+    --input-placeholder-color: #94a3b8;
+}

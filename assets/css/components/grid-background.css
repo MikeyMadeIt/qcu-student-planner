@@ -1,0 +1,79 @@
+/* Animated grid background. Pure CSS, sits behind all content and never captures input.
+   Two layers move at the same speed: a fine grid and a wider amber-tinted grid. */
+
+:root {
+    --grid-size: 3rem;
+    --grid-major-size: 12rem;
+    --grid-line: rgba(148, 163, 184, 0.09);
+    --grid-line-major: rgba(251, 191, 36, 0.13);
+    --grid-fade: #0F172A;
+}
+
+[data-theme="light"] {
+    --grid-line: rgba(15, 23, 42, 0.07);
+    --grid-line-major: rgba(217, 119, 6, 0.17);
+    --grid-fade: #F4F6FA;
+}
+
+.grid-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--grid-fade);
+}
+
+.grid-bg::before,
+.grid-bg::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--grid-major-size) * -1);
+    will-change: transform;
+}
+
+.grid-bg::before {
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    animation: grid-drift-fine 12s linear infinite;
+}
+
+.grid-bg::after {
+    background-image:
+        linear-gradient(var(--grid-line-major) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px);
+    background-size: var(--grid-major-size) var(--grid-major-size);
+    animation: grid-drift-major 48s linear infinite;
+}
+
+/* Soft vignette keeps the grid quiet behind the form. */
+.grid-bg {
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, rgba(0, 0, 0, 0.55) 100%);
+    mask-image: radial-gradient(ellipse at center, #000 30%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+@keyframes grid-drift-fine {
+    to {
+        transform: translate3d(var(--grid-size), var(--grid-size), 0);
+    }
+}
+
+@keyframes grid-drift-major {
+    to {
+        transform: translate3d(var(--grid-major-size), var(--grid-major-size), 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grid-bg::before,
+    .grid-bg::after {
+        animation: none;
+    }
+}
+
+[data-motion="reduced"] .grid-bg::before,
+[data-motion="reduced"] .grid-bg::after {
+    animation: none;
+}

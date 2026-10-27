@@ -1,0 +1,772 @@
+/* ============================================================
+UNIVERSITY PAGE
+============================================================ */
+/* ── 3-tab nav ── */
+
+.univ-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    backdrop-filter: blur(18px);
+}
+
+.univ-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 6px;
+    border: none;
+    border-radius: calc(var(--radius-md) - 3px);
+    background: transparent;
+    color: var(--text-faint);
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s,color .15s;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.univ-tab-btn i {
+    font-size: .88rem;
+    flex-shrink: 0;
+}
+
+.univ-tab-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.univ-tab-btn:hover {
+    background: rgba(var(--accent),.08);
+    color: var(--text);
+}
+
+.univ-tab-active {
+    background: rgba(var(--accent),.16) !important;
+    color: rgb(var(--accent)) !important;
+}
+
+@media (max-width:400px) {
+    .univ-tab-btn {
+        font-size: .7rem;
+        gap: 3px;
+        padding: 8px 3px;
+    }
+}
+
+/* ── Panel ── */
+
+.univ-panel {
+    animation: fadeIn .18s ease;
+}
+
+.univ-link {
+    color: rgb(var(--accent));
+    text-decoration: none;
+}
+
+.univ-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Section labels (centered, accent colored) ── */
+
+.ua-section-label {
+    font-size: .67rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: rgb(var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    padding: 4px 0 6px;
+    position: relative;
+}
+
+.ua-section-label::before,
+.ua-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(var(--accent),.2);
+}
+
+/* ── Glass card (main container) ── */
+
+.ua-glass-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(18px) saturate(140%);
+    box-shadow: var(--shadow);
+}
+
+.ua-card-pad {
+    padding: var(--card-pad-sm);
+}
+
+/* Divider between card sections */
+
+.ua-card-divider {
+    height: 1px;
+    background: var(--border);
+}
+
+.ua-card-section {
+}
+
+.ua-card-section-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    font-weight: 700;
+    font-size: .87rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.ua-section-icon {
+    font-size: .85rem;
+    color: rgb(var(--accent));
+    flex-shrink: 0;
+}
+
+/* ── Info banner ── */
+
+.ua-info-banner {
+    padding: var(--card-pad-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (min-width:768px) {
+    .ua-info-banner {
+        flex-direction: row;
+        gap: 18px;
+    }
+    .ua-info-main {
+        flex: 1;
+    }
+    .ua-info-rows {
+        flex: 1.1;
+    }
+}
+
+.ua-seal {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+
+.ua-uni-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.02rem;
+    line-height: 1.2;
+}
+
+.ua-uni-tag {
+    font-size: .75rem;
+    color: var(--text-faint);
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.ua-info-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.ua-info-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+}
+
+.ua-info-row:last-child {
+    border-bottom: none;
+}
+
+.ua-info-icon {
+    color: rgb(var(--accent));
+    font-size: .75rem;
+    flex-shrink: 0;
+    width: 13px;
+    text-align: center;
+}
+
+.ua-info-lbl {
+    font-weight: 700;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-faint);
+    width: 50px;
+    flex-shrink: 0;
+}
+
+.ua-info-val {
+    color: var(--text);
+    flex: 1;
+    font-size: .8rem;
+}
+
+/* ── V&M image ── */
+
+.ua-vm-img {
+    width: 100%;
+    display: block;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: center top;
+    border-bottom: 1px solid var(--border);
+}
+
+@media (min-width:576px) {
+    .ua-vm-img {
+        max-height: 260px;
+    }
+}
+
+/* ── Inner labels (Vision / Mission inside the card) ── */
+
+.ua-inner-label {
+    font-size: .64rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: rgb(var(--accent));
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 7px;
+}
+
+.ua-inner-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+}
+
+/* ── Quotes ── */
+
+.ua-quote {
+    font-size: .88rem;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.65;
+    border-left: 3px solid rgb(var(--accent));
+    padding-left: 12px;
+    margin: 0 0 10px;
+}
+
+.ua-faint {
+    font-size: .79rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ── Inner accordion (blend with background, no gray) ── */
+
+.ua-inner-acc {
+    border: none;
+}
+
+.ua-no-top-border {
+    border-top: none;
+}
+
+.ua-item {
+    background: transparent !important;
+    border: none !important;
+    border-top: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+}
+
+.ua-item:first-child {
+    border-top: none !important;
+}
+
+.ua-btn {
+    background: transparent !important;
+    color: var(--text) !important;
+    font-weight: 600;
+    font-size: .82rem;
+    box-shadow: none !important;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-radius: 0 !important;
+    transition: background .15s, color .15s;
+}
+
+.ua-btn:hover {
+    background: rgba(var(--accent),.05) !important;
+}
+
+.ua-btn:not(.collapsed) {
+    background: rgba(var(--accent),.07) !important;
+    color: rgb(var(--accent)) !important;
+}
+
+.ua-btn::after {
+    filter: invert(1) grayscale(1) brightness(1.5);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .ua-btn::after {
+    filter: none;
+}
+
+.ua-btn-title {
+    flex: 1;
+    min-width: 0;
+    margin-left: 10px;
+}
+
+.ua-body {
+    padding: 9px 14px 11px;
+    font-size: .8rem;
+    color: var(--text-faint);
+    line-height: 1.65;
+    border-top: 1px solid var(--border);
+    background: transparent;
+}
+
+/* ── Number / abbr badges ── */
+
+.ua-num {
+    font-family: var(--font-mono);
+    font-size: .67rem;
+    font-weight: 800;
+    color: rgb(var(--accent));
+    background: rgba(var(--accent),.1);
+    border-radius: 5px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+}
+
+.ua-abbr {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    font-weight: 800;
+    color: rgb(var(--accent));
+    background: rgba(var(--accent),.1);
+    border-radius: 5px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ── College logo in accordion button ── */
+
+.ua-college-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    margin-right: 8px;
+}
+
+/* ── J.O.Y. ── */
+
+.ua-joy-badge {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: .7rem;
+    color: rgb(var(--accent));
+    background: rgba(var(--accent),.13);
+    border: 1px solid rgba(var(--accent),.22);
+    border-radius: 6px;
+    padding: 1px 7px;
+    letter-spacing: .05em;
+}
+
+.ua-joy-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+}
+
+.ua-joy-row:first-child {
+    border-top: none;
+}
+
+.ua-joy-letter {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: rgb(var(--accent));
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+}
+
+.ua-joy-text {
+    font-size: .85rem;
+}
+
+.ua-joy-hl {
+    font-weight: 800;
+    color: rgb(var(--accent));
+}
+
+.ua-joy-rest {
+    color: var(--text-soft);
+    font-weight: 500;
+}
+
+/* ── Hymn ── */
+
+.ua-hymn-pre {
+    font-family: inherit;
+    font-size: .84rem;
+    line-height: 1.9;
+    color: var(--text-soft);
+    white-space: pre-wrap;
+    margin: 0;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.ua-hymn-credit {
+    font-size: .72rem;
+    color: var(--text-faint);
+    font-style: italic;
+    margin-top: 8px;
+}
+
+/* ── Campuses ── */
+
+.ua-campus-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.ua-campus-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.ua-campus-info {
+    padding: 9px 11px;
+}
+
+.ua-campus-name {
+    font-weight: 800;
+    font-size: .84rem;
+    font-family: var(--font-display);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ua-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ua-detail {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    font-size: .76rem;
+    color: var(--text-soft);
+}
+
+.ua-detail i {
+    color: var(--text-faint);
+    font-size: .7rem;
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+}
+
+/* ── Courses ── */
+
+.ua-desc {
+    font-size: .79rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+}
+
+.ua-courses {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ua-course-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: rgba(var(--accent),.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+}
+
+.ua-course-title {
+    font-size: .79rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* ── Academic card header ── */
+
+.ua-academic-head {
+    padding: var(--card-pad-sm);
+    border-bottom: 1px solid var(--border);
+    background: rgba(var(--accent),.05);
+}
+
+.ua-academic-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .94rem;
+}
+
+/* ── Directory ── */
+
+.ua-dir-group-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(var(--accent),.05);
+}
+
+.ua-dir-group-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(var(--accent),.12);
+    color: rgb(var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    flex-shrink: 0;
+}
+
+.ua-dir-group-name {
+    font-weight: 800;
+    font-size: .86rem;
+    font-family: var(--font-display);
+    line-height: 1.2;
+}
+
+.ua-div-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 13px;
+}
+
+.ua-div-row-border {
+    border-top: 1px solid var(--border);
+}
+
+.ua-div-row-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.ua-div-name {
+    font-weight: 700;
+    font-size: .83rem;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.ua-div-officer {
+    font-size: .73rem;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.ua-div-officer i {
+    font-size: .67rem;
+    color: var(--text-faint);
+}
+
+.ua-div-pos {
+    color: var(--text-faint);
+    font-size: .71rem;
+}
+
+.ua-div-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: .71rem;
+    color: var(--text-faint);
+}
+
+.ua-div-meta i {
+    font-size: .65rem;
+    margin-right: 3px;
+    color: rgb(var(--accent));
+    opacity: .7;
+}
+
+.ua-div-email-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 160px;
+}
+
+.ua-div-row-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.ua-icon-btn {
+    width: var(--icon-btn-size-sm);
+    height: var(--icon-btn-size-sm);
+    border-radius: var(--btn-radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.ua-icon-btn:hover {
+    background: rgba(var(--accent),.1);
+    color: rgb(var(--accent));
+    border-color: rgba(var(--accent),.3);
+}
+
+.ua-no-results {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--text-faint);
+}
+
+.ua-no-results i {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 7px;
+}
+
+.ua-no-results p {
+    font-size: .86rem;
+}
+
+/* ── Student resources ── */
+
+.ua-resource-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: var(--card-pad-xs) var(--card-pad-sm);
+}
+
+.ua-resource-soon {
+    opacity: .5;
+}
+
+.ua-resource-icon {
+    font-size: 1.2rem;
+    color: rgb(var(--accent));
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+
+.ua-resource-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ua-resource-title {
+    font-weight: 700;
+    font-size: .86rem;
+}
+
+.ua-resource-btn {
+    font-size: .74rem !important;
+    padding: 4px 10px !important;
+    height: auto !important;
+    white-space: nowrap;
+}
+
+.ua-coming-soon {
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--text-faint);
+    background: rgba(var(--accent),.07);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 9px;
+    white-space: nowrap;
+}
+
+/* ── Toast ── */
+
+.univ-toast {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
+    color: var(--text);
+}
+
+/* ── Hymn title ── */
+
+.ua-hymn-title {
+    font-weight: 800;
+    font-size: .87rem;
+    font-family: var(--font-display);
+    color: rgb(var(--accent));
+}
+
+@media (max-width: 400px) {
+    }
+

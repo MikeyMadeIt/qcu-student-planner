@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="amber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grades · Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/grades.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="topbar">
+      <div><h1 class="page-title">Grade Tracker</h1><p class="page-sub">Customizable per-subject grading, weighted GWA, and grade tools</p></div>
+    </div>
+
+    <!-- Current GWA Overview — full-width with 3 stat blocks -->
+    <div class="mb-3">
+      <div class="glass card-pad fade-in gwa-overview-card">
+        <div class="gwa-overview-header">
+          <div class="section-title mb-0"><i class="bi bi-mortarboard-fill"></i>GWA Overview</div>
+          <div class="gwa-header-actions">
+            <button class="btn-icon btn-icon-sm gwa-action-btn" onclick="openGradeInterpModal()" title="Grade Interpretation Reference">
+              <i class="bi bi-info-circle"></i>
+            </button>
+            <button class="btn-icon btn-icon-sm gwa-action-btn gwa-share-btn" id="gwaShareBtn" onclick="copyGwaCardAsImage()" title="Share as image">
+              <i class="bi bi-share"></i>
+            </button>
+          </div>
+        </div>
+        <div class="gwa-compact-grid">
+          <!-- Left: Current GWA -->
+          <div class="gwa-compact-main">
+            <div class="gwa-compact-label"><i class="bi bi-award"></i>Current GWA</div>
+            <div class="gwa-compact-num" id="gGwa">--</div>
+            <div class="text-faint gwa-compact-sub" id="gGwaSub">1.00–5.00 scale</div>
+            <div class="mt-1" id="gGwaStatus"></div>
+            <div class="text-faint gwa-compact-statussub" id="gGwaStatusSub"></div>
+          </div>
+          <!-- Vertical divider -->
+          <div class="gwa-compact-divider"></div>
+          <!-- Right: Highest + Lowest stacked -->
+          <div class="gwa-compact-right">
+            <div class="gwa-compact-side">
+              <div class="gwa-compact-label"><i class="bi bi-arrow-up-circle"></i>Highest</div>
+              <div class="gwa-compact-num gwa-hi-num" id="gHighest">--</div>
+              <div class="text-faint gwa-compact-sub" id="gHighestSub">—</div>
+            </div>
+            <div class="gwa-compact-hdivider"></div>
+            <div class="gwa-compact-side">
+              <div class="gwa-compact-label"><i class="bi bi-arrow-down-circle"></i>Lowest</div>
+              <div class="gwa-compact-num gwa-lo-num" id="gLowest">--</div>
+              <div class="text-faint gwa-compact-sub" id="gLowestSub">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject grade cards -->
+    <div class="glass card-pad mb-3 fade-in">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="section-title mb-0"><i class="bi bi-journal-check"></i>Subjects</div>
+        <span class="text-faint" style="font-size:.76rem">Tap <i class="bi bi-pencil"></i> to set grading breakdown</span>
+      </div>
+      <div id="gradesWrap" class="row g-2 stagger"></div>
+    </div>
+
+    <!-- GWA Calculator (Manual) -->
+    <div class="glass mb-3 fade-in" style="overflow:hidden">
+
+      <!-- Header -->
+      <div class="gwa-calc-header">
+        <div class="gwa-calc-header-top">
+          <div class="section-title mb-0"><i class="bi bi-calculator-fill"></i>Manual GWA Calculator</div>
+          <div class="gwa-calc-header-btns">
+            <button class="btn btn-ghost btn-sm" onclick="addGwaCalcRow()"><i class="bi bi-plus-lg me-1"></i>Add</button>
+            <button class="btn btn-ghost btn-sm gwa-clear-btn" onclick="clearAllGwaRows()">
+              <i class="bi bi-trash3 me-1"></i>Clear
+            </button>
+          </div>
+        </div>
+        <p class="gwa-calc-desc">Enter any course codes, units, and grades to manually calculate a weighted GWA. This is independent from your automatically computed semester GWA above.</p>
+      </div>
+
+      <!-- Column headers -->
+      <div class="gwa-table-header">
+        <div>Course Code</div>
+        <div>Units</div>
+        <div>Grade</div>
+        <div></div>
+      </div>
+
+      <!-- Input rows -->
+      <div id="gwaCalcRows"></div>
+
+      <!-- Result section -->
+      <div class="gwa-result-section">
+        <div class="gwa-result-main">
+          <div class="text-faint" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Manual GWA</div>
+          <div class="gwa-result-num" id="gwaCalcResult">--</div>
+          <div class="gwa-result-meaning" id="gwaCalcResultMeaning"></div>
+          <div class="gwa-result-status" id="gwaCalcResultStatus"></div>
+        </div>
+        <div class="gwa-result-stats">
+          <div class="gwa-stat">
+            <div class="gwa-stat-value" id="gwaTotalUnits">0</div>
+            <div class="gwa-stat-label">Total Units</div>
+          </div>
+          <div class="gwa-stat">
+            <div class="gwa-stat-value" id="gwaTotalCourses">0</div>
+            <div class="gwa-stat-label">Total Courses</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Grade Interpretation Modal -->
+<div class="modal fade" id="gradeInterpModal" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-list-columns-reverse me-2"></i>Grade Interpretation Reference</h5>
+        <button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:16px 20px 20px">
+        <div class="ref-table-head">
+          <div class="ref-col-grade">Grade</div>
+          <div class="ref-col-range"><span class="ref-label-full">Percentage Range</span><span class="ref-label-short">Range</span></div>
+          <div class="ref-col-meaning">Meaning</div>
+        </div>
+        <div id="gradeReferenceTable"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grade breakdown modal -->
+<div class="modal fade" id="gradeModal" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Grading Breakdown</h5><button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="gradeModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for clipboard copy -->
+<div id="gwaToast" class="gwa-toast" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/services/gwa.js"></script>
+<script src="../../assets/js/modules/grades.js"></script>
+<script>
+  renderShell('grades');
+  applyTheme();
+  initGrades();
+  function openGradeInterpModal(){ new bootstrap.Modal(document.getElementById('gradeInterpModal')).show(); }
+</script>
+</body>
+</html>

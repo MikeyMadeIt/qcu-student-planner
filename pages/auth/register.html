@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="amber">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <title>Sign up · QCU Student Planner</title>
+    <script src="../../assets/js/core/theme.js"></script>
+    <meta name="theme-color" content="#0F172A">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="icon" href="../../assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="../../assets/icons/icon-192.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../../assets/css/main.css" rel="stylesheet">
+    <link href="../../assets/css/pages/auth.css" rel="stylesheet">
+</head>
+<body class="auth-page">
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to light theme">
+        <i class="bi bi-sun theme-icon-sun" aria-hidden="true"></i>
+        <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
+    </button>
+
+    <main class="auth-main" id="main">
+        <div class="auth-card auth-card-wide">
+            <a class="auth-brand" href="login.html">
+                <img src="../../assets/images/branding/qcu-logo.webp" alt="">
+                <span>QCU Student Planner<small>Student portal</small></span>
+            </a>
+
+            <h1 class="auth-title">Create your account</h1>
+            <p class="auth-sub">Three short steps. New accounts are reviewed by an administrator before access is granted.</p>
+
+            <ol class="stepper" data-stepper aria-label="Registration progress">
+                <li class="stepper-item" data-step-indicator="1">
+                    <span class="stepper-marker" aria-hidden="true">1</span>
+                    <span class="stepper-label">Personal Information<span class="visually-hidden">, <span data-step-status>current step</span></span></span>
+                </li>
+                <li class="stepper-item" data-step-indicator="2">
+                    <span class="stepper-marker" aria-hidden="true">2</span>
+                    <span class="stepper-label">Academic Information<span class="visually-hidden">, <span data-step-status>not started</span></span></span>
+                </li>
+                <li class="stepper-item" data-step-indicator="3">
+                    <span class="stepper-marker" aria-hidden="true">3</span>
+                    <span class="stepper-label">Terms &amp; Privacy<span class="visually-hidden">, <span data-step-status>not started</span></span></span>
+                </li>
+            </ol>
+
+            <form data-register-wizard novalidate>
+                <div class="auth-alert error" data-alert role="alert" hidden></div>
+
+                <p class="auth-alert error" data-options-status hidden></p>
+
+                <fieldset class="wizard-step" data-step="1">
+                    <legend class="visually-hidden">Step 1 of 3: Personal Information</legend>
+                    <h2 class="step-title" data-step-heading tabindex="-1">Personal Information</h2>
+                    <p class="step-sub">These details will be used to identify your account.</p>
+
+                    <div class="auth-field">
+                        <label for="email">Personal Email</label>
+                        <input class="form-control" id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" data-rule="email" aria-describedby="email-err" aria-invalid="false">
+                        <p class="auth-error" id="email-err" hidden></p>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="password">Create Password</label>
+                        <div class="pw-wrap">
+                            <input class="form-control" id="password" name="password" type="password" autocomplete="new-password" aria-describedby="password-err password-reqs" aria-invalid="false">
+                            <button type="button" class="pw-toggle" data-toggle-password="password" aria-label="Show password" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p class="auth-error" id="password-err" hidden></p>
+                    </div>
+
+                    <ul class="req-list" id="password-reqs" data-requirements aria-label="Password requirements"></ul>
+
+                    <div class="auth-field">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="pw-wrap">
+                            <input class="form-control" id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" aria-describedby="confirmPassword-err" aria-invalid="false">
+                            <button type="button" class="pw-toggle" data-toggle-password="confirmPassword" aria-label="Show password" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p class="auth-error" id="confirmPassword-err" hidden></p>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button type="button" class="btn btn-accent auth-submit" data-step-next>Next</button>
+                    </div>
+                </fieldset>
+
+                <fieldset class="wizard-step" data-step="2" hidden>
+                    <legend class="visually-hidden">Step 2 of 3: Academic Information</legend>
+                    <h2 class="step-title" data-step-heading tabindex="-1">Academic Information</h2>
+                    <p class="step-sub">These details help us identify and distinguish QCU student accounts and organize student records by academic program, campus, and year level.</p>
+
+                    <div class="auth-field">
+                        <label for="program">Program</label>
+                        <select class="form-select" id="program" name="program" data-rule="select" aria-describedby="program-err" aria-invalid="false">
+                            <option value="" selected disabled>Select your program</option>
+                        </select>
+                        <p class="auth-error" id="program-err" hidden></p>
+                    </div>
+                    <div class="auth-field">
+                        <label for="campus">Campus</label>
+                        <select class="form-select" id="campus" name="campus" data-rule="select" aria-describedby="campus-err" aria-invalid="false">
+                            <option value="" selected disabled>Select your campus</option>
+                        </select>
+                        <p class="auth-error" id="campus-err" hidden></p>
+                    </div>
+                    <div class="auth-field">
+                        <label for="yearLevel">Year Level</label>
+                        <select class="form-select" id="yearLevel" name="yearLevel" data-rule="select" aria-describedby="yearLevel-err" aria-invalid="false">
+                            <option value="" selected disabled>Select your year level</option>
+                        </select>
+                        <p class="auth-error" id="yearLevel-err" hidden></p>
+                    </div>
+
+                    <div class="wizard-actions two">
+                        <button type="button" class="btn btn-ghost" data-step-back>Back</button>
+                        <button type="button" class="btn btn-accent auth-submit" data-step-next>Next</button>
+                    </div>
+                </fieldset>
+
+                <fieldset class="wizard-step" data-step="3" hidden>
+                    <legend class="visually-hidden">Step 3 of 3: Terms and Privacy</legend>
+                    <h2 class="step-title" data-step-heading tabindex="-1">Terms &amp; Privacy</h2>
+                    <p class="step-sub">Please read and accept the Terms and Conditions and Privacy Notice before submitting your registration.</p>
+
+                    <section class="legal-block" aria-labelledby="terms-box-title">
+                        <h3 class="legal-title" id="terms-box-title">Terms and Conditions</h3>
+                        <div class="legal-box" id="terms-box" tabindex="0" role="region" aria-labelledby="terms-box-title">
+                            <div class="legal-text">
+                                <h4>1. Draft notice</h4>
+                                <p>These Terms and Conditions are a draft prepared for the QCU Student Planner. They must be reviewed and approved by the responsible university offices before the application is deployed to students.</p>
+                                <h4>2. Purpose of the application</h4>
+                                <p>The planner helps students organize class schedules, tasks, grades, attendance records and notes. It is a personal productivity tool and is not an official record of the university.</p>
+                                <h4>3. Acceptable use</h4>
+                                <p>You agree to use the planner only for lawful, personal academic purposes. You must not attempt to access another person's account or records, interfere with the operation of the service, or submit false or misleading information.</p>
+                                <h4>4. Account responsibility</h4>
+                                <p>You are responsible for keeping your password confidential and for activity that takes place under your account. Choose a password that is not used on other services, and notify an administrator if you believe your account has been accessed without permission.</p>
+                                <h4>5. Academic information</h4>
+                                <p>Schedules, grades, attendance and notes that you enter remain your own responsibility. You should check them against official university records, because the planner may contain errors or omissions that you introduced or that result from a software fault.</p>
+                                <h4>6. Account approval</h4>
+                                <p>New accounts are not active until an administrator has reviewed the program, campus and year level you submitted. An account may be declined, suspended or removed if the information cannot be verified or if these terms are not followed.</p>
+                                <h4>7. Changes to these terms</h4>
+                                <p>These terms may be revised before and after launch. Continued use of the planner after a revision means you accept the updated terms.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="legal-block" aria-labelledby="privacy-box-title">
+                        <h3 class="legal-title" id="privacy-box-title">Privacy Notice</h3>
+                        <div class="legal-box" id="privacy-box" tabindex="0" role="region" aria-labelledby="privacy-box-title">
+                            <div class="legal-text">
+                                <h4>1. Draft notice</h4>
+                                <p>This Privacy Notice is a draft that describes the intended handling of information. It has not been reviewed by the university's data protection officer and must be confirmed before production deployment.</p>
+                                <h4>2. Information the system is intended to collect</h4>
+                                <p>To create an account the system is intended to collect your personal email address, a password, your academic program, your campus and your year level. If the final system also asks for your name, this notice will be updated to say so.</p>
+                                <h4>3. Why the information is collected</h4>
+                                <p>Your email address and password identify your account. Your program, campus and year level help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
+                                <h4>4. Handling and access</h4>
+                                <p>Registration details are intended to be visible only to authorized administrators who review accounts, and to you. They are not intended to be sold or used for advertising. The exact storage, retention period and security safeguards will be described here once they are decided and verified.</p>
+                                <h4>5. Your choices</h4>
+                                <p>You may ask to view, correct or delete the information tied to your account. The procedure and the contact details for these requests will be published by the university before launch.</p>
+                                <h4>6. Questions</h4>
+                                <p>Until the final contact details are published, direct questions about this notice to the administrators responsible for the QCU Student Planner.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="auth-field">
+                        <label class="auth-check" for="acceptTerms">
+                            <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false">
+                            <span>I have read and agree to the Terms and Conditions.</span>
+                        </label>
+                        <p class="auth-error" id="acceptTerms-err" hidden></p>
+                    </div>
+                    <div class="auth-field">
+                        <label class="auth-check" for="acknowledgePrivacy">
+                            <input type="checkbox" id="acknowledgePrivacy" name="acknowledgePrivacy" aria-describedby="acknowledgePrivacy-err" aria-invalid="false">
+                            <span>I have read and acknowledge the Privacy Notice.</span>
+                        </label>
+                        <p class="auth-error" id="acknowledgePrivacy-err" hidden></p>
+                    </div>
+
+                    <div class="wizard-actions two">
+                        <button type="button" class="btn btn-ghost" data-step-back>Back</button>
+                        <button type="submit" class="btn btn-accent auth-submit" data-submit>Sign Up</button>
+                    </div>
+                </fieldset>
+            </form>
+
+            <p class="auth-foot">Already have an account? <a class="auth-link" href="login.html">Log in</a></p>
+        </div>
+        <p class="auth-note">Form checks only help you fix typos. Nothing is created or sent until the backend is connected.</p>
+    </main>
+
+    <script src="../../assets/js/core/theme-toggle.js"></script>
+    <script type="module" src="../../assets/js/modules/auth.js"></script>
+</body>
+</html>

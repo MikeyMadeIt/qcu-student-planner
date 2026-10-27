@@ -1,0 +1,16 @@
+[data-theme="amoled"] {
+    color-scheme: dark;
+    --bg: #000000;
+    --bg-grad: #000000;
+    --surface: rgba(255,255,255,.05);
+    --surface-solid: #050505;
+    --surface-2: rgba(255,255,255,.09);
+    --elevated: #0b0b0d;
+    --border: rgba(255,255,255,.10);
+    --text: #F8FAFC;
+    --text-soft: #9AA7BA;
+    --text-faint: #64748B;
+    --shadow: 0 8px 24px rgba(0,0,0,.6);
+    --nav-bg: rgba(0,0,0,.9);
+    --input-placeholder-color: #94a3b8;
+}

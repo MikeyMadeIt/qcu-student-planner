@@ -1,0 +1,107 @@
+/* Icon and text alignment. Applies to every control that pairs an icon with a label. */
+
+.bi {
+    line-height: 1;
+    flex-shrink: 0;
+    vertical-align: -0.125em;
+}
+
+.bi::before {
+    line-height: 1;
+}
+
+/* Explicit size utilities so icons never stretch, shrink unexpectedly,
+   or change size between themes. */
+.icon-sm {
+    font-size: var(--icon-size-sm) !important;
+}
+
+.icon-md {
+    font-size: var(--icon-size-md) !important;
+}
+
+.icon-lg {
+    font-size: var(--icon-size-lg) !important;
+}
+
+svg.icon,
+img.icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+svg.icon.icon-sm,
+img.icon.icon-sm {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+}
+
+svg.icon.icon-lg,
+img.icon.icon-lg {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+}
+
+.btn,
+.btn-accent,
+.btn-ghost,
+.btn-icon,
+.badge,
+.chip,
+.section-title,
+.dropdown-item,
+.form-label,
+label.icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn,
+.btn-accent,
+.btn-ghost {
+    justify-content: center;
+    line-height: 1.2;
+}
+
+.btn-icon {
+    justify-content: center;
+}
+
+.btn i,
+.btn-accent i,
+.btn-ghost i,
+.badge i,
+.chip i,
+.section-title i,
+.dropdown-item i {
+    flex-shrink: 0;
+    margin: 0 !important;
+}
+
+/* Bootstrap spacing helpers on icons inside flex rows are replaced by the gap above. */
+.btn .me-1,
+.btn .me-2,
+.btn-accent .me-1,
+.btn-ghost .me-1,
+.dropdown-item .me-2,
+.section-title .me-1 {
+    margin-right: 0 !important;
+}
+
+.stat-label,
+.meta-row,
+.empty-state-title {
+    align-items: center;
+}
+
+/* Full-width rows keep block layout while aligning icon and label.
+   (.nav-link is styled in layout/sidebar.css.) */
+.profile-item,
+.drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}

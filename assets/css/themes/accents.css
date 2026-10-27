@@ -1,0 +1,24 @@
+[data-accent="amber"] {
+    --accent: 251,191,36;
+    --accent-2: 245,158,11;
+}
+
+[data-accent="violet"] {
+    --accent: 124,108,246;
+    --accent-2: 79,140,255;
+}
+
+[data-accent="blue"] {
+    --accent: 59,130,246;
+    --accent-2: 56,189,248;
+}
+
+[data-accent="emerald"] {
+    --accent: 52,211,153;
+    --accent-2: 16,185,129;
+}
+
+[data-accent="rose"] {
+    --accent: 251,113,133;
+    --accent-2: 244,63,94;
+}

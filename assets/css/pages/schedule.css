@@ -1,0 +1,2064 @@
+/* ---------- SCHEDULE CARDS ---------- */
+
+.subject-card {
+    border-radius: 14px;
+    padding: 11px 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.subject-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--sc-color, rgb(var(--accent)));
+}
+
+.subject-badge {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sc-color, rgb(var(--accent)));
+    display: inline-block;
+}
+
+.sched-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sched-desc {
+    font-size: .8rem;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+    line-height: 1.35;
+}
+
+.sched-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sched-meta span {
+    font-size: .74rem;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sched-meta i {
+    font-size: .68rem;
+    color: rgb(var(--accent));
+    opacity: .75;
+    flex-shrink: 0;
+}
+
+.sched-icon-btn {
+    width: var(--icon-btn-size-sm) !important;
+    height: var(--icon-btn-size-sm) !important;
+    font-size: var(--icon-size-sm) !important;
+}
+
+.sched-action-btn {
+    font-size: var(--btn-font-size-sm) !important;
+    padding: 0 var(--btn-padding-x-sm) !important;
+    height: var(--btn-height-sm) !important;
+    border-radius: var(--btn-radius-sm) !important;
+}
+
+/* ---------- WEEKLY TIMETABLE ---------- */
+
+.timetable {
+    display: grid;
+    grid-template-columns: 60px repeat(7,minmax(0,1fr));
+    gap: 0;
+    position: relative;
+    min-width: 0;
+}
+
+.tt-head {
+    text-align: center;
+    font-weight: 700;
+    font-size: .78rem;
+    padding: 8px 0;
+    color: var(--text-soft);
+    position: sticky;
+    top: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tt-hour {
+    font-size: .68rem;
+    color: var(--text-faint);
+    text-align: right;
+    padding-right: 8px;
+    font-family: var(--font-mono);
+}
+
+.tt-cell {
+    border-top: 1px solid var(--border);
+    /* No min-height: row height is set inline from the zoom level. A fixed minimum made
+       rows taller than the blocks' scale at <100% zoom, so classes drifted off their times. */
+    min-height: 0;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.tt-col {
+    border-left: 1px solid var(--border);
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.tt-block {
+    box-sizing: border-box;
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 10px;
+    padding: 5px 8px;
+    font-size: .7rem;
+    font-weight: 600;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+    transition: .2s;
+}
+
+.tt-block:hover {
+    transform: scale(1.02);
+    z-index: 5;
+}
+
+.tt-now-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #fb7185;
+    z-index: 6;
+}
+
+.tt-now-line::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #fb7185;
+}
+
+/* ============================================================
+SCHEDULE PAGE — Daily Command Center
+============================================================ */
+/* ── Week nav card ── */
+
+.sch-nav-card {
+    padding: var(--card-pad-sm);
+}
+
+.sch-week-label {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.sch-nav-btn {
+    width: var(--btn-height) !important;
+    height: var(--btn-height) !important;
+    font-size: var(--icon-size-md) !important;
+    border-radius: var(--btn-radius) !important;
+}
+
+/* ── Day selector strip ── */
+
+.sch-day-strip {
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.sch-day-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 7px 4px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: background .18s, border-color .18s, color .18s;
+    min-width: 0;
+}
+
+.sch-day-btn:hover {
+    background: rgba(var(--accent),.08);
+    border-color: rgba(var(--accent),.18);
+}
+
+.sch-day-btn.selected {
+    background: rgba(var(--accent),.15);
+    border-color: rgba(var(--accent),.4);
+}
+
+.sch-day-btn.today .sch-day-num {
+    color: rgb(var(--accent));
+}
+
+.sch-day-name {
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+}
+
+.sch-day-btn.selected .sch-day-name {
+    color: rgb(var(--accent));
+}
+
+.sch-day-num {
+    font-size: .95rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text);
+    margin-top: 1px;
+}
+
+.sch-day-btn.selected .sch-day-num {
+    color: rgb(var(--accent));
+}
+
+.sch-today-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+    margin-top: 3px;
+}
+
+/* ── Next / Current class card ── */
+
+.sch-next-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-left: 3px solid var(--sc-color, rgba(var(--accent),1));
+    padding: var(--card-pad-sm);
+    position: relative;
+}
+
+.sch-next-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.sch-next-badge.now {
+    background: rgba(251,113,133,.18);
+    color: #fb7185;
+    animation: sch-pulse 2s ease-in-out infinite;
+}
+
+.sch-next-badge.next {
+    background: rgba(var(--accent),.15);
+    color: rgb(var(--accent));
+}
+
+.sch-next-badge.done {
+    background: rgba(52,211,153,.15);
+    color: #34d399;
+}
+
+@keyframes sch-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .6;
+    }
+}
+
+.sch-next-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.sch-next-label {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.sch-next-subject {
+    font-size: .96rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.sch-next-meta {
+    font-size: .78rem;
+    color: var(--text-faint);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sch-dot-sep {
+    opacity: .4;
+}
+
+.sch-next-loc {
+    font-size: .78rem;
+    color: var(--text-faint);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sch-next-away {
+    font-size: .82rem;
+    font-weight: 700;
+    color: rgb(var(--accent));
+    margin-top: 6px;
+}
+
+.sch-next-edit {
+    position: static;
+    height: 28px !important;
+    width: 28px !important;
+    font-size: .78rem !important;
+    border-radius: 7px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sch-now-progress-wrap {
+}
+
+.sch-now-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.sch-now-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width .5s var(--ease);
+}
+
+/* ── Day summary stats ── */
+
+.sch-day-summary {
+    padding: 12px 16px;
+}
+
+.sch-summary-label {
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.sch-summary-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.sch-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.sch-stat-val {
+    font-size: .96rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.sch-stat-lbl {
+    font-size: .68rem;
+    color: var(--text-faint);
+}
+
+.sch-stat-div {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+/* ── Conflict banner ── */
+
+.sch-conflict-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-left: 3px solid #fbbf24;
+    padding: 10px 14px;
+}
+
+.sch-conflict-icon {
+    color: #fbbf24;
+    font-size: .95rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.sch-conflict-title {
+    font-size: .82rem;
+    font-weight: 700;
+    color: #fbbf24;
+}
+
+.sch-conflict-body {
+    font-size: .78rem;
+    color: var(--text-soft);
+}
+
+/* ── Timeline ── */
+
+.sch-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 12px;
+}
+
+.sch-tl-item {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+}
+
+.sch-tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70px;
+    flex-shrink: 0;
+    padding-right: 12px;
+}
+
+.sch-tl-time {
+    font-size: .72rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    white-space: nowrap;
+    padding-top: 14px;
+    width: 100%;
+    text-align: right;
+    padding-right: 12px;
+    box-sizing: border-box;
+}
+
+.sch-tl-line {
+    flex: 1;
+    width: 1px;
+    background: var(--border);
+    margin-top: 6px;
+    min-height: 20px;
+}
+
+.sch-tl-card {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 8px;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    border-left: 3px solid var(--sc-color, rgba(var(--accent),1));
+    transition: border-color .2s, box-shadow .2s;
+    position: relative;
+}
+
+.sch-tl-item.is-now .sch-tl-card {
+    box-shadow: 0 0 0 1px rgba(251,113,133,.25), 0 4px 20px rgba(0,0,0,.15);
+    border-left-color: #fb7185;
+}
+
+.sch-tl-item.is-past .sch-tl-card {
+    opacity: .55;
+}
+
+.sch-now-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: #fb7185;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    animation: sch-pulse 2s ease-in-out infinite;
+}
+
+.sch-tl-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.sch-tl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.sch-tl-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sch-tl-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.sch-tl-code {
+    font-size: .72rem;
+    color: var(--text-faint);
+    margin-top: 1px;
+    font-family: var(--font-mono);
+}
+
+.sch-tl-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 6px;
+}
+
+.sch-tl-meta span {
+    font-size: .75rem;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sch-tl-meta i {
+    font-size: .7rem;
+    color: rgb(var(--accent));
+    opacity: .75;
+}
+
+.sch-tl-now-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.sch-tl-now-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width .5s var(--ease);
+}
+
+/* ── Task badge in timeline card ── */
+
+.sch-tl-tasks {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: .76rem;
+    font-weight: 600;
+    color: rgb(var(--accent));
+    background: rgba(var(--accent),.08);
+    border: 1px solid rgba(var(--accent),.2);
+    border-radius: 7px;
+    padding: 5px 10px;
+    margin-top: 8px;
+    transition: background .18s;
+}
+
+.sch-tl-tasks:hover {
+    background: rgba(var(--accent),.14);
+}
+
+.sch-task-arrow {
+    font-size: .7rem;
+    opacity: .6;
+}
+
+/* ── Free time block ── */
+
+.sch-timeline-free {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* Match the 70px left column; line is centered within that column before the 12px right padding,
+so its centre sits at (70 - 12) / 2 = 29px from the left edge of the column */
+
+.sch-tl-connector {
+    width: 70px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding-right: 12px;
+    /* mirrors .sch-tl-left padding */
+    box-sizing: border-box;
+}
+
+.sch-tl-connector.free::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+}
+
+.sch-free-block {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--text-faint);
+    padding: 0;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+.sch-free-icon {
+    font-size: .78rem;
+    opacity: .6;
+}
+
+/* ── Empty day state ── */
+
+.sch-empty-day {
+    text-align: center;
+    padding: var(--space-6) var(--card-pad);
+    margin-bottom: var(--grid-gap);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── Today's tasks panel ── */
+
+.sch-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sch-task-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .84rem;
+    color: var(--text);
+}
+
+.sch-task-row.done .sch-task-title {
+    text-decoration: line-through;
+    color: var(--text-faint);
+}
+
+.sch-task-icon {
+    font-size: .86rem;
+    flex-shrink: 0;
+    color: var(--text-faint);
+}
+
+.sch-task-row.done .sch-task-icon {
+    color: #34d399;
+}
+
+.sch-task-title {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* ── Timetable enhancements ── */
+
+.tt-head-today {
+    color: rgb(var(--accent)) !important;
+}
+
+.tt-head-date {
+    display: block;
+    font-size: .68rem;
+    font-weight: 400;
+    color: var(--text-faint);
+    margin-top: 1px;
+}
+
+.tt-head-date-today {
+    color: rgb(var(--accent));
+    font-weight: 700;
+}
+
+.tt-col-today {
+    background: rgba(var(--accent),.03);
+}
+
+.tt-block-code {
+    font-size: .68rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tt-block-time {
+    font-size: .6rem;
+    font-weight: 400;
+    opacity: .85;
+}
+
+.tt-block-room {
+    font-size: .58rem;
+    opacity: .75;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tt-block-now {
+    box-shadow: 0 0 0 2px #fb7185, 0 4px 12px rgba(251,113,133,.3) !important;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 575px) {
+    .sch-day-strip {
+        gap: 4px;
+    }
+    .sch-day-btn {
+        padding: 6px 2px 5px;
+        border-radius: 8px;
+    }
+    .sch-day-num {
+        font-size: .88rem;
+    }
+    .sch-tl-left {
+        width: 58px;
+        padding-right: 9px;
+    }
+    .sch-tl-time {
+        font-size: .66rem;
+        padding-right: 9px;
+    }
+    .sch-tl-connector {
+        width: 58px;
+        padding-right: 9px;
+    }
+    .sch-tl-title {
+        font-size: .84rem;
+    }
+    .sch-next-subject {
+        font-size: .88rem;
+    }
+    .sch-next-card {
+        padding: 12px 13px;
+        gap: 10px;
+    }
+    .sch-next-badge {
+        width: 30px;
+        height: 30px;
+        font-size: .88rem;
+        border-radius: 8px;
+    }
+    .sch-week-label {
+        font-size: .8rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .sch-tl-left {
+        width: 52px;
+        padding-right: 7px;
+    }
+    .sch-tl-time {
+        padding-right: 7px;
+    }
+    .sch-tl-connector {
+        width: 52px;
+        padding-right: 7px;
+    }
+    .sch-day-name {
+        font-size: .56rem;
+    }
+}
+
+/* ── Reduced motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+    .sch-next-badge.now,
+    .sch-now-badge {
+        animation: none !important;
+    }
+    .sch-now-fill,
+    .sch-tl-now-fill,
+    .sch-progress-fill {
+        transition: none !important;
+    }
+}
+
+/* ============================================================
+SCHEDULE — ADVANCED FEATURES (v2)
+============================================================ */
+/* ── Topbar layout (base — overridden by refinement patch below) ── */
+
+.sch-topbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 14px;
+    min-height: 0;
+}
+
+.sch-topbar-left {
+    width: 100%;
+    min-width: 0;
+}
+
+.sch-topbar-left .page-title {
+    margin-bottom: 2px;
+}
+
+.sch-topbar-left .page-sub {
+    margin: 0;
+}
+
+.sch-add-btn {
+    flex-shrink: 0;
+}
+
+/* ── Segmented view control ── */
+
+.sch-view-control {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--surface-alt);
+    border-radius: 10px;
+    padding: 3px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+
+.sched-toggle-btn,
+.sch-toggle-btn {
+    width: var(--icon-btn-size-sm);
+    height: var(--icon-btn-size-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: var(--btn-radius-sm);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: var(--icon-size-sm);
+    color: var(--text-faint);
+    transition: background .18s var(--ease), color .18s var(--ease);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.sched-toggle-btn:hover,
+.sch-toggle-btn:hover {
+    background: rgba(var(--accent),.08);
+    color: var(--text);
+}
+
+.sched-toggle-btn.active,
+.sch-toggle-btn.active {
+    background: rgba(var(--accent),.18);
+    color: rgb(var(--accent));
+    box-shadow: 0 1px 4px rgba(0,0,0,.18);
+}
+
+/* ── Zoom controls ── */
+
+.sch-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface-alt);
+    border-radius: 10px;
+    padding: 3px;
+    border: 1px solid var(--border);
+}
+
+.sch-zoom-badge {
+    font-size: .72rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    min-width: 38px;
+    text-align: center;
+    transition: opacity .3s;
+    opacity: 0;
+}
+
+/* ── Day selector: has-classes indicator ── */
+
+.sch-day-btn.has-classes .sch-day-num::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(var(--accent),.5);
+    margin: 2px auto 0;
+}
+
+.sch-day-btn.has-classes.selected .sch-day-num::after {
+    background: rgb(var(--accent));
+}
+
+/* ── Online chip ── */
+
+.sch-online-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    color: #22d3ee;
+    background: rgba(34,211,238,.12);
+    border: 1px solid rgba(34,211,238,.25);
+    border-radius: 5px;
+    padding: 1px 5px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* ── Conflict card highlight ── */
+
+.sch-conflict-card {
+    border-left-color: #fbbf24 !important;
+    box-shadow: 0 0 0 1px rgba(251,191,36,.15) !important;
+}
+
+.sch-conflict-warning {
+    background: rgba(251,191,36,.08);
+    border: 1px solid rgba(251,191,36,.25);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: .8rem;
+    color: #fbbf24;
+    margin-top: 10px;
+}
+
+/* ── Timetable conflict dot ── */
+
+.tt-conflict-dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fbbf24;
+    border: 1px solid rgba(0,0,0,.3);
+}
+
+.tt-block-conflict {
+    box-shadow: 0 0 0 2px #fbbf24 !important;
+}
+
+/* ── Cancelled class treatment ── */
+
+.sch-tl-item.is-cancelled .sch-tl-card {
+    opacity: .62;
+    background: var(--surface-alt) !important;
+    border-left-color: var(--border) !important;
+}
+
+.sch-cancelled-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: #fb7185;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.sch-cancelled-text {
+    text-decoration: line-through;
+    opacity: .7;
+}
+
+.tt-block-cancelled {
+    background: var(--surface-alt) !important;
+    border: 1px dashed var(--border) !important;
+}
+
+.tt-block-cancelled-label {
+    font-size: .52rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    color: #fb7185;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* ── Cancel class button ── */
+
+.sch-cancel-btn {
+    background: rgba(251,113,133,.1) !important;
+    color: #fb7185 !important;
+    border-color: rgba(251,113,133,.25) !important;
+}
+
+.sch-cancel-btn:hover {
+    background: rgba(251,113,133,.2) !important;
+}
+
+/* ── Cancel info block in modal ── */
+
+.sch-cancel-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(251,113,133,.08);
+    border: 1px solid rgba(251,113,133,.2);
+    border-radius: 10px;
+    margin-bottom: 4px;
+    font-size: .85rem;
+    color: var(--text);
+}
+
+.sch-cancel-info i {
+    color: #fb7185;
+    font-size: 1rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+/* ── Attendance button in timeline ── */
+
+.sch-att-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: var(--btn-font-size-sm) !important;
+    height: var(--btn-height-sm) !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+    min-height: 30px;
+}
+
+.sch-att-logged {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: .76rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(0,0,0,.12);
+}
+
+/* ── Quick attendance modal ── */
+
+.sch-att-date-info {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .82rem;
+    color: var(--text-faint);
+    background: var(--surface-alt);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.sch-att-status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.sch-att-status-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--surface-alt);
+    border: 1.5px solid var(--border);
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    transition: background .18s, border-color .18s, color .18s;
+    min-height: 64px;
+}
+
+.sch-att-status-btn i {
+    font-size: 1.1rem;
+}
+
+.sch-att-status-btn:hover {
+    border-color: var(--att-color, rgb(var(--accent)));
+    color: var(--att-color, rgb(var(--accent)));
+}
+
+.sch-att-status-btn.active {
+    background: rgba(from var(--att-color) r g b / .12);
+    border-color: var(--att-color);
+    color: var(--att-color);
+    box-shadow: 0 0 0 3px rgba(from var(--att-color) r g b / .12);
+}
+
+/* Fallback for browsers without color() */
+
+.sch-att-status-btn.active {
+    background: rgba(0,0,0,.08);
+}
+
+.sch-att-status-btn[data-status="Present"].active {
+    background: rgba(52,211,153,.12);
+    border-color: #34d399;
+    color: #34d399;
+}
+
+.sch-att-status-btn[data-status="Late"].active {
+    background: rgba(251,191,36,.12);
+    border-color: #fbbf24;
+    color: #fbbf24;
+}
+
+.sch-att-status-btn[data-status="Absent"].active {
+    background: rgba(251,113,133,.12);
+    border-color: #fb7185;
+    color: #fb7185;
+}
+
+.sch-att-status-btn[data-status="Excused"].active {
+    background: rgba(96,165,250,.12);
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+/* ── Subject stats bar in list/detail ── */
+
+.sch-subject-stats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 8px;
+}
+
+.sch-subject-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.sch-subject-stat-lbl {
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+}
+
+.sch-subject-stat-val {
+    font-size: .88rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text);
+}
+
+.sch-subject-stat-val.stat-good {
+    color: #34d399;
+}
+
+.sch-subject-stat-val.stat-bad {
+    color: #fb7185;
+}
+
+.sch-subject-stat-div {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    flex-shrink: 0;
+    margin: 0 4px;
+}
+
+/* ── Archived subject card treatment ── */
+
+.subject-card-archived {
+    opacity: .7;
+}
+
+.subject-card-archived::before {
+    background: var(--surface-alt) !important;
+}
+
+/* ── Improved timetable header/corner ── */
+
+.tt-corner {
+    height: 0;
+    /* aligns with header row */
+}
+
+.tt-hour-col {
+}
+
+/* ── Timetable conflict warning in week view ── */
+
+.tt-head {
+    position: relative;
+}
+
+.sch-week-conflict-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .74rem;
+    color: #fbbf24;
+    font-weight: 700;
+    padding: 6px 12px;
+    background: rgba(251,191,36,.08);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(251,191,36,.2);
+}
+
+/* ── Empty state button ── */
+
+.sch-empty-day .btn {
+    margin-top: 8px;
+}
+
+/* ── min-w-0 utility ── */
+
+.min-w-0 {
+    min-width: 0;
+}
+
+/* ── Responsive: mobile-first ── */
+
+@media (max-width: 575px) {
+    /* Topbar — layout now handled by refinement patch below */
+    .sch-topbar-left .page-title {
+        font-size: 1.15rem;
+    }
+    /* Nav */
+    .sch-day-strip {
+        gap: 3px;
+    }
+    .sch-day-btn {
+        padding: 5px 2px 4px;
+        border-radius: 8px;
+    }
+    .sch-day-num {
+        font-size: .85rem;
+    }
+    .sch-week-label {
+        font-size: .78rem;
+    }
+    /* Next class card */
+    .sch-next-card {
+        padding: 11px 12px;
+        gap: 9px;
+    }
+    .sch-next-badge {
+        width: 30px;
+        height: 30px;
+        font-size: .88rem;
+        border-radius: 8px;
+    }
+    .sch-next-subject {
+        font-size: .88rem;
+    }
+    /* Timeline */
+    .sch-tl-left {
+        width: 52px;
+        padding-right: 7px;
+    }
+    .sch-tl-time {
+        font-size: .64rem;
+        padding-right: 7px;
+    }
+    .sch-tl-connector {
+        width: 52px;
+        padding-right: 7px;
+    }
+    .sch-tl-title {
+        font-size: .84rem;
+    }
+    .sch-tl-card {
+        padding: 10px 11px;
+    }
+    /* Stats bar */
+    .sch-subject-stats {
+        padding: 6px 8px;
+    }
+    .sch-subject-stat-val {
+        font-size: .82rem;
+    }
+    /* Attendance grid */
+    .sch-att-status-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+    .sch-att-status-btn {
+        padding: 10px 6px;
+        min-height: 58px;
+        font-size: .76rem;
+    }
+    /* Zoom controls */
+    .sch-zoom-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 400px) {
+    .sch-tl-left {
+        width: 48px;
+        padding-right: 6px;
+    }
+    .sch-tl-time {
+        font-size: .6rem;
+        padding-right: 6px;
+    }
+    .sch-tl-connector {
+        width: 48px;
+        padding-right: 6px;
+    }
+    .sch-day-name {
+        font-size: .54rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .sch-view-control {
+        gap: 0;
+    }
+    .sch-zoom-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .sch-day-btn {
+        padding: 4px 1px;
+    }
+}
+
+/* ── Larger screens ── */
+
+@media (min-width: 1280px) {
+    .sch-zoom-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* ── Reduced motion (schedule) ── */
+
+@media (prefers-reduced-motion: reduce) {
+    .sch-next-badge.now,
+    .sch-now-badge {
+        animation: none !important;
+    }
+    .sch-now-fill,
+    .sch-tl-now-fill,
+    .sch-progress-fill {
+        transition: none !important;
+    }
+    .sch-tl-card,
+    .subject-card,
+    .tt-block {
+        transition: none !important;
+    }
+    .sch-zoom-badge {
+        transition: none !important;
+    }
+}
+
+/* ============================================================
+SCHEDULE — UI/UX REFINEMENT PATCH
+============================================================ */
+/* ── 1. Header description visibility ── */
+
+.sch-topbar-left .page-sub {
+    display: block !important;
+    font-size: .82rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+    line-height: 1.45;
+}
+
+/* ── 2. Header layout: title+desc stacked, controls row below ── */
+
+.sch-topbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 14px;
+    min-height: 0;
+}
+
+.sch-topbar-left {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Controls row: icon-only view switcher, one line */
+
+.sch-topbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.sch-view-control {
+    flex-shrink: 0;
+}
+
+/* Add Subject: full width, same size as the Tasks page's Add Task button
+   (plain .btn/.btn-accent sizing — no overrides needed) */
+
+.sch-add-btn {
+    width: 100%;
+}
+
+/* Next class card — actions column (attendance icon + edit) */
+
+.sch-next-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+/* ── 3. View switcher active state — driven purely by .active class ── */
+/* Remove the [aria-pressed="true"] fallback that could cause dual-highlight */
+
+.sch-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-faint);
+}
+
+.sch-toggle-btn.active {
+    background: rgba(var(--accent), .18) !important;
+    color: rgb(var(--accent)) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.18) !important;
+}
+
+/* Explicitly remove active styling when not .active */
+
+.sch-toggle-btn:not(.active) {
+    background: transparent !important;
+    color: var(--text-faint) !important;
+    box-shadow: none !important;
+}
+
+/* Hover only on non-active */
+
+.sch-toggle-btn:not(.active):hover {
+    background: rgba(var(--accent), .08) !important;
+    color: var(--text) !important;
+}
+
+/* ── 4. Date navigation chevrons — match Today button height ── */
+
+.sch-chevron-btn {
+    width: var(--icon-btn-size-sm) !important;
+    height: var(--icon-btn-size-sm) !important;
+    font-size: var(--icon-size-sm) !important;
+    border-radius: var(--btn-radius-sm) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-faint);
+    transition: background .18s, color .18s, border-color .18s;
+    cursor: pointer;
+}
+
+.sch-chevron-btn:hover {
+    background: rgba(var(--accent), .08);
+    border-color: rgba(var(--accent), .3);
+    color: rgb(var(--accent));
+}
+
+/* Reorder nav row: ‹ | week-label | Today | › */
+
+.sch-nav-card .d-flex.align-items-center.justify-content-between {
+    /* Keep existing flex layout, just ensure vertical alignment */
+}
+
+/* ── 5. Remove decorative dots from dates ── */
+
+.sch-day-btn.has-classes .sch-day-num::after {
+    display: none !important;
+    content: none !important;
+}
+
+.sch-day-btn.has-classes.selected .sch-day-num::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Also hide any sch-today-dot element */
+
+.sch-today-dot {
+    display: none !important;
+}
+
+/* ── 6 & 7. Today + Selected date highlight ── */
+/* Today: subtle accent ring on the day number */
+
+.sch-day-btn.today {
+    /* Subtle background to indicate today */
+}
+
+.sch-day-btn.today .sch-day-num {
+    color: rgb(var(--accent));
+    position: relative;
+}
+
+.sch-day-btn.today:not(.selected) .sch-day-num::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(var(--accent), .45);
+    pointer-events: none;
+}
+
+/* Selected: solid accent pill */
+
+.sch-day-btn.selected {
+    background: rgba(var(--accent), .18) !important;
+    border-color: rgba(var(--accent), .45) !important;
+}
+
+.sch-day-btn.selected .sch-day-name {
+    color: rgb(var(--accent)) !important;
+}
+
+.sch-day-btn.selected .sch-day-num {
+    color: rgb(var(--accent)) !important;
+}
+
+/* Combined: today + selected */
+
+.sch-day-btn.today.selected {
+    background: rgba(var(--accent), .22) !important;
+    border-color: rgba(var(--accent), .6) !important;
+}
+
+.sch-day-btn.today.selected .sch-day-num {
+    color: rgb(var(--accent)) !important;
+}
+
+/* ── 8 & 9. Timetable selected column highlight ── */
+
+.tt-col-selected {
+    background: rgba(var(--accent), .06) !important;
+    border-left: 2px solid rgba(var(--accent), .35) !important;
+}
+
+/* Don't double-apply if also today */
+
+.tt-col-today.tt-col-selected {
+    background: rgba(var(--accent), .09) !important;
+    border-left: 2px solid rgba(var(--accent), .5) !important;
+}
+
+/* Header highlight for selected column */
+
+.tt-head-selected {
+    color: rgb(var(--accent)) !important;
+    font-weight: 800;
+}
+
+.tt-head-date-selected {
+    color: rgb(var(--accent)) !important;
+    font-weight: 700;
+}
+
+/* ── 10. Redundant info button removed from day view (done in JS) ── */
+/* ── 11 & 12. Timetable card popup — info only, no buttons ── */
+
+.sch-tt-popup-modal {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.sch-tt-popup-name {
+    font-size: .96rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+    margin-bottom: 14px;
+    overflow-wrap: anywhere;
+}
+
+.sch-tt-popup-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sch-tt-popup-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: .82rem;
+    color: var(--text-soft);
+    line-height: 1.4;
+}
+
+.sch-tt-popup-row i {
+    font-size: .8rem;
+    color: rgb(var(--accent));
+    opacity: .75;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Cancelled chip inside popup */
+
+.sch-cancelled-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    color: #fb7185;
+    background: rgba(251,113,133,.12);
+    border: 1px solid rgba(251,113,133,.25);
+    border-radius: 5px;
+    padding: 1px 5px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* ── 13. Compact zoom controls ── */
+
+.sch-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.sch-zoom-btn {
+    width: var(--icon-btn-size-sm);
+    height: var(--icon-btn-size-sm);
+    border-radius: var(--btn-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: var(--icon-size-sm);
+    color: var(--text-faint);
+    transition: background .15s, color .15s;
+    flex-shrink: 0;
+}
+
+.sch-zoom-btn:hover {
+    background: rgba(var(--accent), .1);
+    color: rgb(var(--accent));
+}
+
+.sch-zoom-badge {
+    font-size: .68rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    min-width: 34px;
+    text-align: center;
+    opacity: 1 !important;
+    /* always visible */
+    transition: none;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+/* ── 14 & 15. Export image button — same size as zoom buttons, inside zoom bar ── */
+
+.sch-tt-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.sch-zoom-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+.sch-tt-header-row {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Zoom controls mobile sizing */
+
+@media (max-width: 575px) {
+    .sch-zoom-btn {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    .sch-zoom-badge {
+        min-width: 30px;
+        font-size: .64rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .sch-zoom-btn {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+
+/* ── Subject list attendance button (replaces Schedule button) ── */
+/* Inherits existing .sched-action-btn — no extra CSS needed for layout */
+/* Ensure the btn-ghost btn-sm renders fine at flex-grow-1 */
+/* ── Misc: ensure page-sub always shows on schedule page ── */
+
+.sch-topbar-left .page-sub.d-none {
+    /* Override the d-none Bootstrap class applied in old HTML */
+    display: block !important;
+}
+
+/* ── Attendance icon button in card header ── */
+
+.sch-att-icon-logged {
+    /* colour set inline via style attr — just ensure it inherits well */
+    opacity: 1;
+}
+
+/* Override old responsive rules that may conflict with new topbar structure */
+
+@media (max-width: 575px) {
+    .sch-topbar-controls {
+        gap: 8px;
+    }
+}
+
+/* ── Next class card: attendance icon sizing ── */
+
+.sch-next-actions .btn-icon,
+.sch-next-actions .sch-next-edit {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: .78rem !important;
+    border-radius: 7px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Week navigation row: ‹ | week range | Today | › | view switcher, self-contained. */
+.sch-week-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.sch-week-nav > .sch-week-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sch-week-nav > .sch-nav-btn,
+.sch-week-nav > .sch-today-btn {
+    flex: 0 0 auto;
+}
+
+/* View switcher sits beside the right chevron; wraps onto its own
+   right-aligned line on very narrow screens instead of overflowing. */
+.sch-week-nav > .sch-view-control {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+/* ── Subject list: search spans full width, archive button beside it at the same height ── */
+
+.sch-list-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sch-list-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--btn-height-sm);
+    min-height: var(--btn-height-sm);
+    line-height: calc(var(--btn-height-sm) - 2px);
+    font-size: var(--btn-font-size-sm);
+}
+
+.sch-list-archive-btn {
+    flex-shrink: 0;
+}
+
+
+/* ── Week nav: "‹ date ›  Today  [view icon]" ── */
+/* Today stays a compact text button (never wraps below the date); the view
+   switcher is icon-only, sized like the chevrons, so it can't push the date
+   row to a second line on narrow screens. */
+
+.sch-week-nav > .sch-today-btn {
+    flex: 0 0 auto;
+    height: var(--btn-height-sm);
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: var(--btn-font-size-sm);
+    font-weight: 600;
+    margin-left: 0;
+}
+
+/* .sch-view-btn reuses .sch-chevron-btn's icon-button sizing */
+
+/* ── View picker: anchored dropdown below the icon button (like the
+   Add-task menu) instead of a centered modal ── */
+
+.sch-view-dropdown {
+    position: relative;
+}
+
+.sch-view-menu {
+    min-width: 230px;
+    padding: 6px;
+    /* Solid, opaque panel — don't rely on the undefined --surface-alt token
+       or inherit the glass card's blur/translucency behind it, so the menu
+       reads clearly as a clickable surface. */
+    background: var(--elevated) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(0,0,0,.04);
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    z-index: 1050;
+}
+
+.sch-view-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 10px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.sch-view-option:hover,
+.sch-view-option:focus {
+    background: rgba(var(--accent), .08);
+    color: var(--text);
+}
+
+.sch-view-option.active {
+    background: rgba(var(--accent), .14);
+}
+
+.sch-view-option + .sch-view-option {
+    margin-top: 2px;
+}
+
+.sch-view-option-icon {
+    font-size: 1.15rem;
+    color: var(--text-faint);
+    flex-shrink: 0;
+}
+
+.sch-view-option.active .sch-view-option-icon,
+.sch-view-option.active .sch-view-option-check {
+    color: rgb(var(--accent));
+}
+
+.sch-view-option-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.sch-view-option-title {
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+.sch-view-option-desc {
+    font-size: .74rem;
+    color: var(--text-faint);
+}
+
+.sch-view-option-check {
+    visibility: hidden;
+    font-size: 1.1rem;
+}
+
+.sch-view-option.active .sch-view-option-check {
+    visibility: visible;
+}
+
+.sch-zoom-btn:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--text-faint);
+}
+
+/* ── View dropdown: always render above the cards below it ──
+   .glass uses backdrop-filter (and .fade-in a transform), so the nav card forms its own
+   stacking context. The menu's z-index only applied *inside* it, letting later cards
+   (e.g. the "next class" card and timeline) paint over the menu. Lift the whole nav card
+   above its siblings so the menu covers them. */
+.sch-nav-card {
+    position: relative;
+    z-index: 30;
+}
+
+.sch-view-menu {
+    background-color: var(--elevated) !important;
+    opacity: 1 !important;
+    z-index: 1050;
+}
+
+/* ── View menu: theme-aware text ──
+   Bootstrap's .dropdown-item.active forces white text/accent fill, which made the
+   active option unreadable in light mode. Drive every colour from theme tokens instead. */
+.sch-view-menu {
+    --bs-dropdown-link-color: var(--text);
+    --bs-dropdown-link-hover-color: var(--text);
+    --bs-dropdown-link-active-color: var(--text);
+    --bs-dropdown-link-hover-bg: rgba(var(--accent), .08);
+    --bs-dropdown-link-active-bg: rgba(var(--accent), .14);
+    color: var(--text);
+}
+
+.sch-view-menu .sch-view-option,
+.sch-view-menu .sch-view-option:hover,
+.sch-view-menu .sch-view-option:focus,
+.sch-view-menu .sch-view-option.active {
+    color: var(--text) !important;
+}
+
+.sch-view-menu .sch-view-option.active {
+    background: rgba(var(--accent), .14) !important;
+}
+
+.sch-view-menu .sch-view-option-title {
+    color: var(--text);
+}
+
+.sch-view-menu .sch-view-option-desc {
+    color: var(--text-soft);
+}
+
+.sch-view-menu .sch-view-option .sch-view-option-icon {
+    color: var(--text-faint);
+}
+
+.sch-view-menu .sch-view-option.active .sch-view-option-icon,
+.sch-view-menu .sch-view-option.active .sch-view-option-check {
+    color: rgb(var(--accent));
+}

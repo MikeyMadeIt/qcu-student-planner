@@ -1,0 +1,152 @@
+/* Shared page rhythm: content column, page header, sections, card grids and form fields.
+   Spacing comes from the tokens in base/variables.css:
+     --page-gap  between major sections      --grid-gap  between cards in one grid
+     --form-gap  between stacked form fields --title-gap section heading -> content */
+
+.main-content {
+    flex: 1 1 0%;
+    min-width: 0;
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+    padding: 0 var(--content-padding-x) var(--space-6);
+}
+
+/* Page header */
+.topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.main-content > .topbar {
+    margin-bottom: var(--page-gap);
+}
+
+.page-title {
+    margin: 0 0 var(--space-1);
+    font-weight: 800;
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.85rem);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.page-sub {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-soft);
+}
+
+/* Bootstrap grid gutters follow the shared grid gap. */
+.row.g-2,
+.row.g-3 {
+    --bs-gutter-x: var(--grid-gap);
+    --bs-gutter-y: var(--grid-gap);
+}
+
+/* Bootstrap's .mb-3 is used both for page sections and for form fields.
+   Direct children of the page get the section gap, everything nested
+   (forms, modals, cards) gets the tighter field gap. !important is needed
+   only because Bootstrap's utility is !important. */
+.mb-3 {
+    margin-bottom: var(--form-gap) !important;
+}
+
+.main-content > .mb-3,
+.main-content > .page-stack > .mb-3 {
+    margin-bottom: var(--page-gap) !important;
+}
+
+label {
+    margin-bottom: var(--space-2);
+    line-height: 1.4;
+}
+
+.d-flex.gap-2 {
+    gap: var(--space-3) !important;
+}
+
+.min-w-0,
+.min-width-0 {
+    min-width: 0;
+}
+
+.flex-1 {
+    flex: 1 1 0%;
+}
+
+/* Text-heavy pages keep a comfortable reading width. */
+.page-narrow {
+    max-width: 60rem;
+}
+
+/* ---------- Phones: one tidy, thumb-friendly rhythm for every page ---------- */
+@media (max-width: 575.98px) {
+    .page-title {
+        font-size: 1.35rem;
+        margin-bottom: 2px;
+    }
+
+    .page-sub {
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    /* Page-header actions span the full width instead of floating at one edge. */
+    .tk-header > .btn,
+    .nt-header > .btn,
+    .topbar > .btn,
+    .topbar > .d-flex {
+        width: 100%;
+    }
+
+    .topbar > .d-flex > .btn {
+        flex: 1 1 0%;
+    }
+
+    .sch-add-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    /* Consistent control sizes. */
+    .btn-sm,
+    .form-control,
+    .form-select {
+        font-size: 0.85rem;
+    }
+
+    .section-title,
+    .dash-section-title {
+        font-size: 0.8rem;
+    }
+
+    /* Modals: full-width stacked actions and even padding. */
+    .modal-dialog {
+        margin: var(--space-3);
+    }
+
+    .modal-footer {
+        flex-wrap: nowrap;
+    }
+
+    .modal-footer > .btn {
+        flex: 1 1 0%;
+        margin: 0;
+    }
+
+    .modal-body,
+    .modal-header,
+    .modal-footer {
+        padding: var(--card-pad-sm);
+    }
+
+    /* Tables and wide blocks scroll inside themselves, never the page. */
+    .table-responsive,
+    .overflow-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}

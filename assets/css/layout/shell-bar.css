@@ -1,0 +1,305 @@
+/* Top bar: breadcrumb on the left, compact profile menu on the right. */
+
+.shell-bar {
+    position: sticky;
+    top: 0;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: var(--shell-bar-height);
+    margin: 0 calc(var(--content-padding-x) * -1) var(--page-gap);
+    padding: var(--space-3) var(--content-padding-x);
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+}
+
+.shell-brand {
+    display: none;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.shell-brand .dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: var(--logo-box-size);
+    height: var(--logo-box-size);
+    font-size: 1.1rem;
+    border-radius: var(--btn-radius-sm);
+    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    color: var(--on-accent);
+    box-shadow: 0 6px 16px rgba(var(--accent),.35);
+}
+
+.shell-crumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+}
+
+.shell-crumbs i {
+    font-size: 0.65rem;
+}
+
+.shell-crumb-current {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Profile menu */
+
+.profile-menu {
+    position: relative;
+    margin-left: auto;
+}
+
+.profile-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.5rem;
+    padding: 0.25rem 0.6rem 0.25rem 0.3rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 500;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.profile-trigger:hover,
+.profile-trigger[aria-expanded="true"] {
+    background: var(--surface-2);
+    border-color: var(--border);
+}
+
+.profile-caret {
+    font-size: 0.65rem;
+    color: var(--text-faint);
+}
+
+.profile-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    color: var(--on-accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.profile-avatar-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+}
+
+.profile-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 60;
+    width: min(18rem, calc(100vw - 2rem));
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--elevated);
+    box-shadow: var(--shadow);
+}
+
+.profile-panel[hidden] {
+    display: none;
+}
+
+.profile-panel-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+}
+
+.profile-panel-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.profile-panel-sub {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+}
+
+.profile-panel-section {
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--border);
+}
+
+.profile-panel-label {
+    padding: 0 var(--space-3) var(--space-2);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.5rem;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--text-soft);
+    font-size: 0.86rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.profile-item:hover,
+.profile-item:focus-visible {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.profile-item i {
+    width: 1.1rem;
+    text-align: center;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 3.25rem;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.theme-option:hover {
+    background: var(--surface-2);
+}
+
+.theme-option[aria-checked="true"] {
+    border-color: rgb(var(--accent));
+    background: rgba(var(--accent), 0.12);
+    color: var(--text);
+}
+
+.shell-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: var(--menu-btn-size);
+    height: var(--menu-btn-size);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 1.3rem;
+}
+
+.shell-menu-btn:hover {
+    border-color: rgba(var(--accent), 0.5);
+}
+
+.shell-crumb-current {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.shell-crumb-current i {
+    font-size: 0.9rem;
+    color: rgb(var(--accent));
+}
+
+@media (max-width: 991.98px) {
+    /* Brand stays alone on the left; the menu button sits after the profile. */
+    .shell-menu-btn {
+        display: inline-flex;
+        order: 3;
+    }
+
+    .shell-brand {
+        display: inline-flex;
+        margin-right: auto;
+    }
+
+    .shell-crumbs {
+        display: none;
+    }
+
+    .shell-bar {
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+    }
+}
+
+@media (max-width: 575.98px) {
+    :root {
+        --content-padding-x: 1rem;
+    }
+
+    .profile-name,
+    .profile-caret {
+        display: none;
+    }
+
+    .profile-trigger {
+        padding: 0.2rem;
+    }
+}
+
+.shell-semester {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid rgba(var(--accent), 0.3);
+    border-radius: var(--radius-pill);
+    background: rgba(var(--accent), 0.08);
+    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.shell-semester + .profile-menu {
+    margin-left: 0;
+}
+
+@media (max-width: 575.98px) {
+    .shell-semester {
+        display: none;
+    }
+}

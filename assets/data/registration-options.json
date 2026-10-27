@@ -1,0 +1,81 @@
+{
+    "_comment": "Static reference data for the registration form. Program names are reused from the University directory data (assets/js/modules/university.js) and still need to be confirmed against the registrar's list before launch.",
+    "campuses": [
+        "San Bartolome",
+        "Batasan",
+        "San Francisco"
+    ],
+    "yearLevels": [
+        "1st Year",
+        "2nd Year",
+        "3rd Year",
+        "4th Year"
+    ],
+    "colleges": [
+        {
+            "college": "College of Accountancy",
+            "programs": [
+                {
+                    "code": "BSA",
+                    "title": "Bachelor of Science in Accountancy"
+                }
+            ]
+        },
+        {
+            "college": "College of Business Administration",
+            "programs": [
+                {
+                    "code": "BS Entrep",
+                    "title": "Bachelor of Science in Entrepreneurship"
+                },
+                {
+                    "code": "BSMA",
+                    "title": "Bachelor of Science in Management Accounting"
+                }
+            ]
+        },
+        {
+            "college": "College of Computer Studies",
+            "programs": [
+                {
+                    "code": "BSCS",
+                    "title": "Bachelor of Science in Computer Science"
+                },
+                {
+                    "code": "BSIT",
+                    "title": "Bachelor of Science in Information Technology"
+                },
+                {
+                    "code": "BSIS",
+                    "title": "Bachelor of Science in Information Systems"
+                },
+                {
+                    "code": "BSCpE",
+                    "title": "Bachelor of Science in Computer Engineering"
+                }
+            ]
+        },
+        {
+            "college": "College of Engineering",
+            "programs": [
+                {
+                    "code": "BSIE",
+                    "title": "Bachelor of Science in Industrial Engineering"
+                },
+                {
+                    "code": "BSECE",
+                    "title": "Bachelor of Science in Electronics Engineering"
+                }
+            ]
+        },
+        {
+            "college": "College of Education",
+            "programs": [
+                {
+                    "code": "BECEd",
+                    "title": "Bachelor of Early Childhood Education"
+                }
+            ]
+        }
+    ]
+}

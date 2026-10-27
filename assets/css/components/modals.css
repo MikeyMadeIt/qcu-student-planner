@@ -1,0 +1,90 @@
+/* modal */
+
+.modal-content {
+    --bs-modal-bg: var(--elevated);
+    --bs-modal-color: var(--text);
+    --bs-modal-border-color: var(--border);
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+.modal-title {
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-title i {
+    flex-shrink: 0;
+    margin: 0 !important;
+}
+
+.modal-content label {
+    color: var(--text-soft);
+}
+
+.modal-content .glass {
+    box-shadow: none;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--border);
+}
+
+.btn-close {
+    filter: invert(1) grayscale(1) brightness(1.6);
+    opacity: .7;
+}
+
+[data-theme="light"] .btn-close {
+    filter: none;
+    opacity: .6;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+/* dropdown */
+
+.dropdown-menu {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 6px;
+    min-width: 190px;
+}
+
+.dropdown-item {
+    color: var(--text-soft);
+    border-radius: 9px;
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 8px 10px;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.dropdown-item.text-danger:hover {
+    background: rgba(251,113,133,.14);
+    color: #fb7185!important;
+}
+
+.dropdown-divider {
+    border-color: var(--border);
+    margin: 6px 0;
+}
+
+.modal-backdrop.show {
+    opacity: .6;
+}

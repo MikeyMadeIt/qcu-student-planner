@@ -1,0 +1,168 @@
+/* utility */
+
+.text-soft {
+    color: var(--text-soft)!important;
+}
+
+.text-faint {
+    color: var(--text-faint)!important;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+    border: none;
+}
+
+.scroll-x {
+    overflow-x: auto;
+}
+
+.grabbable::-webkit-scrollbar {
+    display: none;
+}
+
+/* fade/slide animations */
+
+.fade-in {
+    animation: fadeIn .5s var(--ease);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stagger > * {
+    animation: fadeIn .45s var(--ease) both;
+}
+
+.stagger > *:nth-child(1) {
+    animation-delay: .03s;
+}
+
+.stagger > *:nth-child(2) {
+    animation-delay: .07s;
+}
+
+.stagger > *:nth-child(3) {
+    animation-delay: .11s;
+}
+
+.stagger > *:nth-child(4) {
+    animation-delay: .15s;
+}
+
+.stagger > *:nth-child(5) {
+    animation-delay: .19s;
+}
+
+.stagger > *:nth-child(6) {
+    animation-delay: .23s;
+}
+
+/* skeleton */
+
+.skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, rgba(var(--accent),.12) 37%, var(--surface-2) 63%);
+    background-size: 400% 100%;
+    animation: sk 1.4s ease infinite;
+    border-radius: 10px;
+}
+
+@keyframes sk {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+/* reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: .001s !important;
+        transition-duration: .001s !important;
+    }
+}
+
+/* confetti */
+
+.confetti-piece {
+    position: fixed;
+    top: -10px;
+    width: 8px;
+    height: 14px;
+    z-index: 9998;
+    pointer-events: none;
+    border-radius: 2px;
+}
+
+/* install fab */
+
+.install-fab {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    z-index: 60;
+    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 11px 18px;
+    font-weight: 700;
+    font-size: .82rem;
+    box-shadow: 0 10px 26px rgba(var(--accent),.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (min-width:992px) {
+    .install-fab {
+        bottom: 24px;
+    }
+}
+
+/* ============================================================
+PREFERS-REDUCED-MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .grade-trend-svg,
+    .att-absence-row,
+    .att-subject-breakdown-card,
+    .att-log-row,
+    .grade-card,
+    .grade-pass-badge {
+        transition: none !important;
+        animation: none !important;
+    }
+    .progress-bar {
+        transition: none !important;
+    }
+}
+
+/* ---- user display preferences (set by core/theme.js) ---- */
+
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+}
+
+[data-density="compact"] .card-pad {
+    padding: 12px;
+}

@@ -1,0 +1,22 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+.display {
+    font-family: var(--font-display);
+    letter-spacing: -.01em;
+    font-weight: 600;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+.label-mono {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}

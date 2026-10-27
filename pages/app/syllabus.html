@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="amber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Syllabus · Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/syllabus.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+
+    <div class="topbar syl-topbar">
+      <div class="syl-topbar-left">
+        <h1 class="page-title">Course Syllabus</h1>
+        <p class="page-sub">Your subjects and their syllabi, all in one place.</p>
+      </div>
+      <!-- Add Subject: full width, same size as the Tasks page's Add Task button -->
+      <button class="btn btn-accent syl-add-btn" onclick="openCourseModal()" aria-label="Add new subject"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button>
+    </div>
+
+    <input type="file" accept="application/json" id="syllabusImportFile" hidden onchange="handleSyllabusImportFile(this)">
+
+    <!-- Search + Sort + Import bar -->
+    <div class="syl-toolbar mb-3">
+      <div class="syl-search-wrap">
+        <i class="bi bi-search syl-search-icon" aria-hidden="true"></i>
+        <input class="form-control syl-search" id="syllabusSearch" placeholder="Search course title or code…"
+          oninput="renderSyllabusGrid()" aria-label="Search syllabus">
+      </div>
+      <div class="dropdown syl-sort-dropdown">
+        <button class="btn btn-ghost btn-sm syl-sort-btn" id="syllabusSortBtn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-label="Sort subjects">
+          <i class="bi bi-sort-alpha-down" id="syllabusSortIcon" aria-hidden="true"></i><span id="syllabusSortLabel">A – Z</span><i class="bi bi-chevron-down syl-sort-caret" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end syl-sort-menu" id="syllabusSortMenu" aria-label="Sort options">
+          <button type="button" class="dropdown-item syl-sort-option active" data-sort="az" data-icon="bi-sort-alpha-down" data-label="A – Z" role="radio" aria-checked="true" onclick="chooseSyllabusSort('az')"><i class="bi bi-sort-alpha-down syl-sort-option-icon" aria-hidden="true"></i><span class="syl-sort-option-text">A – Z</span><i class="bi bi-check2 syl-sort-option-check" aria-hidden="true"></i></button>
+          <button type="button" class="dropdown-item syl-sort-option" data-sort="recent" data-icon="bi-clock-history" data-label="Recently Added" role="radio" aria-checked="false" onclick="chooseSyllabusSort('recent')"><i class="bi bi-clock-history syl-sort-option-icon" aria-hidden="true"></i><span class="syl-sort-option-text">Recently Added</span><i class="bi bi-check2 syl-sort-option-check" aria-hidden="true"></i></button>
+          <button type="button" class="dropdown-item syl-sort-option" data-sort="updated" data-icon="bi-arrow-repeat" data-label="Recently Updated" role="radio" aria-checked="false" onclick="chooseSyllabusSort('updated')"><i class="bi bi-arrow-repeat syl-sort-option-icon" aria-hidden="true"></i><span class="syl-sort-option-text">Recently Updated</span><i class="bi bi-check2 syl-sort-option-check" aria-hidden="true"></i></button>
+        </div>
+        <select class="d-none" id="syllabusSort" aria-hidden="true" tabindex="-1">
+          <option value="az">A – Z</option>
+          <option value="recent">Recently Added</option>
+          <option value="updated">Recently Updated</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm syl-import-btn" onclick="document.getElementById('syllabusImportFile').click()" title="Import syllabus" aria-label="Import syllabus"><i class="bi bi-upload" aria-hidden="true"></i><span class="syl-import-label">Import</span></button>
+    </div>
+
+    <!-- Card grid -->
+    <div id="syllabusGrid" class="syl-list-grid stagger"></div>
+
+  </main>
+</div>
+
+<!-- Add/Edit Subject Modal -->
+<div class="modal fade" id="courseModal" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-body card-pad" id="courseModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Import Preview Modal -->
+<div class="modal fade" id="syllabusImportModal" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body card-pad" id="syllabusImportModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/modules/syllabus.js"></script>
+<script>
+  renderShell('syllabus');
+  applyTheme();
+  initSyllabusList();
+</script>
+</body>
+</html>
