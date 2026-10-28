@@ -586,7 +586,7 @@ function buildBoardCard(t) {
     }
     var dueClass = isOverdue ? 'bdue-overdue' : (t.dueDate === todayKey() ? 'bdue-today' : 'bdue-normal');
     // Priority color dot
-    var priMap = { high: '#fb7185', medium: '#fbbf24', low: '#6b7280' };
+    var priMap = { high: '#fb7185', medium: '#b45309', low: '#6b7280' };
     var priColor = priMap[t.priority || 'low'] || priMap.low;
     // Time estimate compact
     var teStr = '';

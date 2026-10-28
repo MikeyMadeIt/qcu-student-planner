@@ -17,7 +17,7 @@ function readCssVar(name, fallback) {
 function renderCharts(counts, all) {
     const textSoft = readCssVar('--text-soft', '#94a3b8');
     const gridColor = readCssVar('--border', 'rgba(148,163,184,.2)');
-    const statusColors = { pending: '#fbbf24', approved: '#34d399', rejected: '#fb7185', suspended: '#94a3b8' };
+    const statusColors = { pending: '#b45309', approved: '#34d399', rejected: '#fb7185', suspended: '#94a3b8' };
     const segments = ['pending', 'approved', 'rejected', 'suspended'];
 
     const distLegend = document.getElementById('distLegend');

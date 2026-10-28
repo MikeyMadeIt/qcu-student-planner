@@ -41,7 +41,7 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--text-faint);
-    border-radius: 5px;
+    border-radius: 4px;
     padding: 1px 6px;
     font-weight: 700;
 }
@@ -68,7 +68,7 @@
 
 .tk-board-card:hover {
     border-color: rgba(var(--accent), .3);
-    box-shadow: 0 2px 12px rgba(var(--accent), .07);
+    box-shadow: 0 0 0 1px rgba(var(--accent),.12);
 }
 
 .tk-board-card.completed {
@@ -151,7 +151,7 @@
 .tk-board-card {
     padding: 8px 10px !important;
     gap: 5px !important;
-    border-radius: 10px !important;
+    border-radius: 4px !important;
 }
 
 .tk-board-card.overdue .tk-bc-bar-fill {
@@ -166,7 +166,7 @@
 .tk-board-card.overdue.tk-selected,
 .tk-board-card.completed.tk-selected {
     border-color: rgb(var(--accent)) !important;
-    box-shadow: 0 0 0 2px rgba(var(--accent), .28), 0 2px 12px rgba(var(--accent), .1) !important;
+    box-shadow: 0 0 0 2px rgba(var(--accent),.3) !important;
     background: rgba(var(--accent), .07) !important;
     opacity: 1 !important;
 }
@@ -179,7 +179,7 @@
     width: 18px;
     height: 18px;
     min-width: 18px;
-    border-radius: 5px;
+    border-radius: 4px;
     border: 1.5px solid var(--border);
     background: transparent;
     display: flex;

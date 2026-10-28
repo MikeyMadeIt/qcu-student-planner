@@ -197,8 +197,8 @@ function renderGradePerformance() {
         var perfPct = gwaToPerformancePct(r.point);
         var barColor = perfPct >= 90 ? 'linear-gradient(90deg,#34d399,#22d3ee)'
             : perfPct >= 80 ? 'linear-gradient(90deg,rgb(var(--accent)),rgb(var(--accent-2)))'
-                : perfPct >= 75 ? 'linear-gradient(90deg,#fbbf24,#f472b6)'
-                    : 'linear-gradient(90deg,#fb7185,#f59e0b)';
+                : perfPct >= 75 ? 'linear-gradient(90deg,#b45309,#f472b6)'
+                    : 'linear-gradient(90deg,#fb7185,#92400e)';
         var tooltip = escHtml(r.subject.desc || r.subject.code) + ' — ' + (r.pct !== null ? r.pct.toFixed(1) + '% raw · GWA ' + (r.point !== null ? r.point.toFixed(2) : '–') : '–');
         return '<div class="grade-bar-row" title="' + tooltip + '">' +
             '<div class="grade-bar-label" title="' + escHtml(r.subject.desc) + '">' + escHtml(r.subject.code) + '</div>' +
@@ -388,7 +388,7 @@ function renderContextSummary() {
     // Tasks due today
     var dueToday = tasks.filter(function (t) { return t.dueDate === today; });
     if (dueToday.length > 0) {
-        msgs.push({ priority: 2, html: '<i class="bi bi-clock-fill me-1" style="color:#fbbf24"></i>' +
+        msgs.push({ priority: 2, html: '<i class="bi bi-clock-fill me-1" style="color:#b45309"></i>' +
                 dueToday.length + ' task' + (dueToday.length !== 1 ? 's are' : ' is') + ' due today.' });
     }
     // Days until finals
@@ -396,7 +396,7 @@ function renderContextSummary() {
         var finals = new Date(sem.finalsDate + 'T00:00:00');
         var daysToFinals = Math.ceil((finals - now) / (1000 * 60 * 60 * 24));
         if (daysToFinals > 0 && daysToFinals <= 14) {
-            msgs.push({ priority: 3, html: '<i class="bi bi-calendar-event me-1" style="color:#fbbf24"></i>' +
+            msgs.push({ priority: 3, html: '<i class="bi bi-calendar-event me-1" style="color:#b45309"></i>' +
                     daysToFinals + ' day' + (daysToFinals !== 1 ? 's' : '') + ' until finals.' });
         }
         else if (daysToFinals > 14 && daysToFinals <= 30) {

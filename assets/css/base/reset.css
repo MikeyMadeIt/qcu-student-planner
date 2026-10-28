@@ -48,7 +48,7 @@ a {
 
 ::-webkit-scrollbar-thumb {
     background: rgba(var(--accent),.35);
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-track {

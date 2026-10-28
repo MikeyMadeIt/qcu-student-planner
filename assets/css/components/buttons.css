@@ -18,20 +18,20 @@
 }
 
 .btn-accent {
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
-    border: none;
+    background: rgb(var(--accent));
+    border: 1px solid rgb(var(--accent));
     color: var(--on-accent);
-    box-shadow: 0 6px 16px rgba(var(--accent),.3);
+    box-shadow: none;
 }
 
 .btn-accent:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(var(--accent),.42);
+    background: rgb(var(--accent-2));
+    border-color: rgb(var(--accent-2));
     color: var(--on-accent);
 }
 
 .btn-accent:active {
-    transform: translateY(0);
+    background: rgb(var(--accent-2));
 }
 
 .btn-ghost {
@@ -190,7 +190,7 @@
     align-items: center;
     gap: 5px;
     padding: 4px 11px;
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: .72rem;
     font-weight: 700;
     background: rgba(var(--accent),.14);
@@ -205,9 +205,9 @@
 }
 
 .chip.medium {
-    background: rgba(251,191,36,.14);
-    color: #fbbf24;
-    border-color: rgba(251,191,36,.3);
+    background: rgba(180,83,9,.14);
+    color: var(--warning);
+    border-color: rgba(180,83,9,.3);
 }
 
 .chip.high {
@@ -227,25 +227,25 @@
     height: 58px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    background: rgb(var(--accent));
     color: var(--on-accent);
     font-size: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 12px 28px rgba(var(--accent),.45);
+    box-shadow: 0 1px 2px rgba(var(--accent),.3);
     transition: .25s var(--ease);
 }
 
 .fab-btn:hover {
-    transform: translateY(-3px) scale(1.04);
-    box-shadow: 0 16px 34px rgba(var(--accent),.55);
+    transform: none;
+    box-shadow: 0 1px 2px rgba(var(--accent),.35);
     color: var(--on-accent);
 }
 
 .fab-btn:focus-visible {
     outline: none;
-    box-shadow: var(--focus-ring), 0 12px 28px rgba(var(--accent),.45);
+    box-shadow: var(--focus-ring);
 }
 
 @media (max-width:991px) {

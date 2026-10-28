@@ -32,7 +32,7 @@ CURRICULUM PAGE
 .cur-stat-icon {
     width: 28px;
     height: 28px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: rgba(var(--accent), .14);
     color: rgb(var(--accent));
     display: flex;
@@ -86,11 +86,10 @@ CURRICULUM PAGE
 /* -- Year block -- */
 
 .cur-year-block {
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px solid var(--border);
     background: var(--surface);
-    backdrop-filter: blur(18px) saturate(140%);
     box-shadow: var(--shadow);
 }
 
@@ -106,8 +105,8 @@ CURRICULUM PAGE
 .cur-year-pill {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    border-radius: 4px;
+    background: rgb(var(--accent));
     color: #fff;
     font-weight: 800;
     font-family: var(--font-display);
@@ -115,7 +114,7 @@ CURRICULUM PAGE
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(var(--accent), .35);
+    box-shadow: 0 1px 2px rgba(var(--accent),.3);
     flex-shrink: 0;
 }
 
@@ -276,7 +275,7 @@ CURRICULUM PAGE
     color: rgb(var(--accent));
     background: rgba(var(--accent), .1);
     padding: 2px 8px;
-    border-radius: 6px;
+    border-radius: 4px;
     white-space: nowrap;
 }
 
@@ -300,7 +299,7 @@ CURRICULUM PAGE
     font-size: .65rem !important;
     font-weight: 700 !important;
     padding: 2px 7px !important;
-    border-radius: 5px !important;
+    border-radius: 4px !important;
     border: 1px solid rgba(var(--accent-2), .25) !important;
     margin: 1px 2px !important;
     display: inline-block;
@@ -336,7 +335,7 @@ CURRICULUM PAGE
     color: rgb(var(--accent));
     background: rgba(var(--accent), .12);
     border: 1px solid rgba(var(--accent), .22);
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 2px 8px;
 }
 
@@ -457,7 +456,7 @@ CURRICULUM PAGE
 
 .cur-picker {
     padding: 14px 16px;
-    border-radius: 16px;
+    border-radius: 5px;
 }
 .cur-picker-label {
     display: block;
@@ -474,14 +473,14 @@ CURRICULUM PAGE
 
 .curv {
     padding: 10px;
-    border-radius: 16px;
+    border-radius: 5px;
     margin-bottom: 12px;
 }
 .curv-stage {
     height: 62vh;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 12px;
+    border-radius: 5px;
     background: rgba(0, 0, 0, .25);
     padding: 10px;
     display: flex;
@@ -491,8 +490,8 @@ CURRICULUM PAGE
 .curv-canvas {
     display: block;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .28);
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
 }
 .cur-viewer-status {
     margin: auto;
@@ -536,7 +535,7 @@ CURRICULUM PAGE
     height: 48px;
     min-height: 48px;
     padding: 0 10px;
-    border-radius: 12px;
+    border-radius: 5px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
@@ -552,10 +551,10 @@ CURRICULUM PAGE
 }
 .curv-btn-accent,
 .curv-btn-accent:hover {
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    background: rgb(var(--accent));
     border: none;
     color: var(--on-accent);
-    box-shadow: 0 6px 16px rgba(var(--accent), .3);
+    box-shadow: 0 1px 2px rgba(var(--accent),.3);
 }
 .curv-btn:disabled {
     opacity: .35;
@@ -568,7 +567,7 @@ CURRICULUM PAGE
 .cur-empty {
     text-align: center;
     padding: 40px 18px;
-    border-radius: 16px;
+    border-radius: 5px;
 }
 .cur-empty i {
     font-size: 2rem;

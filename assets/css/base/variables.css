@@ -1,61 +1,61 @@
 :root {
-    --font-display: 'Poppins', system-ui, sans-serif;
-    --font-body: 'Poppins', system-ui, sans-serif;
-    --font-mono: 'Space Mono', ui-monospace, monospace;
+    --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
     --space-1: 0.25rem;
     --space-2: 8px;
     --space-3: 12px;
     --space-4: 16px;
     --space-5: 24px;
     --space-6: 32px;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --radius-sm: 10px;
+    --radius-lg: 8px;
+    --radius-md: 6px;
+    --radius-sm: 4px;
     --radius-pill: 999px;
     --ease: cubic-bezier(.22,.9,.35,1);
-    --transition-fast: .15s var(--ease);
-    --transition: .25s var(--ease);
-    --success: #34d399;
-    --warning: #fbbf24;
-    --danger: #fb7185;
-    --info: #38bdf8;
-    --on-accent: #1a1205;
-    --accent: 251,191,36;
-    --accent-2: 245,158,11;
+    --transition-fast: .12s var(--ease);
+    --transition: .18s var(--ease);
+    --success: #1F9254;
+    --warning: #B45309;
+    --danger: #D6433C;
+    --info: #2D6CDF;
+    --on-accent: #FFFFFF;
+    --accent: 36,87,214;
+    --accent-2: 26,66,169;
 
     --space-7: 2.5rem;
     --space-8: 3rem;
-    --shell-bar-height: 4.25rem;
+    --shell-bar-height: 3.75rem;
     --content-max-width: 80rem;
     --content-padding-x: 1.5rem;
 
     /* ---------- Sidebar (desktop) ---------- */
-    --sidebar-width: 11rem;          /* 176px: fits "Attendance" and the brand on one line */
-    --sidebar-padding-x: 0.625rem;   /* 10px */
+    --sidebar-width: 12rem;
+    --sidebar-padding-x: 0.625rem;
     --sidebar-item-padding-y: 0.5rem;
     --sidebar-item-padding-x: 0.625rem;
-    --sidebar-item-gap: 0.625rem;    /* icon -> label */
+    --sidebar-item-gap: 0.625rem;
 
     /* ---------- Spacing system ---------- */
-    --page-gap: var(--space-5);      /* between major sections on a page (24px) */
-    --grid-gap: var(--space-4);      /* between cards in the same grid (16px) */
-    --form-gap: var(--space-4);      /* between stacked form fields (16px) */
-    --title-gap: var(--space-3);     /* section heading -> its content (12px) */
+    --page-gap: var(--space-5);
+    --grid-gap: var(--space-4);
+    --form-gap: var(--space-4);
+    --title-gap: var(--space-3);
 
     /* Card padding scale: the same value on all four sides. */
-    --card-pad: 1.5rem;              /* 24px: content cards, forms, settings */
-    --card-pad-md: 1.25rem;          /* 20px: summary and hero cards */
-    --card-pad-sm: 1rem;             /* 16px: stat tiles, widgets, banners */
-    --card-pad-xs: 0.75rem;          /* 12px: dense list items, toolbars */
+    --card-pad: 1.5rem;
+    --card-pad-md: 1.25rem;
+    --card-pad-sm: 1rem;
+    --card-pad-xs: 0.75rem;
 
     /* ---------- Shared component tokens ---------- */
     /* Buttons */
-    --btn-height: 2.5rem;         /* 40px standard */
-    --btn-height-sm: 2rem;        /* 32px compact */
-    --btn-height-lg: 2.75rem;     /* 44px large primary */
+    --btn-height: 2.375rem;
+    --btn-height-sm: 2rem;
+    --btn-height-lg: 2.625rem;
     --btn-radius: var(--radius-sm);
-    --btn-radius-sm: 8px;
-    --btn-radius-lg: var(--radius-md);
+    --btn-radius-sm: 4px;
+    --btn-radius-lg: var(--radius-sm);
     --btn-gap: 0.5rem;
     --btn-padding-x: 1rem;
     --btn-padding-x-sm: 0.75rem;
@@ -65,25 +65,25 @@
     --btn-font-size-lg: 0.9rem;
 
     /* Icon-only buttons */
-    --icon-btn-size: 2.5rem;      /* 40px */
-    --icon-btn-size-sm: 2rem;     /* 32px */
+    --icon-btn-size: 2.375rem;
+    --icon-btn-size-sm: 2rem;
 
     /* Icon glyph sizes */
-    --icon-size-sm: 1rem;         /* 16px */
-    --icon-size-md: 1.25rem;      /* 20px */
-    --icon-size-lg: 1.5rem;       /* 24px */
+    --icon-size-sm: 1rem;
+    --icon-size-md: 1.125rem;
+    --icon-size-lg: 1.375rem;
 
     /* Form controls */
-    --input-height: 2.5rem;       /* 40px */
+    --input-height: 2.375rem;
     --input-radius: var(--radius-sm);
-    --checkbox-size: 1.1rem;
+    --checkbox-size: 1.05rem;
 
     /* Top bar / sidebar chrome */
-    --menu-btn-size: 2.5rem;      /* mobile menu button + mobile logo box */
-    --logo-box-size: 2.5rem;
+    --menu-btn-size: 2.375rem;
+    --logo-box-size: 2.375rem;
 
     /* Focus ring */
-    --focus-ring-color: rgba(var(--accent), 0.55);
+    --focus-ring-color: rgba(var(--accent), 0.45);
     --focus-ring: 0 0 0 3px var(--focus-ring-color);
 }
 

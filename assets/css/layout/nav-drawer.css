@@ -70,9 +70,9 @@
     height: 2rem;
     font-size: 1rem;
     border-radius: var(--btn-radius-sm);
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    background: rgb(var(--accent));
     color: var(--on-accent);
-    box-shadow: 0 6px 16px rgba(var(--accent),.35);
+    box-shadow: none;
 }
 
 .drawer-close {

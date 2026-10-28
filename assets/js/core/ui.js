@@ -28,7 +28,7 @@ const Toast = {
 /* ---------- CONFETTI ---------- */
 
 function fireConfetti() {
-    const colors = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#FBBF24'];
+    const colors = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309'];
     for (let i = 0; i < 40; i++) {
         const p = document.createElement('div');
         p.className = 'confetti-piece';

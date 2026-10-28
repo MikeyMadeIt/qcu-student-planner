@@ -63,7 +63,7 @@
 
 .dropdown-item {
     color: var(--text-soft);
-    border-radius: 9px;
+    border-radius: 4px;
     font-size: .85rem;
     font-weight: 600;
     padding: 8px 10px;

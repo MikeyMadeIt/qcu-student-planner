@@ -508,7 +508,7 @@ function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal')
     const isSmall = size === 'small';
     if (existingStatus && existingStatus !== 'No Classes') {
         const icons = { Present: 'bi-check-circle-fill', Late: 'bi-clock-fill', Absent: 'bi-x-circle-fill', Excused: 'bi-shield-check' };
-        const colors = { Present: '#34d399', Late: '#fbbf24', Absent: '#fb7185', Excused: '#60a5fa' };
+        const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
         const ic = icons[existingStatus] || 'bi-check-circle-fill';
         const col = colors[existingStatus] || 'var(--text-faint)';
         return `<div class="sch-att-logged" style="color:${col}"><i class="bi ${ic}" aria-hidden="true"></i> ${existingStatus}</div>`;
@@ -522,7 +522,7 @@ function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal')
 function buildAttendanceIconBtn(subjectId, dateStr, existingStatus) {
     if (existingStatus && existingStatus !== 'No Classes') {
         const icons = { Present: 'bi-check-circle-fill', Late: 'bi-clock-fill', Absent: 'bi-x-circle-fill', Excused: 'bi-shield-check' };
-        const colors = { Present: '#34d399', Late: '#fbbf24', Absent: '#fb7185', Excused: '#60a5fa' };
+        const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
         const ic = icons[existingStatus] || 'bi-check-circle-fill';
         const col = colors[existingStatus] || 'var(--text-faint)';
         return `<button class="btn-icon sched-icon-btn sch-att-icon-logged" style="color:${col}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Attendance: ${existingStatus}" aria-label="Attendance logged: ${existingStatus}"><i class="bi ${ic}" aria-hidden="true"></i></button>`;
@@ -564,7 +564,7 @@ function openQuickAttModal(subjectId, dateStr) {
     <div class="sch-att-status-grid mb-3" role="group" aria-label="Attendance status">
       ${statuses.map(st => {
         const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
-        const colors = { Present: '34d399', Late: 'fbbf24', Absent: 'fb7185', Excused: '60a5fa' };
+        const colors = { Present: '34d399', Late: 'b45309', Absent: 'fb7185', Excused: '60a5fa' };
         const isActive = currentStatus === st;
         return `<button class="sch-att-status-btn ${isActive ? 'active' : ''}" data-status="${st}" style="--att-color:#${colors[st]}" onclick="selectQuickAtt('${st}')" aria-pressed="${isActive ? 'true' : 'false'}">
           <i class="bi ${icons[st]}" aria-hidden="true"></i>

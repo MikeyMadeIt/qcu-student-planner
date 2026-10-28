@@ -10,7 +10,7 @@
 .cal-cell {
     min-height: 76px;
     min-width: 0;
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 5px;
     border: 1px solid var(--border);
     background: var(--surface-2);
@@ -36,7 +36,7 @@
 .cal-evt {
     font-size: .62rem;
     padding: 2px 5px;
-    border-radius: 6px;
+    border-radius: 4px;
     margin-top: 3px;
     font-weight: 600;
     color: #fff;
@@ -58,7 +58,7 @@
 .uc-cell {
     aspect-ratio: 1/1;
     min-width: 0;
-    border-radius: 12px;
+    border-radius: 5px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     display: flex;
@@ -108,7 +108,7 @@
 }
 
 .uc-week-cell {
-    border-radius: 12px;
+    border-radius: 5px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     padding: 8px 4px;

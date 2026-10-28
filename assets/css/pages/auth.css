@@ -12,11 +12,11 @@
     --auth-border: rgba(148, 163, 184, 0.22);
     --auth-input-bg: #0F172A;
     --auth-input-border: rgba(148, 163, 184, 0.3);
-    --auth-link: #FBBF24;
+    --auth-link: #2457D6;
     --auth-danger: #FB7185;
     --auth-success: #34D399;
     --auth-info: #38BDF8;
-    --auth-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+    --auth-shadow: 0 1px 2px rgba(2, 6, 23, .4);
     --auth-scroll-thumb: #64748B;
     --auth-scroll-track: rgba(148, 163, 184, 0.14);
 }
@@ -35,7 +35,7 @@
     --auth-danger: #BE123C;
     --auth-success: #047857;
     --auth-info: #0369A1;
-    --auth-shadow: 0 20px 48px rgba(15, 23, 42, 0.12);
+    --auth-shadow: 0 1px 2px rgba(15, 23, 42, .08);
     --auth-scroll-thumb: #94A3B8;
     --auth-scroll-track: #E2E8F0;
 }
@@ -212,7 +212,7 @@ body.auth-page {
 .auth-page .form-select:focus {
     background-color: var(--auth-input-bg);
     border-color: var(--auth-link);
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.22);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.22);
     color: var(--auth-text);
 }
 

@@ -27,7 +27,7 @@ ATTENDANCE PAGE — Enhanced v2
     align-items: center;
     justify-content: center;
     padding: var(--card-pad-xs);
-    border-radius: 12px;
+    border-radius: 5px;
     background: rgba(255,255,255,.04);
     border: 1px solid rgba(255,255,255,.08);
     text-align: center;
@@ -67,7 +67,7 @@ ATTENDANCE PAGE — Enhanced v2
 }
 
 .att-stat-card.late .stat-value {
-    color: #fbbf24;
+    color: var(--warning);
 }
 
 .att-stat-card.excused .stat-value {
@@ -112,7 +112,7 @@ ATTENDANCE PAGE — Enhanced v2
 
 .att-absence-row {
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: transparent;
     margin-bottom: 8px;
@@ -129,8 +129,8 @@ ATTENDANCE PAGE — Enhanced v2
 }
 
 .att-absence-row.att-absence-near {
-    border-color: rgba(251,191,36,.3);
-    background: rgba(251,191,36,.04);
+    border-color: rgba(180,83,9,.3);
+    background: rgba(180,83,9,.04);
 }
 
 .att-limit-badge {
@@ -140,7 +140,7 @@ ATTENDANCE PAGE — Enhanced v2
     font-size: .62rem;
     font-weight: 700;
     padding: 1px 6px;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .att-limit-badge.danger {
@@ -149,15 +149,15 @@ ATTENDANCE PAGE — Enhanced v2
 }
 
 .att-limit-badge.warn {
-    background: rgba(251,191,36,.15);
-    color: #fbbf24;
+    background: rgba(180,83,9,.15);
+    color: var(--warning);
 }
 
 /* ---- Per-Subject Breakdown ---- */
 
 .att-subject-breakdown-card {
     padding: var(--card-pad-xs);
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: rgba(255,255,255,.02);
     margin-bottom: 8px;
@@ -203,7 +203,7 @@ ATTENDANCE PAGE — Enhanced v2
 .att-bd-stat {
     text-align: center;
     padding: 4px 2px;
-    border-radius: 7px;
+    border-radius: 4px;
     background: rgba(255,255,255,.03);
 }
 
@@ -228,7 +228,7 @@ ATTENDANCE PAGE — Enhanced v2
 }
 
 .att-bd-stat.late .att-bd-val {
-    color: #fbbf24;
+    color: var(--warning);
 }
 
 .att-bd-stat.excused .att-bd-val {
@@ -281,7 +281,7 @@ ATTENDANCE PAGE — Enhanced v2
     gap: 6px;
     align-items: center;
     padding: 6px 10px;
-    border-radius: 9px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: transparent;
     font-size: .76rem;
@@ -339,7 +339,7 @@ ATTENDANCE PAGE — Enhanced v2
     border: none;
     color: var(--text-soft);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: .7rem;
     transition: all .15s;
     padding: 0;
@@ -357,7 +357,7 @@ ATTENDANCE PAGE — Enhanced v2
     font-weight: 700;
     font-size: .63rem;
     padding: 2px 7px;
-    border-radius: 16px;
+    border-radius: 5px;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
@@ -371,9 +371,9 @@ ATTENDANCE PAGE — Enhanced v2
 }
 
 .att-status-badge.late {
-    background: rgba(251,191,36,.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251,191,36,.3);
+    background: rgba(180,83,9,.15);
+    color: var(--warning);
+    border: 1px solid rgba(180,83,9,.3);
 }
 
 .att-status-badge.absent {
@@ -401,7 +401,7 @@ ATTENDANCE PAGE — Enhanced v2
     align-items: center;
     background: rgba(6,182,212,.2);
     color: #06b6d4;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: .58rem;
     font-weight: 700;
     padding: 1px 5px;
@@ -508,7 +508,7 @@ ATTENDANCE PAGE — v3 Refinements
 
 .al-modal-row {
     padding: 12px;
-    border-radius: 12px;
+    border-radius: 5px;
     border: 1px solid var(--border);
     background: rgba(255,255,255,.02);
     margin-bottom: 10px;
@@ -525,8 +525,8 @@ ATTENDANCE PAGE — v3 Refinements
 }
 
 .al-modal-row.al-near {
-    border-color: rgba(251,191,36,.3);
-    background: rgba(251,191,36,.04);
+    border-color: rgba(180,83,9,.3);
+    background: rgba(180,83,9,.04);
 }
 
 .al-row-header {
@@ -549,7 +549,7 @@ ATTENDANCE PAGE — v3 Refinements
     font-size: .68rem;
     font-weight: 700;
     padding: 3px 8px;
-    border-radius: 20px;
+    border-radius: 6px;
     white-space: nowrap;
 }
 
@@ -560,9 +560,9 @@ ATTENDANCE PAGE — v3 Refinements
 }
 
 .al-status-badge.warn {
-    background: rgba(251,191,36,.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251,191,36,.25);
+    background: rgba(180,83,9,.15);
+    color: var(--warning);
+    border: 1px solid rgba(180,83,9,.25);
 }
 
 .al-status-badge.ok {
@@ -615,7 +615,7 @@ ATTENDANCE PAGE — v3 Refinements
     align-items: center;
     gap: 10px;
     padding: 8px 10px;
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: transparent;
     margin-bottom: 5px;
@@ -1588,7 +1588,7 @@ We hard-code this and also ensure the col wrapper stretches. */
     /* Fixed height matching Bootstrap sm controls */
     height: 31px !important;
     min-height: 31px !important;
-    border-radius: 8px !important;
+    border-radius: 4px !important;
     border: 1px solid var(--border) !important;
     background: rgba(255,255,255,.04) !important;
     color: var(--text-soft) !important;
@@ -1911,7 +1911,7 @@ TASKS v2 — Recurring, Bulk Actions, Grouping, Score/Remarks
     color: rgb(var(--accent));
     background: rgba(var(--accent), .13);
     border: 1px solid rgba(var(--accent), .28);
-    border-radius: 20px;
+    border-radius: 6px;
     padding: 1px 7px;
     letter-spacing: .02em;
     white-space: nowrap;
@@ -1970,7 +1970,7 @@ TASKS v2 — Recurring, Bulk Actions, Grouping, Score/Remarks
     color: var(--text-faint);
     font-size: .8rem;
     padding: 2px 4px;
-    border-radius: 5px;
+    border-radius: 4px;
     transition: .15s;
     display: flex;
     align-items: center;
@@ -1989,7 +1989,7 @@ TASKS v2 — Recurring, Bulk Actions, Grouping, Score/Remarks
     gap: 8px;
     background: rgba(var(--accent), .14);
     border: 1px solid rgba(var(--accent), .3);
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 8px 14px;
     margin-bottom: 10px;
     flex-wrap: wrap;
@@ -2050,7 +2050,7 @@ TASKS v2 — Recurring, Bulk Actions, Grouping, Score/Remarks
 
 .tk-score-section {
     background: var(--surface-2);
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 8px 12px;
     margin-top: 8px;
     display: flex;
@@ -2224,7 +2224,7 @@ Consecutive Absence Alerts, Export, Skeleton States
     height: 36px;
     min-height: 36px;
     padding: 0 10px;
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: rgba(255,255,255,.06);
     color: var(--text-soft);
@@ -2254,7 +2254,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-mode-track {
     width: 28px;
     height: 16px;
-    border-radius: 10px;
+    border-radius: 4px;
     background: rgba(255,255,255,.15);
     position: relative;
     flex-shrink: 0;
@@ -2317,16 +2317,16 @@ Consecutive Absence Alerts, Export, Skeleton States
     align-items: flex-start;
     gap: 10px;
     padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(251,191,36,.08);
-    border: 1px solid rgba(251,191,36,.28);
+    border-radius: 4px;
+    background: rgba(180,83,9,.08);
+    border: 1px solid rgba(180,83,9,.28);
     animation: att-consec-in .25s ease;
 }
 
 @keyframes att-consec-in {
     from {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: none;
     }
     to {
         opacity: 1;
@@ -2341,7 +2341,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-consec-icon {
-    color: #fbbf24;
+    color: var(--warning);
     font-size: .9rem;
     margin-top: 1px;
     flex-shrink: 0;
@@ -2357,7 +2357,7 @@ Consecutive Absence Alerts, Export, Skeleton States
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: #fbbf24;
+    color: var(--warning);
     margin-bottom: 2px;
 }
 
@@ -2490,7 +2490,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-hm-late {
-    background: rgba(251,191,36,.65);
+    background: rgba(180,83,9,.65);
 }
 
 .att-hm-excused {
@@ -2616,12 +2616,12 @@ Consecutive Absence Alerts, Export, Skeleton States
     z-index: 9999;
     background: rgba(15,20,40,.97);
     border: 1px solid rgba(255,255,255,.15);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 8px 12px;
     font-size: .75rem;
     pointer-events: none;
     max-width: 220px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    box-shadow: 0 1px 2px rgba(0,0,0,.4);
     opacity: 0;
     transition: opacity .12s;
 }
@@ -2650,7 +2650,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-hm-tt-late {
-    color: #fbbf24;
+    color: var(--warning);
 }
 
 .att-hm-tt-excused {
@@ -2686,7 +2686,7 @@ Consecutive Absence Alerts, Export, Skeleton States
     align-items: center;
     gap: 8px;
     padding: 9px 12px;
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: transparent;
     margin-bottom: 8px;
@@ -2704,8 +2704,8 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-limit-row.att-absence-near {
-    border-color: rgba(251,191,36,.3);
-    background: rgba(251,191,36,.04);
+    border-color: rgba(180,83,9,.3);
+    background: rgba(180,83,9,.04);
 }
 
 .att-limit-dot {
@@ -2814,7 +2814,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-bd-consec-warn {
     margin-top: 6px;
     font-size: .7rem;
-    color: #fbbf24;
+    color: var(--warning);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -2862,7 +2862,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-map-warn .att-map-section-title {
-    color: #fbbf24;
+    color: var(--warning);
 }
 
 /* ---- Online chip (legacy, keep compatible) ---- */
@@ -2873,7 +2873,7 @@ Consecutive Absence Alerts, Export, Skeleton States
     background: rgba(6,182,212,.15);
     color: #06b6d4;
     border: 1px solid rgba(6,182,212,.3);
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: .58rem;
     font-weight: 700;
     padding: 1px 5px;
@@ -3072,7 +3072,7 @@ END ATTENDANCE v4
     text-align: left;
     background: transparent;
     border: none;
-    border-radius: 10px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: .85rem;
     font-weight: 600;
