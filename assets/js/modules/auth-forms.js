@@ -81,8 +81,38 @@ async function submitForm(form, submitButton) {
     try {
         const result = await SUBMIT_HANDLERS[type](form);
 
-        /* A successful result will be handled here once the real auth service is connected. */
-        if (!result.ok) showAlert(form, result.message, 'info');
+        if (!result.ok) {
+            showAlert(form, result.message, 'info');
+            return;
+        }
+
+        if (type === 'login') {
+            const { role, accountStatus } = result.data;
+
+            if (accountStatus === 'approved' && role === 'admin') {
+                location.href = '../admin/dashboard.html';
+            } else if (accountStatus === 'approved') {
+                location.href = '../app/dashboard.html';
+            } else if (accountStatus === 'pending') {
+                location.href = 'pending.html';
+            } else {
+                showAlert(form, result.data.accountStatus === 'rejected'
+                    ? `Your registration was not approved.${result.data.rejectionReason ? ` Reason: ${result.data.rejectionReason}` : ''}`
+                    : 'Your account has been suspended. Contact an administrator for help.', 'error');
+            }
+            return;
+        }
+
+        if (type === 'forgot') {
+            showAlert(form, result.data.message, 'info');
+            return;
+        }
+
+        if (type === 'reset') {
+            showAlert(form, 'Your password has been updated. Redirecting to log in…', 'info');
+            setTimeout(() => { location.href = 'login.html'; }, 1500);
+            return;
+        }
     } catch (error) {
         showAlert(form, 'Something went wrong. Please try again.');
     } finally {

@@ -58,4 +58,15 @@ export const validators = {
     select: label => value => (value ? '' : `Select your ${label}.`),
 
     consent: message => checked => (checked ? '' : message),
+
+    fullName: value => {
+        if (!value.trim()) return 'Enter your full name.';
+        if (value.trim().length < 2) return 'Enter your full name.';
+        return /^[a-zA-Z\u00C0-\u017F.,'\- ]+$/.test(value.trim()) ? '' : 'Use letters only for your full name.';
+    },
+
+    section: value => {
+        if (!value.trim()) return 'Enter your section.';
+        return /^[a-zA-Z0-9.\- ]+$/.test(value.trim()) ? '' : 'Enter a valid section (letters and numbers).';
+    },
 };

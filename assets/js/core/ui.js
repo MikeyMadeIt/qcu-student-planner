@@ -60,6 +60,11 @@ function ensureConfirmModal() {
         </div>
         <h5 id="confirmTitle" class="mb-1">Are you sure?</h5>
         <p class="text-soft mb-0 confirm-message" id="confirmMessage"></p>
+        <div class="confirm-reason-wrap text-start mt-3" id="confirmReasonWrap" hidden>
+          <label class="adm-label" id="confirmReasonLabel" for="confirmReasonInput">Reason</label>
+          <textarea class="form-control" id="confirmReasonInput" rows="2" maxlength="300"></textarea>
+          <p class="auth-error" id="confirmReasonError" hidden></p>
+        </div>
         <div class="d-flex gap-2 mt-3">
           <button class="btn btn-ghost flex-grow-1" data-bs-dismiss="modal">Cancel</button>
           <button class="btn flex-grow-1 confirm-action-btn" id="confirmActionBtn">Confirm</button>
@@ -78,8 +83,11 @@ function ensureConfirmModal() {
     });
 }
 
+/* opts.reasonField, when present ({ label, placeholder, required }), shows a textarea inline
+   in the popup instead of falling back to a native window.prompt() after the fact. onConfirm
+   is then called with the trimmed reason string (or '' if left blank and not required). */
 function confirmAction(opts) {
-    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, onConfirm } = opts;
+    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, onConfirm } = opts;
     ensureConfirmModal();
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
@@ -88,15 +96,40 @@ function confirmAction(opts) {
     iconWrap.style.background = danger ? 'rgba(251,113,133,.15)' : 'rgba(var(--accent),.15)';
     iconEl.style.color = danger ? '#fb7185' : 'rgb(var(--accent))';
     iconEl.className = 'bi ' + (icon || (danger ? 'bi-exclamation-triangle-fill' : 'bi-question-circle-fill'));
+
+    const reasonWrap = document.getElementById('confirmReasonWrap');
+    const reasonLabel = document.getElementById('confirmReasonLabel');
+    const reasonInput = document.getElementById('confirmReasonInput');
+    const reasonError = document.getElementById('confirmReasonError');
+    reasonWrap.hidden = !reasonField;
+    reasonError.hidden = true;
+    reasonInput.value = '';
+    if (reasonField) {
+        reasonLabel.textContent = reasonField.label || 'Reason';
+        reasonInput.placeholder = reasonField.placeholder || '';
+        reasonInput.setAttribute('aria-describedby', 'confirmReasonError');
+    }
+
     const btn = document.getElementById('confirmActionBtn');
     btn.textContent = confirmLabel;
     btn.style.background = danger ? '#fb7185' : 'linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)))';
     const freshBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(freshBtn, btn);
     freshBtn.addEventListener('click', () => {
+        const reasonValue = reasonInput.value.trim();
+        if (reasonField && reasonField.required && !reasonValue) {
+            reasonError.textContent = reasonField.requiredMessage || 'A reason is required.';
+            reasonError.hidden = false;
+            reasonInput.focus();
+            return;
+        }
         bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
         if (onConfirm)
-            onConfirm();
+            onConfirm(reasonValue);
     });
-    new bootstrap.Modal(document.getElementById('confirmActionModal')).show();
+    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
+    document.getElementById('confirmActionModal').addEventListener('shown.bs.modal', () => {
+        if (reasonField) reasonInput.focus();
+    }, { once: true });
+    modal.show();
 }

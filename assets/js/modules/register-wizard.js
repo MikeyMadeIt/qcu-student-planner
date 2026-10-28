@@ -1,8 +1,8 @@
 /* Three-step registration wizard (ES module).
-   Frontend only: nothing is stored or sent. The submit step calls AuthService.signUp, which is the
-   backend integration point. */
+   The submit step calls AuthService.signUp, which creates the Supabase Auth user and records
+   the submitted program/campus/year on the pending profile row via the submit_profile_details RPC. */
 
-import { AuthService, AUTH_NOT_CONFIGURED } from '../services/auth-service.js';
+import { AuthService } from '../services/auth-service.js';
 import { APP_CONFIG } from '../core/config.js';
 import { loadRegistrationOptions } from '../data/registration-options.js';
 import { validators } from '../utils/validation.js';
@@ -20,18 +20,20 @@ const TOTAL_STEPS = 3;
 
 /* Fields to validate on each step, in display order. */
 const STEP_FIELDS = {
-    1: ['email', 'password', 'confirmPassword'],
-    2: ['program', 'campus', 'yearLevel'],
+    1: ['fullName', 'email', 'password', 'confirmPassword'],
+    2: ['program', 'campus', 'yearLevel', 'section'],
     3: ['acceptTerms', 'acknowledgePrivacy'],
 };
 
 const FIELD_RULES = {
+    fullName: (value) => validators.fullName(value),
     email: (value) => validators.email(value),
     password: (value) => validators.newPassword(value),
     confirmPassword: (value, form) => validators.confirm(value, form.elements.password.value),
     program: validators.select('program'),
     campus: validators.select('campus'),
     yearLevel: validators.select('year level'),
+    section: (value) => validators.section(value),
     acceptTerms: validators.consent('Accept the Terms and Conditions to continue.'),
     acknowledgePrivacy: validators.consent('Acknowledge the Privacy Notice to continue.'),
 };
@@ -113,6 +115,47 @@ function showStep(form, stepper, step, { moveFocus = true } = {}) {
 
 /* ---------- Dropdown options ---------- */
 
+/* Last-resort popup: loadRegistrationOptions() already falls back to an embedded copy of the
+   data, so this only fires if that embedded fallback is itself somehow malformed. Built as a
+   minimal Bootstrap modal (Bootstrap's JS bundle is loaded on this page) rather than the old
+   inline banner, so the failure is impossible to miss. */
+function ensureOptionsErrorModal() {
+    if (document.getElementById('optionsErrorModal')) return;
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="modal fade" id="optionsErrorModal" tabindex="-1" aria-modal="true" role="alertdialog" aria-labelledby="optionsErrorTitle" aria-describedby="optionsErrorMessage">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content card-pad text-center">
+          <div class="confirm-icon-wrap" style="background:rgba(251,113,133,.15)">
+            <i class="bi bi-exclamation-triangle-fill confirm-icon" style="color:#fb7185" aria-hidden="true"></i>
+          </div>
+          <h5 id="optionsErrorTitle" class="mb-1">Couldn't load program options</h5>
+          <p class="text-soft mb-0 confirm-message" id="optionsErrorMessage">The program, campus and year level lists could not be loaded.</p>
+          <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-ghost flex-grow-1" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-accent flex-grow-1" id="optionsErrorRetryBtn">Try again</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    document.body.appendChild(wrap.firstElementChild);
+}
+
+function showOptionsErrorModal(form) {
+    ensureOptionsErrorModal();
+
+    const retryButton = document.getElementById('optionsErrorRetryBtn');
+    const freshButton = retryButton.cloneNode(true);
+    retryButton.parentNode.replaceChild(freshButton, retryButton);
+    freshButton.addEventListener('click', () => {
+        bootstrap.Modal.getInstance(document.getElementById('optionsErrorModal'))?.hide();
+        populateOptions(form);
+    });
+
+    const modal = new bootstrap.Modal(document.getElementById('optionsErrorModal'));
+    modal.show();
+}
+
 function fillSelect(select, options) {
     const placeholder = select.querySelector('option[value=""]');
 
@@ -146,6 +189,11 @@ function buildProgramOptions(colleges) {
 
 async function populateOptions(form) {
     const status = $('[data-options-status]', form);
+    const submitButtons = $$('[data-step-next], [data-submit]', form);
+
+    status.hidden = true;
+    status.innerHTML = '';
+    submitButtons.forEach(button => { button.disabled = false; });
 
     try {
         const options = await loadRegistrationOptions();
@@ -154,8 +202,14 @@ async function populateOptions(form) {
         fillSelect(form.elements.campus, options.campuses.map(campus => createOption(campus)));
         fillSelect(form.elements.yearLevel, options.yearLevels.map(level => createOption(level)));
     } catch (error) {
+        /* True last resort: loadRegistrationOptions() already has its own embedded fallback, so
+           reaching here means even that fallback failed to apply (e.g. it was malformed). Keep an
+           accessible, mostly-hidden status message for assistive tech, and surface the real,
+           user-visible error as a popup instead of inline page text. */
+        submitButtons.forEach(button => { button.disabled = true; });
         status.hidden = false;
-        status.textContent = 'The program, campus and year level lists could not be loaded. Reload the page to try again.';
+        status.textContent = 'The program, campus and year level lists could not be loaded.';
+        showOptionsErrorModal(form);
     }
 }
 
@@ -163,11 +217,13 @@ async function populateOptions(form) {
 
 function collectRegistration(form) {
     return {
+        fullName: readValue(form.elements.fullName),
         email: readValue(form.elements.email),
         password: form.elements.password.value,
         program: form.elements.program.value,
         campus: form.elements.campus.value,
         yearLevel: form.elements.yearLevel.value,
+        section: readValue(form.elements.section),
         acceptedTerms: form.elements.acceptTerms.checked,
         acknowledgedPrivacy: form.elements.acknowledgePrivacy.checked,
     };
@@ -200,12 +256,9 @@ async function submitRegistration(form, stepper, submitButton) {
 
     try {
         const registration = collectRegistration(form);
-        setSelectedProgram(registration.program);
         const result = await AuthService.signUp(registration);
 
-        /* Until the backend exists the service reports AUTH_NOT_CONFIGURED. That still shows the
-           frontend-only confirmation, which states plainly that nothing was created or sent. */
-        if (result.ok || result.code === AUTH_NOT_CONFIGURED) {
+        if (result.ok) {
             showSubmittedConfirmation();
             return;
         }

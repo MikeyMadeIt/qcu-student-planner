@@ -44,12 +44,8 @@
             <div class="auth-center" data-state-submitted hidden>
                 <div class="status-icon"><i class="bi bi-send-check" aria-hidden="true"></i></div>
                 <h1 class="auth-title">Registration Submitted</h1>
-                <p class="auth-sub">Your registration details have been prepared successfully. Your account will require administrator review before access is granted.</p>
-                <p class="auth-detail">Once the system is connected, the program, campus and year level you provided will help administrators distinguish and verify student accounts.</p>
-                <div class="auth-alert info auth-preview-notice" role="note">
-                    <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-                    <span><strong>Frontend preview only.</strong> No account has been created, no administrator has received a request, no email has been sent, and your details have not been stored. This confirmation depends on the backend integration that is not connected yet.</span>
-                </div>
+                <p class="auth-sub">Your account has been created and your registration details have been recorded. An administrator will review your account before you can log in.</p>
+                <p class="auth-detail">The program, campus and year level you provided will help administrators review your account.</p>
                 <div class="auth-actions">
                     <a class="btn btn-accent auth-submit" href="login.html">Back to log in</a>
                 </div>
@@ -58,6 +54,7 @@
         <p class="auth-note">Approval is decided by an administrator, never by this page.</p>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script src="../../assets/js/core/theme-toggle.js"></script>
     <script type="module" src="../../assets/js/modules/auth.js"></script>
 </body>

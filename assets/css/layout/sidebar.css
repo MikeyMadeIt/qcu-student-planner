@@ -111,6 +111,47 @@
     color: var(--text-faint);
 }
 
+/* Sign-out, pinned at the bottom of the sidebar, visually separated from the nav groups above. */
+.sidebar-logout-sep {
+    margin-top: auto;
+}
+
+.sidebar-user {
+    padding: var(--space-2) var(--sidebar-item-padding-x) var(--space-1);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-logout-btn {
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #fb7185;
+    text-align: left;
+}
+
+.sidebar-logout-btn:hover {
+    background: rgba(251, 113, 133, 0.12);
+    color: #fb7185;
+    transform: none;
+}
+
+.sidebar-logout-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Sidebar toggle (desktop): collapses the static column when the topbar button is clicked. */
+@media (min-width: 992px) {
+    body.sidebar-collapsed .sidebar {
+        display: none;
+    }
+}
+
 /* Below desktop width the sidebar is replaced by the top-bar menu button
    and the nav-drawer (see nav-drawer.css). There is only one navigation
    system at any given viewport width. */

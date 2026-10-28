@@ -189,6 +189,11 @@ textarea:focus-visible {
     color: #fff;
 }
 
+.confirm-reason-wrap textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+}
+
 /* Settings — semester edit read-only fields */
 
 .sem-readonly-field {

@@ -59,6 +59,12 @@
                     <p class="step-sub">These details will be used to identify your account.</p>
 
                     <div class="auth-field">
+                        <label for="fullName">Full Name</label>
+                        <input class="form-control" id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Juan Dela Cruz" data-rule="fullName" aria-describedby="fullName-err" aria-invalid="false">
+                        <p class="auth-error" id="fullName-err" hidden></p>
+                    </div>
+
+                    <div class="auth-field">
                         <label for="email">Personal Email</label>
                         <input class="form-control" id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" data-rule="email" aria-describedby="email-err" aria-invalid="false">
                         <p class="auth-error" id="email-err" hidden></p>
@@ -119,6 +125,11 @@
                         </select>
                         <p class="auth-error" id="yearLevel-err" hidden></p>
                     </div>
+                    <div class="auth-field">
+                        <label for="section">Section</label>
+                        <input class="form-control" id="section" name="section" type="text" autocomplete="off" placeholder="e.g. BSIT 2A" data-rule="section" aria-describedby="section-err" aria-invalid="false">
+                        <p class="auth-error" id="section-err" hidden></p>
+                    </div>
 
                     <div class="wizard-actions two">
                         <button type="button" class="btn btn-ghost" data-step-back>Back</button>
@@ -160,9 +171,9 @@
                                 <h4>1. Draft notice</h4>
                                 <p>This Privacy Notice is a draft that describes the intended handling of information. It has not been reviewed by the university's data protection officer and must be confirmed before production deployment.</p>
                                 <h4>2. Information the system is intended to collect</h4>
-                                <p>To create an account the system is intended to collect your personal email address, a password, your academic program, your campus and your year level. If the final system also asks for your name, this notice will be updated to say so.</p>
+                                <p>To create an account the system collects your full name, personal email address, a password, your academic program, campus, year level and section. Your student number is not collected during registration.</p>
                                 <h4>3. Why the information is collected</h4>
-                                <p>Your email address and password identify your account. Your program, campus and year level help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
+                                <p>Your email address and password identify your account. Your name, program, campus, year level and section help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
                                 <h4>4. Handling and access</h4>
                                 <p>Registration details are intended to be visible only to authorized administrators who review accounts, and to you. They are not intended to be sold or used for advertising. The exact storage, retention period and security safeguards will be described here once they are decided and verified.</p>
                                 <h4>5. Your choices</h4>
@@ -197,9 +208,11 @@
 
             <p class="auth-foot">Already have an account? <a class="auth-link" href="login.html">Log in</a></p>
         </div>
-        <p class="auth-note">Form checks only help you fix typos. Nothing is created or sent until the backend is connected.</p>
+        <p class="auth-note">Your details are sent securely and reviewed by an administrator before you can log in.</p>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script src="../../assets/js/core/theme-toggle.js"></script>
     <script type="module" src="../../assets/js/modules/auth.js"></script>
 </body>
