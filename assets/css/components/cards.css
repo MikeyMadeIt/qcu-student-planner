@@ -1,20 +1,19 @@
-/* ---------- GLASS CARD ---------- */
+/* ---------- CARD (Swiss editorial: flat surface, border-led, no blur/lift) ---------- */
 
 .glass {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
     box-shadow: var(--shadow);
-    transition: transform .35s var(--ease), box-shadow .35s var(--ease), border-color .3s;
+    transition: border-color var(--transition);
 }
 
 .glass:hover {
+    border-color: var(--border);
 }
 
 .glass-tight {
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
 }
 
 /* Card padding scale (tokens in base/variables.css): equal on all four sides. */
@@ -34,27 +33,38 @@
     padding: var(--card-pad-xs);
 }
 
-.hover-lift:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(0,0,0,.28);
-    border-color: rgba(var(--accent),.3);
+/* Interactive cards get a crisp accent edge instead of a floating shadow lift. */
+.hover-lift {
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+.hover-lift:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+    border-color: rgb(var(--accent));
+}
+
+/* Editorial section heading: small accent rule + label, used to open every
+   major block (dashboard sections, card groups, list headers). */
 .section-title {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     margin-bottom: var(--title-gap);
-    font-weight: 800;
-    font-size: 0.82rem;
-    letter-spacing: 0.01em;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
     line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    padding-left: 0.6rem;
+    border-left: 2px solid rgb(var(--accent));
 }
 
 .section-title i {
     flex-shrink: 0;
     color: rgb(var(--accent));
-    font-size: 0.9rem;
+    font-size: 0.88rem;
 }
 
 /* ---------- Shared vertical rhythm ---------- */

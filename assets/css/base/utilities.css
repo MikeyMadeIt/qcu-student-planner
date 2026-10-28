@@ -74,7 +74,7 @@
     background: linear-gradient(90deg, var(--surface-2) 25%, rgba(var(--accent),.12) 37%, var(--surface-2) 63%);
     background-size: 400% 100%;
     animation: sk 1.4s ease infinite;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 @keyframes sk {
@@ -114,14 +114,14 @@
     bottom: 90px;
     right: 20px;
     z-index: 60;
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    background: rgb(var(--accent));
     color: #fff;
     border: none;
-    border-radius: 50px;
+    border-radius: 6px;
     padding: 11px 18px;
     font-weight: 700;
     font-size: .82rem;
-    box-shadow: 0 10px 26px rgba(var(--accent),.4);
+    box-shadow: 0 1px 2px rgba(var(--accent),.3);
     display: flex;
     align-items: center;
     gap: 8px;

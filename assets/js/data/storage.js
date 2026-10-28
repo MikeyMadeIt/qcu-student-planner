@@ -51,11 +51,11 @@ function writeKey(key, value) {
 
 const DEFAULT_SETTINGS = {
     name: 'Student', studentNumber: '', course: '', yearLevel: '', section: '', school: '',
-    theme: 'dark', accent: 'amber',
+    theme: 'dark', accent: 'blue',
     notifications: { upcomingClass: true, assignmentDue: true, examReminder: true, pomodoroFinished: true, dailyReview: false },
 };
 
-const SUBJECT_COLORS = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#FBBF24', '#F472B6', '#22D3EE', '#A78BFA'];
+const SUBJECT_COLORS = ['#2457D6', '#1F9254', '#B45309', '#D6433C', '#6D5BD6', '#0E8C8C', '#C2498A', '#4B5563'];
 /* ============================================================
    SEMESTER HELPERS
    ============================================================ */

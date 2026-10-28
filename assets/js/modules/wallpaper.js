@@ -21,7 +21,7 @@ let wpMode = 'list'; // 'list' | 'timetable'
 let wpToggleState = { room: true, professor: true, name: true, semester: true };
 const WP_DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const WP_DAY_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
-const WP_PALETTE = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#FBBF24', '#F472B6', '#22D3EE', '#A78BFA', '#F97316', '#10B981'];
+const WP_PALETTE = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309', '#F472B6', '#22D3EE', '#A78BFA', '#F97316', '#10B981'];
 
 function getSubjectColor(subject) {
     return subject.color || WP_PALETTE[0];

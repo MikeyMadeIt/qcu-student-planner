@@ -209,7 +209,7 @@
 }
 
 .adm-stat-card.pending .adm-stat-value,
-.adm-stat-card.pending .adm-stat-icon { color: var(--warning, #fbbf24); }
+.adm-stat-card.pending .adm-stat-icon { color: var(--warning); }
 .adm-stat-card.approved .adm-stat-value,
 .adm-stat-card.approved .adm-stat-icon { color: var(--success, #34d399); }
 .adm-stat-card.rejected .adm-stat-value,
@@ -229,7 +229,7 @@
 }
 
 .adm-dist-seg { height: 100%; }
-.adm-dist-seg.pending { background: #fbbf24; }
+.adm-dist-seg.pending { background: var(--warning); }
 .adm-dist-seg.approved { background: #34d399; }
 .adm-dist-seg.rejected { background: #fb7185; }
 .adm-dist-seg.suspended { background: #94a3b8; }
@@ -299,7 +299,7 @@
     }
 }
 
-.dot.pending { background: #fbbf24; }
+.dot.pending { background: var(--warning); }
 .dot.approved { background: #34d399; }
 .dot.rejected { background: #fb7185; }
 .dot.suspended { background: #94a3b8; }

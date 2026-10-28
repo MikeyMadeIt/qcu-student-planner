@@ -23,7 +23,7 @@
         var s = read();
         var theme = THEMES.indexOf(s.theme) > -1 ? s.theme : 'dark';
         document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.setAttribute('data-accent', s.accent || 'amber');
+        document.documentElement.setAttribute('data-accent', s.accent || 'blue');
         document.documentElement.setAttribute('data-density', s.compact ? 'compact' : 'comfortable');
         document.documentElement.setAttribute('data-motion', s.reduceMotion ? 'reduced' : 'full');
         var meta = document.querySelector('meta[name="theme-color"]');

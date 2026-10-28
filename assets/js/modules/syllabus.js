@@ -1144,7 +1144,7 @@ function showSyllabusImportPreview(data) {
       <div class="text-faint" style="font-size:.74rem">${escapeHtml(data.courseCode)} · ${data.weeks.length} weeks</div></div>
     </div>
     ${existing ? `<div class="mt-3 p-3 rounded" style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3)">
-      <div class="fw-bold mb-2" style="font-size:.84rem;color:#fbbf24">
+      <div class="fw-bold mb-2" style="font-size:.84rem;color:#b45309">
         <i class="bi bi-exclamation-triangle me-1"></i>"${escapeHtml(data.courseCode)}" already exists
       </div>
       <div class="d-grid gap-2">

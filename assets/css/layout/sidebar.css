@@ -44,11 +44,10 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 10px;
-    background: linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)));
+    border-radius: 4px;
+    background: rgb(var(--accent));
     color: var(--on-accent);
     font-size: 1rem;
-    box-shadow: 0 6px 16px rgba(var(--accent), 0.4);
 }
 
 /* Navigation: the whole row (icon + label) is the link and the hover/active hit area. */
@@ -78,13 +77,13 @@
 .nav-link:hover {
     background: var(--surface-2);
     color: var(--text);
-    transform: translateX(2px);
+    transform: none;
 }
 
 .nav-link.active {
-    background: linear-gradient(90deg, rgba(var(--accent), 0.2), rgba(var(--accent), 0.04));
+    background: var(--surface-2);
     color: rgb(var(--accent));
-    box-shadow: inset 0 0 0 1px rgba(var(--accent), 0.25);
+    box-shadow: inset 2px 0 0 rgb(var(--accent));
 }
 
 /* Group headings share the nav-link inset so labels and headings align. */

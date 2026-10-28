@@ -188,7 +188,7 @@ function renderOverallRate() {
     const bar = document.getElementById('aRateBar');
     if (bar) {
         bar.style.width = (rate || 0) + '%';
-        bar.style.background = rate === null ? '' : rate >= 75 ? '#34d399' : rate >= 50 ? '#fbbf24' : '#fb7185';
+        bar.style.background = rate === null ? '' : rate >= 75 ? '#34d399' : rate >= 50 ? '#b45309' : '#fb7185';
     }
 }
 
@@ -542,7 +542,7 @@ function renderAbsenceWarnings() {
         const reached = absences >= limit;
         const nearLimit = !reached && absences >= limit - 1 && limit > 1;
         const pct = limit > 0 ? Math.min(Math.round(absences / limit * 100), 100) : (absences > 0 ? 100 : 0);
-        const barColor = reached ? '#fb7185' : nearLimit ? '#fbbf24' : '#34d399';
+        const barColor = reached ? '#fb7185' : nearLimit ? '#b45309' : '#34d399';
         const consec = getCurrentConsecutiveAbsences(s.id, records);
         return { s, absences, limit, reached, nearLimit, pct, barColor, consec };
     });
@@ -576,7 +576,7 @@ function openAbsenceLimitModal() {
         const reached = absences >= limit;
         const nearLimit = !reached && absences >= limit - 1 && limit > 1;
         const pct = limit > 0 ? Math.min(Math.round(absences / limit * 100), 100) : (absences > 0 ? 100 : 0);
-        const barColor = reached ? '#fb7185' : nearLimit ? '#fbbf24' : '#34d399';
+        const barColor = reached ? '#fb7185' : nearLimit ? '#b45309' : '#34d399';
         return { s, absences, limit, remaining, reached, nearLimit, pct, barColor };
     });
     body.innerHTML = `
@@ -659,7 +659,7 @@ function renderSubjectBreakdown() {
         const rate = relevant > 0 ? Math.round((present + late + excused) / relevant * 100) : null;
         const limit = getAbsenceLimitForSubject(s.id);
         const limitPct = limit > 0 ? Math.min(Math.round(absent / limit * 100), 100) : (absent > 0 ? 100 : 0);
-        const limitColor = absent >= limit ? '#fb7185' : absent >= limit - 1 && limit > 1 ? '#fbbf24' : '#34d399';
+        const limitColor = absent >= limit ? '#fb7185' : absent >= limit - 1 && limit > 1 ? '#b45309' : '#34d399';
         const consec = getCurrentConsecutiveAbsences(s.id, records);
         const rateLabel = rate === null ? '' : rate >= 90 ? 'Excellent' : rate >= 80 ? 'Good' : rate >= 75 ? 'Fair' : 'At Risk';
         return { s, present, presentOnline, late, excused, absent, noClass, relevant, rate, limit, limitPct, limitColor, consec, rateLabel };
@@ -669,7 +669,7 @@ function renderSubjectBreakdown() {
         return;
     }
     wrap.innerHTML = subData.map(({ s, present, presentOnline, late, excused, absent, noClass, rate, limit, limitPct, limitColor, consec, rateLabel }) => {
-        const rateColor = rate === null ? 'var(--text-faint)' : rate >= 80 ? '#34d399' : rate >= 75 ? '#fbbf24' : '#fb7185';
+        const rateColor = rate === null ? 'var(--text-faint)' : rate >= 80 ? '#34d399' : rate >= 75 ? '#b45309' : '#fb7185';
         const remaining = Math.max(limit - absent, 0);
         return `
     <div class="att-subject-breakdown-card">
@@ -968,7 +968,7 @@ function exportAttendancePDF() {
         return { code: s.code, p, l, e, a, nc, rate };
     }).filter(x => (x.p + x.l + x.e + x.a + x.nc) > 0);
     const statusColor = s => ({
-        'Present': '#22c55e', 'Late': '#f59e0b', 'Excused': '#60a5fa', 'Absent': '#f43f5e', 'No Classes': '#8b5cf6'
+        'Present': '#22c55e', 'Late': '#92400e', 'Excused': '#60a5fa', 'Absent': '#f43f5e', 'No Classes': '#8b5cf6'
     }[s] || '#888');
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Attendance Report</title>

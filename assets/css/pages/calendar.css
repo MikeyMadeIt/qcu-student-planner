@@ -15,7 +15,7 @@ CALENDAR IMPROVEMENTS (v2)
     align-items: center;
     gap: 5px;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text-soft);
@@ -46,8 +46,8 @@ CALENDAR IMPROVEMENTS (v2)
 }
 
 .cal-filter-btn.active.f-task {
-    background: rgba(251,191,36,.12);
-    border-color: rgba(251,191,36,.4);
+    background: rgba(180,83,9,.12);
+    border-color: rgba(180,83,9,.4);
 }
 
 .cal-filter-btn.active.f-event {
@@ -69,7 +69,7 @@ CALENDAR IMPROVEMENTS (v2)
 
 .cal-view-btn {
     padding: 5px 12px;
-    border-radius: 8px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text-soft);
@@ -159,7 +159,7 @@ CALENDAR IMPROVEMENTS (v2)
     text-transform: uppercase;
     letter-spacing: .05em;
     padding: 1px 6px;
-    border-radius: 10px;
+    border-radius: 4px;
     flex-shrink: 0;
     margin-top: 1px;
 }
@@ -170,8 +170,8 @@ CALENDAR IMPROVEMENTS (v2)
 }
 
 .badge-task {
-    background: rgba(251,191,36,.15);
-    color: #fbbf24;
+    background: rgba(180,83,9,.15);
+    color: var(--warning);
 }
 
 .badge-event {
@@ -314,13 +314,13 @@ CALENDAR v3 — Advanced Scheduling & UI
 .cal-toolbar-row1 .btn-accent.btn-sm {
     padding: 0 14px;
     font-size: .8rem;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 .cal-toolbar-row2 .btn-ghost.btn-sm {
     width: 36px;
     padding: 0;
-    border-radius: 10px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -341,7 +341,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     display: flex;
     gap: 0;
     background: var(--surface-2);
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     overflow: hidden;
     padding: 3px;
@@ -349,7 +349,7 @@ CALENDAR v3 — Advanced Scheduling & UI
 
 .cal-view-btn {
     padding: 5px 14px;
-    border-radius: 8px;
+    border-radius: 4px;
     border: none;
     background: transparent;
     color: var(--text-faint);
@@ -447,7 +447,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     align-items: center;
     gap: 8px;
     padding: 6px 8px;
-    border-radius: 8px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: .82rem;
     font-weight: 600;
@@ -503,7 +503,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     min-height: 52px;
     cursor: pointer;
     transition: border-color .15s, background .15s, box-shadow .15s;
-    border-radius: 8px;
+    border-radius: 4px;
     border: 1px solid var(--border);
     background: var(--surface);
     padding: 5px 5px 4px;
@@ -567,7 +567,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     .uc-cell {
         min-height: 42px;
         padding: 4px;
-        border-radius: 7px;
+        border-radius: 4px;
     }
     .uc-dot {
         width: 4px;
@@ -639,7 +639,7 @@ CALENDAR v3 — Advanced Scheduling & UI
 
 .drag-active {
     opacity: .5;
-    transform: scale(.97);
+    transform: none;
 }
 
 .drag-over {
@@ -758,7 +758,7 @@ CALENDAR v3 — Advanced Scheduling & UI
 .tt-wrap {
     position: relative;
     overflow: visible;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 /* All-day strip */
@@ -1031,7 +1031,8 @@ CALENDAR v3 — Advanced Scheduling & UI
 
 .tt-event-block:hover {
     z-index: 20;
-    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    box-shadow: none;
+    filter: brightness(1.08);
 }
 
 /* .tt-event-block:hover handled above */
@@ -1176,7 +1177,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     text-transform: uppercase;
     letter-spacing: .05em;
     padding: 1px 5px;
-    border-radius: 10px;
+    border-radius: 4px;
     flex-shrink: 0;
     margin-top: 1px;
 }
@@ -1187,8 +1188,8 @@ CALENDAR v3 — Advanced Scheduling & UI
 }
 
 .badge-task {
-    background: rgba(251,191,36,.15);
-    color: #fbbf24;
+    background: rgba(180,83,9,.15);
+    color: var(--warning);
 }
 
 .badge-event {

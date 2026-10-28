@@ -5,7 +5,7 @@
     --grid-size: 3rem;
     --grid-major-size: 12rem;
     --grid-line: rgba(148, 163, 184, 0.09);
-    --grid-line-major: rgba(251, 191, 36, 0.13);
+    --grid-line-major: rgba(var(--accent), 0.13);
     --grid-fade: #0F172A;
 }
 

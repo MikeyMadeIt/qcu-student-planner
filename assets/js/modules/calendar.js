@@ -12,11 +12,11 @@ let calFilters = { classes: true, tasks: true, events: true, univ: true };
 let dragState = null;
 /* ── Constants ─────────────────────────────────────────────── */
 const CATEGORY_COLORS = {
-    Homework: '#FBBF24', Project: '#4F8CFF', Quiz: '#22D3EE',
+    Homework: '#B45309', Project: '#4F8CFF', Quiz: '#22D3EE',
     Exam: '#FB7185', Personal: '#34D399', Organization: '#A78BFA'
 };
 
-const UNIV_COLORS = ['#F59E0B', '#7C6CF6', '#4F8CFF', '#FB7185', '#34D399', '#22D3EE', '#F472B6', '#A78BFA'];
+const UNIV_COLORS = ['#92400E', '#7C6CF6', '#4F8CFF', '#FB7185', '#34D399', '#22D3EE', '#F472B6', '#A78BFA'];
 const EVENT_CATEGORIES = ['Study Session', 'Organization Meeting', 'Personal Appointment', 'Project Meeting', 'Exam Review', 'Event', 'Other'];
 const EVENT_CAT_COLORS = {
     'Study Session': '#34D399',
@@ -24,7 +24,7 @@ const EVENT_CAT_COLORS = {
     'Personal Appointment': '#4F8CFF',
     'Project Meeting': '#7C6CF6',
     'Exam Review': '#FB7185',
-    'Event': '#FBBF24',
+    'Event': '#B45309',
     'Other': '#8a90a6'
 };
 // Stable subject color cache (persisted per session)
@@ -63,7 +63,7 @@ function getSubjectColor(subjectObj) {
     if (_subjectColorCache[subjectObj.id])
         return _subjectColorCache[subjectObj.id];
     // Assign from palette deterministically
-    const palette = DB.colors || ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#FBBF24'];
+    const palette = DB.colors || ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309'];
     const idx = Object.keys(_subjectColorCache).length % palette.length;
     _subjectColorCache[subjectObj.id] = palette[idx];
     return _subjectColorCache[subjectObj.id];

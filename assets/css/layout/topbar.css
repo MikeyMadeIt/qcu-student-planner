@@ -21,7 +21,7 @@ PHASE 1 ADDITIONS
     justify-content: space-between;
     gap: 10px;
     padding: 10px 12px;
-    border-radius: 12px;
+    border-radius: 5px;
     background: var(--surface-2);
     margin-bottom: 6px;
     border: 1px solid var(--border);
@@ -167,7 +167,7 @@ textarea:focus-visible {
 .confirm-icon-wrap {
     width: 54px;
     height: 54px;
-    border-radius: 16px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,7 +184,7 @@ textarea:focus-visible {
 
 .confirm-action-btn {
     border: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     color: #fff;
 }
@@ -209,7 +209,7 @@ textarea:focus-visible {
 .accent-swatch-btn {
     width: 38px;
     height: 38px;
-    border-radius: 12px;
+    border-radius: 5px;
     cursor: pointer;
     border: none;
     transition: box-shadow .15s;
