@@ -1261,12 +1261,12 @@ function openSubjectModal(id) {
       <div class="col-4"><label class="form-label" style="font-size:.82rem">Units</label><input type="number" step="0.5" class="form-control" id="subUnits" value="${s ? s.units : 3}" aria-label="Units"></div>
       <div class="col-4"><label class="form-label" style="font-size:.82rem">Section</label><input class="form-control" id="subSection" value="${s ? esc(s.section) : ''}" placeholder="BSCS-1A" aria-label="Section"></div>
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Days</label>
-        <div class="d-flex gap-2 flex-wrap" role="group" aria-label="Select class days">
+        <div class="day-selector" role="group" aria-label="Select class days">
           ${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => `
-            <div class="form-check form-check-inline">
-              <input class="form-check-input day-check" type="checkbox" value="${d}" id="day_${d}" ${days.includes(d) ? 'checked' : ''}>
-              <label class="form-check-label" for="day_${d}" style="font-size:.82rem">${d}</label>
-            </div>`).join('')}
+            <label class="day-chip">
+              <input class="day-check" type="checkbox" value="${d}" id="day_${d}" ${days.includes(d) ? 'checked' : ''}>
+              <span>${d}</span>
+            </label>`).join('')}
         </div>
       </div>
       <div class="col-6"><label class="form-label" style="font-size:.82rem">Start Time</label><input type="time" class="form-control" id="subStart" value="${s ? s.start : '08:00'}" aria-label="Start Time"></div>
@@ -1282,8 +1282,8 @@ function openSubjectModal(id) {
       <div class="col-6"><label class="form-label" style="font-size:.82rem">Professor</label><input class="form-control" id="subProf" value="${s ? esc(s.professor) : ''}" aria-label="Professor"></div>
       <div class="col-6"><label class="form-label" style="font-size:.82rem">Email</label><input type="email" class="form-control" id="subEmail" value="${s ? esc(s.email) : ''}" aria-label="Professor email"></div>
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Color Label</label>
-        <div class="d-flex gap-2 flex-wrap" id="colorPicker" role="radiogroup" aria-label="Select subject color">
-          ${DB.colors.map(c => `<div onclick="selectColor('${c}')" data-color="${c}" tabindex="0" role="radio" aria-label="Color ${c}" aria-checked="${(s ? s.color : DB.colors[0]) === c}" style="width:26px;height:26px;border-radius:7px;background:${c};cursor:pointer;box-shadow:${(s ? s.color : DB.colors[0]) === c ? '0 0 0 3px rgba(255,255,255,.5)' : 'none'}"></div>`).join('')}
+        <div class="color-swatch-group" id="colorPicker" role="radiogroup" aria-label="Select subject color">
+          ${DB.colors.map(c => `<button type="button" onclick="selectColor('${c}')" data-color="${c}" class="color-swatch-btn${(s ? s.color : DB.colors[0]) === c ? ' is-selected' : ''}" role="radio" aria-label="Color ${c}" aria-checked="${(s ? s.color : DB.colors[0]) === c}" style="background:${c}"></button>`).join('')}
         </div>
         <input type="hidden" id="subColor" value="${s ? s.color : DB.colors[0]}">
       </div>
@@ -1307,9 +1307,9 @@ function openSubjectModal(id) {
 
 function selectColor(c) {
     document.getElementById('subColor').value = c;
-    document.querySelectorAll('#colorPicker div').forEach(d => {
+    document.querySelectorAll('#colorPicker .color-swatch-btn').forEach(d => {
         const isSelected = d.dataset.color === c;
-        d.style.boxShadow = isSelected ? '0 0 0 3px rgba(255,255,255,.5)' : 'none';
+        d.classList.toggle('is-selected', isSelected);
         d.setAttribute('aria-checked', isSelected ? 'true' : 'false');
     });
 }

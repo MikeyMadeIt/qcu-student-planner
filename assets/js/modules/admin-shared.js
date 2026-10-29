@@ -30,17 +30,19 @@ export function statusBadge(status) {
 /* Admin name + log out now live at the bottom of the sidebar (rendered by layout.js's
    renderShell), not in the per-page topbar, so this wires those elements instead. */
 export function mountAdminTopbar(admin) {
-    const nameEl = document.getElementById('admSidebarName');
-    if (nameEl) nameEl.textContent = `Signed in as ${admin.full_name || 'Administrator'}`;
+    /* The desktop sidebar and the mobile nav drawer each render their own copy of the name
+       and log-out control, so every matching element (not just the first) is wired here. */
+    document.querySelectorAll('.js-admin-name').forEach(nameEl => {
+        nameEl.textContent = `Signed in as ${admin.full_name || 'Administrator'}`;
+    });
 
-    const logoutBtn = document.getElementById('admSidebarLogoutBtn');
-    if (logoutBtn) {
+    document.querySelectorAll('.js-admin-logout').forEach(logoutBtn => {
         logoutBtn.addEventListener('click', async () => {
-            logoutBtn.disabled = true;
+            document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = true);
             await AuthService.signOut();
             location.href = '../auth/login.html';
         });
-    }
+    });
 }
 
 export function renderError(container, message) {

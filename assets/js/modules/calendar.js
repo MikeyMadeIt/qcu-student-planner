@@ -1074,12 +1074,12 @@ function openScheduleModal(id, presetDay) {
       <div class="col-md-4"><label>Units</label><input type="number" step="0.5" class="form-control" id="csUnits" value="${s ? s.units : 3}"></div>
       <div class="col-md-4"><label>Section</label><input class="form-control" id="csSection" value="${s ? escapeHtml(s.section) : ''}" placeholder="BSCS-1A"></div>
       <div class="col-12"><label>Days</label>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="day-selector" role="group" aria-label="Select class days">
           ${DAY_NAMES.slice(1).concat(DAY_NAMES[0]).map(d => `
-            <div class="form-check form-check-inline">
-              <input class="form-check-input cs-day-check" type="checkbox" value="${d}" id="csday_${d}" ${days.includes(d) ? 'checked' : ''}>
-              <label class="form-check-label" for="csday_${d}">${d}</label>
-            </div>`).join('')}
+            <label class="day-chip">
+              <input class="cs-day-check" type="checkbox" value="${d}" id="csday_${d}" ${days.includes(d) ? 'checked' : ''}>
+              <span>${d}</span>
+            </label>`).join('')}
         </div>
       </div>
       <div class="col-md-6"><label>Start Time</label><input type="time" class="form-control" id="csStart" value="${s ? s.start : '08:00'}"></div>
@@ -1091,8 +1091,8 @@ function openScheduleModal(id, presetDay) {
       <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}"></div>
       <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}"></div>
       <div class="col-12"><label>Color Label</label>
-        <div class="d-flex gap-2 flex-wrap" id="csColorPicker">
-          ${DB.colors.map(c => `<div onclick="selectScheduleColor('${c}')" data-cs-color="${c}" style="width:28px;height:28px;border-radius:8px;background:${c};cursor:pointer;box-shadow:${color === c ? '0 0 0 3px rgba(255,255,255,.5)' : 'none'}" aria-label="Color ${c}"></div>`).join('')}
+        <div class="color-swatch-group" id="csColorPicker" role="radiogroup" aria-label="Select subject color">
+          ${DB.colors.map(c => `<button type="button" onclick="selectScheduleColor('${c}')" data-cs-color="${c}" class="color-swatch-btn${color === c ? ' is-selected' : ''}" role="radio" aria-checked="${color === c}" aria-label="Color ${c}" style="background:${c}"></button>`).join('')}
         </div>
         <input type="hidden" id="csColor" value="${color}">
       </div>
@@ -1107,7 +1107,11 @@ function openScheduleModal(id, presetDay) {
 
 function selectScheduleColor(c) {
     document.getElementById('csColor').value = c;
-    document.querySelectorAll('#csColorPicker div').forEach(d => d.style.boxShadow = d.dataset.csColor === c ? '0 0 0 3px rgba(255,255,255,.5)' : 'none');
+    document.querySelectorAll('#csColorPicker .color-swatch-btn').forEach(d => {
+        const isSelected = d.dataset.csColor === c;
+        d.classList.toggle('is-selected', isSelected);
+        d.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
 }
 
 function saveScheduleEntry() {
