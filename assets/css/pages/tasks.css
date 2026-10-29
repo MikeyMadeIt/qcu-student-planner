@@ -82,14 +82,27 @@ TASKS PAGE — Redesigned (2026)
     margin-bottom: 2px;
 }
 
+.tk-main-body {
+    display: flex; 
+    align-items: flex-start;
+}
+
+.tk-control-and-task {
+    flex: 1 0;
+}
+
 /* ── Stats Row ── */
 
 .tk-stats-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--grid-gap);
     margin-bottom: var(--page-gap);
+    grid-template-columns: auto;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    margin-right: var(--page-gap);
+    flex: 0 1 115px;
 }
+
 
 .tk-stat-card {
     padding: var(--card-pad-sm);
@@ -99,6 +112,10 @@ TASKS PAGE — Redesigned (2026)
     align-items: center;
     text-align: left;
     gap: var(--space-3);
+}
+
+.tk-stat-card:hover {
+    border-color: rgba(var(--accent), 0.6);
 }
 
 .tk-stat-text {
@@ -937,9 +954,14 @@ TASKS PAGE — Redesigned (2026)
 /* ── Responsive ── */
 
 @media (max-width: 767px) {
+    .tk-main-body {
+        display: block;
+    }
     .tk-stats-row {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--grid-gap);
+        grid-template-rows: auto;
+        margin-right: 0px;
     }
     .tk-stat-card {
         gap: var(--space-2);
