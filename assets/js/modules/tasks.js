@@ -551,7 +551,7 @@ function buildTaskCard(t, inSubjectGroup) {
     var completeBtn = isCompleted
         ? '<button class="tk-complete-btn tk-complete-btn-done" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Active" aria-label="Reopen task"><i class="bi bi-arrow-counterclockwise"></i><span>Reopen</span></button>'
         : '<button class="tk-complete-btn" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Complete" aria-label="Mark task complete"><i class="bi bi-check-lg"></i><span>Complete</span></button>';
-    return '<div class="tk-card ' + (isCompleted ? 'completed' : '') + ' ' + (isOverdue ? 'overdue' : '') + ' ' + (isExpanded ? 'expanded' : '') + ' ' + (isSelected ? 'tk-selected' : '') + '" id="tkCard_' + t.id + '" data-taskid="' + t.id + '">' +
+    return '<div class="tk-card ' + (isCompleted ? 'completed' : '') + ' ' + (isOverdue ? 'overdue' : '') + ' ' + (isExpanded ? 'expanded' : '') + ' ' + (isSelected ? 'tk-selected' : '') + '" id="tkCard_' + t.id + '" data-taskid="' + t.id + '" style="--sc-color:' + (sub ? (sub.color || 'rgb(var(--accent))') : '#525252') + '">' +
         '<div class="tk-card-header" onclick="toggleCard(\'' + t.id + '\', event)">' +
         '<button class="tk-bulk-check ' + (isSelected ? 'selected' : '') + '" onclick="event.stopPropagation();toggleSelect(\'' + t.id + '\')" title="' + (isSelected ? 'Deselect' : 'Select for bulk action') + '" aria-label="' + (isSelected ? 'Deselect task' : 'Select task') + '">' +
         (isSelected ? '<i class="bi bi-check-lg"></i>' : '') + '</button>' +
@@ -609,7 +609,8 @@ function buildBoardCard(t) {
         (isCompleted ? ' completed' : '') +
         (isOverdue ? ' overdue' : '') +
         (isSelected ? ' tk-selected' : '') +
-        '" data-taskid="' + t.id + '">' +
+        '" data-taskid="' + t.id + 
+        '" style="--sc-color:' + (sub ? (sub.color || 'rgb(var(--accent))') : '#525252') + '">' +
         '<div class="tk-bc-top">' +
         '<button class="tk-bulk-check' + (isSelected ? ' selected' : '') + '" ' +
         'onclick="event.stopPropagation();toggleSelect(\'' + t.id + '\')" ' +
