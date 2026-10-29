@@ -30,9 +30,9 @@
     --content-padding-x: 1.5rem;
 
     /* ---------- Sidebar (desktop) ---------- */
-    --sidebar-width: 12rem;
-    --sidebar-padding-x: 0.625rem;
-    --sidebar-item-padding-y: 0.5rem;
+    --sidebar-width: 15.75rem;
+    --sidebar-padding-x: 0.875rem;
+    --sidebar-item-padding-y: 0.4rem;
     --sidebar-item-padding-x: 0.625rem;
     --sidebar-item-gap: 0.625rem;
 

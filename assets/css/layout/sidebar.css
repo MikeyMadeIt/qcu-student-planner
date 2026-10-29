@@ -50,6 +50,25 @@
     font-size: 1rem;
 }
 
+/* Inbox / Notifications — prominent rows directly under branding, above the categorized nav. */
+.sidebar-quick-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-quick-link {
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
 /* Navigation: the whole row (icon + label) is the link and the hover/active hit area. */
 .nav-link {
     display: flex;
@@ -97,12 +116,6 @@
     opacity: 0.8;
 }
 
-.sidebar-sep {
-    margin-top: var(--space-2);
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--border);
-}
-
 .sem-banner-nav {
     padding: var(--space-2) var(--sidebar-item-padding-x) var(--space-1);
     font-size: 0.68rem;
@@ -110,9 +123,23 @@
     color: var(--text-faint);
 }
 
-/* Sign-out, pinned at the bottom of the sidebar, visually separated from the nav groups above. */
-.sidebar-logout-sep {
+/* Everything from "Add Task / Export" down through the profile row is pinned to the bottom
+   of the sidebar, below the scrollable nav, in a single predictable block. */
+.sidebar-bottom {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Bottom utility group (Settings, Log out) — visually separated from the nav above by a
+   divider, without being enclosed in its own card. */
+.sidebar-utility {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .sidebar-user {
@@ -124,18 +151,58 @@
     text-overflow: ellipsis;
 }
 
+/* Profile — the very last section of the sidebar: avatar, real name, and a muted secondary
+   line (student number if the user has set one). Not a link; nothing here is clickable. */
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--sidebar-item-padding-x);
+    border-top: 1px solid var(--border);
+}
+
+.sidebar-profile .profile-avatar {
+    flex: 0 0 auto;
+}
+
+.sidebar-profile-text {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.sidebar-profile-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-profile-sub {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Log out: same row shape/typography as every other nav row, with only a subtle
+   destructive tint on the icon/text (never a filled red block). */
 .sidebar-logout-btn {
     width: 100%;
     border: none;
     background: transparent;
     cursor: pointer;
-    color: #fb7185;
+    color: var(--danger);
     text-align: left;
 }
 
-.sidebar-logout-btn:hover {
-    background: rgba(251, 113, 133, 0.12);
-    color: #fb7185;
+.sidebar-logout-btn:hover,
+.sidebar-logout-btn:focus-visible {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
     transform: none;
 }
 
@@ -144,12 +211,7 @@
     cursor: default;
 }
 
-/* Sidebar toggle (desktop): collapses the static column when the topbar button is clicked. */
-@media (min-width: 992px) {
-    body.sidebar-collapsed .sidebar {
-        display: none;
-    }
-}
+/* The desktop sidebar is permanent — it has no collapse/hide state at any desktop width. */
 
 /* Below desktop width the sidebar is replaced by the top-bar menu button
    and the nav-drawer (see nav-drawer.css). There is only one navigation

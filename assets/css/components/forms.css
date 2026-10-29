@@ -132,6 +132,110 @@ label.checkbox-label {
     line-height: 1.45;
 }
 
+/* ---------- Day selector (Mon–Sun), used by Add Subject / Add Event ---------- */
+.day-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.day-chip {
+    position: relative;
+    margin: 0;
+}
+
+.day-chip input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.day-chip span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.65rem;
+    height: 2rem;
+    padding: 0 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text-soft);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.day-chip input:hover + span {
+    border-color: var(--text-faint);
+}
+
+.day-chip input:checked + span {
+    background: rgb(var(--accent));
+    border-color: rgb(var(--accent));
+    color: var(--on-accent, #fff);
+}
+
+.day-chip input:focus-visible + span {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+}
+
+.day-chip input:disabled + span {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* ---------- Color label swatches (subjects / events) ---------- */
+.color-swatch-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.color-swatch-btn {
+    position: relative;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, .18);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.color-swatch-btn:hover {
+    transform: translateY(-1px);
+}
+
+.color-swatch-btn:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+}
+
+.color-swatch-btn.is-selected {
+    border-color: var(--text);
+    box-shadow: inset 0 0 0 2px var(--surface);
+}
+
+.color-swatch-btn.is-selected::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0.5rem;
+    height: 0.28rem;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg);
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, .6));
+}
+
 /* Form labels and helper / validation text */
 .form-label {
     display: block;

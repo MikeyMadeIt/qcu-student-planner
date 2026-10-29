@@ -17,11 +17,169 @@
     border-bottom: 1px solid var(--border);
 }
 
-.shell-bar-right {
+.shell-bar-left {
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+/* Dynamic page title — the current page's name, kept to one line. */
+.shell-page-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* The sidebar toggle only exists to open/close the mobile drawer — the desktop sidebar is
+   always visible, so this control is hidden at desktop widths. */
+@media (min-width: 992px) {
+    .shell-bar-left [data-sidebar-toggle] {
+        display: none;
+    }
+}
+
+.shell-bar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     margin-left: auto;
+    flex: 0 0 auto;
+}
+
+/* Every control on the right (notification/inbox icons, profile avatar) keeps its own
+   fixed footprint — none of them may shrink when a long page title squeezes the bar. */
+.shell-bar-right > * {
+    flex: 0 0 auto;
+}
+
+/* Notification / inbox icon buttons — simple, restrained, same footprint as the sidebar toggle. */
+.header-panel-wrap {
+    position: relative;
+}
+
+.shell-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--menu-btn-size);
+    height: var(--menu-btn-size);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 1.3rem;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.shell-icon-btn:hover,
+.shell-icon-btn[aria-expanded="true"] {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.header-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 60;
+    width: min(20rem, calc(100vw - 2rem));
+    max-height: min(26rem, calc(100vh - 6rem));
+    overflow-y: auto;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--elevated);
+    box-shadow: var(--shadow);
+}
+
+.header-panel[hidden] {
+    display: none;
+}
+
+.header-panel-title {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.header-panel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.header-panel-item:hover,
+.header-panel-item:focus-visible {
+    background: var(--surface-2);
+}
+
+.header-panel-dot {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+}
+
+.header-panel-dot.is-overdue {
+    background: var(--danger);
+}
+
+.header-panel-item-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.header-panel-item-title {
+    font-size: 0.86rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-panel-item-sub {
+    font-size: 0.72rem;
+    color: var(--text-faint);
+}
+
+.header-panel-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-5) var(--space-3);
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.84rem;
+}
+
+.header-panel-empty i {
+    font-size: 1.3rem;
+    margin-bottom: var(--space-1);
+}
+
+.header-panel-empty span {
+    font-size: 0.74rem;
 }
 
 .profile-trigger-circle {
@@ -160,15 +318,19 @@
 
 .profile-avatar {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     width: 1.9rem;
     height: 1.9rem;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     background: rgb(var(--accent));
     color: var(--on-accent);
     font-size: 0.8rem;
     font-weight: 700;
+    overflow: hidden;
+    object-fit: cover;
 }
 
 .profile-avatar-lg {
@@ -281,22 +443,29 @@
     color: var(--text);
 }
 
+/* Sidebar toggle: sits directly on the header surface, no box/background — just the icon. */
 .shell-menu-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    width: var(--menu-btn-size);
-    height: var(--menu-btn-size);
-    border: 1px solid var(--border);
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
     border-radius: var(--radius-sm);
-    background: var(--surface-2);
+    background: transparent;
     color: var(--text);
-    font-size: 1.3rem;
+    font-size: 1.25rem;
 }
 
-.shell-menu-btn:hover {
-    border-color: rgba(var(--accent), 0.5);
+.shell-menu-btn i {
+    font-size: 1.25rem;
+}
+
+.shell-menu-btn:hover,
+.shell-menu-btn[aria-expanded="true"] {
+    background: var(--surface-2);
+    color: rgb(var(--accent));
 }
 
 .shell-crumb-current {
@@ -325,6 +494,25 @@
     .theme-switch-btn {
         width: 1.8rem;
         height: 1.8rem;
+    }
+
+    .shell-bar-right {
+        gap: 2px;
+    }
+
+    .shell-icon-btn,
+    .shell-menu-btn,
+    .profile-trigger-circle {
+        width: 2.125rem;
+        height: 2.125rem;
+    }
+
+    .shell-icon-btn {
+        font-size: 1.15rem;
+    }
+
+    .shell-page-title {
+        font-size: 0.92rem;
     }
 }
 

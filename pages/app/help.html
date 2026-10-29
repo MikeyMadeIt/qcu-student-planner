@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Help · Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="topbar"><div><h1 class="page-title">Help</h1><p class="page-sub">Answers to common questions about the planner.</p></div></div>
+
+    <div class="glass card-pad fade-in mb-3">
+      <div class="section-title"><i class="bi bi-question-circle"></i>Frequently asked questions</div>
+      <div class="accordion" id="helpFaq">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Where is my data stored?</button></h2>
+          <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#helpFaq">
+            <div class="accordion-body">Your schedule, tasks, grades, attendance and notes are stored locally in this browser. Your account (sign-in email and profile) is managed separately through your QCU Planner account.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">How do I add or export my tasks?</button></h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
+            <div class="accordion-body">Use the <strong>Add Task</strong> button on the Tasks page to create a task. To back up or move your data, go to <a href="../app/settings.html">Settings &rarr; Backup &amp; Export</a> and choose Export All Data.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">How do I switch themes?</button></h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
+            <div class="accordion-body">Open your profile menu (top right, or the bottom of the sidebar on mobile) and pick Light, Dark or AMOLED. Your choice is remembered on this device.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">I found a problem or have feedback.</button></h2>
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
+            <div class="accordion-body">Use the <a href="../app/report.html">Report</a> page to send details to the QCU Planner admins.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass card-pad fade-in">
+      <div class="section-title"><i class="bi bi-life-preserver"></i>Still need help?</div>
+      <p class="text-soft">Contact your program's administrator through the university, or use <a href="../app/report.html">Report a problem</a> to send a message that reaches the planner's admins.</p>
+    </div>
+
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/custom-select.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script>
+  renderShell('help');
+</script>
+</body>
+</html>

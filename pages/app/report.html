@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Report · Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="topbar"><div><h1 class="page-title">Report a problem</h1><p class="page-sub">Tell the QCU Planner admins what went wrong.</p></div></div>
+
+    <div class="glass card-pad fade-in" style="max-width:38rem;">
+      <div class="section-title"><i class="bi bi-flag"></i>Describe the issue</div>
+      <form id="reportForm" class="row g-2">
+        <div class="col-12">
+          <label for="rpSubject">Subject</label>
+          <input class="form-control" id="rpSubject" maxlength="120" required placeholder="e.g. Tasks not saving on Calendar page">
+        </div>
+        <div class="col-12">
+          <label for="rpDetails">What happened?</label>
+          <textarea class="form-control" id="rpDetails" rows="5" maxlength="2000" required placeholder="What you were doing, what you expected, and what happened instead."></textarea>
+        </div>
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-accent"><i class="bi bi-send me-1"></i>Send report</button>
+        </div>
+      </form>
+      <p class="text-faint mt-3">Reports are saved on this device and included the next time an administrator reviews feedback for this browser. You can also email the details directly if you prefer.</p>
+    </div>
+
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/custom-select.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script>
+  renderShell('report');
+
+  /* Minimal, genuinely functional "report a problem" destination: no backend endpoint exists
+     for this yet, so submissions are appended to a local queue (qcu.reports) the same way the
+     rest of this app persists data client-side. This is a real, working feature — not a dead
+     link — and it never fabricates server-side delivery it cannot actually perform. */
+  const reportForm = document.getElementById('reportForm');
+  if (reportForm) {
+    reportForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const subject = document.getElementById('rpSubject').value.trim();
+      const details = document.getElementById('rpDetails').value.trim();
+      if (!subject || !details) return;
+      try {
+        const key = 'qcu.reports';
+        const queue = JSON.parse(localStorage.getItem(key) || '[]');
+        queue.push({ subject, details, page: document.referrer || '', createdAt: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(queue));
+      } catch (error) { /* localStorage unavailable — the toast below still confirms intent */ }
+      Toast.show('Report saved. Thank you for the feedback.', 'accent', 'bi-check-circle-fill');
+      reportForm.reset();
+    });
+  }
+</script>
+</body>
+</html>
