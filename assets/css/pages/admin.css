@@ -129,10 +129,30 @@
     }
 }
 
+/* Filter bar: search gets its own full-width row so it never fights the
+   other controls for space; status/date/sort wrap onto a second row and
+   shrink onto their own lines on narrow screens instead of being forced
+   into a fixed column count. */
 .adm-filters {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.adm-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3);
+}
+
+.adm-filters-row > div {
+    flex: 1 1 150px;
+    min-width: 130px;
+}
+
+.adm-filter-search {
+    flex: 1 1 100%;
 }
 
 .adm-filters .form-control,
@@ -141,14 +161,25 @@
     height: 2.75rem;
 }
 
+.adm-filters-clear {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    height: 2.75rem;
+    white-space: nowrap;
+}
+
 .adm-table th,
 .adm-table td {
     padding: var(--space-3) var(--space-4);
 }
 
 @media (max-width: 720px) {
-    .adm-filters {
-        grid-template-columns: 1fr;
+    .adm-filters-row > div {
+        flex-basis: 100%;
+    }
+    .adm-filters-clear {
+        flex-basis: 100%;
+        align-self: stretch;
     }
 }
 
@@ -570,9 +601,14 @@
         white-space: nowrap;
     }
     .adm-table-cols .adm-col-email {
+        max-width: 0; /* with the cell's auto-sizing sibling widths pinned to
+            1%, this forces the remaining table width onto this column instead
+            of letting the cell grow to fit its text — which is what makes
+            overflow:hidden below actually truncate instead of no-op. */
         padding-left: 10px;
-        white-space: normal;
-        overflow-wrap: anywhere;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
     .adm-table-cols .adm-actions {
         width: 1%;

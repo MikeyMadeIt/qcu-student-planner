@@ -505,9 +505,13 @@ function wireModalDefaults() {
         } else {
             const header = content.querySelector(':scope > .modal-header');
             const closeSelector = 'button.btn-close, button[data-bs-dismiss="modal"]';
-            let closeButton = header
-                ? header.querySelector(closeSelector)
-                : content.querySelector(':scope > .modal-close-floating');
+            /* Look for an existing close button anywhere inside the modal content —
+               not just as a direct child of a .modal-header or of .modal-content —
+               since several of our modals (e.g. the admin "view" detail modal) put
+               their own button.btn-close inside a plain header-style wrapper div
+               instead of a real .modal-header. Scoping the search too narrowly made
+               this miss that button and inject a second, floating one on top of it. */
+            let closeButton = content.querySelector(closeSelector) || content.querySelector('.modal-close-floating');
             if (!closeButton) {
                 closeButton = document.createElement('button');
                 closeButton.type = 'button';
@@ -519,13 +523,10 @@ function wireModalDefaults() {
                     content.appendChild(closeButton);
                 }
             }
-            if (header) {
-                header.querySelectorAll(closeSelector).forEach(button => {
-                    if (button !== closeButton)
-                        button.remove();
-                });
-                content.querySelectorAll(':scope > .modal-close-floating').forEach(button => button.remove());
-            }
+            content.querySelectorAll(`${closeSelector}, .modal-close-floating`).forEach(button => {
+                if (button !== closeButton)
+                    button.remove();
+            });
             closeButton.type = 'button';
             if (!closeButton.classList.contains('btn-close') && !closeButton.textContent.trim())
                 closeButton.classList.add('btn-close');

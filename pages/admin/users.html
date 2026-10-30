@@ -21,18 +21,42 @@
 
     <div class="glass card-pad mb-3">
       <div class="adm-filters">
-        <div>
+        <div class="adm-filter-search">
           <label for="admSearch" class="adm-label">Search</label>
           <input id="admSearch" class="form-control" type="search" placeholder="Search by name, email or program" autocomplete="off">
         </div>
-        <div><label for="admStatus" class="adm-label">Status</label>
-          <select id="admStatus" class="form-select">
-            <option value="all">All</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
-            <option value="suspended">Suspended</option>
-          </select></div>
+        <div class="adm-filters-row">
+          <div>
+            <label for="admStatus" class="adm-label">Status</label>
+            <select id="admStatus" class="form-select">
+              <option value="all">All statuses</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+          <div>
+            <label for="admDateFrom" class="adm-label">Registered from</label>
+            <input id="admDateFrom" class="form-control" type="date">
+          </div>
+          <div>
+            <label for="admDateTo" class="adm-label">Registered to</label>
+            <input id="admDateTo" class="form-control" type="date">
+          </div>
+          <div>
+            <label for="admSort" class="adm-label">Sort by</label>
+            <select id="admSort" class="form-select">
+              <option value="created_desc">Newest first</option>
+              <option value="created_asc">Oldest first</option>
+              <option value="name_asc">Name A–Z</option>
+              <option value="name_desc">Name Z–A</option>
+            </select>
+          </div>
+          <button type="button" id="admFiltersClear" class="btn btn-ghost adm-filters-clear">
+            <i class="bi bi-x-circle" aria-hidden="true"></i> Clear filters
+          </button>
+        </div>
       </div>
     </div>
 

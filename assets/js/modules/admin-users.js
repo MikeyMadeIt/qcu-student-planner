@@ -17,8 +17,11 @@ async function loadRows() {
 
     const status = document.getElementById('admStatus').value;
     const search = document.getElementById('admSearch').value;
+    const dateFrom = document.getElementById('admDateFrom').value;
+    const dateTo = document.getElementById('admDateTo').value;
+    const sort = document.getElementById('admSort').value;
 
-    const result = await AdminService.listAccounts({ status, search, page: currentPage, pageSize: PAGE_SIZE });
+    const result = await AdminService.listAccounts({ status, search, dateFrom, dateTo, sort, page: currentPage, pageSize: PAGE_SIZE });
 
     loading.hidden = true;
 
@@ -139,10 +142,22 @@ async function init() {
     if (status) document.getElementById('admStatus').value = status;
 
     document.getElementById('admStatus').addEventListener('change', () => { currentPage = 1; loadRows(); });
+    document.getElementById('admSort').addEventListener('change', () => { currentPage = 1; loadRows(); });
+    document.getElementById('admDateFrom').addEventListener('change', () => { currentPage = 1; loadRows(); });
+    document.getElementById('admDateTo').addEventListener('change', () => { currentPage = 1; loadRows(); });
     let searchTimer = null;
     document.getElementById('admSearch').addEventListener('input', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => { currentPage = 1; loadRows(); }, 300);
+    });
+    document.getElementById('admFiltersClear').addEventListener('click', () => {
+        document.getElementById('admSearch').value = '';
+        document.getElementById('admStatus').value = 'all';
+        document.getElementById('admDateFrom').value = '';
+        document.getElementById('admDateTo').value = '';
+        document.getElementById('admSort').value = 'created_desc';
+        currentPage = 1;
+        loadRows();
     });
     document.getElementById('admBody').addEventListener('click', onAction);
 
