@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <title>Finish your profile · QCU Student Planner</title>
+    <script src="../../assets/js/core/theme.js"></script>
+    <meta name="theme-color" content="#0F172A">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="icon" href="../../assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="../../assets/icons/icon-192.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../../assets/css/main.css" rel="stylesheet">
+    <link href="../../assets/css/pages/auth.css" rel="stylesheet">
+</head>
+<body class="auth-page">
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to light theme">
+        <i class="bi bi-sun theme-icon-sun" aria-hidden="true"></i>
+        <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
+    </button>
+
+    <main class="auth-main" id="main">
+        <div class="auth-card">
+            <a class="auth-brand" href="login.html">
+                <img src="../../assets/images/branding/qcu-logo.webp" alt="">
+                <span>QCU Student Planner<small>Student portal</small></span>
+            </a>
+
+            <div class="auth-center" data-finish-profile-loading>
+                <div class="status-icon"><i class="bi bi-arrow-repeat auth-spin" aria-hidden="true"></i></div>
+                <p class="auth-sub">Loading your account&hellip;</p>
+            </div>
+
+            <h1 class="auth-title">Almost there</h1>
+            <p class="auth-sub">You signed in with Google. We still need a few academic details so an administrator can verify your account.</p>
+
+            <form data-finish-profile-form novalidate hidden>
+                <div class="auth-alert error" data-alert role="alert" hidden></div>
+
+                <div class="auth-field">
+                    <label for="fullName">Full Name</label>
+                    <input class="form-control" id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Juan Dela Cruz" data-rule="fullName" aria-describedby="fullName-err" aria-invalid="false">
+                    <p class="auth-error" id="fullName-err" hidden></p>
+                </div>
+
+                <div class="auth-field">
+                    <label for="program">Program</label>
+                    <select class="form-select" id="program" name="program" aria-describedby="program-err" aria-invalid="false">
+                        <option value="" selected disabled>Select your program</option>
+                    </select>
+                    <p class="auth-error" id="program-err" hidden></p>
+                </div>
+                <div class="auth-field">
+                    <label for="campus">Campus</label>
+                    <select class="form-select" id="campus" name="campus" aria-describedby="campus-err" aria-invalid="false">
+                        <option value="" selected disabled>Select your campus</option>
+                    </select>
+                    <p class="auth-error" id="campus-err" hidden></p>
+                </div>
+                <div class="auth-field">
+                    <label for="yearLevel">Year Level</label>
+                    <select class="form-select" id="yearLevel" name="yearLevel" aria-describedby="yearLevel-err" aria-invalid="false">
+                        <option value="" selected disabled>Select your year level</option>
+                    </select>
+                    <p class="auth-error" id="yearLevel-err" hidden></p>
+                </div>
+                <div class="auth-field">
+                    <label for="section">Section</label>
+                    <input class="form-control" id="section" name="section" type="text" autocomplete="off" placeholder="e.g. BSIT 2A" data-rule="section" aria-describedby="section-err" aria-invalid="false">
+                    <p class="auth-error" id="section-err" hidden></p>
+                </div>
+
+                <div class="auth-field">
+                    <label class="auth-check" for="acceptTerms">
+                        <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false">
+                        <span>I have read and agree to the <a class="auth-link" href="register.html#terms-box-title">Terms and Conditions</a> and <a class="auth-link" href="register.html#privacy-box-title">Privacy Notice</a>.</span>
+                    </label>
+                    <p class="auth-error" id="acceptTerms-err" hidden></p>
+                </div>
+
+                <button class="btn btn-accent auth-submit" type="submit" data-submit>Submit for review</button>
+            </form>
+        </div>
+        <p class="auth-note">Your details are sent securely and reviewed by an administrator before you can log in.</p>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="../../assets/js/core/theme-toggle.js"></script>
+    <script type="module" src="../../assets/js/modules/auth.js"></script>
+</body>
+</html>

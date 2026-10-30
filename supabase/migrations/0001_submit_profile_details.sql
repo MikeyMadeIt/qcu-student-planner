@@ -5,8 +5,13 @@
 -- Only touches the caller's own row, and only while still pending, so it
 -- cannot be used to edit role/account_status or anyone else's profile.
 --
--- STATUS: Already applied manually via the Supabase SQL editor (confirmed by project owner).
--- Kept here so the repository reflects the live schema.
+-- STATUS: SUPERSEDED by 0005_fix_submit_profile_details.sql.
+-- This version references a `student_number` column that was never added to
+-- `public.profiles`. Postgres validates column names in a plpgsql body at
+-- CREATE FUNCTION time, so this statement actually FAILED when run -- the
+-- function was never created, which is why Google sign-up's "finish your
+-- profile" step errors with "a required database function" is missing.
+-- Do not run this file; run 0005 instead.
 
 create or replace function public.submit_profile_details(
     p_full_name text,
