@@ -59,7 +59,7 @@ async function init() {
     const admin = await requireAdmin();
     if (!admin) return;
 
-    renderShell('admin-activity');
+    renderShell('admin-activity', admin);
     mountAdminTopbar(admin);
 
     loadRows();
