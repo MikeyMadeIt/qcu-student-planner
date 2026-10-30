@@ -140,6 +140,41 @@ export const AdminService = {
         }
     },
 
+    /* Permanent deletion lives entirely behind the `admin-delete-account` Edge Function
+       (service_role never touches the browser). The function itself re-verifies admin
+       status and re-checks the target is 'rejected' server-side -- this call cannot
+       succeed just because the UI allowed it to be clicked. */
+    async deleteAccountPermanently({ targetUserId, reason = null }) {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase.functions.invoke('admin-delete-account', {
+                body: { target_user_id: targetUserId, reason },
+            });
+
+            if (error) {
+                // supabase-js FunctionsHttpError carries the actual response on error.context;
+                // surface the server's exact message instead of a generic one, per the
+                // "never pretend it succeeded, never hide why it failed" requirement.
+                let message = error.message || 'Could not delete that account.';
+                try {
+                    if (error.context && typeof error.context.json === 'function') {
+                        const body = await error.context.json();
+                        if (body?.error) message = body.error;
+                    }
+                } catch { /* fall back to error.message above */ }
+                return fail(message);
+            }
+
+            if (data && data.ok !== true) {
+                return fail(data?.error || 'Could not delete that account.');
+            }
+
+            return ok({});
+        } catch (error) {
+            return fail('Could not reach the deletion service. Please try again.');
+        }
+    },
+
     async listAuditLog({ page = 1, pageSize = 25 } = {}) {
         try {
             const supabase = getSupabase();

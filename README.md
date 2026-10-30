@@ -60,7 +60,9 @@ qcu-student-planner/
 
 ## 🗄️ Data & Privacy
 
-Planner data (subjects, tasks, notes, grades, attendance, and settings) is stored in this browser's `localStorage`. Account authentication and profile data use the configured Supabase service. Task-reminder read states are also device-local. Clearing browser data or using another browser/device means planner data and read states will not follow you, so use **Settings → Export All Data** regularly to back up planner records. The current project does not include a conversation/message-delivery backend.
+Account authentication, profile review, and planner records (subjects, tasks, notes, grades, attendance, calendar, syllabus, GWA and settings) are stored in the configured Supabase project, protected by Row Level Security so each student can only ever read or write their own rows. Task-reminder read states remain device-local in `localStorage`. The current project does not include a conversation/message-delivery backend.
+
+Admins can approve, reject, suspend, reactivate, and — for already-rejected accounts only — **permanently delete** an account and its planner data. Deletion requires a privileged, server-side Edge Function (never the browser) and is fully documented in [`supabase/README.md`](supabase/README.md); the security model behind every account-management action is validated in [`supabase/SECURITY_VALIDATION.md`](supabase/SECURITY_VALIDATION.md).
 
 ---
 
