@@ -159,7 +159,7 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     background: rgba(var(--accent), .1);
 }
 
-/* Markdown toolbar */
+/* Formatting toolbar */
 
 .note-md-toolbar {
     display: flex;
@@ -198,14 +198,86 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     pointer-events: none;
 }
 
-/* Editor textarea */
+/* WYSIWYG editor */
 
 .note-editor-ta {
-    font-family: var(--font-mono, monospace);
-    font-size: .82rem;
+    font-family: var(--font-sans, inherit);
+    font-size: .88rem;
     line-height: 1.6;
-    resize: vertical;
     min-height: 200px;
+    max-height: min(52vh, 560px);
+    overflow-y: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    cursor: text;
+}
+
+.note-editor-ta:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.note-editor-ta h4.md-h,
+.note-editor-ta h5.md-h,
+.note-editor-ta h6.md-h {
+    color: var(--text);
+}
+
+.note-editor-ta p,
+.note-editor-ta h4,
+.note-editor-ta h5,
+.note-editor-ta h6 {
+    margin: 0 0 .55em;
+}
+
+.note-editor-ta ul,
+.note-editor-ta ol {
+    padding-left: 1.5em;
+    margin: .25em 0 .65em;
+}
+
+.note-editor-ta .md-checklist {
+    list-style: none;
+    padding-left: 0;
+}
+
+.note-editor-ta .md-checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 3px 0;
+}
+
+.note-editor-ta .md-checklist-input {
+    accent-color: rgb(var(--accent));
+    flex: 0 0 auto;
+    margin: .35em 0 0;
+}
+
+.note-editor-ta .md-cl-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.note-editor-ta pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--surface-2);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-family: var(--font-mono, monospace);
+}
+
+.note-editor-ta code,
+.note-preview-pane code {
+    font-family: var(--font-mono, monospace);
+}
+
+.note-editor-ta [contenteditable="false"] {
+    user-select: none;
 }
 
 /* Preview pane */
@@ -348,6 +420,7 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     }
     .note-editor-ta {
         min-height: 160px;
+        max-height: 48vh;
     }
     .note-preview-pane {
         min-height: 160px;
@@ -599,16 +672,17 @@ NOTES v3 — Comprehensive overhaul
 Masonry grid, bulk-select, tags, preview modal, PDF export,
 templates, compact metadata, card interactions
 ============================================================ */
-/* ── Masonry grid ── */
+/* ── Responsive notes grid ── */
 
 .nt-masonry-grid {
-    columns: 3 280px;
-    column-gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    align-items: stretch;
+    gap: 16px;
 }
 
 .nt-masonry-item {
-    break-inside: avoid;
-    margin-bottom: 16px;
+    min-width: 0;
     display: block;
 }
 
@@ -618,9 +692,22 @@ templates, compact metadata, card interactions
 }
 
 .nt-empty {
-    columns: unset;
-    break-inside: unset;
-    margin-bottom: 16px;
+    grid-column: 1 / -1;
+    display: flex;
+    min-height: 12rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.nt-empty p {
+    margin: 0;
+}
+
+.nt-empty .btn {
+    margin-top: var(--space-2);
 }
 
 /* ── Select mode: card selected state ── */
@@ -1357,9 +1444,6 @@ templates, compact metadata, card interactions
 /* ── Responsive: Notes ── */
 
 @media (max-width: 991.98px) {
-    .nt-masonry-grid {
-        columns: 2 220px;
-    }
     .nt-preview-panel {
         max-width: 100%;
         border-left: none;
@@ -1379,10 +1463,6 @@ templates, compact metadata, card interactions
 }
 
 @media (max-width: 575.98px) {
-    .nt-masonry-grid {
-        columns: 1;
-        column-gap: 0;
-    }
     .nt-controls-row2 {
         flex-direction: column;
         align-items: stretch;
@@ -1876,12 +1956,13 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
 }
 
 .nt-filters-row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 8px;
+    width: 100%;
 }
 
 .nt-dd {
-    flex: 1 1 130px;
     min-width: 0;
     position: relative;
 }

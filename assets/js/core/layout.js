@@ -10,6 +10,8 @@ const NAV_ITEMS = [
     { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
     { href: 'syllabus.html', icon: 'bi-journal-bookmark-fill', label: 'Syllabus', key: 'syllabus', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
+    { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
+    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'university.html', icon: 'bi-building-fill', label: 'University', key: 'university', base: 'app' },
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
     { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
@@ -21,6 +23,7 @@ const NAV_ITEMS = [
     { href: 'users.html', icon: 'bi-people-fill', label: 'User management', key: 'admin-users', base: 'admin' },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Activity logs', key: 'admin-activity', base: 'admin' },
 ];
+const QUICK_ACCESS_KEYS = ['inbox', 'notifications'];
 const THEME_OPTIONS = [
     { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
     { value: 'light', label: 'Light', icon: 'bi-sun' },
@@ -38,6 +41,8 @@ const PAGE_SECTIONS = {
     attendance: 'Academics',
     syllabus: 'Academics',
     notes: 'Academics',
+    notifications: 'Quick Access',
+    inbox: 'Quick Access',
     university: 'University',
     curriculum: 'University',
     wallpaper: 'App',
@@ -50,9 +55,7 @@ const PAGE_SECTIONS = {
     'admin-activity': 'Administration',
 };
 /* ---------- Sign out ---------- */
-/* Classic (non-module) scripts resolve a dynamic import() specifier against the document's URL,
-   not the importing script's URL. Every page that loads layout.js lives two levels under /pages/
-   (pages/app/*.html or pages/admin/*.html), so this relative path resolves correctly from both. */
+/* Dynamic import specifiers in this classic script resolve relative to layout.js itself. */
 async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
     try {
@@ -158,50 +161,102 @@ function wireSidebarToggles() {
 }
 
 /* ---------- Notifications (derived from real task data — never fabricated) ---------- */
-/* Surfaces tasks that are due soon or overdue, the same "assignmentDue" reminders the
-   Settings page already lets the user toggle off. There is no separate notifications
-   store: this list is recomputed from the user's actual tasks every time it is opened. */
+const NOTIFICATION_READ_KEY = 'sp_notification_read';
+
 function getTaskNotifications() {
     if (typeof DB === 'undefined') return [];
     const settings = DB.getSettings();
     if (settings.notifications && settings.notifications.assignmentDue === false) return [];
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const horizon = new Date(todayStart.getTime() + 1000 * 60 * 60 * 24 * 3);
-    let tasks = [];
-    try { tasks = DB.getActiveTasks(); } catch (e) { tasks = []; }
-    return tasks
+    return DB.getActiveTasks()
         .filter(t => t && t.status !== 'completed' && t.dueDate)
         .map(t => ({ task: t, due: new Date(t.dueDate + 'T' + (t.dueTime || '23:59')) }))
         .filter(x => !isNaN(x.due) && x.due <= horizon)
         .sort((a, b) => a.due - b.due)
         .map(x => ({
-            id: x.task.id,
+            id: `task-${x.task.id}-${x.task.dueDate}-${x.task.dueTime || ''}`,
+            taskId: x.task.id,
             title: x.task.title || 'Untitled task',
             overdue: x.due < new Date(),
             due: x.due,
+            category: 'Task reminder',
+            description: x.task.description || '',
         }));
 }
+
+function getNotificationReadMap() {
+    const raw = localStorage.getItem(NOTIFICATION_READ_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+        throw new Error('Saved notification read states are invalid.');
+    return parsed;
+}
+
+function getUnreadNotificationCount() {
+    const readMap = getNotificationReadMap();
+    return getTaskNotifications().filter(item => !readMap[item.id]).length;
+}
+
+function setNotificationRead(id, isRead = true) {
+    const readMap = getNotificationReadMap();
+    if (isRead) readMap[id] = true;
+    else delete readMap[id];
+    localStorage.setItem(NOTIFICATION_READ_KEY, JSON.stringify(readMap));
+    updateNotificationBadge();
+    window.dispatchEvent(new CustomEvent('planner:notifications-changed'));
+}
+
+function markAllNotificationsRead() {
+    const readMap = getNotificationReadMap();
+    getTaskNotifications().forEach(item => { readMap[item.id] = true; });
+    localStorage.setItem(NOTIFICATION_READ_KEY, JSON.stringify(readMap));
+    updateNotificationBadge();
+    window.dispatchEvent(new CustomEvent('planner:notifications-changed'));
+}
+
+function updateNotificationBadge() {
+    const trigger = document.getElementById('notifTrigger');
+    const badge = document.getElementById('notificationUnreadCount');
+    if (!trigger || !badge) return;
+    try {
+        const count = getUnreadNotificationCount();
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.hidden = count === 0;
+        trigger.setAttribute('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
+    } catch (error) {
+        console.error('Unable to load notification read states.', error);
+        badge.hidden = true;
+        trigger.setAttribute('aria-label', 'Notifications, status unavailable');
+    }
+}
+
 function renderNotifPanelBody() {
-    const items = getTaskNotifications();
+    let items;
+    let readMap;
+    try {
+        items = getTaskNotifications();
+        readMap = getNotificationReadMap();
+    } catch (error) {
+        console.error('Unable to load notifications.', error);
+        return `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Notifications could not be loaded.</div>`;
+    }
     if (!items.length)
-        return `<div class="header-panel-empty"><i class="bi bi-check2-circle" aria-hidden="true"></i>Nothing due soon</div>`;
-    return items.slice(0, 8).map(n => `
-        <a class="header-panel-item" href="../app/tasks.html">
+        return `<div class="header-panel-empty"><i class="bi bi-check2-circle" aria-hidden="true"></i>Nothing due soon</div><a class="header-panel-footer" href="../app/notifications.html">View all notifications</a>`;
+    return items.slice(0, 5).map(n => `
+        <a class="header-panel-item ${readMap[n.id] ? 'is-read' : 'is-unread'}" href="../app/notifications.html?item=${encodeURIComponent(n.id)}">
             <span class="header-panel-dot ${n.overdue ? 'is-overdue' : ''}" aria-hidden="true"></span>
             <span class="header-panel-item-text">
                 <span class="header-panel-item-title">${escHtml(n.title)}</span>
                 <span class="header-panel-item-sub">${n.overdue ? 'Overdue' : 'Due ' + n.due.toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
             </span>
-        </a>`).join('');
+        </a>`).join('') + `<a class="header-panel-footer" href="../app/notifications.html">View all notifications</a>`;
 }
 
-/* ---------- Inbox ----------
-   The project has no backend for system messages/announcements — there is no table or API
-   to read them from, so this always renders a genuine empty state rather than invented
-   messages. The interface is fully wired (icon, panel, sidebar row); only the data source
-   is missing. See the delivery summary for what a real implementation would need. */
+/* Messaging is not implemented in the available data layer; never show invented messages. */
 function renderInboxPanelBody() {
-    return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>No messages yet<span>Announcements from QCU Planner admins will appear here.</span></div>`;
+    return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Messaging is not connected<span>Conversations will appear here when messaging is available.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
 }
 
 function renderShellBar(activeKey) {
@@ -228,8 +283,9 @@ function renderShellBar(activeKey) {
                 <button type="button" class="shell-icon-btn" id="notifTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="notifPanel" aria-label="Notifications">
                     <i class="bi bi-bell" aria-hidden="true"></i>
+                    <span class="notification-count" id="notificationUnreadCount" aria-hidden="true" hidden></span>
                 </button>
-                <div class="header-panel" id="notifPanel" role="menu" aria-label="Notifications" hidden>
+                <div class="header-panel" id="notifPanel" role="region" aria-label="Notifications" hidden>
                     <div class="header-panel-title">Notifications</div>
                     <div class="header-panel-body">${renderNotifPanelBody()}</div>
                 </div>
@@ -239,7 +295,7 @@ function renderShellBar(activeKey) {
                     aria-haspopup="true" aria-expanded="false" aria-controls="inboxPanel" aria-label="Inbox">
                     <i class="bi bi-inbox" aria-hidden="true"></i>
                 </button>
-                <div class="header-panel" id="inboxPanel" role="menu" aria-label="Inbox" hidden>
+                <div class="header-panel" id="inboxPanel" role="region" aria-label="Inbox" hidden>
                     <div class="header-panel-title">Inbox</div>
                     <div class="header-panel-body">${renderInboxPanelBody()}</div>
                 </div>
@@ -274,6 +330,18 @@ function renderShellBar(activeKey) {
     initHeaderPanel(bar, 'profileTrigger', 'profilePanel', 'profileMenu');
     initHeaderPanel(bar, 'notifTrigger', 'notifPanel', 'notifMenu');
     initHeaderPanel(bar, 'inboxTrigger', 'inboxPanel', 'inboxMenu');
+    updateNotificationBadge();
+    window.addEventListener('storage', event => {
+        if (event.key === NOTIFICATION_READ_KEY) refreshNotificationPreview();
+    });
+    window.addEventListener('planner:notifications-changed', refreshNotificationPreview);
+    window.addEventListener('planner:tasks-changed', refreshNotificationPreview);
+}
+
+function refreshNotificationPreview() {
+    updateNotificationBadge();
+    const body = document.querySelector('#notifPanel .header-panel-body');
+    if (body) body.innerHTML = renderNotifPanelBody();
 }
 /* Generic open/close wiring shared by the profile, notifications and inbox popovers:
    click-outside closes, Escape closes, and only one popover is open at a time. */
@@ -291,12 +359,26 @@ function initHeaderPanel(bar, triggerId, panelId, wrapId) {
             }
         });
     }
+    function positionPanel() {
+        const triggerRect = trigger.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const panelWidth = panel.getBoundingClientRect().width;
+        const gutter = Math.min(16, window.innerWidth / 2);
+        const maxLeft = Math.max(gutter, window.innerWidth - panelWidth - gutter);
+        const left = Math.min(Math.max(triggerRect.left, gutter), maxLeft);
+        panel.style.left = `${left - wrapperRect.left}px`;
+        panel.style.right = 'auto';
+    }
     function setOpen(isOpen) {
         if (isOpen) closeOthers();
         panel.hidden = !isOpen;
         trigger.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) positionPanel();
     }
     trigger.addEventListener('click', () => setOpen(panel.hidden));
+    window.addEventListener('resize', () => {
+        if (!panel.hidden) positionPanel();
+    });
     document.addEventListener('click', event => {
         if (!panel.hidden && !wrapper.contains(event.target))
             setOpen(false);
@@ -309,14 +391,115 @@ function initHeaderPanel(bar, triggerId, panelId, wrapId) {
     });
 }
 
-/* The sidebar's Inbox/Notifications rows reuse the exact same popovers as the header icons
-   (no second inbox/notifications implementation) — they simply delegate the click. */
-function wireSidebarQuickLinks(sidebar) {
-    const inboxBtn = sidebar.querySelector('#sidebarInboxBtn');
-    const notifBtn = sidebar.querySelector('#sidebarNotifBtn');
-    if (inboxBtn) inboxBtn.addEventListener('click', () => document.getElementById('inboxTrigger') && document.getElementById('inboxTrigger').click());
-    if (notifBtn) notifBtn.addEventListener('click', () => document.getElementById('notifTrigger') && document.getElementById('notifTrigger').click());
+/* Bootstrap already manages modal focus trapping, Escape/backdrop dismissal, body scroll,
+   and focus restoration. Normalize the visible close control for all existing and lazy
+   modals without replacing their established submit/cancel behavior. */
+function wireModalDefaults() {
+    if (window.__qcuModalDefaultsWired) return;
+    window.__qcuModalDefaultsWired = true;
+    const formBaselines = new WeakMap();
+    const focusTargets = new WeakMap();
+    const snapshotFormControls = modal => JSON.stringify(
+        [...modal.querySelectorAll('input, textarea, select')].map(control => ({
+            name: control.name,
+            type: control.type,
+            value: control.type === 'checkbox' || control.type === 'radio' ? control.checked : control.value,
+        }))
+    );
+    const hasUnsavedChanges = modal => {
+        const baseline = formBaselines.get(modal);
+        return baseline !== undefined && baseline !== snapshotFormControls(modal);
+    };
+    const askToDiscard = modal => window.confirm('Discard unsaved changes and close this dialog?');
+    const dismissIfDirty = (modal, event) => {
+        if (!modal || !hasUnsavedChanges(modal)) return false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (askToDiscard(modal)) {
+            const instance = bootstrap.Modal.getInstance(modal);
+            if (instance) instance.hide();
+        }
+        return true;
+    };
+
+    document.addEventListener('show.bs.modal', event => {
+        const modal = event.target;
+        if (!(modal instanceof HTMLElement) || !modal.classList.contains('modal')) return;
+        const content = modal.querySelector('.modal-content');
+        if (!content) return;
+        formBaselines.set(modal, snapshotFormControls(modal));
+        if (!modal.contains(document.activeElement))
+            focusTargets.set(modal, document.activeElement);
+        modal.setAttribute('role', modal.getAttribute('role') || 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        if (modal.dataset.hideCloseButton === 'true') {
+            content.querySelectorAll('button.btn-close, :scope > .modal-close-floating').forEach(button => button.remove());
+        } else {
+            const header = content.querySelector(':scope > .modal-header');
+            const closeSelector = 'button.btn-close, button[data-bs-dismiss="modal"]';
+            let closeButton = header
+                ? header.querySelector(closeSelector)
+                : content.querySelector(':scope > .modal-close-floating');
+            if (!closeButton) {
+                closeButton = document.createElement('button');
+                closeButton.type = 'button';
+                closeButton.className = 'btn-close';
+                closeButton.setAttribute('data-bs-dismiss', 'modal');
+                if (header) header.appendChild(closeButton);
+                else {
+                    closeButton.classList.add('modal-close-floating');
+                    content.appendChild(closeButton);
+                }
+            }
+            if (header) {
+                header.querySelectorAll(closeSelector).forEach(button => {
+                    if (button !== closeButton)
+                        button.remove();
+                });
+                content.querySelectorAll(':scope > .modal-close-floating').forEach(button => button.remove());
+            }
+            closeButton.type = 'button';
+            if (!closeButton.classList.contains('btn-close') && !closeButton.textContent.trim())
+                closeButton.classList.add('btn-close');
+            closeButton.setAttribute('aria-label', 'Close modal');
+        }
+
+        if (!modal.hasAttribute('aria-labelledby') && !modal.hasAttribute('aria-label')) {
+            const title = content.querySelector('.modal-title, h1, h2, h3, h4, h5, h6');
+            if (title) {
+                if (!title.id) title.id = `${modal.id || 'app'}-dialog-title`;
+                modal.setAttribute('aria-labelledby', title.id);
+            } else {
+                modal.setAttribute('aria-label', 'Dialog');
+            }
+        }
+    });
+    window.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const closeControl = event.target.closest('button[data-bs-dismiss="modal"], .modal-header .btn-close');
+        if (closeControl) {
+            dismissIfDirty(closeControl.closest('.modal'), event);
+            return;
+        }
+        if (event.target.classList.contains('modal') && event.target.dataset.bsBackdrop !== 'static')
+            dismissIfDirty(event.target, event);
+    }, true);
+    window.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        const modal = document.querySelector('.modal.show');
+        if (modal && modal.dataset.bsKeyboard !== 'false')
+            dismissIfDirty(modal, event);
+    }, true);
+    document.addEventListener('hidden.bs.modal', event => {
+        if (!(event.target instanceof HTMLElement)) return;
+        formBaselines.delete(event.target);
+        const opener = focusTargets.get(event.target);
+        focusTargets.delete(event.target);
+        if (opener instanceof HTMLElement && opener.isConnected)
+            opener.focus();
+    });
 }
+
 function renderShell(activeKey) {
     const isAdminArea = String(activeKey).startsWith('admin-');
     /* Admin pages use only the sidebar for navigation — no top profile/brand
@@ -334,6 +517,7 @@ function renderShell(activeKey) {
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
                 { label: 'University', keys: ['university', 'curriculum'] },
                 { label: 'App', keys: ['wallpaper'] },
+                { label: 'Utilities', keys: ['settings', 'help', 'report'] },
             ];
         const itemMap = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n]));
         const sidebarSettings = (typeof DB !== 'undefined') ? DB.getSettings() : {};
@@ -342,13 +526,16 @@ function renderShell(activeKey) {
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
         const brandIcon = isAdminArea ? 'bi-shield-lock-fill' : 'bi-mortarboard';
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
+        sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
         if (!isAdminArea) {
-            sidebarHtml += `<div class="sidebar-quick-row" role="group" aria-label="Inbox and notifications">
-      <button type="button" class="nav-link sidebar-quick-link" id="sidebarInboxBtn" aria-haspopup="true" aria-expanded="false" aria-controls="inboxPanel"><i class="bi bi-inbox" aria-hidden="true"></i>Inbox</button>
-      <button type="button" class="nav-link sidebar-quick-link" id="sidebarNotifBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notifPanel"><i class="bi bi-bell" aria-hidden="true"></i>Notifications</button>
-    </div>`;
+            sidebarHtml += `<div class="sidebar-quick-row" aria-label="Quick access">`;
+            QUICK_ACCESS_KEYS.forEach(key => {
+                const item = itemMap[key];
+                const isActive = item.key === activeKey;
+                sidebarHtml += `<a class="nav-link sidebar-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}><i class="bi ${item.icon}" aria-hidden="true"></i>${item.label}</a>`;
+            });
+            sidebarHtml += `</div>`;
         }
-        sidebarHtml += `<nav class="d-flex flex-column gap-0 flex-grow-1" aria-label="Main navigation">`;
         sidebarGroups.forEach(g => {
             if (g.label)
                 sidebarHtml += `<div class="nav-group-label" role="heading" aria-level="2">${g.label}</div>`;
@@ -377,9 +564,6 @@ function renderShell(activeKey) {
             const _semLabel = _sem ? `${_sem.schoolYear} &bull; ${_sem.name}` : '';
             sidebarHtml += `${_semLabel ? `<div class="sem-banner-nav"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>${_semLabel}</div>` : ''}
     <div class="sidebar-utility">
-      <a class="nav-link" href="../app/settings.html"><i class="bi bi-gear-fill" aria-hidden="true"></i>Settings</a>
-      <a class="nav-link" href="../app/help.html"><i class="bi bi-question-circle" aria-hidden="true"></i>Help</a>
-      <a class="nav-link" href="../app/report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report</a>
       <button type="button" class="nav-link sidebar-logout-btn" id="sidebarLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
     </div>
     <div class="sidebar-profile" id="sidebarProfile">
@@ -392,12 +576,12 @@ function renderShell(activeKey) {
         }
         sidebarHtml += `</div>`;
         sidebar.innerHTML = sidebarHtml;
-        if (!isAdminArea) wireSidebarQuickLinks(sidebar);
     }
     ensureNavDrawer(activeKey);
     initThemeSwitches();
     initThemeOptions();
     wireSidebarToggles();
+    wireModalDefaults();
     if (!isAdminArea) hydrateProfileIdentity();
 }
 
@@ -412,8 +596,8 @@ function renderShell(activeKey) {
 async function hydrateProfileIdentity() {
     try {
         const [{ AuthService }, { getSupabase }] = await Promise.all([
-            import('../../assets/js/services/auth-service.js'),
-            import('../../assets/js/core/supabase-client.js'),
+            import('../services/auth-service.js'),
+            import('./supabase-client.js'),
         ]);
         const supabase = getSupabase();
         const { data: sessionData } = await supabase.auth.getSession();
@@ -442,14 +626,13 @@ async function hydrateProfileIdentity() {
     }
 }
 /* ---------- MOBILE NAVIGATION DRAWER ---------- */
-/* Same information hierarchy as the desktop sidebar (branding, then the categorized groups —
-   Inbox/Notifications and the bottom utility/profile rows are added separately in
-   ensureNavDrawer, same as the desktop sidebar builds them outside sidebarGroups). */
+/* Keep the student navigation hierarchy identical in the desktop sidebar and mobile drawer. */
 const DRAWER_GROUPS = [
     { label: 'Overview', keys: ['dashboard'] },
     { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
     { label: 'University', keys: ['university', 'curriculum'] },
-    { label: 'App', keys: ['wallpaper'] }
+    { label: 'App', keys: ['wallpaper'] },
+    { label: 'Utilities', keys: ['settings', 'help', 'report'] }
 ];
 const ADMIN_DRAWER_GROUPS = [
     { label: 'Administration', keys: ['admin-dashboard', 'admin-verification', 'admin-users', 'admin-activity'] },
@@ -461,6 +644,17 @@ function ensureNavDrawer(activeKey) {
     const isAdminArea = String(activeKey).startsWith('admin-');
     const groups = isAdminArea ? ADMIN_DRAWER_GROUPS : DRAWER_GROUPS;
     const itemMap = Object.fromEntries(NAV_ITEMS.map(item => [item.key, item]));
+    const quickAccessHtml = isAdminArea ? '' : `
+        <div class="drawer-quick-row" aria-label="Quick access">
+            ${QUICK_ACCESS_KEYS.map(key => {
+                const item = itemMap[key];
+                const isActive = key === activeKey;
+                return `<a class="drawer-link drawer-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
+                    <i class="bi ${item.icon}" aria-hidden="true"></i>
+                    <span>${item.label}</span>
+                </a>`;
+            }).join('')}
+        </div>`;
     const groupsHtml = groups.map(group => `
         <div class="drawer-group">
             <div class="drawer-group-label">${group.label}</div>
@@ -473,22 +667,17 @@ function ensureNavDrawer(activeKey) {
                 </a>`;
     }).join('')}
         </div>`).join('');
-    const quickRowHtml = isAdminArea ? '' : `
-            <div class="drawer-quick-row" role="group" aria-label="Inbox and notifications">
-                <button type="button" class="drawer-link drawer-quick-link" id="drawerInboxBtn"><i class="bi bi-inbox" aria-hidden="true"></i><span>Inbox</span></button>
-                <button type="button" class="drawer-link drawer-quick-link" id="drawerNotifBtn"><i class="bi bi-bell" aria-hidden="true"></i><span>Notifications</span></button>
-            </div>`;
     const sidebarSettingsForDrawer = (!isAdminArea && typeof DB !== 'undefined') ? DB.getSettings() : {};
     const drawerName = (sidebarSettingsForDrawer.name || '').trim() || 'Student';
     const drawerInitial = escHtml(drawerName.charAt(0).toUpperCase() || 'S');
+    const activeSemester = (!isAdminArea && typeof DB !== 'undefined') ? DB.getActiveSemester() : null;
+    const semesterLabel = activeSemester ? `${activeSemester.schoolYear} &bull; ${activeSemester.name}` : '';
     const bottomHtml = isAdminArea ? `
             <div class="drawer-group drawer-bottom">
                 <button type="button" class="drawer-link drawer-link-danger js-admin-logout" id="admDrawerLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
             </div>` : `
-            <div class="drawer-group drawer-bottom">
-                <a class="drawer-link" href="../app/settings.html"><i class="bi bi-gear-fill" aria-hidden="true"></i><span>Settings</span></a>
-                <a class="drawer-link" href="../app/help.html"><i class="bi bi-question-circle" aria-hidden="true"></i><span>Help</span></a>
-                <a class="drawer-link" href="../app/report.html"><i class="bi bi-flag" aria-hidden="true"></i><span>Report</span></a>
+            <div class="drawer-bottom">
+                ${semesterLabel ? `<div class="sem-banner-nav drawer-sem-banner"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>${semesterLabel}</div>` : ''}
                 <button type="button" class="drawer-link drawer-link-danger" id="drawerLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
             </div>
             <div class="drawer-profile" id="drawerProfile">
@@ -514,7 +703,7 @@ function ensureNavDrawer(activeKey) {
                     <i class="bi bi-x-lg" aria-hidden="true"></i>
                 </button>
             </div>
-            <nav class="nav-drawer-body" aria-label="All pages">${quickRowHtml}${groupsHtml}</nav>
+            <nav class="nav-drawer-body" aria-label="All pages">${quickAccessHtml}${groupsHtml}</nav>
             ${bottomHtml}
         </aside>`;
     document.body.appendChild(drawer);
@@ -526,10 +715,6 @@ function ensureNavDrawer(activeKey) {
     drawer.querySelectorAll('.drawer-link[href]').forEach(el => {
         el.addEventListener('click', closeNavDrawer);
     });
-    const inboxBtn = drawer.querySelector('#drawerInboxBtn');
-    const notifBtn = drawer.querySelector('#drawerNotifBtn');
-    if (inboxBtn) inboxBtn.addEventListener('click', () => { closeNavDrawer(); setTimeout(() => document.getElementById('inboxTrigger') && document.getElementById('inboxTrigger').click(), 230); });
-    if (notifBtn) notifBtn.addEventListener('click', () => { closeNavDrawer(); setTimeout(() => document.getElementById('notifTrigger') && document.getElementById('notifTrigger').click(), 230); });
 }
 let drawerReturnFocus = null;
 function openNavDrawer() {

@@ -1,5 +1,41 @@
 /* ---------- SCHEDULE CARDS ---------- */
 
+body {
+    scrollbar-gutter: stable;
+}
+
+#subjectModal .sch-subject-required {
+    color: var(--danger);
+}
+
+#subjectModal .sch-subject-error {
+    display: block;
+    margin: 4px 0 0;
+    color: var(--danger);
+    font-size: .76rem;
+    line-height: 1.35;
+}
+
+#subjectModal .sch-subject-error[hidden] {
+    display: none;
+}
+
+#subjectModal .sch-subject-code[aria-invalid="true"] {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
+}
+
+#subjectModal .sch-subject-time[aria-invalid="true"] {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
+}
+
+#subjectModal .sch-subject-days.has-error .day-selector {
+    outline: 1px solid var(--danger);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
 .subject-card {
     border-radius: 5px;
     padding: 11px 12px;
