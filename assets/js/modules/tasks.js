@@ -210,6 +210,13 @@ function updateFilterBadge() {
     btn.classList.toggle('tk-filter-active', count > 0);
 }
 
+function ShortcutFilter(SFilter) {
+    tkFilter = SFilter;
+    closeFilterDrawer();
+    updateFilterBadge();
+    renderTasks();
+}
+
 /* ── Recurring helpers ── */
 
 function addDays(dateStr, n) {

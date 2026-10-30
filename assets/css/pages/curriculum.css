@@ -455,9 +455,12 @@ CURRICULUM PAGE
    ============================================================ */
 
 .cur-picker {
+    position: relative;
+    z-index: var(--layer-popover);
     padding: 14px 16px;
     border-radius: 5px;
 }
+
 .cur-picker-label {
     display: block;
     font-size: .72rem;

@@ -4,7 +4,7 @@
 .shell-bar {
     position: sticky;
     top: 0;
-    z-index: 45;
+    z-index: var(--layer-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -67,6 +67,7 @@
 }
 
 .shell-icon-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -80,6 +81,27 @@
     transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
+.notification-count {
+    position: absolute;
+    top: -0.15rem;
+    right: -0.2rem;
+    min-width: 1.05rem;
+    height: 1.05rem;
+    padding: 0 0.22rem;
+    border: 2px solid var(--nav-bg);
+    border-radius: var(--radius-pill);
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 0.85rem;
+    text-align: center;
+}
+
+.notification-count[hidden] {
+    display: none;
+}
+
 .shell-icon-btn:hover,
 .shell-icon-btn[aria-expanded="true"] {
     background: var(--surface-2);
@@ -91,7 +113,7 @@
     position: absolute;
     top: calc(100% + 0.5rem);
     right: 0;
-    z-index: 60;
+    z-index: var(--layer-popover);
     width: min(20rem, calc(100vw - 2rem));
     max-height: min(26rem, calc(100vh - 6rem));
     overflow-y: auto;
@@ -127,6 +149,32 @@
 
 .header-panel-item:hover,
 .header-panel-item:focus-visible {
+    background: var(--surface-2);
+}
+
+.header-panel-item.is-unread .header-panel-item-title {
+    font-weight: 700;
+}
+
+.header-panel-item.is-read .header-panel-dot {
+    background: var(--border);
+}
+
+.header-panel-footer {
+    display: block;
+    margin-top: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--border);
+    color: rgb(var(--accent));
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.header-panel-footer:hover,
+.header-panel-footer:focus-visible {
+    color: var(--text);
     background: var(--surface-2);
 }
 

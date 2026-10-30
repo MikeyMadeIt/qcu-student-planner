@@ -575,6 +575,39 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
+@media (min-width: 1024px) {
+    .main-content.calendar-page {
+        max-width: 1600px;
+        margin-inline: auto;
+        padding-inline: 28px;
+    }
+    .cal-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .cal-main-col > .glass {
+        padding: 14px;
+    }
+    .uc-grid {
+        width: 98%;
+        margin-inline: auto;
+        gap: 2px !important;
+    }
+    .uc-cell {
+        min-height: 72px;
+        padding: 3px;
+    }
+    .uc-dots {
+        width: 100%;
+        justify-content: center;
+        gap: 4px;
+    }
+    .uc-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+    }
+}
+
 /* ── Day view list ────────────────────────────────────────── */
 
 .day-view-list {

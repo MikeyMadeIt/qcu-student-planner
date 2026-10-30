@@ -385,6 +385,77 @@ body.auth-page {
     background: var(--auth-elevated);
 }
 
+/* ---------- Google sign-in ---------- */
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: var(--space-5) 0;
+    color: var(--auth-text-faint);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--auth-border);
+}
+
+.auth-page .btn-google {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    min-height: 3rem;
+    background: var(--auth-input-bg);
+    border: 1px solid var(--auth-input-border);
+    color: var(--auth-text);
+    font-weight: 600;
+}
+
+.auth-page .btn-google:hover:not(:disabled) {
+    background: var(--auth-elevated);
+}
+
+.auth-page .btn-google .google-g {
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.auth-page .btn-google.is-loading .google-g {
+    opacity: 0;
+}
+
+.auth-page .btn-google.is-loading {
+    position: relative;
+    color: transparent;
+}
+
+.auth-page .btn-google.is-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: -0.55rem 0 0 -0.55rem;
+    border: 2px solid var(--auth-text-faint);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: auth-spin 0.7s linear infinite;
+}
+
+.auth-spin {
+    display: inline-block;
+    animation: auth-spin 1s linear infinite;
+}
+
 /* ---------- Alerts and footer text ---------- */
 
 .auth-alert {
@@ -705,12 +776,16 @@ body.auth-page {
 
 @media (max-width: 575.98px) {
     .auth-main {
-        justify-content: flex-start;
-        padding: 4.5rem var(--space-4) var(--space-5);
+        /* Centered top-to-bottom and side-to-side, same as desktop. When content is taller
+           than the viewport this still scrolls normally -- centering a flex item never clips
+           it, it only changes where the extra space goes when there IS extra space. */
+        justify-content: center;
+        padding: max(4.5rem, env(safe-area-inset-top) + 3.5rem) var(--space-4) var(--space-5);
     }
 
     .auth-card {
-        padding: var(--space-5) var(--space-4);
+        /* More breathing room than the outer page padding alone gave the card's own edges. */
+        padding: var(--space-6) var(--space-5);
     }
 
     .auth-title {

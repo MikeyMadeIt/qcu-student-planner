@@ -87,7 +87,7 @@ function ensureConfirmModal() {
    in the popup instead of falling back to a native window.prompt() after the fact. onConfirm
    is then called with the trimmed reason string (or '' if left blank and not required). */
 function confirmAction(opts) {
-    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, onConfirm } = opts;
+    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, hideCloseButton = false, onConfirm } = opts;
     ensureConfirmModal();
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
@@ -127,8 +127,10 @@ function confirmAction(opts) {
         if (onConfirm)
             onConfirm(reasonValue);
     });
-    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
-    document.getElementById('confirmActionModal').addEventListener('shown.bs.modal', () => {
+    const modalElement = document.getElementById('confirmActionModal');
+    modalElement.dataset.hideCloseButton = hideCloseButton ? 'true' : 'false';
+    const modal = new bootstrap.Modal(modalElement);
+    modalElement.addEventListener('shown.bs.modal', () => {
         if (reasonField) reasonInput.focus();
     }, { once: true });
     modal.show();

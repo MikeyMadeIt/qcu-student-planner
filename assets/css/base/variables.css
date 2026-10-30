@@ -82,6 +82,13 @@
     --menu-btn-size: 2.375rem;
     --logo-box-size: 2.375rem;
 
+    /* Shared overlay stack: page popovers < header < Bootstrap dialogs < mobile navigation. */
+    --layer-popover: 60;
+    --layer-header: 65;
+    --layer-modal-backdrop: 1050;
+    --layer-modal: 1055;
+    --layer-nav-drawer: 1200;
+
     /* Focus ring */
     --focus-ring-color: rgba(var(--accent), 0.45);
     --focus-ring: 0 0 0 3px var(--focus-ring-color);

@@ -33,7 +33,7 @@ async function loadRows() {
 
     body.innerHTML = rows.map(r => `
       <tr>
-        <td data-label="Account"><div class="adm-name">${escHtml(r.full_name || 'Not provided')}</div><div class="adm-sub">${escHtml(r.student_number || r.course || '—')}</div></td>
+        <td data-label="Account"><div class="adm-name">${escHtml(r.full_name || 'Not provided')}</div><div class="adm-sub">${escHtml(r.email || r.course || '—')}</div></td>
         <td data-label="Role">${escHtml(r.role || 'student')}</td>
         <td data-label="Registered">${formatDate(r.created_at)}</td>
         <td data-label="Status">${statusBadge(r.account_status)}</td>
@@ -68,9 +68,10 @@ async function viewDetail(id) {
     const body = document.getElementById('userDetailBody');
     document.getElementById('userDetailTitle').textContent = a.full_name || 'Account details';
     body.innerHTML = `
+        <dt>Email</dt><dd>${escHtml(a.email || '—')}</dd>
+        <dt>Signed up with</dt><dd>${a.signup_provider === 'google' ? 'Google' : 'Email &amp; password'}</dd>
         <dt>Status</dt><dd>${statusBadge(a.account_status)}</dd>
         <dt>Role</dt><dd>${escHtml(a.role || 'student')}</dd>
-        <dt>Student number</dt><dd>${escHtml(a.student_number || '—')}</dd>
         <dt>Program</dt><dd>${escHtml(a.course || '—')}</dd>
         <dt>Year level</dt><dd>${escHtml(a.year_level || '—')}</dd>
         <dt>Section</dt><dd>${escHtml(a.section || '—')}</dd>

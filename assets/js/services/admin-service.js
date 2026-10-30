@@ -73,12 +73,12 @@ export const AdminService = {
             const supabase = getSupabase();
             let query = supabase
                 .from('profiles')
-                .select('id, full_name, student_number, course, year_level, section, school, role, account_status, created_at, reviewed_at, rejection_reason', { count: 'exact' });
+                .select('id, email, full_name, course, year_level, section, school, role, account_status, signup_provider, created_at, reviewed_at, rejection_reason', { count: 'exact' });
 
             if (status !== 'all') query = query.eq('account_status', status);
             if (search.trim()) {
                 const term = search.trim().replace(/[%_]/g, '');
-                query = query.or(`full_name.ilike.%${term}%,student_number.ilike.%${term}%,course.ilike.%${term}%`);
+                query = query.or(`full_name.ilike.%${term}%,course.ilike.%${term}%,email.ilike.%${term}%`);
             }
 
             const from = (page - 1) * pageSize;
