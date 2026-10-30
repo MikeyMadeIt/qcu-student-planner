@@ -2,6 +2,7 @@
 
 import { AuthService } from '../services/auth-service.js';
 import { validators } from '../utils/validation.js';
+import { resolveLandingRoute } from '../utils/auth-routing.js';
 import {
     $,
     $$,
@@ -87,18 +88,13 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'login') {
-            const { role, accountStatus } = result.data;
+            const { role, accountStatus, rejectionReason } = result.data;
+            const destination = resolveLandingRoute({ role, accountStatus, rejectionReason });
 
-            if (accountStatus === 'approved' && role === 'admin') {
-                location.href = '../admin/dashboard.html';
-            } else if (accountStatus === 'approved') {
-                location.href = '../app/dashboard.html';
-            } else if (accountStatus === 'pending') {
-                location.href = 'pending.html';
+            if (destination.type === 'go') {
+                location.href = destination.href;
             } else {
-                showAlert(form, result.data.accountStatus === 'rejected'
-                    ? `Your registration was not approved.${result.data.rejectionReason ? ` Reason: ${result.data.rejectionReason}` : ''}`
-                    : 'Your account has been suspended. Contact an administrator for help.', 'error');
+                showAlert(form, destination.message, 'error');
             }
             return;
         }
@@ -135,4 +131,28 @@ function setupForm(form) {
 
 export function initAuthForms() {
     $$('[data-auth-form]').forEach(setupForm);
+}
+
+/* "Continue with Google" button on login.html / register.html. Clicking it redirects the
+   whole page to Google -- there is nothing to show success/failure for on *this* page beyond
+   a possible immediate error (e.g. offline), since the real outcome is decided after the
+   redirect back, on callback.html. */
+export function initGoogleButton() {
+    const button = $('[data-google-signin]');
+
+    if (!button) return;
+
+    button.addEventListener('click', async () => {
+        setLoading(button, true);
+
+        const result = await AuthService.signInWithGoogle();
+
+        if (!result.ok) {
+            setLoading(button, false);
+            const card = button.closest('.auth-card');
+            if (card) showAlert(card, result.message);
+        }
+        /* On success the browser is already navigating away to Google; leave the button
+           disabled/loading so it can't be double-clicked while that happens. */
+    });
 }

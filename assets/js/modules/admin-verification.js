@@ -3,7 +3,20 @@
 
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
+import { APP_CONFIG } from '../core/config.js';
 import { escHtml, formatDate, statusBadge, mountAdminTopbar, renderError } from './admin-shared.js';
+
+/* Visual-only hint: Supabase has no way to restrict Google sign-in to a particular email
+   format, so every Google (and password) sign-up still lands here as 'pending' and a human
+   makes the final call. This just flags, for the reviewer, whether the email looks like the
+   university's lastname.firstname.middlename@gmail.com pattern. */
+function emailFormatBadge(email) {
+    if (!email) return '';
+    const matches = APP_CONFIG.studentEmailPattern.test(email.trim());
+    return matches
+        ? '<i class="bi bi-check-circle-fill text-success" title="Matches the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>'
+        : '<i class="bi bi-exclamation-triangle-fill text-danger" title="Does not match the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>';
+}
 
 const PAGE_SIZE = 20;
 let currentPage = 1;
@@ -39,8 +52,8 @@ async function loadRows() {
 
     body.innerHTML = rows.map(r => `
       <tr>
-        <td data-label="Student"><div class="adm-name">${escHtml(r.full_name || 'Not provided')}</div><div class="adm-sub">${escHtml(r.student_number || 'No student number on file')}</div></td>
-        <td data-label="Student no." class="mono">${escHtml(r.student_number || '—')}</td>
+        <td data-label="Student"><div class="adm-name">${escHtml(r.full_name || 'Not provided')}</div></td>
+        <td data-label="Email"><span class="mono">${escHtml(r.email || '—')}</span> ${emailFormatBadge(r.email)}${r.signup_provider === 'google' ? ' <span class="status-badge" title="Signed up with Google"><i class="bi bi-google" aria-hidden="true"></i> Google</span>' : ''}</td>
         <td data-label="Program">${escHtml(r.course || '—')}${r.year_level ? ' · ' + escHtml(r.year_level) : ''}</td>
         <td data-label="Submitted">${formatDate(r.created_at)}</td>
         <td data-label="Status">${statusBadge(r.account_status)}</td>
