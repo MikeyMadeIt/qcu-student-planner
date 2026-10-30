@@ -53,7 +53,18 @@
 }
 
 .adm-name {
+    display: block;
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-weight: 600;
+}
+
+@media (max-width: 960px) {
+    .adm-name {
+        max-width: 9rem;
+    }
 }
 
 .adm-sub {
@@ -393,4 +404,228 @@
 
 .main-content:has(> .topbar:first-child) {
     padding-top: var(--space-4);
+}
+
+/* ---------- Admin header: role pill, nav badges, column responsiveness ---------- */
+
+.role-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 1.75rem;
+    margin-right: var(--space-2);
+    padding: 0 10px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(var(--accent), .35);
+    background: rgba(var(--accent), .10);
+    color: rgb(var(--accent));
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+
+/* Reset native <button> chrome on the logout control so it matches the
+   <a> profile-item entries above it (full-width row, no border/background,
+   left-aligned text, pointer cursor) instead of looking like a bare system button. */
+.profile-item-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    appearance: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.profile-item-btn:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.nav-link-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nav-badge {
+    flex: 0 0 auto;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background: var(--danger);
+    color: #fff;
+    font-size: .66rem;
+    font-weight: 800;
+    line-height: 1.25rem;
+    text-align: center;
+}
+
+.nav-badge[hidden] {
+    display: none;
+}
+
+/* Desktop All Users-style tables: explicit columns rather than the generic
+   label/value stack used elsewhere, so the table keeps real column alignment
+   down to tablet width. Only the mobile breakpoint collapses to No./Email/Actions.
+   Name and email read naturally left-aligned; every other column (being a short,
+   single-value field — a count, a status, a date) reads cleaner centered, matching
+   its centered header. */
+.adm-table-cols {
+    font-size: .8rem;
+}
+
+.adm-table-cols td,
+.adm-table-cols th {
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.adm-table-cols .adm-col-wide,
+.adm-table-cols .adm-col-email {
+    text-align: left;
+}
+
+.adm-col-no {
+    width: 3rem;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: .8rem;
+}
+
+/* Icon-only actions (desktop and mobile alike) — the label is still available
+   to assistive tech and as a native tooltip via title/aria-label. */
+.adm-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Combined with the button-type class (.btn-ghost.adm-icon-btn, not just
+   .adm-icon-btn alone) so this beats .btn-ghost.btn-sm's own height/padding on
+   specificity — otherwise the btn-sm rule's horizontal padding and 2rem height
+   (with no matching width) win and the box renders as a stretched rectangle
+   instead of a square. */
+.btn-ghost.adm-icon-btn,
+.btn-accent.adm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    line-height: 1;
+}
+
+.adm-icon-btn + .adm-icon-btn {
+    margin-left: 4px;
+}
+
+/* Mobile: keep real table semantics (unlike the generic .adm-table stacking
+   rule above) and show only No. / Email Address / Actions, per the brief —
+   Full Name and every other column move behind the row's View action. Explicit
+   column widths (rather than letting flex/auto sizing fight each other) are
+   what stop the actions cell from wrapping onto its own line and overlapping
+   the row below. */
+@media (max-width: 720px) {
+    /* table-layout: auto (not fixed) — No. and Actions size to their own small
+       content via the width:1%/white-space:nowrap trick below, and Email Address,
+       the only column left unconstrained, naturally takes whatever space remains
+       between them instead of three equally-fought-over fixed widths. */
+    table.adm-table-cols {
+        display: table;
+        table-layout: auto;
+        width: 100%;
+    }
+    .adm-table-cols thead {
+        display: table-header-group;
+    }
+    .adm-table-cols tbody {
+        display: table-row-group;
+    }
+    .adm-table-cols tr {
+        display: table-row;
+    }
+    .adm-table-cols td,
+    .adm-table-cols th {
+        display: table-cell;
+        padding: 10px 8px;
+        font-size: .78rem;
+    }
+    .adm-table-cols td::before {
+        content: none;
+    }
+    .adm-table-cols .adm-col-hide-mobile,
+    .adm-table-cols .adm-col-wide {
+        display: none;
+    }
+    .adm-table-cols .adm-col-no {
+        width: 1%;
+        padding-right: 10px;
+        font-size: .72rem;
+        white-space: nowrap;
+    }
+    .adm-table-cols .adm-col-email {
+        padding-left: 10px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    .adm-table-cols .adm-actions {
+        width: 1%;
+        padding-left: 10px;
+        white-space: nowrap;
+    }
+    .btn-ghost.adm-icon-btn,
+    .btn-accent.adm-icon-btn {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: .82rem;
+    }
+    .adm-icon-btn + .adm-icon-btn {
+        margin-left: 2px;
+    }
+}
+
+/* ---------- Coming-soon placeholder (sidebar sections not yet implemented) ---------- */
+
+.adm-placeholder {
+    text-align: center;
+    padding: var(--space-6) var(--space-4);
+    color: var(--text-faint);
+}
+
+.adm-placeholder i {
+    font-size: 2rem;
+    opacity: .5;
+    margin-bottom: var(--space-3);
+    display: block;
+}
+
+.adm-placeholder h2 {
+    color: var(--text);
+    font-size: 1.1rem;
+    margin-bottom: var(--space-2);
+}
+
+.adm-placeholder p {
+    max-width: 34rem;
+    margin: 0 auto;
+    font-size: .88rem;
+}
+
+.adm-placeholder-tag {
+    display: inline-block;
+    margin-bottom: var(--space-3);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    border: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    font-size: .64rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
 }

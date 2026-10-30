@@ -133,7 +133,7 @@ async function init() {
     const admin = await requireAdmin();
     if (!admin) return;
 
-    renderShell('admin-verification');
+    renderShell('admin-verification', admin);
     mountAdminTopbar(admin);
 
     const params = new URLSearchParams(location.search);

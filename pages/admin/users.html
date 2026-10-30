@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>User Management · QCU Student Planner</title>
+<title>All Users · QCU Student Planner</title>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
 <link rel="manifest" href="../../manifest.json">
@@ -18,24 +18,12 @@
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content">
-    <div class="topbar adm-topbar">
-      <a class="shell-brand adm-topbar-brand" href="dashboard.html" aria-label="QCU Planner admin">
-        <span class="dot"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
-        <span>QCU Planner<small>Admin</small></span>
-      </a>
-      <div class="topbar-controls">
-        <div class="theme-switch" role="radiogroup" aria-label="Theme" data-theme-switch></div>
-        <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-label="Toggle sidebar"><i class="bi bi-list" aria-hidden="true"></i></button>
-      </div>
-    </div>
-
-    <div class="topbar"><div><h1 class="page-title">User Management</h1><p class="page-sub">All registered accounts, after review</p></div></div>
 
     <div class="glass card-pad mb-3">
       <div class="adm-filters">
         <div>
           <label for="admSearch" class="adm-label">Search</label>
-          <input id="admSearch" class="form-control" type="search" placeholder="Name, student no. or program" autocomplete="off">
+          <input id="admSearch" class="form-control" type="search" placeholder="Search by name, email or program" autocomplete="off">
         </div>
         <div><label for="admStatus" class="adm-label">Status</label>
           <select id="admStatus" class="form-select">
@@ -55,8 +43,18 @@
       </div>
       <div id="admLoading" class="adm-loading"><i class="bi bi-hourglass-split"></i> Loading…</div>
       <div class="adm-table-wrap">
-        <table class="adm-table">
-          <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col">Registered</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr></thead>
+        <table class="adm-table adm-table-cols">
+          <thead><tr>
+            <th scope="col" class="adm-col-no">No.</th>
+            <th scope="col" class="adm-col-wide">Full Name</th>
+            <th scope="col" class="adm-col-email">Email Address</th>
+            <th scope="col" class="adm-col-hide-mobile">Campus</th>
+            <th scope="col" class="adm-col-hide-mobile">Program</th>
+            <th scope="col" class="adm-col-hide-mobile">Year Level</th>
+            <th scope="col" class="adm-col-hide-mobile">Account Status</th>
+            <th scope="col" class="adm-col-hide-mobile">Registration Date</th>
+            <th scope="col" class="text-end">Actions</th>
+          </tr></thead>
           <tbody id="admBody"></tbody>
         </table>
       </div>
