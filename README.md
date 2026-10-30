@@ -1,6 +1,6 @@
 # 📘 QCU Student Planner — PWA
 
-A premium, offline-first Student Planner Progressive Web App built with **HTML5, CSS3, Bootstrap 5.3, and vanilla JavaScript** — no frameworks and no backend yet. Sign-in and registration screens are interface only until authentication is connected. Every byte of your data stays on your own device in `localStorage`.
+A premium, offline-first Student Planner Progressive Web App built with **HTML5, CSS3, Bootstrap 5.3, and vanilla JavaScript**. Account authentication and profile/admin workflows use the configured Supabase integration; planner records are stored in the browser's `localStorage`.
 
 ---
 
@@ -15,6 +15,8 @@ A premium, offline-first Student Planner Progressive Web App built with **HTML5,
 - **Notes** — lightweight markdown (bold, italic, headings, checklists, code), pin, favorite, search
 - **Wallpaper Generator** — canvas-based lock-screen wallpapers from your live schedule in 8 themes (Minimal, Dark, Glassmorphism, Gradient, Neon, Cyberpunk, Pastel, AMOLED), multiple resolutions, PNG/JPG export
 - **Settings** — student profile, semester dates, Dark/Light/AMOLED themes with 5 accent colors, notification toggles, export/import/reset data
+- **Notifications** — dedicated task-reminder inbox with unread/read filters and persistent read state; the header shows a quick preview
+- **Inbox** — dedicated messaging interface and header entry point; message delivery is unavailable until a messaging backend is added
 - **Installable PWA** — manifest + service worker, offline caching, "Install App" prompt
 - **Mobile-first** — responsive down to small phones, bottom nav with a "More" sheet so every page is always reachable
 
@@ -58,7 +60,7 @@ qcu-student-planner/
 
 ## 🗄️ Data & Privacy
 
-All data (subjects, tasks, notes, grades, attendance, habits, settings) is stored **only** in your browser's `localStorage` — nothing is sent to a server. Clearing your browser data or using a different browser/device means starting fresh, so use **Settings → Export All Data** regularly to back up, and **Import Data** to restore.
+Planner data (subjects, tasks, notes, grades, attendance, and settings) is stored in this browser's `localStorage`. Account authentication and profile data use the configured Supabase service. Task-reminder read states are also device-local. Clearing browser data or using another browser/device means planner data and read states will not follow you, so use **Settings → Export All Data** regularly to back up planner records. The current project does not include a conversation/message-delivery backend.
 
 ---
 

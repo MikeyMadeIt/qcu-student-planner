@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notifications · Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/notifications.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">Notifications</h1>
+        <p class="page-sub">Task reminders due soon, derived from your planner data.</p>
+      </div>
+      <button class="btn btn-ghost" type="button" id="markAllReadBtn" disabled>
+        <i class="bi bi-check2-all" aria-hidden="true"></i> Mark all as read
+      </button>
+    </div>
+
+    <div class="notification-filters" role="group" aria-label="Filter notifications">
+      <button class="notification-filter is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+      <button class="notification-filter" type="button" data-filter="unread" aria-pressed="false">Unread</button>
+      <button class="notification-filter" type="button" data-filter="read" aria-pressed="false">Read</button>
+      <span class="notification-device-note">Read status is saved on this device.</span>
+    </div>
+
+    <p class="notification-status" id="notificationStatus" role="status" aria-live="polite">Loading notifications…</p>
+    <div class="notification-layout" id="notificationLayout" hidden>
+      <section class="notification-list glass" aria-label="Notification list">
+        <div class="notification-list-items" id="notificationList" role="list"></div>
+        <div class="notification-list-empty" id="notificationListEmpty" hidden>
+          <i class="bi bi-bell-slash" aria-hidden="true"></i>
+          <strong>No notifications here</strong>
+          <span id="notificationEmptyText">New task reminders will appear here when they are due soon.</span>
+        </div>
+        <button class="notification-load-more" id="notificationLoadMore" type="button" hidden>Load more</button>
+      </section>
+      <section class="notification-detail glass" id="notificationDetail" aria-label="Notification details" aria-live="polite">
+        <div class="notification-detail-empty">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <strong>Select a notification</strong>
+          <span>Details for the selected reminder will appear here.</span>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/custom-select.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/modules/notifications.js"></script>
+<script>
+  renderShell('notifications');
+  initNotifications();
+</script>
+</body>
+</html>

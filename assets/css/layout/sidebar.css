@@ -16,7 +16,7 @@
     height: 100vh;
     padding: var(--space-4) var(--sidebar-padding-x);
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     border-right: 1px solid var(--border);
     background: var(--nav-bg);
     backdrop-filter: blur(18px);
@@ -58,6 +58,16 @@
     padding-bottom: var(--space-3);
     margin-bottom: var(--space-2);
     border-bottom: 1px solid var(--border);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .sidebar-quick-link {
@@ -126,6 +136,7 @@
 /* Everything from "Add Task / Export" down through the profile row is pinned to the bottom
    of the sidebar, below the scrollable nav, in a single predictable block. */
 .sidebar-bottom {
+    flex: 0 0 auto;
     margin-top: auto;
     display: flex;
     flex-direction: column;
