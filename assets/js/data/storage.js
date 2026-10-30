@@ -41,6 +41,8 @@ function readKey(key, fallback) {
 function writeKey(key, value) {
     try {
         localStorage.setItem(key, JSON.stringify(value));
+        if (key === DB_KEYS.tasks)
+            window.dispatchEvent(new CustomEvent('planner:tasks-changed'));
         return true;
     }
     catch (e) {

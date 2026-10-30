@@ -193,6 +193,10 @@ SYLLABUS  —  List page + View page (Refined Compact Edition)
     margin-top: 2px;
 }
 
+#courseModal .modal-content > .modal-close-floating {
+    display: none;
+}
+
 .syl-field-label {
     font-size: .72rem;
     color: var(--text-faint);
