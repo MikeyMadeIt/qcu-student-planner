@@ -18,10 +18,17 @@ const NAV_ITEMS = [
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help', key: 'help', base: 'app' },
     { href: 'report.html', icon: 'bi-flag', label: 'Report', key: 'report', base: 'app' },
-    { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Admin dashboard', key: 'admin-dashboard', base: 'admin' },
-    { href: 'verification.html', icon: 'bi-person-check', label: 'Account verification', key: 'admin-verification', base: 'admin' },
-    { href: 'users.html', icon: 'bi-people-fill', label: 'User management', key: 'admin-users', base: 'admin' },
-    { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Activity logs', key: 'admin-activity', base: 'admin' },
+    { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
+    { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
+    { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
+    { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
+    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
+    { href: 'tickets.html', icon: 'bi-life-preserver', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
+    { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin' },
+    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'admin-announcements', base: 'admin' },
+    { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin' },
+    { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
+    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin' },
 ];
 const QUICK_ACCESS_KEYS = ['inbox', 'notifications'];
 const THEME_OPTIONS = [
@@ -49,10 +56,17 @@ const PAGE_SECTIONS = {
     settings: 'Utilities',
     help: 'Utilities',
     report: 'Utilities',
-    'admin-dashboard': 'Administration',
-    'admin-verification': 'Administration',
-    'admin-users': 'Administration',
-    'admin-activity': 'Administration',
+    'admin-dashboard': 'Overview',
+    'admin-users': 'User Management',
+    'admin-verification': 'User Management',
+    'admin-rejected': 'User Management',
+    'admin-inbox': 'Communications',
+    'admin-tickets': 'Communications',
+    'admin-email': 'Communications',
+    'admin-announcements': 'Communications',
+    'admin-reports': 'System',
+    'admin-activity': 'System',
+    'admin-settings': 'System',
 };
 /* ---------- Sign out ---------- */
 /* Dynamic import specifiers in this classic script resolve relative to layout.js itself. */
@@ -259,6 +273,60 @@ function renderInboxPanelBody() {
     return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Messaging is not connected<span>Conversations will appear here when messaging is available.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
 }
 
+/* Admin header bar: sidebar toggle + dynamic page title on the left; theme toggle,
+   avatar and a role pill (never hardcoded — filled in from the real `profiles.role`
+   value by admin-shared.js's mountAdminTopbar, once the authenticated admin's own
+   row has been verified) on the right. No notifications/inbox popovers here — the
+   admin Inbox is its own sidebar page, not a header shortcut. */
+function renderAdminShellBar(activeKey, admin) {
+    const main = document.querySelector('.main-content');
+    if (!main || document.getElementById('shellBar'))
+        return;
+    const pageTitle = PAGE_TITLES[activeKey] || 'Admin';
+    const roleLabel = admin && admin.role ? admin.role.replace(/_/g, ' ').toUpperCase() : '';
+    const name = (admin && admin.full_name) || 'Administrator';
+    const initial = escHtml(name.charAt(0).toUpperCase() || 'A');
+    const bar = document.createElement('header');
+    bar.id = 'shellBar';
+    bar.className = 'shell-bar';
+    bar.innerHTML = `
+        <div class="shell-bar-left">
+            <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
+                aria-expanded="false" aria-controls="navDrawer" aria-label="Open navigation">
+                <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
+            </button>
+            <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
+        </div>
+        <div class="shell-bar-right">
+            <span class="role-pill js-admin-role" id="shellRolePill"${roleLabel ? '' : ' hidden'}>${escHtml(roleLabel)}</span>
+            <div class="profile-menu" id="profileMenu">
+                <button type="button" class="profile-trigger profile-trigger-circle" id="profileTrigger"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="profilePanel" aria-label="Account menu">
+                    <span class="profile-avatar js-admin-avatar" aria-hidden="true" id="shellAdminAvatar">${initial}</span>
+                </button>
+                <div class="profile-panel" id="profilePanel" role="menu" aria-label="Account menu" hidden>
+                    <div class="profile-panel-head">
+                        <span class="profile-avatar profile-avatar-lg js-admin-avatar" aria-hidden="true">${initial}</span>
+                        <div>
+                            <div class="profile-panel-name js-admin-fullname">${escHtml(name)}</div>
+                            <div class="profile-panel-sub js-admin-email" id="shellAdminEmail">&nbsp;</div>
+                        </div>
+                    </div>
+                    <div class="profile-panel-section">
+                        <div class="profile-panel-label">Theme</div>
+                        <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
+                    </div>
+                    <div class="profile-panel-section">
+                        <a class="profile-item" role="menuitem" href="settings.html"><i class="bi bi-sliders" aria-hidden="true"></i>Settings</a>
+                        <button type="button" class="profile-item profile-item-btn js-admin-logout" role="menuitem"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    main.insertBefore(bar, main.firstChild);
+    initHeaderPanel(bar, 'profileTrigger', 'profilePanel', 'profileMenu');
+}
+
 function renderShellBar(activeKey) {
     const main = document.querySelector('.main-content');
     if (!main || document.getElementById('shellBar'))
@@ -437,9 +505,13 @@ function wireModalDefaults() {
         } else {
             const header = content.querySelector(':scope > .modal-header');
             const closeSelector = 'button.btn-close, button[data-bs-dismiss="modal"]';
-            let closeButton = header
-                ? header.querySelector(closeSelector)
-                : content.querySelector(':scope > .modal-close-floating');
+            /* Look for an existing close button anywhere inside the modal content —
+               not just as a direct child of a .modal-header or of .modal-content —
+               since several of our modals (e.g. the admin "view" detail modal) put
+               their own button.btn-close inside a plain header-style wrapper div
+               instead of a real .modal-header. Scoping the search too narrowly made
+               this miss that button and inject a second, floating one on top of it. */
+            let closeButton = content.querySelector(closeSelector) || content.querySelector('.modal-close-floating');
             if (!closeButton) {
                 closeButton = document.createElement('button');
                 closeButton.type = 'button';
@@ -451,13 +523,10 @@ function wireModalDefaults() {
                     content.appendChild(closeButton);
                 }
             }
-            if (header) {
-                header.querySelectorAll(closeSelector).forEach(button => {
-                    if (button !== closeButton)
-                        button.remove();
-                });
-                content.querySelectorAll(':scope > .modal-close-floating').forEach(button => button.remove());
-            }
+            content.querySelectorAll(`${closeSelector}, .modal-close-floating`).forEach(button => {
+                if (button !== closeButton)
+                    button.remove();
+            });
             closeButton.type = 'button';
             if (!closeButton.classList.contains('btn-close') && !closeButton.textContent.trim())
                 closeButton.classList.add('btn-close');
@@ -500,18 +569,20 @@ function wireModalDefaults() {
     });
 }
 
-function renderShell(activeKey) {
+function renderShell(activeKey, admin) {
     const isAdminArea = String(activeKey).startsWith('admin-');
-    /* Admin pages use only the sidebar for navigation — no top profile/brand
-       bar, and no link back into the student app. The sidebar brand itself
-       is plain text (not a link) so there's nothing to click into student
-       pages from here. */
-    if (!isAdminArea) renderShellBar(activeKey);
+    if (isAdminArea) renderAdminShellBar(activeKey, admin);
+    else renderShellBar(activeKey);
     // sidebar
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
         const sidebarGroups = isAdminArea
-            ? [{ label: 'Administration', keys: ['admin-dashboard', 'admin-verification', 'admin-users', 'admin-activity'] }]
+            ? [
+                { label: 'Overview', keys: ['admin-dashboard'] },
+                { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
+                { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email', 'admin-announcements'] },
+                { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
+            ]
             : [
                 { label: 'Overview', keys: ['dashboard'] },
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
@@ -544,7 +615,8 @@ function renderShell(activeKey) {
                 if (!n)
                     return;
                 const isActive = n.key === activeKey;
-                sidebarHtml += `<a class="nav-link ${isActive ? 'active' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i>${n.label}</a>`;
+                const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>` : '';
+                sidebarHtml += `<a class="nav-link ${isActive ? 'active' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
         });
         sidebarHtml += `</nav><div class="sidebar-bottom">`;
@@ -582,7 +654,7 @@ function renderShell(activeKey) {
     initThemeOptions();
     wireSidebarToggles();
     wireModalDefaults();
-    if (!isAdminArea) hydrateProfileIdentity();
+    hydrateProfileIdentity();
 }
 
 /* ---------- Real authenticated identity (profile sections, bottom of both sidebars) ----------
@@ -611,7 +683,7 @@ async function hydrateProfileIdentity() {
         if (profileResult.ok && profileResult.data && profileResult.data.full_name)
             fullName = profileResult.data.full_name;
 
-        document.querySelectorAll('#sidebarUserName, #drawerUserEmail, #topbarUserEmail').forEach(el => {
+        document.querySelectorAll('#sidebarUserName, #drawerUserEmail, #topbarUserEmail, #shellAdminEmail').forEach(el => {
             el.textContent = email;
             el.title = email;
         });
@@ -619,6 +691,8 @@ async function hydrateProfileIdentity() {
             const initial = escHtml(fullName.charAt(0).toUpperCase() || 'S');
             document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; });
             document.querySelectorAll('#sidebarProfileAvatar, #drawerProfileAvatar, #topbarProfileAvatar').forEach(el => { el.textContent = initial; });
+            document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; });
+            document.querySelectorAll('.js-admin-avatar').forEach(el => { el.textContent = initial; });
         }
     } catch (error) {
         /* No live Supabase session available (offline, static preview, etc.) — keep the
@@ -635,7 +709,10 @@ const DRAWER_GROUPS = [
     { label: 'Utilities', keys: ['settings', 'help', 'report'] }
 ];
 const ADMIN_DRAWER_GROUPS = [
-    { label: 'Administration', keys: ['admin-dashboard', 'admin-verification', 'admin-users', 'admin-activity'] },
+    { label: 'Overview', keys: ['admin-dashboard'] },
+    { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
+    { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email', 'admin-announcements'] },
+    { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
 ];
 function ensureNavDrawer(activeKey) {
     const existing = document.getElementById('navDrawer');
@@ -661,9 +738,10 @@ function ensureNavDrawer(activeKey) {
             ${group.keys.map(key => {
         const item = itemMap[key];
         const isActive = key === activeKey;
+        const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>` : '';
         return `<a class="drawer-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
                     <i class="bi ${item.icon}" aria-hidden="true"></i>
-                    <span>${item.label}</span>
+                    <span>${item.label}</span>${badgeHtml}
                 </a>`;
     }).join('')}
         </div>`).join('');

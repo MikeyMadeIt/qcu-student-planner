@@ -186,7 +186,7 @@ async function init() {
     const admin = await requireAdmin();
     if (!admin) return;
 
-    renderShell('admin-dashboard');
+    renderShell('admin-dashboard', admin);
     mountAdminTopbar(admin);
 
     const loading = document.getElementById('admDashLoading');

@@ -68,7 +68,7 @@ export const AdminService = {
         }
     },
 
-    async listAccounts({ status = 'all', search = '', page = 1, pageSize = 20 } = {}) {
+    async listAccounts({ status = 'all', search = '', dateFrom = '', dateTo = '', sort = 'created_desc', page = 1, pageSize = 20 } = {}) {
         try {
             const supabase = getSupabase();
             let query = supabase
@@ -80,10 +80,22 @@ export const AdminService = {
                 const term = search.trim().replace(/[%_]/g, '');
                 query = query.or(`full_name.ilike.%${term}%,course.ilike.%${term}%,email.ilike.%${term}%`);
             }
+            // Registration-date range — dateTo is a calendar day, so push it to that
+            // day's end rather than midnight to keep the day itself inclusive.
+            if (dateFrom) query = query.gte('created_at', new Date(`${dateFrom}T00:00:00`).toISOString());
+            if (dateTo) query = query.lte('created_at', new Date(`${dateTo}T23:59:59.999`).toISOString());
+
+            const [sortField, sortDir] = {
+                created_desc: ['created_at', false],
+                created_asc: ['created_at', true],
+                name_asc: ['full_name', true],
+                name_desc: ['full_name', false],
+            }[sort] || ['created_at', false];
+            query = query.order(sortField, { ascending: sortDir, nullsFirst: sortDir });
 
             const from = (page - 1) * pageSize;
             const to = from + pageSize - 1;
-            query = query.order('created_at', { ascending: false }).range(from, to);
+            query = query.range(from, to);
 
             const { data, error, count } = await query;
 

@@ -359,6 +359,19 @@
     border-color: var(--border);
 }
 
+/* The avatar-only trigger (student header avatar, admin header avatar) must stay a
+   perfect circle on hover/focus too. .profile-trigger's own asymmetric padding
+   (sized for the name+caret variant) was winning the cascade over
+   .profile-trigger-circle's padding:0/fixed size, since both are single-class
+   selectors — this combined, higher-specificity selector makes the circle variant
+   reliably square regardless of file order. */
+.profile-trigger.profile-trigger-circle {
+    padding: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    min-height: 0;
+}
+
 .profile-caret {
     font-size: 0.65rem;
     color: var(--text-faint);
@@ -550,7 +563,8 @@
 
     .shell-icon-btn,
     .shell-menu-btn,
-    .profile-trigger-circle {
+    .profile-trigger-circle,
+    .profile-trigger.profile-trigger-circle {
         width: 2.125rem;
         height: 2.125rem;
     }
