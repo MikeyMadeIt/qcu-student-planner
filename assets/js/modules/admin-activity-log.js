@@ -1,13 +1,9 @@
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
-import { escHtml, formatDateTime, mountAdminTopbar, renderError } from './admin-shared.js';
+import { escHtml, formatDateTime, mountAdminTopbar, renderError, ACTION_LABELS } from './admin-shared.js';
 
 const PAGE_SIZE = 25;
 let currentPage = 1;
-
-const ACTION_LABELS = {
-    account_status_change: 'Account status change',
-};
 
 async function loadRows() {
     const body = document.getElementById('admBody');

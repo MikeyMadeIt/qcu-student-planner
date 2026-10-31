@@ -19,40 +19,57 @@
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content">
 
+    <div class="d-flex justify-content-between align-items-center mb-3 adm-dash-head">
+      <div class="section-title mb-0"><i class="bi bi-speedometer2"></i>Overview</div>
+      <button type="button" class="btn btn-ghost btn-sm" id="admRefreshBtn" aria-label="Refresh dashboard">
+        <i class="bi bi-arrow-clockwise" id="admRefreshIcon" aria-hidden="true"></i> Refresh
+      </button>
+    </div>
+
     <div id="admDashLoading" class="adm-loading"><i class="bi bi-hourglass-split"></i> Loading dashboard…</div>
     <div id="admDashContent" hidden>
 
       <div class="adm-stats-grid">
-        <div class="glass card-pad adm-stat-card total">
+        <a class="glass card-pad adm-stat-card total" href="users.html">
           <i class="bi bi-people-fill adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statTotal">0</div>
-          <div class="adm-stat-label">Total accounts</div>
-        </div>
-        <div class="glass card-pad adm-stat-card pending">
+          <div class="adm-stat-label">Total users</div>
+        </a>
+        <a class="glass card-pad adm-stat-card pending" href="verification.html?status=pending">
           <i class="bi bi-hourglass-split adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statPending">0</div>
-          <div class="adm-stat-label">Pending</div>
-        </div>
-        <div class="glass card-pad adm-stat-card approved">
+          <div class="adm-stat-label">Pending approvals</div>
+        </a>
+        <a class="glass card-pad adm-stat-card approved" href="users.html?status=approved">
           <i class="bi bi-check-circle-fill adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statApproved">0</div>
-          <div class="adm-stat-label">Approved</div>
-        </div>
-        <div class="glass card-pad adm-stat-card rejected">
+          <div class="adm-stat-label">Approved accounts</div>
+        </a>
+        <a class="glass card-pad adm-stat-card rejected" href="rejected.html">
           <i class="bi bi-x-circle-fill adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statRejected">0</div>
-          <div class="adm-stat-label">Rejected</div>
-        </div>
-        <div class="glass card-pad adm-stat-card suspended">
+          <div class="adm-stat-label">Rejected accounts</div>
+        </a>
+        <a class="glass card-pad adm-stat-card suspended" href="users.html?status=suspended">
           <i class="bi bi-pause-circle-fill adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statSuspended">0</div>
           <div class="adm-stat-label">Suspended</div>
-        </div>
-        <div class="glass card-pad adm-stat-card new">
+        </a>
+        <a class="glass card-pad adm-stat-card new" href="users.html">
           <i class="bi bi-calendar-plus-fill adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statNew7">0</div>
           <div class="adm-stat-label">New, last 7 days</div>
-        </div>
+        </a>
+        <a class="glass card-pad adm-stat-card" href="inbox.html">
+          <i class="bi bi-envelope-fill adm-stat-icon" aria-hidden="true"></i>
+          <div class="adm-stat-value" id="statUnreadMsgs">0</div>
+          <div class="adm-stat-label">Unread messages (all students)</div>
+        </a>
+        <a class="glass card-pad adm-stat-card" href="tickets.html?status=open">
+          <i class="bi bi-life-preserver adm-stat-icon" aria-hidden="true"></i>
+          <div class="adm-stat-value" id="statOpenTickets">0</div>
+          <div class="adm-stat-label">Open support tickets</div>
+        </a>
       </div>
 
       <div class="adm-chart-grid mb-3">
@@ -83,26 +100,78 @@
       </div>
 
       <div class="glass card-pad mb-3">
-        <div class="section-title mb-2"><i class="bi bi-lightning-charge-fill"></i>Quick links</div>
+        <div class="section-title mb-2"><i class="bi bi-lightning-charge-fill"></i>Quick actions</div>
         <div class="adm-quick-links">
-          <a class="btn btn-accent btn-sm" href="verification.html?status=pending"><i class="bi bi-person-check"></i> Account verification</a>
-          <a class="btn btn-ghost btn-sm" href="users.html"><i class="bi bi-people-fill"></i> User management</a>
-          <a class="btn btn-ghost btn-sm" href="activity-log.html"><i class="bi bi-clock-history"></i> Activity logs</a>
+          <a class="btn btn-accent btn-sm" href="verification.html?status=pending"><i class="bi bi-person-check"></i> Review pending approvals</a>
+          <a class="btn btn-ghost btn-sm" href="users.html"><i class="bi bi-people-fill"></i> View all users</a>
+          <a class="btn btn-ghost btn-sm" href="inbox.html"><i class="bi bi-inbox"></i> Open inbox</a>
+          <a class="btn btn-ghost btn-sm" href="tickets.html"><i class="bi bi-life-preserver"></i> View support tickets</a>
+          <a class="btn btn-ghost btn-sm" href="activity-log.html"><i class="bi bi-clock-history"></i> Review audit logs</a>
         </div>
       </div>
 
-      <div class="glass card-pad">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="section-title mb-0"><i class="bi bi-person-plus-fill"></i>Recent registrations</div>
-          <a class="text-faint" style="font-size:.8rem" href="users.html">View all &rarr;</a>
+      <div class="adm-chart-grid mb-3">
+        <div class="glass card-pad">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title mb-0"><i class="bi bi-person-plus-fill"></i>Recent registrations</div>
+            <a class="text-faint" style="font-size:.8rem" href="users.html">View all &rarr;</a>
+          </div>
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th scope="col">Student</th><th scope="col">Program</th><th scope="col">Campus</th><th scope="col">Submitted</th><th scope="col">Status</th><th scope="col" class="text-end">Action</th></tr></thead>
+              <tbody id="recentList"></tbody>
+            </table>
+          </div>
+          <div id="recentEmpty" class="empty-state" hidden>No registrations yet.</div>
         </div>
-        <div class="adm-table-wrap">
-          <table class="adm-table">
-            <thead><tr><th scope="col">Student</th><th scope="col">Program</th><th scope="col">Campus</th><th scope="col">Submitted</th><th scope="col">Status</th><th scope="col" class="text-end">Action</th></tr></thead>
-            <tbody id="recentList"></tbody>
-          </table>
+
+        <div class="glass card-pad">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title mb-0"><i class="bi bi-clock-history"></i>Recent admin activity</div>
+            <a class="text-faint" style="font-size:.8rem" href="activity-log.html">View all &rarr;</a>
+          </div>
+          <div id="activityLoading" class="adm-loading" hidden><i class="bi bi-hourglass-split"></i> Loading…</div>
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th scope="col">When</th><th scope="col">Admin</th><th scope="col">Action</th><th scope="col">Account</th></tr></thead>
+              <tbody id="activityList"></tbody>
+            </table>
+          </div>
+          <div id="activityEmpty" class="empty-state" hidden>No administrative actions have been recorded yet.</div>
+          <div id="activityError" hidden></div>
         </div>
-        <div id="recentEmpty" class="empty-state" hidden>No registrations yet.</div>
+      </div>
+
+      <div class="adm-chart-grid mb-3">
+        <div class="glass card-pad">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title mb-0"><i class="bi bi-envelope-paper-fill"></i>Recent administrative messages</div>
+            <a class="text-faint" style="font-size:.8rem" href="inbox.html">View all &rarr;</a>
+          </div>
+          <p class="text-faint mb-2" style="font-size:.78rem" id="msgsTotalLine"></p>
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th scope="col">Subject</th><th scope="col">Category</th><th scope="col">Recipients</th><th scope="col">Sent</th></tr></thead>
+              <tbody id="recentMsgsList"></tbody>
+            </table>
+          </div>
+          <div id="recentMsgsEmpty" class="empty-state" hidden>No messages have been sent yet.</div>
+        </div>
+
+        <div class="glass card-pad">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title mb-0"><i class="bi bi-life-preserver"></i>Recent reports</div>
+            <a class="text-faint" style="font-size:.8rem" href="tickets.html">View all &rarr;</a>
+          </div>
+          <p class="text-faint mb-2" style="font-size:.78rem" id="ticketsTotalLine"></p>
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead><tr><th scope="col">Ticket</th><th scope="col">Student</th><th scope="col">Subject</th><th scope="col">Status</th></tr></thead>
+              <tbody id="recentTicketsList"></tbody>
+            </table>
+          </div>
+          <div id="recentTicketsEmpty" class="empty-state" hidden>No reports have been submitted yet.</div>
+        </div>
       </div>
     </div>
     <div id="admDashError" class="glass card-pad" hidden></div>

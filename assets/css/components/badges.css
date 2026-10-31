@@ -34,3 +34,65 @@
     border-color: rgba(148,163,184,.35);
     background: rgba(148,163,184,.12);
 }
+
+/* ---------- Support ticket statuses ---------- */
+.status-badge.ticket-status-open {
+    color: var(--warning);
+    border-color: rgba(180,83,9,.35);
+    background: rgba(180,83,9,.10);
+}
+
+.status-badge.ticket-status-in_progress {
+    color: #4F8CFF;
+    border-color: rgba(79,140,255,.35);
+    background: rgba(79,140,255,.10);
+}
+
+.status-badge.ticket-status-waiting_user {
+    color: #B45309;
+    border-color: rgba(180,83,9,.35);
+    background: rgba(180,83,9,.08);
+}
+
+.status-badge.ticket-status-resolved {
+    color: var(--success);
+    border-color: rgba(52,211,153,.35);
+    background: rgba(52,211,153,.10);
+}
+
+.status-badge.ticket-status-closed {
+    color: var(--text-soft);
+    border-color: rgba(148,163,184,.35);
+    background: rgba(148,163,184,.12);
+}
+
+/* ---------- Admin message categories ---------- */
+.status-badge.msg-cat-announcement {
+    color: #FB7185;
+    border-color: rgba(251,113,133,.35);
+    background: rgba(251,113,133,.10);
+}
+
+.status-badge.msg-cat-update {
+    color: #4F8CFF;
+    border-color: rgba(79,140,255,.35);
+    background: rgba(79,140,255,.10);
+}
+
+.status-badge.msg-cat-reminder {
+    color: var(--warning);
+    border-color: rgba(180,83,9,.35);
+    background: rgba(180,83,9,.10);
+}
+
+.status-badge.msg-cat-maintenance {
+    color: #B45309;
+    border-color: rgba(180,83,9,.35);
+    background: rgba(180,83,9,.08);
+}
+
+.status-badge.msg-cat-general {
+    color: var(--text-soft);
+    border-color: var(--border);
+    background: var(--surface-2);
+}
