@@ -1,6 +1,10 @@
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
-import { escHtml, formatDateTime, statusBadge, mountAdminTopbar, renderError } from './admin-shared.js';
+import { escHtml, formatDateTime, statusBadge, mountAdminTopbar, renderErrorWithRetry, ACTION_LABELS } from './admin-shared.js';
+import { MESSAGE_CATEGORY_LABELS, ticketStatusBadge } from './comms-shared.js';
+
+const ACTIVITY_PREVIEW_SIZE = 6;
+let isLoading = false;
 
 let distChartInstance = null;
 let trendChartInstance = null;
@@ -182,24 +186,148 @@ function renderBreakdownCharts(all) {
     }
 }
 
-async function init() {
-    const admin = await requireAdmin();
-    if (!admin) return;
+/* Renders the Recent Admin Activity widget from a listAuditLog() result. Kept separate
+   from the main stats load so a failure here (e.g. a permissions issue on that one table)
+   doesn't take down the rest of an otherwise-working dashboard. */
+async function loadRecentActivity() {
+    const loading = document.getElementById('activityLoading');
+    const list = document.getElementById('activityList');
+    const empty = document.getElementById('activityEmpty');
+    const errorBox = document.getElementById('activityError');
+    const table = list.closest('.adm-table-wrap');
 
-    renderShell('admin-dashboard', admin);
-    mountAdminTopbar(admin);
+    loading.hidden = false;
+    errorBox.hidden = true;
+    table.hidden = true;
+    empty.hidden = true;
 
-    const loading = document.getElementById('admDashLoading');
-    const content = document.getElementById('admDashContent');
-    const errorBox = document.getElementById('admDashError');
-
-    const result = await AdminService.getDashboardStats();
+    const result = await AdminService.listAuditLog({ page: 1, pageSize: ACTIVITY_PREVIEW_SIZE });
 
     loading.hidden = true;
 
     if (!result.ok) {
         errorBox.hidden = false;
-        renderError(errorBox, result.message);
+        renderErrorWithRetry(errorBox, result.message, loadRecentActivity);
+        return;
+    }
+
+    const { rows } = result.data;
+
+    if (!rows.length) {
+        empty.hidden = false;
+        return;
+    }
+
+    table.hidden = false;
+    list.innerHTML = rows.map(r => `
+        <tr>
+            <td data-label="When">${formatDateTime(r.created_at)}</td>
+            <td data-label="Admin">${escHtml(r.actor && r.actor.full_name ? r.actor.full_name : 'Administrator')}</td>
+            <td data-label="Action">${escHtml(ACTION_LABELS[r.action] || r.action)}</td>
+            <td data-label="Account">${escHtml(r.target && r.target.full_name ? r.target.full_name : '—')}</td>
+        </tr>`).join('');
+}
+
+/* Messaging + support ticket stats (Phase 5). Kept separate from the main
+   getDashboardStats() load, same reasoning as loadRecentActivity() above: a
+   problem here (e.g. the Phase 5 migration not yet applied) degrades only
+   these two cards/widgets instead of the whole dashboard. Message-count and
+   recipient-count are always shown as distinct numbers -- one message sent to
+   50 students is one row in "Recent administrative messages", never 50. */
+async function loadCommsStats() {
+    const unreadEl = document.getElementById('statUnreadMsgs');
+    const openEl = document.getElementById('statOpenTickets');
+    const msgsTotalLine = document.getElementById('msgsTotalLine');
+    const ticketsTotalLine = document.getElementById('ticketsTotalLine');
+    const msgsList = document.getElementById('recentMsgsList');
+    const msgsEmpty = document.getElementById('recentMsgsEmpty');
+    const ticketsList = document.getElementById('recentTicketsList');
+    const ticketsEmpty = document.getElementById('recentTicketsEmpty');
+
+    const result = await AdminService.getCommsStats();
+
+    if (!result.ok) {
+        unreadEl.textContent = '—';
+        openEl.textContent = '—';
+        msgsTotalLine.textContent = result.message;
+        ticketsTotalLine.textContent = result.message;
+        msgsList.closest('.adm-table-wrap').hidden = true;
+        ticketsList.closest('.adm-table-wrap').hidden = true;
+        msgsEmpty.hidden = false;
+        msgsEmpty.textContent = 'Messaging statistics could not be loaded.';
+        ticketsEmpty.hidden = false;
+        ticketsEmpty.textContent = 'Ticket statistics could not be loaded.';
+        return;
+    }
+
+    const { messagesTotal, unreadTotal, ticketsTotal, ticketsOpen, recentMessages, recentTickets } = result.data;
+
+    unreadEl.textContent = unreadTotal;
+    openEl.textContent = ticketsOpen;
+    msgsTotalLine.textContent = `${messagesTotal} message${messagesTotal === 1 ? '' : 's'} sent in total`;
+    ticketsTotalLine.textContent = `${ticketsTotal} report${ticketsTotal === 1 ? '' : 's'} submitted in total`;
+
+    const msgsTable = msgsList.closest('.adm-table-wrap');
+    if (!recentMessages.length) {
+        msgsTable.hidden = true;
+        msgsEmpty.hidden = false;
+        msgsEmpty.textContent = 'No messages have been sent yet.';
+    } else {
+        msgsTable.hidden = false;
+        msgsEmpty.hidden = true;
+        msgsList.innerHTML = recentMessages.map(m => `
+            <tr>
+                <td data-label="Subject">${escHtml(m.subject)}</td>
+                <td data-label="Category">${escHtml(MESSAGE_CATEGORY_LABELS[m.category] || m.category)}</td>
+                <td data-label="Recipients">${m.recipient_count}</td>
+                <td data-label="Sent">${formatDateTime(m.sent_at)}</td>
+            </tr>`).join('');
+    }
+
+    const ticketsTable = ticketsList.closest('.adm-table-wrap');
+    if (!recentTickets.length) {
+        ticketsTable.hidden = true;
+        ticketsEmpty.hidden = false;
+        ticketsEmpty.textContent = 'No reports have been submitted yet.';
+    } else {
+        ticketsTable.hidden = false;
+        ticketsEmpty.hidden = true;
+        ticketsList.innerHTML = recentTickets.map(t => `
+            <tr>
+                <td data-label="Ticket"><span class="text-faint" style="font-family:var(--font-mono);font-size:.76rem">${escHtml(t.ticket_ref)}</span></td>
+                <td data-label="Student">${escHtml(t.student && t.student.full_name ? t.student.full_name : 'Unnamed account')}</td>
+                <td data-label="Subject">${escHtml(t.subject)}</td>
+                <td data-label="Status">${ticketStatusBadge(escHtml, t.status)}</td>
+            </tr>`).join('');
+    }
+}
+
+async function loadDashboard() {
+    if (isLoading) return;
+    isLoading = true;
+
+    const refreshBtn = document.getElementById('admRefreshBtn');
+    const refreshIcon = document.getElementById('admRefreshIcon');
+    const loading = document.getElementById('admDashLoading');
+    const content = document.getElementById('admDashContent');
+    const errorBox = document.getElementById('admDashError');
+
+    refreshBtn.disabled = true;
+    refreshIcon.classList.add('adm-spin');
+    errorBox.hidden = true;
+    if (content.hidden) loading.hidden = false;
+
+    const result = await AdminService.getDashboardStats();
+
+    loading.hidden = true;
+    refreshBtn.disabled = false;
+    refreshIcon.classList.remove('adm-spin');
+    isLoading = false;
+
+    if (!result.ok) {
+        content.hidden = true;
+        errorBox.hidden = false;
+        renderErrorWithRetry(errorBox, result.message, loadDashboard);
         return;
     }
 
@@ -244,6 +372,21 @@ async function init() {
             </tr>`;
         }).join('');
     }
+
+    loadRecentActivity();
+    loadCommsStats();
+}
+
+async function init() {
+    const admin = await requireAdmin();
+    if (!admin) return;
+
+    renderShell('admin-dashboard', admin);
+    mountAdminTopbar(admin);
+
+    document.getElementById('admRefreshBtn').addEventListener('click', loadDashboard);
+
+    loadDashboard();
 }
 
 init();

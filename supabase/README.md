@@ -18,9 +18,45 @@ supabase db push
 ```
 
 or paste each file's contents into the Supabase Dashboard → SQL Editor and run
-them in order (0001 → 0006). Migrations 0002–0005 were already applied to the
+them in order (0001 → 0009). Migrations 0002–0005 were already applied to the
 live project in Phase 2 (each file says so in its header comment) and are safe
 to re-run — `create or replace` / `if not exists` throughout.
+
+**0008_messaging_and_support_tickets.sql is new in Phase 5** and must be
+applied before the admin Inbox, Support Tickets, student Inbox or the Report
+tab will work — it adds, with no Edge Function required (every write goes
+through a SECURITY DEFINER function, the same pattern as `set_account_status()`):
+
+- `admin_messages` / `admin_message_recipients` — one-way admin → student
+  messaging. `admin_send_message()` creates a message and every recipient row
+  in one transaction, always re-deriving the actual audience
+  (`role = 'student' and account_status = 'approved'`) from `profiles`
+  server-side, so a tampered request can never reach a pending/rejected/
+  suspended account. Students can read a message addressed to them and flip
+  its read state with `set_message_read_status()`; they can never reply, edit
+  it, or see another student's copy — there is no student-insert policy on
+  either table at all.
+- `support_tickets` / `support_ticket_notes` — the student Report tab.
+  `submit_support_report()` always stamps `student_id = auth.uid()` itself, so
+  a student can never file (or read) a report under another account no matter
+  what the client sends, and generates the `TCK-YYYYMMDD-NNNN` ticket
+  reference server-side. Only `admin_set_ticket_status()` /
+  `admin_add_ticket_note()` (both `is_admin()`-gated) can change a ticket's
+  status or attach an internal note; `support_ticket_notes` has no select
+  policy for anyone but an admin, so a student can never read it even for
+  their own ticket.
+- Both status-change functions write to the existing `admin_audit_log` from
+  0002, same append-only, no-client-write model as every other admin action.
+
+**0009_grant_messaging_tickets_privileges.sql must be applied right after
+0008**, or every page in Phase 5 fails with *"You are not authorized to
+perform this action"* even for a real admin. That message is the frontend's
+readable mapping of Postgres error 42501 on what is, underneath, a plain
+missing table-level `GRANT` to `authenticated` on the four new tables — the
+exact same category of issue 0007 already diagnosed and fixed for
+`service_role`. RLS is not the problem (an RLS policy rejecting a row returns
+zero rows, never a 42501); the role simply never had base access to the
+table at all. 0009 restores it, the same way 0007 did.
 
 **0006_account_permanent_deletion.sql is new in Phase 3** and must be applied
 before the Edge Function below can work — it adds:

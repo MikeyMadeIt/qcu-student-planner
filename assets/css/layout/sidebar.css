@@ -115,6 +115,23 @@
     box-shadow: inset 2px 0 0 rgb(var(--accent));
 }
 
+/* Small unread-messages indicator on the sidebar/drawer "Inbox" entry and the
+   mobile quick-access icon. Never fabricated: refreshInboxPreview() in
+   core/layout.js is the only thing that un-hides it, and only with a real
+   unread count from Supabase. */
+.nav-dot {
+    flex: 0 0 auto;
+    width: 0.44rem;
+    height: 0.44rem;
+    border-radius: 50%;
+    background: var(--danger);
+    margin-left: auto;
+}
+
+.nav-dot[hidden] {
+    display: none;
+}
+
 /* Group headings share the nav-link inset so labels and headings align. */
 .nav-group-label {
     padding: var(--space-3) var(--sidebar-item-padding-x) var(--space-1);

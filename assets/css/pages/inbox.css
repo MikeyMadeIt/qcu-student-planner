@@ -17,25 +17,29 @@
     color: var(--info);
 }
 
-.inbox-shell {
-    display: grid;
-    grid-template-columns: minmax(15rem, 0.38fr) minmax(0, 0.62fr);
-    min-height: min(68vh, 44rem);
-    overflow: hidden;
+/* The msg-list / msg-row / msg-pill / msg-time / msg-action-btn component
+   itself now lives in assets/css/components/message-row.css (it's global,
+   loaded via main.css) so the header inbox dropdown on every page can use
+   the exact same row as this page's full list. Only this page's own chrome
+   (search box, filter pills, pagination, detail-modal body) stays here. */
+
+.inbox-filter-row {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
 }
 
-.inbox-conversations {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    border-right: 1px solid var(--border);
+.inbox-filter-row .btn.active {
+    background: rgba(var(--accent), .14);
+    color: rgb(var(--accent));
+    border-color: rgba(var(--accent), .35);
 }
 
 .inbox-search {
     position: relative;
-    width: calc(100% - 2 * var(--space-3));
-    min-width: 0;
-    margin: var(--space-3) auto;
+    width: 100%;
+    max-width: 22rem;
+    margin-bottom: var(--space-3);
 }
 
 .inbox-search > i {
@@ -52,95 +56,48 @@
 .inbox-search input.form-control {
     min-width: 0;
     width: 100%;
-    max-width: 100%;
     padding-left: 36px;
     box-sizing: border-box;
 }
 
-.inbox-list-empty,
-.inbox-thread-empty {
+.inbox-pagination {
     display: flex;
-    flex: 1;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-6) var(--space-4);
-    color: var(--text-faint);
-    font-size: 0.82rem;
-    text-align: center;
-}
-
-.inbox-list-empty > i,
-.inbox-thread-empty > i {
-    font-size: 1.8rem;
-}
-
-.inbox-list-empty strong {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: .82rem;
     color: var(--text-soft);
-    font-size: 0.9rem;
 }
 
-.inbox-list-empty span {
-    max-width: 18rem;
-    line-height: 1.5;
-}
+/* ---------- Message detail modal body (both admin + student) ---------- */
 
-.inbox-thread {
+.msg-detail-meta {
     display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.inbox-thread-empty {
-    min-height: 18rem;
-}
-
-.inbox-thread-empty h2 {
-    margin: 0;
-    color: var(--text);
-    font-size: 1rem;
-}
-
-.inbox-thread-empty p {
-    max-width: 26rem;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.inbox-composer {
-    margin-top: auto;
-    padding: var(--space-3);
-    border-top: 1px solid var(--border);
-}
-
-.inbox-composer textarea:disabled {
-    opacity: 0.7;
-    resize: none;
-}
-
-.inbox-composer p {
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-1);
-    margin: var(--space-2) 0 0;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    font-size: .78rem;
     color: var(--text-faint);
-    font-size: 0.72rem;
 }
 
-@media (max-width: 767.98px) {
-    .inbox-shell {
-        grid-template-columns: minmax(0, 1fr);
-        min-height: 0;
-    }
+.msg-detail-body {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    font-size: .9rem;
+    color: var(--text-soft);
+    max-height: 22rem;
+    overflow-y: auto;
+}
 
-    .inbox-conversations {
-        min-height: 17rem;
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .inbox-thread {
-        min-height: 24rem;
-    }
+.msg-detail-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
 }

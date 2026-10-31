@@ -20,43 +20,51 @@
     <div class="topbar">
       <div>
         <h1 class="page-title">Inbox</h1>
-        <p class="page-sub">Conversations and messages.</p>
+        <p class="page-sub">Messages from your administrators.</p>
       </div>
     </div>
 
     <div class="inbox-backend-notice" role="status">
       <i class="bi bi-info-circle" aria-hidden="true"></i>
-      <span>Messaging is not connected yet. This app has no conversations or message-delivery endpoint, so messages cannot be sent or received.</span>
+      <span>This is a one-way inbox: administrators can send you messages here, but you cannot reply from this page.</span>
     </div>
 
-    <section class="inbox-shell glass" aria-label="Inbox">
-      <aside class="inbox-conversations" aria-label="Conversations">
-        <label class="inbox-search">
-          <i class="bi bi-search" aria-hidden="true"></i>
-          <input id="inboxSearch" class="form-control" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations">
-        </label>
-        <div class="inbox-list-empty" id="inboxListState" role="status" aria-live="polite">
-          <i class="bi bi-chat-square-text" aria-hidden="true"></i>
-          <strong>No conversations</strong>
-          <span>When messaging is connected, your conversations will appear here.</span>
-        </div>
-      </aside>
-
-      <section class="inbox-thread" aria-label="Conversation details">
-        <div class="inbox-thread-empty">
-          <i class="bi bi-inbox" aria-hidden="true"></i>
-          <h2>Your inbox is not connected</h2>
-          <p>There is no messaging backend available to load a message history or recipient list.</p>
-        </div>
-        <div class="inbox-composer" aria-label="Message composer unavailable">
-          <textarea class="form-control" rows="2" placeholder="Messaging is unavailable" aria-label="Message" disabled></textarea>
-          <p><i class="bi bi-lock" aria-hidden="true"></i> Sending is disabled until a real messaging service is connected.</p>
-        </div>
-      </section>
+    <section class="glass card-pad" aria-label="Inbox">
+      <label class="inbox-search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input id="inboxSearch" class="form-control" type="search" placeholder="Search messages" autocomplete="off" aria-label="Search messages">
+      </label>
+      <div class="inbox-filter-row">
+        <button type="button" class="btn btn-ghost btn-sm active" id="inboxFilterAll" data-filter="all">All</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="inboxFilterUnread" data-filter="unread">Unread</button>
+      </div>
+      <div id="inboxLoading" class="adm-loading" hidden><i class="bi bi-hourglass-split"></i> Loading…</div>
+      <div class="msg-list-empty" id="inboxListState" role="status" aria-live="polite" hidden>
+        <i class="bi bi-chat-square-text" aria-hidden="true"></i>
+        <strong>No messages</strong>
+        <span>When an administrator sends you a message, it will appear here.</span>
+      </div>
+      <div id="inboxList" class="msg-list" hidden></div>
+      <div class="inbox-pagination" id="inboxPagination" hidden></div>
     </section>
   </main>
 </div>
+
+<!-- Message detail modal -->
+<div class="modal fade" id="messageDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="msgDetailTitle">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content card-pad">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h5 id="msgDetailTitle" class="mb-0">Message details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="msgDetailBody"></div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
@@ -64,10 +72,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
-<script src="../../assets/js/modules/inbox.js"></script>
-<script>
-  renderShell('inbox');
-  initInbox();
-</script>
+<script>renderShell('inbox');</script>
+<script type="module" src="../../assets/js/modules/student-inbox.js"></script>
 </body>
 </html>

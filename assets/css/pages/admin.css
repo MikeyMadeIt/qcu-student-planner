@@ -225,9 +225,98 @@
 
 .adm-stat-card {
     position: relative;
+    display: block;
     padding: 14px 16px;
     border-radius: var(--radius-sm);
     overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: transform .12s ease, border-color .12s ease;
+}
+
+a.adm-stat-card:hover,
+a.adm-stat-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(var(--accent), .4);
+    text-decoration: none;
+    color: inherit;
+}
+
+.adm-stat-card.unavailable {
+    opacity: .7;
+    border-style: dashed;
+}
+
+.adm-stat-value-sm {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-faint);
+    line-height: 1.3;
+}
+
+.adm-dash-head .btn[disabled] {
+    opacity: .6;
+    cursor: default;
+}
+
+.auth-error {
+    margin: var(--space-2) 0 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--danger, #fb7185);
+}
+
+.auth-error[hidden] {
+    display: none;
+}
+
+.adm-recipient-list {
+    max-height: 13rem;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+}
+
+.adm-recipient-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: .84rem;
+}
+
+.adm-recipient-row:hover {
+    background: var(--surface-2);
+}
+
+.adm-recipient-row input {
+    flex: 0 0 auto;
+}
+
+.adm-recipient-name {
+    color: var(--text);
+}
+
+.adm-recipient-email {
+    margin-left: auto;
+    font-size: .76rem;
+}
+
+.adm-sub {
+    font-size: .76rem;
+    color: var(--text-faint);
+}
+
+.adm-spin {
+    display: inline-block;
+    animation: admSpin .8s linear infinite;
+}
+
+@keyframes admSpin {
+    to { transform: rotate(360deg); }
 }
 
 .adm-stat-icon {

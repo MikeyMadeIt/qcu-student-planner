@@ -2,6 +2,17 @@
 
 import { AuthService } from '../services/auth-service.js';
 
+/* Shared label map for admin_audit_log.action values — used by both the full
+   Audit Logs page and the dashboard's Recent Admin Activity widget so the two
+   never drift out of sync. */
+export const ACTION_LABELS = {
+    account_status_change: 'Account status change',
+    account_permanently_deleted: 'Account permanently deleted',
+    admin_message_sent: 'Administrative message sent',
+    admin_message_archived: 'Administrative message archived',
+    ticket_status_change: 'Support ticket status change',
+};
+
 export function escHtml(s) {
     const d = document.createElement('div');
     d.textContent = s || '';
@@ -47,6 +58,14 @@ export function mountAdminTopbar(admin) {
 
 export function renderError(container, message) {
     container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
+}
+
+/* Same as renderError, plus a Retry button wired to onRetry. Used wherever a failed
+   fetch should let the admin try again in place instead of reloading the whole page. */
+export function renderErrorWithRetry(container, message, onRetry) {
+    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="bi bi-arrow-clockwise"></i> Retry</button></div>`;
+    const btn = container.querySelector('#admErrorRetryBtn');
+    if (btn) btn.addEventListener('click', onRetry, { once: true });
 }
 
 /* Shared "View" detail modal used by All Users, Pending Approvals and Rejected
