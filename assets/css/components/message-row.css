@@ -1,0 +1,195 @@
+/* ============================================================
+   Gmail-style message row — shared by the admin inbox (with an
+   archive action), the student inbox page, and the header inbox
+   dropdown preview, so all three render the exact same component:
+     [icon] [pill category / subject / preview] [time + action]
+   Global (imported from main.css) because the header dropdown
+   appears on every page, not just the inbox pages.
+   ============================================================ */
+
+/* One column everywhere — each message is its own full-width
+   rounded rectangle, stacked. Avatar is centered on the row so its
+   height lines up with the whole text block, not just the top line. */
+.msg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.msg-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: 10px var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease;
+}
+
+.msg-row:hover {
+    background: var(--surface-2);
+}
+
+.msg-row-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-faint);
+    font-size: .9rem;
+}
+
+.msg-row.is-unread .msg-row-icon {
+    background: rgba(var(--accent), .14);
+    color: rgb(var(--accent));
+}
+
+.msg-row-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.msg-pill {
+    align-self: flex-start;
+}
+
+.msg-pill .status-badge {
+    padding: 1px 8px;
+    font-size: .64rem;
+}
+
+.msg-subject {
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.msg-row.is-unread .msg-subject {
+    font-weight: 700;
+}
+
+.msg-preview {
+    font-size: .72rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Right-hand column: time sits level with the pill on the first
+   line, the archive button sits below it — admin only; the student
+   page and the header preview omit .msg-row-actions and just show
+   the time (the header preview omits even that; see .msg-list-compact). */
+.msg-row-side {
+    flex: 0 0 auto;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.msg-time {
+    font-size: .68rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+.msg-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-size: .82rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+
+.msg-action-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.msg-action-btn.danger:hover {
+    color: var(--danger);
+    border-color: rgba(251,113,133,.35);
+    background: rgba(251,113,133,.10);
+}
+
+.msg-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    text-align: center;
+}
+
+.msg-list-empty > i {
+    font-size: 1.8rem;
+}
+
+.msg-list-empty strong {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.msg-list-empty span {
+    max-width: 22rem;
+    line-height: 1.5;
+}
+
+/* Compact variant for the header inbox dropdown: smaller rows, no
+   border/radius/gap between them (the panel already scrolls), and
+   no right-hand time/action column — tapping anywhere opens the
+   full inbox page. */
+.msg-list-compact {
+    gap: 0;
+}
+
+.msg-list-compact .msg-row {
+    padding: 8px 6px;
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+}
+
+.msg-list-compact .msg-row:last-child {
+    border-bottom: 0;
+}
+
+.msg-list-compact .msg-row-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: .8rem;
+}

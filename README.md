@@ -16,7 +16,8 @@ A premium, offline-first Student Planner Progressive Web App built with **HTML5,
 - **Wallpaper Generator** — canvas-based lock-screen wallpapers from your live schedule in 8 themes (Minimal, Dark, Glassmorphism, Gradient, Neon, Cyberpunk, Pastel, AMOLED), multiple resolutions, PNG/JPG export
 - **Settings** — student profile, semester dates, Dark/Light/AMOLED themes with 5 accent colors, notification toggles, export/import/reset data
 - **Notifications** — dedicated task-reminder inbox with unread/read filters and persistent read state; the header shows a quick preview
-- **Inbox** — dedicated messaging interface and header entry point; message delivery is unavailable until a messaging backend is added
+- **Inbox** — one-way messages from administrators (announcements, updates, reminders, maintenance notices): read, search/filter, unread badges in the header and sidebar, mark read/unread — students cannot reply or message each other
+- **Report** — submit a support ticket to the admins (category, subject, description) and track your own report history and status
 - **Installable PWA** — manifest + service worker, offline caching, "Install App" prompt
 - **Mobile-first** — responsive down to small phones, bottom nav with a "More" sheet so every page is always reachable
 
@@ -60,7 +61,7 @@ qcu-student-planner/
 
 ## 🗄️ Data & Privacy
 
-Account authentication, profile review, and planner records (subjects, tasks, notes, grades, attendance, calendar, syllabus, GWA and settings) are stored in the configured Supabase project, protected by Row Level Security so each student can only ever read or write their own rows. Task-reminder read states remain device-local in `localStorage`. The current project does not include a conversation/message-delivery backend.
+Account authentication, profile review, planner records (subjects, tasks, notes, grades, attendance, calendar, syllabus, GWA and settings), the admin-to-student Inbox, and support tickets submitted through the Report tab are all stored in the configured Supabase project, protected by Row Level Security so each student can only ever read their own messages/reports — never another student's, and never send or reply to a message themselves. Task-reminder read states remain device-local in `localStorage`. Admin messaging is strictly one-way (admin → student); there is no student-to-student messaging and no reply feature.
 
 Admins can approve, reject, suspend, reactivate, and — for already-rejected accounts only — **permanently delete** an account and its planner data. Deletion requires a privileged, server-side Edge Function (never the browser) and is fully documented in [`supabase/README.md`](supabase/README.md); the security model behind every account-management action is validated in [`supabase/SECURITY_VALIDATION.md`](supabase/SECURITY_VALIDATION.md).
 

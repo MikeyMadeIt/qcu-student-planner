@@ -73,7 +73,7 @@ const PAGE_SECTIONS = {
 async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
     try {
-        const { AuthService } = await import('../../assets/js/services/auth-service.js');
+        const { AuthService } = await import('../services/auth-service.js');
         await AuthService.signOut();
     } catch (error) {
         /* Even if sign-out fails client-side, still send the user back to the login page. */
@@ -268,9 +268,75 @@ function renderNotifPanelBody() {
         </a>`).join('') + `<a class="header-panel-footer" href="../app/notifications.html">View all notifications</a>`;
 }
 
-/* Messaging is not implemented in the available data layer; never show invented messages. */
-function renderInboxPanelBody() {
-    return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Messaging is not connected<span>Conversations will appear here when messaging is available.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
+function renderInboxPanelLoading() {
+    return `<div class="header-panel-empty"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Loading…</div>`;
+}
+
+/* Mirrors the admin/student inbox page's own message-row layout (pill
+   category, subject, ellipsized preview) so the preview in this dropdown
+   and the full inbox page always look like the same component. */
+function renderInboxPanelItems(rows, icons, categoryBadge) {
+    if (!rows.length)
+        return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
+    return `<div class="msg-list msg-list-compact">` + rows.slice(0, 5).map(r => {
+        const m = r.message;
+        const icon = icons[m.category] || 'bi-chat-square-text-fill';
+        return `
+        <a class="msg-row ${r.read_at ? '' : 'is-unread'}" href="../app/inbox.html">
+            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+            <span class="msg-row-body">
+                <span class="msg-pill">${categoryBadge(escHtml, m.category)}</span>
+                <span class="msg-subject">${escHtml(m.subject)}</span>
+                <span class="msg-preview">${escHtml(m.body || '')}</span>
+            </span>
+        </a>`;
+    }).join('') + `</div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
+}
+
+/* Fetches the signed-in student's real inbox preview + unread count from Supabase
+   (via a dynamic import, since this file is a classic script, not a module) and
+   fills in the header popover + badge. Never fabricates a count: if there is no
+   session or the request fails, the badge just stays hidden. */
+async function refreshInboxPreview() {
+    const badge = document.getElementById('inboxUnreadCount');
+    const body = document.querySelector('#inboxPanel .header-panel-body');
+    if (!badge || !body) return;
+
+    try {
+        const { StudentService } = await import('../services/student-service.js');
+        const { MESSAGE_CATEGORY_ICONS, messageCategoryBadge } = await import('../modules/comms-shared.js');
+        const [countResult, listResult] = await Promise.all([
+            StudentService.getUnreadCount(),
+            StudentService.listInboxMessages({ pageSize: 5 }),
+        ]);
+
+        if (!countResult.ok) {
+            console.error('Inbox unread count failed:', countResult.message);
+            badge.hidden = true;
+            document.querySelectorAll('[data-inbox-dot]').forEach(d => { d.hidden = true; });
+            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(countResult.message || '')}</span></div>`;
+            return;
+        }
+
+        const count = countResult.data;
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.hidden = count === 0;
+        document.querySelectorAll('[data-inbox-dot]').forEach(d => { d.hidden = count === 0; });
+        document.getElementById('inboxTrigger').setAttribute('aria-label', count ? `Inbox, ${count} unread` : 'Inbox');
+
+        if (listResult.ok) {
+            body.innerHTML = renderInboxPanelItems(listResult.data.rows, MESSAGE_CATEGORY_ICONS, messageCategoryBadge);
+        } else {
+            console.error('Inbox preview list failed:', listResult.message);
+            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(listResult.message || '')}</span></div>`;
+        }
+    } catch (error) {
+        console.error('Could not load inbox preview.', error);
+        badge.hidden = true;
+        if (body.innerHTML.includes('bi-hourglass-split')) {
+            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml((error && error.message) || '')}</span></div>`;
+        }
+    }
 }
 
 /* Admin header bar: sidebar toggle + dynamic page title on the left; theme toggle,
@@ -362,10 +428,11 @@ function renderShellBar(activeKey) {
                 <button type="button" class="shell-icon-btn" id="inboxTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="inboxPanel" aria-label="Inbox">
                     <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <span class="notification-count" id="inboxUnreadCount" aria-hidden="true" hidden></span>
                 </button>
                 <div class="header-panel" id="inboxPanel" role="region" aria-label="Inbox" hidden>
                     <div class="header-panel-title">Inbox</div>
-                    <div class="header-panel-body">${renderInboxPanelBody()}</div>
+                    <div class="header-panel-body">${renderInboxPanelLoading()}</div>
                 </div>
             </div>
             <div class="profile-menu" id="profileMenu">
@@ -399,6 +466,7 @@ function renderShellBar(activeKey) {
     initHeaderPanel(bar, 'notifTrigger', 'notifPanel', 'notifMenu');
     initHeaderPanel(bar, 'inboxTrigger', 'inboxPanel', 'inboxMenu');
     updateNotificationBadge();
+    refreshInboxPreview();
     window.addEventListener('storage', event => {
         if (event.key === NOTIFICATION_READ_KEY) refreshNotificationPreview();
     });
@@ -603,7 +671,8 @@ function renderShell(activeKey, admin) {
             QUICK_ACCESS_KEYS.forEach(key => {
                 const item = itemMap[key];
                 const isActive = item.key === activeKey;
-                sidebarHtml += `<a class="nav-link sidebar-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}><i class="bi ${item.icon}" aria-hidden="true"></i>${item.label}</a>`;
+                const dotHtml = item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
+                sidebarHtml += `<a class="nav-link sidebar-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}><i class="bi ${item.icon}" aria-hidden="true"></i>${item.label}${dotHtml}</a>`;
             });
             sidebarHtml += `</div>`;
         }
@@ -615,7 +684,8 @@ function renderShell(activeKey, admin) {
                 if (!n)
                     return;
                 const isActive = n.key === activeKey;
-                const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>` : '';
+                const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
+                    : n.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
                 sidebarHtml += `<a class="nav-link ${isActive ? 'active' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
         });
@@ -655,6 +725,28 @@ function renderShell(activeKey, admin) {
     wireSidebarToggles();
     wireModalDefaults();
     hydrateProfileIdentity();
+    if (isAdminArea) refreshAdminNavBadges();
+}
+
+/* Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
+   and the mobile nav drawer share the same data-admin-badge attribute, so one
+   querySelectorAll updates both). Never shows a fabricated number: if the request
+   fails for any reason the badge just stays hidden, same as every other badge here. */
+async function refreshAdminNavBadges() {
+    const badges = document.querySelectorAll('[data-admin-badge="admin-tickets"]');
+    if (!badges.length) return;
+    try {
+        const { AdminService } = await import('../services/admin-service.js');
+        const result = await AdminService.getCommsStats();
+        if (!result.ok) return;
+        const count = result.data.ticketsOpen;
+        badges.forEach(b => {
+            b.textContent = count > 99 ? '99+' : String(count);
+            b.hidden = count === 0;
+        });
+    } catch (error) {
+        console.error('Could not load admin nav badge counts.', error);
+    }
 }
 
 /* ---------- Real authenticated identity (profile sections, bottom of both sidebars) ----------
@@ -726,9 +818,10 @@ function ensureNavDrawer(activeKey) {
             ${QUICK_ACCESS_KEYS.map(key => {
                 const item = itemMap[key];
                 const isActive = key === activeKey;
+                const dotHtml = item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
                 return `<a class="drawer-link drawer-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
                     <i class="bi ${item.icon}" aria-hidden="true"></i>
-                    <span>${item.label}</span>
+                    <span>${item.label}</span>${dotHtml}
                 </a>`;
             }).join('')}
         </div>`;
@@ -738,7 +831,8 @@ function ensureNavDrawer(activeKey) {
             ${group.keys.map(key => {
         const item = itemMap[key];
         const isActive = key === activeKey;
-        const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>` : '';
+        const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>`
+            : item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
         return `<a class="drawer-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
                     <i class="bi ${item.icon}" aria-hidden="true"></i>
                     <span>${item.label}</span>${badgeHtml}

@@ -15,8 +15,12 @@ function ok(data) {
 function readableDbError(error) {
     if (!error) return 'Something went wrong. Please try again.';
     if (error.code === '42501') return 'You are not authorized to perform this action.';
-    if (error.code === 'P0002') return 'That account could not be found.';
-    if (error.code === '22023') return 'That is not a valid account status.';
+    /* P0002 and 22023 are raised, by every SECURITY DEFINER function in this project, with a
+       specific human-readable message already attached (e.g. "Subject must be between 1 and
+       150 characters", "That account could not be found") -- surface it instead of a single
+       generic string that would otherwise flatten every validation error into the same text. */
+    if (error.code === 'P0002') return error.message || 'That record could not be found.';
+    if (error.code === '22023') return error.message || 'That value is not valid.';
     return 'The request could not be completed. Please try again.';
 }
 
@@ -172,6 +176,258 @@ export const AdminService = {
             return ok({});
         } catch (error) {
             return fail('Could not reach the deletion service. Please try again.');
+        }
+    },
+
+    /* ---------- Admin Inbox (one-way admin -> student messaging) ---------- */
+
+    /* Student picker for the Compose form. Only ever returns role='student',
+       account_status='approved' rows -- the same audience admin_send_message()
+       re-derives server-side, so this list can never be out of sync with who a
+       message is actually allowed to reach. */
+    async listApprovedStudents({ search = '' } = {}) {
+        try {
+            const supabase = getSupabase();
+            let query = supabase
+                .from('profiles')
+                .select('id, full_name, email, course, school')
+                .eq('role', 'student')
+                .eq('account_status', 'approved')
+                .order('full_name', { ascending: true })
+                .limit(500);
+
+            if (search.trim()) {
+                const term = search.trim().replace(/[%_]/g, '');
+                query = query.or(`full_name.ilike.%${term}%,email.ilike.%${term}%`);
+            }
+
+            const { data, error } = await query;
+            if (error) return fail(readableDbError(error));
+            return ok(data);
+        } catch (error) {
+            return fail('Could not load the student list.');
+        }
+    },
+
+    async sendMessage({ subject, body, category, recipientScope, studentIds = null }) {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase.rpc('admin_send_message', {
+                p_subject: subject,
+                p_body: body,
+                p_category: category,
+                p_recipient_scope: recipientScope,
+                p_student_ids: studentIds,
+            });
+
+            if (error) return fail(readableDbError(error));
+            return ok({ id: data });
+        } catch (error) {
+            return fail('Could not send that message.');
+        }
+    },
+
+    async archiveMessage(messageId) {
+        try {
+            const supabase = getSupabase();
+            const { error } = await supabase.rpc('admin_archive_message', { p_message_id: messageId });
+            if (error) return fail(readableDbError(error));
+            return ok({});
+        } catch (error) {
+            return fail('Could not archive that message.');
+        }
+    },
+
+    async listMessages({ search = '', category = 'all', dateFrom = '', dateTo = '', sort = 'sent_desc', page = 1, pageSize = 20 } = {}) {
+        try {
+            const supabase = getSupabase();
+            let query = supabase
+                .from('admin_messages')
+                .select('id, subject, body, category, recipient_scope, recipient_count, status, sent_at, created_at, deleted_at, sender:sender_id(full_name)', { count: 'exact' })
+                .is('deleted_at', null);
+
+            if (category !== 'all') query = query.eq('category', category);
+            if (search.trim()) {
+                const term = search.trim().replace(/[%_]/g, '');
+                query = query.or(`subject.ilike.%${term}%,body.ilike.%${term}%`);
+            }
+            if (dateFrom) query = query.gte('sent_at', new Date(`${dateFrom}T00:00:00`).toISOString());
+            if (dateTo) query = query.lte('sent_at', new Date(`${dateTo}T23:59:59.999`).toISOString());
+
+            query = query.order('sent_at', { ascending: sort === 'sent_asc' });
+
+            const from = (page - 1) * pageSize;
+            const to = from + pageSize - 1;
+            query = query.range(from, to);
+
+            const { data, error, count } = await query;
+            if (error) return fail(readableDbError(error));
+            return ok({ rows: data, total: count ?? data.length });
+        } catch (error) {
+            return fail('Could not load messages.');
+        }
+    },
+
+    /* Full message content + its recipient list with per-recipient read status
+       (never exposes anything beyond name/email, already visible elsewhere in
+       the admin panel). */
+    async getMessage(id) {
+        try {
+            const supabase = getSupabase();
+            const { data: message, error: msgError } = await supabase
+                .from('admin_messages')
+                .select('id, subject, body, category, recipient_scope, recipient_count, status, sent_at, created_at, deleted_at, sender:sender_id(full_name)')
+                .eq('id', id)
+                .maybeSingle();
+
+            if (msgError || !message) return fail('Message not found.');
+
+            const { data: recipients, error: recError } = await supabase
+                .from('admin_message_recipients')
+                .select('student_id, read_at, student:student_id(full_name, email)')
+                .eq('message_id', id)
+                .order('created_at', { ascending: true });
+
+            if (recError) return fail(readableDbError(recError));
+
+            const readCount = recipients.filter(r => r.read_at).length;
+            return ok({ message, recipients, readCount, totalCount: recipients.length });
+        } catch (error) {
+            return fail('Could not load that message.');
+        }
+    },
+
+    /* ---------- Admin Support Tickets ---------- */
+
+    async listTickets({ status = 'all', category = 'all', search = '', sort = 'created_desc', page = 1, pageSize = 20 } = {}) {
+        try {
+            const supabase = getSupabase();
+            let query = supabase
+                .from('support_tickets')
+                .select('id, ticket_ref, category, subject, description, status, created_at, updated_at, student:student_id(full_name, email)', { count: 'exact' });
+
+            if (status !== 'all') query = query.eq('status', status);
+            if (category !== 'all') query = query.eq('category', category);
+            if (search.trim()) {
+                const term = search.trim().replace(/[%_]/g, '');
+                query = query.or(`ticket_ref.ilike.%${term}%,subject.ilike.%${term}%`);
+            }
+
+            query = query.order('created_at', { ascending: sort === 'created_asc' });
+
+            const from = (page - 1) * pageSize;
+            const to = from + pageSize - 1;
+            query = query.range(from, to);
+
+            const { data, error, count } = await query;
+            if (error) return fail(readableDbError(error));
+
+            /* Email search needs a second pass: Postgres can't .or() across a joined
+               table's column in one query, so when the ticket-side filters above
+               return nothing, also try matching on the joined student's email. */
+            if (search.trim() && data.length === 0) {
+                const term = search.trim().replace(/[%_]/g, '');
+                let emailQuery = supabase
+                    .from('support_tickets')
+                    .select('id, ticket_ref, category, subject, description, status, created_at, updated_at, student:student_id!inner(full_name, email)', { count: 'exact' })
+                    .ilike('student.email', `%${term}%`);
+                if (status !== 'all') emailQuery = emailQuery.eq('status', status);
+                if (category !== 'all') emailQuery = emailQuery.eq('category', category);
+                emailQuery = emailQuery.order('created_at', { ascending: sort === 'created_asc' }).range(from, to);
+                const emailResult = await emailQuery;
+                if (!emailResult.error && emailResult.data.length) {
+                    return ok({ rows: emailResult.data, total: emailResult.count ?? emailResult.data.length });
+                }
+            }
+
+            return ok({ rows: data, total: count ?? data.length });
+        } catch (error) {
+            return fail('Could not load support tickets.');
+        }
+    },
+
+    async getTicket(id) {
+        try {
+            const supabase = getSupabase();
+            const { data: ticket, error: ticketError } = await supabase
+                .from('support_tickets')
+                .select('id, ticket_ref, category, subject, description, status, created_at, updated_at, student:student_id(full_name, email), updater:updated_by(full_name)')
+                .eq('id', id)
+                .maybeSingle();
+
+            if (ticketError || !ticket) return fail('Ticket not found.');
+
+            const { data: notes, error: notesError } = await supabase
+                .from('support_ticket_notes')
+                .select('id, note, created_at, admin:admin_id(full_name)')
+                .eq('ticket_id', id)
+                .order('created_at', { ascending: true });
+
+            if (notesError) return fail(readableDbError(notesError));
+
+            return ok({ ticket, notes });
+        } catch (error) {
+            return fail('Could not load that ticket.');
+        }
+    },
+
+    async setTicketStatus({ ticketId, newStatus, note = null }) {
+        try {
+            const supabase = getSupabase();
+            const { error } = await supabase.rpc('admin_set_ticket_status', {
+                p_ticket_id: ticketId,
+                p_new_status: newStatus,
+                p_note: note,
+            });
+            if (error) return fail(readableDbError(error));
+            return ok({});
+        } catch (error) {
+            return fail('Could not update that ticket.');
+        }
+    },
+
+    async addTicketNote({ ticketId, note }) {
+        try {
+            const supabase = getSupabase();
+            const { error } = await supabase.rpc('admin_add_ticket_note', { p_ticket_id: ticketId, p_note: note });
+            if (error) return fail(readableDbError(error));
+            return ok({});
+        } catch (error) {
+            return fail('Could not add that note.');
+        }
+    },
+
+    /* ---------- Overview Dashboard: messaging + ticket stats ----------
+       Message-level counts (admin_messages rows) are always kept separate from
+       recipient-level counts (admin_message_recipients rows) -- one message
+       sent to 50 students is one message, not 50. */
+    async getCommsStats() {
+        try {
+            const supabase = getSupabase();
+
+            const [messagesTotal, unreadTotal, ticketsTotal, ticketsOpen, recentMessages, recentTickets] = await Promise.all([
+                supabase.from('admin_messages').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+                supabase.from('admin_message_recipients').select('id', { count: 'exact', head: true }).is('read_at', null),
+                supabase.from('support_tickets').select('id', { count: 'exact', head: true }),
+                supabase.from('support_tickets').select('id', { count: 'exact', head: true }).not('status', 'in', '(resolved,closed)'),
+                supabase.from('admin_messages').select('id, subject, category, recipient_count, sent_at').is('deleted_at', null).order('sent_at', { ascending: false }).limit(5),
+                supabase.from('support_tickets').select('id, ticket_ref, subject, status, created_at, student:student_id(full_name)').order('created_at', { ascending: false }).limit(5),
+            ]);
+
+            const firstError = [messagesTotal, unreadTotal, ticketsTotal, ticketsOpen, recentMessages, recentTickets]
+                .map(r => r.error).find(Boolean);
+            if (firstError) return fail(readableDbError(firstError));
+
+            return ok({
+                messagesTotal: messagesTotal.count ?? 0,
+                unreadTotal: unreadTotal.count ?? 0,
+                ticketsTotal: ticketsTotal.count ?? 0,
+                ticketsOpen: ticketsOpen.count ?? 0,
+                recentMessages: recentMessages.data || [],
+                recentTickets: recentTickets.data || [],
+            });
+        } catch (error) {
+            return fail('Could not load communications statistics.');
         }
     },
 

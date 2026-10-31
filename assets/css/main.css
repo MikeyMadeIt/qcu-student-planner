@@ -21,6 +21,7 @@
 @import url('components/forms.css');
 @import url('components/modals.css');
 @import url('components/badges.css');
+@import url('components/message-row.css');
 @import url('components/toasts.css');
 @import url('components/calendar.css');
 @import url('components/kanban.css');
