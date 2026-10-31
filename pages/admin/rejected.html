@@ -14,19 +14,62 @@
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/admin.css" rel="stylesheet">
 </head>
-<body data-page-key="admin-rejected">
+<body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content">
 
-    <div class="glass card-pad adm-placeholder">
-      <i class="bi bi-person-x" aria-hidden="true"></i>
-      <span class="adm-placeholder-tag">Not yet implemented</span>
-      <h2>Rejected Accounts</h2>
-      <p>Rejected accounts will list here with campus, program, year level and rejection date, plus a permanent-delete action that removes the Supabase Auth user through a protected server-side function.</p>
-      <p class="mt-3"><small>Needs: a secure Edge Function with service_role access (never shipped to the browser) that deletes the Supabase Auth user and cascades/retains related records per the data-retention plan — see SETUP.md.</small></p>
+    <div class="auth-alert-inline" role="note">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span>Delete Permanently is irreversible. It removes the account's sign-in and all of its planner data via a protected server-side function and is recorded in the activity log.</span>
+    </div>
+
+    <div class="glass card-pad mb-3">
+      <div class="adm-filters">
+        <div class="adm-filter-search">
+          <label for="admSearch" class="adm-label">Search</label>
+          <input id="admSearch" class="form-control" type="search" placeholder="Search by name, email or program" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <div class="glass card-pad">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="section-title mb-0"><i class="bi bi-person-x"></i>Rejected Accounts</div>
+        <span class="text-faint" id="admCount" aria-live="polite"></span>
+      </div>
+      <div id="admLoading" class="adm-loading"><i class="bi bi-hourglass-split"></i> Loading…</div>
+      <div class="adm-table-wrap">
+        <table class="adm-table adm-table-cols">
+          <thead><tr>
+            <th scope="col" class="adm-col-no">No.</th>
+            <th scope="col" class="adm-col-wide">Full Name</th>
+            <th scope="col" class="adm-col-email">Email Address</th>
+            <th scope="col" class="adm-col-hide-mobile">Campus</th>
+            <th scope="col" class="adm-col-hide-mobile">Program</th>
+            <th scope="col" class="adm-col-hide-mobile">Year Level</th>
+            <th scope="col" class="adm-col-hide-mobile">Rejection Date</th>
+            <th scope="col" class="text-end">Actions</th>
+          </tr></thead>
+          <tbody id="admBody"></tbody>
+        </table>
+      </div>
+      <div id="admEmpty" class="empty-state" hidden>No rejected accounts.</div>
+      <div class="adm-pagination" id="admPagination" hidden></div>
     </div>
   </main>
+</div>
+
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="userDetailTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-pad">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h5 id="userDetailTitle" class="mb-0">Account details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <dl class="adm-detail-grid" id="userDetailBody"></dl>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -38,6 +81,6 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
-<script type="module" src="../../assets/js/modules/admin-placeholder.js"></script>
+<script type="module" src="../../assets/js/modules/admin-rejected.js"></script>
 </body>
 </html>

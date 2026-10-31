@@ -1,6 +1,6 @@
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
-import { escHtml, formatDate, formatDateTime, statusBadge, mountAdminTopbar, renderError } from './admin-shared.js';
+import { escHtml, formatDate, statusBadge, mountAdminTopbar, renderError, renderAccountDetail } from './admin-shared.js';
 
 const PAGE_SIZE = 20;
 let currentPage = 1;
@@ -72,22 +72,7 @@ async function viewDetail(id) {
         return;
     }
 
-    const a = result.data;
-    const body = document.getElementById('userDetailBody');
-    document.getElementById('userDetailTitle').textContent = a.full_name || 'Account details';
-    body.innerHTML = `
-        <dt>Email</dt><dd>${escHtml(a.email || '—')}</dd>
-        <dt>Signed up with</dt><dd>${a.signup_provider === 'google' ? 'Google' : 'Email &amp; password'}</dd>
-        <dt>Status</dt><dd>${statusBadge(a.account_status)}</dd>
-        <dt>Role</dt><dd>${escHtml(a.role || 'student')}</dd>
-        <dt>Program</dt><dd>${escHtml(a.course || '—')}</dd>
-        <dt>Year level</dt><dd>${escHtml(a.year_level || '—')}</dd>
-        <dt>Section</dt><dd>${escHtml(a.section || '—')}</dd>
-        <dt>School / campus</dt><dd>${escHtml(a.school || '—')}</dd>
-        <dt>Registered</dt><dd>${formatDateTime(a.created_at)}</dd>
-        <dt>Last reviewed</dt><dd>${formatDateTime(a.reviewed_at)}</dd>
-        <dt>Last decision reason</dt><dd>${escHtml(a.rejection_reason || '—')}</dd>`;
-    new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+    renderAccountDetail(result.data);
 }
 
 function onAction(e) {
