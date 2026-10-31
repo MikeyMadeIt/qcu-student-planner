@@ -48,3 +48,47 @@ export function mountAdminTopbar(admin) {
 export function renderError(container, message) {
     container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
 }
+
+/* Shared "View" detail modal used by All Users, Pending Approvals and Rejected
+   Accounts. Every field it shows comes straight off the profiles row already
+   fetched by AdminService.getAccount() -- never invented, never a secret
+   (password/token) column. */
+export function renderAccountDetail(account) {
+    const titleEl = document.getElementById('userDetailTitle');
+    const bodyEl = document.getElementById('userDetailBody');
+    if (!titleEl || !bodyEl) return;
+
+    titleEl.textContent = account.full_name || 'Account details';
+    bodyEl.innerHTML = `
+        <dt>Email</dt><dd>${escHtml(account.email || '—')}</dd>
+        <dt>Signed up with</dt><dd>${account.signup_provider === 'google' ? 'Google' : 'Email &amp; password'}</dd>
+        <dt>Status</dt><dd>${statusBadge(account.account_status)}</dd>
+        <dt>Role</dt><dd>${escHtml(account.role || 'student')}</dd>
+        <dt>Campus</dt><dd>${escHtml(account.school || '—')}</dd>
+        <dt>Program</dt><dd>${escHtml(account.course || '—')}</dd>
+        <dt>Year level</dt><dd>${escHtml(account.year_level || '—')}</dd>
+        <dt>Section</dt><dd>${escHtml(account.section || '—')}</dd>
+        <dt>Registration date</dt><dd>${formatDateTime(account.created_at)}</dd>
+        <dt>Last reviewed</dt><dd>${formatDateTime(account.reviewed_at)}</dd>
+        <dt>Last decision reason</dt><dd>${escHtml(account.rejection_reason || '—')}</dd>`;
+
+    new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+}
+
+/* The markup for the shared detail modal above -- identical on every page
+   that uses it, so it's generated once here instead of copy-pasted into
+   three HTML files that could drift out of sync. */
+export function userDetailModalMarkup() {
+    return `
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="userDetailTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-pad">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h5 id="userDetailTitle" class="mb-0">Account details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <dl class="adm-detail-grid" id="userDetailBody"></dl>
+    </div>
+  </div>
+</div>`;
+}
