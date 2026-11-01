@@ -11,14 +11,96 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/ai-tools.css" rel="stylesheet">
 </head>
 <body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content">
-    <div class="topbar"><div><h1 class="page-title">AI Quiz Maker</h1><p class="page-sub">Turn your study materials into practice quizzes.</p></div></div>
+    <div class="topbar"><div><h1 class="page-title">AI Quiz Maker</h1><p class="page-sub">Turn your study materials into a practice quiz.</p></div></div>
 
-    <div class="glass card-pad fade-in feature-placeholder" data-feature-placeholder></div>
+    <!-- CREATION FORM -->
+    <form class="glass card-pad fade-in" id="aqmForm" novalidate>
+      <div class="ai-field">
+        <label for="aqmTopic">Topic or subject</label>
+        <input type="text" class="form-control" id="aqmTopic" placeholder="e.g. Photosynthesis, Philippine History, Data Structures" maxlength="150">
+      </div>
+      <div class="ai-field">
+        <label for="aqmNotes">Instructions or study notes <span class="text-soft fw-normal">(optional)</span></label>
+        <textarea class="form-control" id="aqmNotes" rows="4" placeholder="Paste notes, or describe what the quiz should focus on…" maxlength="6000"></textarea>
+      </div>
+      <div class="ai-field">
+        <label for="aqmFileInput">Attach a PDF or image <span class="text-soft fw-normal">(optional)</span></label>
+        <input type="file" id="aqmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
+        <div class="ai-attach">
+          <span class="ai-attach-empty" id="aqmFileEmpty"><i class="bi bi-paperclip" aria-hidden="true"></i>No file attached</span>
+          <span class="ai-file-info" id="aqmFileInfo" hidden></span>
+          <div class="ai-attach-actions">
+            <button type="button" class="btn-ghost" id="aqmAttachBtn"><i class="bi bi-upload" aria-hidden="true"></i> Attach file</button>
+            <button type="button" class="btn-ghost" id="aqmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <p class="text-soft mt-1 mb-0" style="font-size:.75rem">PDF, JPG, or PNG — up to 8 MB.</p>
+      </div>
+      <div class="ai-field-row">
+        <div class="ai-field mb-0">
+          <label for="aqmQuestionCount">Number of questions: <span id="aqmQuestionCountLabel">10</span></label>
+          <input type="range" class="form-range" id="aqmQuestionCount" min="1" max="20" value="10">
+        </div>
+        <div class="ai-field mb-0">
+          <label for="aqmDifficulty">Difficulty</label>
+          <select class="form-select" id="aqmDifficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-accent mt-2" id="aqmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Quiz</button>
+    </form>
+
+    <!-- LOADING -->
+    <div class="glass card-pad fade-in ai-state" id="aqmLoadingState" hidden>
+      <i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i>
+      <p>Generating your quiz… this can take a few seconds.</p>
+    </div>
+
+    <!-- ERROR -->
+    <div class="glass card-pad fade-in ai-state ai-state-error" id="aqmErrorState" hidden>
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <p id="aqmErrorMessage">Something went wrong.</p>
+      <button type="button" class="btn btn-ghost mt-2" id="aqmRetryBtn"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Try again</button>
+    </div>
+
+    <!-- QUIZ TAKING -->
+    <div class="glass card-pad fade-in" id="aqmQuizCard" hidden>
+      <h2 class="h5 mb-3" id="aqmQuizTitle"></h2>
+      <div class="ai-quiz-progress"><span id="aqmProgressLabel"></span></div>
+      <div class="ai-progress-bar"><div class="ai-progress-bar-fill" id="aqmProgressFill"></div></div>
+      <p class="ai-quiz-question" id="aqmQuestionText"></p>
+      <div class="ai-choices" id="aqmChoices" role="group" aria-label="Answer choices"></div>
+      <div class="ai-explanation" id="aqmExplanation" hidden></div>
+      <div class="ai-quiz-nav">
+        <button type="button" class="btn-ghost" id="aqmPrevBtn"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</button>
+        <button type="button" class="btn btn-accent" id="aqmNextBtn">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+        <button type="button" class="btn btn-accent" id="aqmSubmitBtn" hidden><i class="bi bi-check2-circle" aria-hidden="true"></i> Submit Quiz</button>
+        <button type="button" class="btn btn-accent" id="aqmViewResultsBtn" hidden><i class="bi bi-bar-chart-fill" aria-hidden="true"></i> View Results</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="glass card-pad fade-in" id="aqmResultsCard" hidden>
+      <div class="text-center">
+        <div class="ai-score-ring" id="aqmScoreRing"><div class="ai-score-ring-inner"><strong id="aqmScorePercent">0%</strong><span id="aqmScoreFraction">0 / 0</span></div></div>
+        <h2 class="h5">Quiz complete!</h2>
+      </div>
+      <h3 class="h6 mt-4 mb-2">Answer review</h3>
+      <div id="aqmReviewList"></div>
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-accent" id="aqmRetakeBtn"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Retake Quiz</button>
+        <button type="button" class="btn-ghost" id="aqmNewQuizBtn"><i class="bi bi-plus-lg" aria-hidden="true"></i> New Quiz</button>
+      </div>
+    </div>
 
   </main>
 </div>
@@ -26,21 +108,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/utils/ai-file-upload.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
-<script src="../../assets/js/modules/feature-placeholder.js"></script>
+<script src="../../assets/js/modules/ai-quiz-maker.js"></script>
 <script>
   renderShell('ai-quiz-maker');
   applyTheme();
-  initFeaturePlaceholder({
-    icon: 'bi-patch-question-fill',
-    title: 'AI Quiz Maker',
-    badge: 'Not Yet Implemented',
-    description: 'An AI-powered tool intended to turn your notes and lessons into practice quizzes you can use to test yourself before an exam.'
-  });
+  initAiQuizMaker();
 </script>
 </body>
 </html>
