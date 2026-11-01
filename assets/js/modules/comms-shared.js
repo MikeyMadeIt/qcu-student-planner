@@ -45,3 +45,8 @@ export function ticketStatusBadge(escHtml, status) {
     const label = TICKET_STATUS_LABELS[status] || status || 'Unknown';
     return `<span class="status-badge ticket-status-${escHtml(status || '')}">${escHtml(label)}</span>`;
 }
+
+export function ticketCategoryBadge(escHtml, category) {
+    const label = REPORT_CATEGORY_LABELS[category] || category || 'Other';
+    return `<span class="status-badge">${escHtml(label)}</span>`;
+}
