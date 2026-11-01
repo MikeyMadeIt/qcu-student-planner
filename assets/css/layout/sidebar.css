@@ -132,6 +132,49 @@
     display: none;
 }
 
+/* Label text inside a .nav-link row — lets the row's icon/label/badge sit in a flex
+   line without the badge ever overlapping the label (label ellipsizes instead). */
+.nav-link-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sidebar/drawer entries for sections that aren't built yet (e.g. Announcements,
+   AI Summarizer, AI Reviewer, Legal & Policies on the student side; Email Center
+   etc. on the admin side). Still a real, clickable link to the page's own
+   "Not yet implemented" card — just visually de-emphasized with a "Soon" pill so
+   it reads as inactive at a glance, on both the desktop sidebar and the mobile
+   drawer. Pointer events are never disabled and focus/hover states stay intact. */
+.nav-link-soon,
+.drawer-link-soon {
+    opacity: .5;
+}
+
+.nav-link-soon:hover,
+.drawer-link-soon:hover,
+.nav-link-soon:focus-visible,
+.drawer-link-soon:focus-visible {
+    opacity: .8;
+}
+
+.nav-pill-soon {
+    flex: 0 0 auto;
+    padding: 1px 7px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
 /* Group headings share the nav-link inset so labels and headings align. */
 .nav-group-label {
     padding: var(--space-3) var(--sidebar-item-padding-x) var(--space-1);
@@ -195,8 +238,33 @@
 }
 
 .sidebar-profile-text {
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
+}
+
+/* Overflow ("...") trigger for the sidebar footer profile menu — stays pinned to
+   the far right regardless of how long the name/email text next to it gets. */
+.sidebar-profile-more {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-profile-more:hover,
+.sidebar-profile-more:focus-visible,
+.sidebar-profile-more[aria-expanded="true"] {
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .sidebar-profile-name {

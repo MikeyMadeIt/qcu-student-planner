@@ -417,6 +417,108 @@
     display: none;
 }
 
+/* The sidebar footer's three-dot menu reuses .profile-panel's look, but is
+   appended to <body> and positioned with fixed coordinates in JS (see
+   ensureSidebarProfileMenu in layout.js) instead of being anchored inside
+   .sidebar, which clips absolutely-positioned descendants via overflow:hidden. */
+.sidebar-profile-panel {
+    position: fixed;
+    top: auto;
+    right: auto;
+    width: min(14rem, calc(100vw - 2rem));
+    /* Must outrank the mobile nav-drawer overlay (--layer-nav-drawer), since the
+       drawer footer's three-dot trigger lives inside that overlay on mobile — a
+       plain .profile-panel z-index would render this panel underneath it,
+       invisibly, even though it's "open". */
+    z-index: var(--layer-drawer-popover);
+}
+
+/* Current-semester info card (header avatar popup), above the theme selector. */
+.profile-panel-section-semester {
+    padding: var(--space-2) 0;
+}
+
+.shell-semester-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+}
+
+.shell-semester-info {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.shell-semester-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shell-semester-dates {
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shell-semester-status {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--success) 16%, transparent);
+    color: var(--success);
+    border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.shell-semester-status i {
+    font-size: 0.72rem;
+}
+
+/* Logout row, shared by the header popup and the sidebar footer menu — same
+   native-button reset as the admin profile panel's logout control. */
+.profile-item-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    appearance: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.profile-item-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.profile-item-danger {
+    color: var(--danger);
+}
+
+.profile-item-danger:hover,
+.profile-item-danger:focus-visible {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+}
+
 .profile-panel-head {
     display: flex;
     align-items: center;
