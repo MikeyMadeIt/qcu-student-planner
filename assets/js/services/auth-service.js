@@ -298,6 +298,13 @@ export const AuthService = {
         try {
             const supabase = getSupabase();
             await supabase.auth.signOut();
+            // Security: clear this device's local cache of the signed-out student's
+            // planner data so a different student signing in on the same browser
+            // never sees stale subjects/tasks/notes/etc. in the moment before (or if)
+            // a fresh cloud sync overwrites them. See storage.js clearPrivateCacheOnSignOut.
+            if (typeof DB !== 'undefined' && typeof DB.clearPrivateCacheOnSignOut === 'function') {
+                DB.clearPrivateCacheOnSignOut();
+            }
             return ok({});
         } catch (error) {
             return fail(readableAuthError(error), 'AUTH_ERROR');

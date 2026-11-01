@@ -1,0 +1,845 @@
+/* ============================================================
+   CLOUD-SYNC.JS — Supabase persistence for Subjects / Schedule /
+   Calendar / Tasks / Notes / Attendance / Grades & GWA / Syllabus,
+   layered on top of storage.js (DB.*) so that tasks.js / schedule.js /
+   calendar.js / notes.js / attendance.js / grades.js / syllabus.js —
+   and anything else that reads this data — keep working exactly as
+   before. storage.js remains the synchronous read/write cache the UI
+   talks to; this file is the thing that keeps it in sync with
+   Postgres under the hood.
+
+   Grades: `grades` + `grade_components` + `grade_assessments` are kept
+   as real relational rows (the local nested shape maps onto them 1:1).
+   Syllabus: the local course shape (course + weeks + topics + outcomes
+   + activities + resources + assessments) has far more fields than
+   `syllabus_courses`/`syllabus_weeks`/`syllabus_topics` have columns
+   for, so the whole course object is stored as-is in a new
+   `syllabus_courses.data jsonb` column (see migration 0015) with the
+   handful of matching top-level columns kept in sync alongside it for
+   future querying. `syllabus_weeks`/`syllabus_topics` are left unused
+   rather than half-normalized — a true relational breakdown of that
+   feature is a larger follow-up, noted in the summary.
+
+   Pattern:
+     1. On every app page, hydrate() pulls the signed-in user's
+        subjects / tasks (+checklist items) / calendar_events and
+        writes them into the same localStorage keys storage.js
+        already uses (via DB.set, which does NOT re-trigger cloud
+        sync), so DB.getSubjects()/getTasks()/getCalendarEvents()
+        return live data straight out of Postgres.
+     2. DB.saveSubjects / DB.saveTasks / DB.saveCalendarEvents are
+        wrapped: the original localStorage write still happens
+        first (so the UI updates instantly, unchanged), then the
+        new list is diffed against the last known server list and
+        the difference (insert/update/delete) is pushed to Supabase
+        in the background.
+     3. Semesters are a local-only concept (out of scope for this
+        migration) — a small localStorage-side map remembers which
+        semester each cloud record belongs to, so multi-semester
+        filtering keeps working without needing a real semester_id.
+   ============================================================ */
+
+(function () {
+    const MAP_KEY = 'sp_cloud_semester_map';
+
+    function loadMap() {
+        const empty = { subjects: {}, tasks: {}, calendarEvents: {}, notes: {}, attendance: {}, grades: {}, syllabusCourses: {} };
+        try { return Object.assign(empty, JSON.parse(localStorage.getItem(MAP_KEY)) || {}); }
+        catch (e) { return empty; }
+    }
+    function saveMap(m) {
+        try { localStorage.setItem(MAP_KEY, JSON.stringify(m)); } catch (e) { /* ignore */ }
+    }
+    function semFor(bucket, id) {
+        const m = loadMap();
+        return (m[bucket] && m[bucket][id]) || DB.getActiveSemesterId();
+    }
+    function setSemFor(bucket, id, semId) {
+        const m = loadMap();
+        if (!m[bucket]) m[bucket] = {};
+        m[bucket][id] = semId;
+        saveMap(m);
+    }
+    function dropSemFor(bucket, id) {
+        const m = loadMap();
+        if (m[bucket]) delete m[bucket][id];
+        saveMap(m);
+    }
+
+    function toast(msg, kind) {
+        if (window.Toast && typeof window.Toast.show === 'function') {
+            window.Toast.show(msg, kind || 'high', 'bi-cloud-slash');
+        }
+    }
+
+    const WEEK_LINK_KEY = 'sp_cloud_task_syllabus_week_map';
+    function weekLinkFor(taskId) {
+        try {
+            const m = JSON.parse(localStorage.getItem(WEEK_LINK_KEY)) || {};
+            return m[taskId] || null;
+        } catch (e) { return null; }
+    }
+    function setWeekLink(taskId, weekId) {
+        try {
+            const m = JSON.parse(localStorage.getItem(WEEK_LINK_KEY)) || {};
+            if (weekId) m[taskId] = weekId; else delete m[taskId];
+            localStorage.setItem(WEEK_LINK_KEY, JSON.stringify(m));
+        } catch (e) { /* ignore */ }
+    }
+
+    function hhmm(t) { return t ? String(t).slice(0, 5) : ''; }
+    function isUuid(id) { return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id); }
+
+    /* ---------- loading overlay ---------- */
+    let overlayCount = 0;
+    function showLoader() {
+        overlayCount++;
+        if (document.getElementById('cloudSyncLoader')) return;
+        const el = document.createElement('div');
+        el.id = 'cloudSyncLoader';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        el.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:var(--bg,#111318);opacity:.97;';
+        el.innerHTML = '<div class="spinner-border" style="width:2.5rem;height:2.5rem;color:rgb(var(--accent,36,87,214))"></div>' +
+            '<div style="color:var(--text-soft,#A1A8B5);font-size:.9rem">Loading your data…</div>';
+        document.body.appendChild(el);
+    }
+    function hideLoader() {
+        overlayCount = Math.max(0, overlayCount - 1);
+        if (overlayCount > 0) return;
+        const el = document.getElementById('cloudSyncLoader');
+        if (el) el.remove();
+    }
+
+    /* ---------- supabase handle ---------- */
+    let _supabasePromise = null;
+    function getClient() {
+        if (!_supabasePromise) {
+            _supabasePromise = import('../core/supabase-client.js').then(m => m.getSupabase());
+        }
+        return _supabasePromise;
+    }
+
+    async function getUserId() {
+        try {
+            const supabase = await getClient();
+            const { data } = await supabase.auth.getSession();
+            return data && data.session ? data.session.user.id : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /* ---------- row <-> local mappers ---------- */
+
+    function subjectRowToLocal(row) {
+        return {
+            id: row.id,
+            code: row.code || '',
+            desc: row.description || '',
+            type: row.type || '',
+            units: row.units != null ? Number(row.units) : 0,
+            section: row.section || '',
+            days: Array.isArray(row.days) ? row.days : [],
+            start: hhmm(row.start_time),
+            end: hhmm(row.end_time),
+            online: !!row.online,
+            room: row.room || '',
+            building: row.building || '',
+            professor: row.professor || '',
+            email: row.professor_email || '',
+            color: row.color || '',
+            notes: row.notes || '',
+            absenceLimit: row.absence_limit != null ? row.absence_limit : null,
+            archived: !!row.archived,
+            semesterId: semFor('subjects', row.id),
+        };
+    }
+    function subjectLocalToRow(s, userId) {
+        return {
+            id: s.id, user_id: userId,
+            code: s.code || '', description: s.desc || '', type: s.type || '',
+            units: s.units || 0, section: s.section || '',
+            days: Array.isArray(s.days) ? s.days : [],
+            start_time: s.start || null, end_time: s.end || null,
+            online: !!s.online, room: s.room || '', building: s.building || '',
+            professor: s.professor || '', professor_email: s.email || '',
+            color: s.color || '', notes: s.notes || '',
+            absence_limit: s.absenceLimit != null && s.absenceLimit !== '' ? s.absenceLimit : null,
+            archived: !!s.archived,
+        };
+    }
+
+    function taskRowToLocal(row, checklist) {
+        return {
+            id: row.id,
+            title: row.title || '',
+            description: row.description || '',
+            subjectId: row.subject_id || null,
+            // NOT read from row.syllabus_week_id -- see note in taskLocalToRow.
+            syllabusWeekId: weekLinkFor(row.id),
+            category: row.category || '',
+            priority: row.priority || 'medium',
+            dueDate: row.due_date || '',
+            dueTime: hhmm(row.due_time),
+            status: row.status || 'not-started',
+            progress: row.progress || 0,
+            reminder: !!row.reminder,
+            remindBeforeMin: row.remind_before_min != null ? row.remind_before_min : null,
+            repeat: row.repeat || 'none',
+            timeEstimate: row.time_estimate_min || 0,
+            score: row.score != null ? Number(row.score) : null,
+            remarks: row.remarks || '',
+            completedAt: row.completed_at ? new Date(row.completed_at).getTime() : undefined,
+            createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+            updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
+            checklist: (checklist || []).map(c => ({ id: c.id, text: c.text, done: !!c.done })),
+            semesterId: semFor('tasks', row.id),
+        };
+    }
+    function taskLocalToRow(t, userId) {
+        return {
+            id: t.id, user_id: userId,
+            title: t.title || '', description: t.description || '',
+            subject_id: t.subjectId || null,
+            // Deliberately NOT t.syllabusWeekId: a syllabus week's id (`w.id`) only
+            // exists inside syllabus_courses.data (jsonb) -- the real syllabus_weeks
+            // table is intentionally left unpopulated (see migration 0015), so there
+            // is no row for this FK column to point at, and a security-audit
+            // ownership trigger (0016, tasks_guard_fk) now also rejects a
+            // syllabus_week_id that isn't a real owned row. The link is instead kept
+            // client-side only, see weekLinkFor/setWeekLink below.
+            syllabus_week_id: null,
+            category: t.category || null, priority: t.priority || 'medium',
+            due_date: t.dueDate || null, due_time: t.dueTime || null,
+            status: t.status || 'not-started', progress: t.progress || 0,
+            reminder: !!t.reminder, remind_before_min: t.remindBeforeMin || null,
+            repeat: t.repeat || 'none', time_estimate_min: t.timeEstimate || null,
+            score: t.score != null && t.score !== '' ? t.score : null,
+            remarks: t.remarks || '',
+            completed_at: t.completedAt ? new Date(t.completedAt).toISOString() : null,
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    function eventRowToLocal(row) {
+        return {
+            id: row.id, title: row.title || '', date: row.date,
+            startTime: hhmm(row.start_time), endTime: hhmm(row.end_time),
+            category: row.category || '', color: row.color || '',
+            description: row.note || '',
+            createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+            semesterId: semFor('calendarEvents', row.id),
+        };
+    }
+    function eventLocalToRow(e, userId) {
+        return {
+            id: e.id, user_id: userId, title: e.title || '', date: e.date,
+            start_time: e.startTime || null, end_time: e.endTime || null,
+            category: e.category || null, color: e.color || null, note: e.description || '',
+        };
+    }
+
+    function notesRowToLocal(row) {
+        return {
+            id: row.id, title: row.title || '', content: row.content || '',
+            category: row.category || '', pinned: !!row.pinned, favorite: !!row.favorite,
+            subjectId: row.subject_id || null, taskId: row.task_id || null,
+            tags: Array.isArray(row.tags) ? row.tags : [],
+            checklist: [], // not persisted server-side; see notesLocalToRow note below
+            createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+            updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
+            semesterId: semFor('notes', row.id),
+        };
+    }
+    function notesLocalToRow(n, userId) {
+        // `checklist` has no column on `notes` (and nothing in notes.js ever populates
+        // it today) -- everything else round-trips.
+        return {
+            id: n.id, user_id: userId, title: n.title || '', content: n.content || '',
+            category: n.category || null, pinned: !!n.pinned, favorite: !!n.favorite,
+            subject_id: n.subjectId || null, task_id: n.taskId || null,
+            tags: Array.isArray(n.tags) ? n.tags : [],
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    function attendanceRowToLocal(row) {
+        return {
+            id: row.id, subjectId: row.subject_id, date: row.date, status: row.status || '',
+            online: !!row.online, notes: row.notes || '',
+            semesterId: semFor('attendance', row.id),
+        };
+    }
+    function attendanceLocalToRow(r, userId) {
+        return {
+            id: r.id, user_id: userId, subject_id: r.subjectId, date: r.date,
+            status: r.status || '', online: !!r.online, notes: r.notes || '',
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    function gwaRowToLocal(row) {
+        return { id: row.id, label: row.label || '', units: row.units != null ? row.units : '', grade: row.grade != null ? row.grade : '' };
+    }
+    function gwaLocalToRow(r, userId) {
+        return {
+            id: r.id, user_id: userId, label: r.label || '',
+            units: r.units === '' || r.units == null ? 0 : (+r.units || 0),
+            grade: r.grade === '' || r.grade == null ? 0 : (+r.grade || 0),
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    function gradeRowToLocal(row, components, assessmentsByComponent) {
+        return {
+            id: row.id,
+            subjectId: row.subject_id,
+            semesterId: semFor('grades', row.id),
+            components: (components || []).map(c => ({
+                id: c.id, name: c.name || '', weight: c.weight != null ? Number(c.weight) : 0,
+                assessments: (assessmentsByComponent[c.id] || []).map(a => ({
+                    id: a.id, name: a.name || '',
+                    score: a.score != null ? Number(a.score) : null,
+                    totalItems: a.total_items != null ? Number(a.total_items) : null,
+                })),
+            })),
+        };
+    }
+
+    /* ---------- server-side semester placeholder ----------
+       `grades.semester_id` and `syllabus_courses.semester_id` are NOT NULL FKs to
+       the real `semesters` table. This project's multi-semester feature is local-only
+       (out of scope for this migration), so there's no real semester row to point at.
+       We lazily create ONE small placeholder semester row per user the first time it's
+       needed and reuse its id to satisfy that FK -- it is never shown in the app UI. */
+    const SERVER_SEM_KEY = 'sp_cloud_server_semester_id';
+    async function getServerSemesterId(userId) {
+        let id = null;
+        try { id = localStorage.getItem(SERVER_SEM_KEY); } catch (e) { /* ignore */ }
+        if (id) return id;
+        const supabase = await getClient();
+        const { data, error } = await supabase
+            .from('semesters')
+            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: true })
+            .select('id')
+            .single();
+        if (error || !data) throw error || new Error('Could not create placeholder semester');
+        try { localStorage.setItem(SERVER_SEM_KEY, data.id); } catch (e) { /* ignore */ }
+        return data.id;
+    }
+
+    function syllabusRowToLocal(row) {
+        const d = (row.data && typeof row.data === 'object') ? row.data : {};
+        return Object.assign({
+            courseTitle: row.course_title || '', courseCode: row.course_code || '',
+            creditUnits: row.credit_units != null ? Number(row.credit_units) : 0,
+            courseDescription: row.description || '', instructor: row.instructor || '',
+            schedule: '', room: '', semester: '', academicYear: '', semesterId: semFor('syllabusCourses', row.id),
+            courseOutcomes: [], gradingComponents: [], requirements: '', policies: '', references: '',
+            weeks: [], createdAt: Date.now(), updatedAt: Date.now(),
+        }, d, { id: row.id });
+    }
+    function syllabusLocalToRow(c, userId, serverSemId) {
+        return {
+            id: c.id, user_id: userId, semester_id: serverSemId,
+            course_code: c.courseCode || '', course_title: c.courseTitle || '',
+            credit_units: c.creditUnits || 0, description: c.courseDescription || null,
+            instructor: c.instructor || null, data: c,
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    /* ---------- last-known-server snapshots (for diffing) ---------- */
+    const last = {
+        subjects: new Map(), tasks: new Map(), calendarEvents: new Map(),
+        notes: new Map(), attendance: new Map(), grades: new Map(),
+        gwaCalc: new Map(), syllabusCourses: new Map(),
+    };
+
+    /* ---------- hydrate (pull) ---------- */
+
+    const LAST_USER_KEY = 'sp_cloud_last_user_id';
+
+    async function hydrate() {
+        const userId = await getUserId();
+        if (!userId) return; // not signed in yet / auth guard will redirect
+
+        // Defense in depth against stale cross-student data on a shared device:
+        // AuthService.signOut() already wipes this cache (see storage.js
+        // clearPrivateCacheOnSignOut), but if a session ever changes to a
+        // *different* user without going through that path (e.g. a stale tab,
+        // or a session swapped in devtools), don't let that other student's
+        // cached subjects/tasks/notes/etc. render even for the instant before
+        // this hydrate's fetch resolves.
+        let lastUserId = null;
+        try { lastUserId = localStorage.getItem(LAST_USER_KEY); } catch (e) { /* ignore */ }
+        if (lastUserId && lastUserId !== userId) {
+            DB.clearPrivateCacheOnSignOut();
+        }
+        try { localStorage.setItem(LAST_USER_KEY, userId); } catch (e) { /* ignore */ }
+
+        try {
+            const supabase = await getClient();
+
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes] = await Promise.all([
+                supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+                supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+                supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
+                supabase.from('calendar_events').select('*').eq('user_id', userId).order('date', { ascending: true }),
+                supabase.from('notes').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+                supabase.from('attendance').select('*').eq('user_id', userId).order('date', { ascending: true }),
+                supabase.from('grades').select('*').eq('user_id', userId),
+                supabase.from('grade_components').select('*').order('position', { ascending: true }),
+                supabase.from('grade_assessments').select('*').order('position', { ascending: true }),
+                supabase.from('gwa_calculator').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+                supabase.from('syllabus_courses').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+            ]);
+
+            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes]
+                .map(r => r.error).find(Boolean);
+            if (firstError) throw firstError;
+
+            const checklistByTask = {};
+            (clRes.data || []).forEach(c => {
+                (checklistByTask[c.task_id] = checklistByTask[c.task_id] || []).push(c);
+            });
+            const assessmentsByComponent = {};
+            (gaRes.data || []).forEach(a => {
+                (assessmentsByComponent[a.component_id] = assessmentsByComponent[a.component_id] || []).push(a);
+            });
+            const componentsByGrade = {};
+            (gcRes.data || []).forEach(c => {
+                (componentsByGrade[c.grade_id] = componentsByGrade[c.grade_id] || []).push(c);
+            });
+
+            const subjects = (subjRes.data || []).map(subjectRowToLocal);
+            const tasks = (taskRes.data || []).map(r => taskRowToLocal(r, checklistByTask[r.id]));
+            const events = (evRes.data || []).map(eventRowToLocal);
+            const notes = (noteRes.data || []).map(notesRowToLocal);
+            const attendance = (attRes.data || []).map(attendanceRowToLocal);
+            const grades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
+            const syllabusCourses = (sylRes.data || []).map(syllabusRowToLocal);
+
+            DB.set('subjects', subjects);
+            DB.set('tasks', tasks);
+            DB.set('calendarEvents', events);
+            DB.set('notes', notes);
+            DB.set('attendance', attendance);
+            DB.set('grades', grades);
+            DB.set('gwaCalc', gwaRows);
+            DB.set('syllabusCourses', syllabusCourses);
+
+            last.subjects = new Map(subjects.map(s => [s.id, true]));
+            last.tasks = new Map(tasks.map(t => [t.id, true]));
+            last.calendarEvents = new Map(events.map(e => [e.id, true]));
+            last.notes = new Map(notes.map(n => [n.id, true]));
+            last.attendance = new Map(attendance.map(a => [a.id, true]));
+            last.grades = new Map(grades.map(g => [g.id, true]));
+            last.gwaCalc = new Map(gwaRows.map(r => [r.id, true]));
+            last.syllabusCourses = new Map(syllabusCourses.map(c => [c.id, true]));
+
+            window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
+        } catch (err) {
+            console.warn('Cloud sync hydrate failed', err);
+            toast("Couldn't load your latest data from the server. Showing cached data.", 'high');
+        }
+    }
+
+    /* ---------- push (write-through diffing) ---------- */
+
+    async function pushSubjects(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(s => s.id));
+        const toDelete = [...last.subjects.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) {
+                await supabase.from('subjects').delete().in('id', toDelete);
+                toDelete.forEach(id => dropSemFor('subjects', id));
+            }
+            for (const s of newList) {
+                if (!isUuid(s.id)) continue;
+                const row = subjectLocalToRow(s, userId);
+                const { error } = await supabase.from('subjects').upsert(row, { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('subjects', s.id, s.semesterId);
+            }
+            last.subjects = new Map(newList.map(s => [s.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (subjects) failed', err);
+            toast("Couldn't save that subject to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushTasks(newList, changedId) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(t => t.id));
+        const toDelete = [...last.tasks.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) {
+                await supabase.from('task_checklist_items').delete().in('task_id', toDelete);
+                await supabase.from('tasks').delete().in('id', toDelete);
+                toDelete.forEach(id => { dropSemFor('tasks', id); setWeekLink(id, null); });
+            }
+            for (const t of newList) {
+                if (!isUuid(t.id)) continue;
+                const isNew = !last.tasks.has(t.id);
+                const row = taskLocalToRow(t, userId);
+                if (isNew) row.created_at = new Date(t.createdAt || Date.now()).toISOString();
+                const { error } = await supabase.from('tasks').upsert(row, { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('tasks', t.id, t.semesterId);
+                setWeekLink(t.id, t.syllabusWeekId || null);
+                // Checklist: replace-all is simplest and matches how tasks.js rebuilds
+                // the checklist array from the modal on every save (no stable ids there).
+                await supabase.from('task_checklist_items').delete().eq('task_id', t.id);
+                const items = (t.checklist || []).map((c, i) => ({
+                    id: (c.id && isUuid(c.id)) ? c.id : (window.crypto && crypto.randomUUID ? crypto.randomUUID() : undefined),
+                    task_id: t.id, text: c.text, done: !!c.done, position: i,
+                }));
+                if (items.length) {
+                    const { error: clErr } = await supabase.from('task_checklist_items').insert(items);
+                    if (clErr) throw clErr;
+                }
+            }
+            last.tasks = new Map(newList.map(t => [t.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (tasks) failed', err);
+            toast("Couldn't save that task to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushCalendarEvents(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(e => e.id));
+        const toDelete = [...last.calendarEvents.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) {
+                await supabase.from('calendar_events').delete().in('id', toDelete);
+                toDelete.forEach(id => dropSemFor('calendarEvents', id));
+            }
+            for (const e of newList) {
+                if (!isUuid(e.id)) continue;
+                const row = eventLocalToRow(e, userId);
+                const { error } = await supabase.from('calendar_events').upsert(row, { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('calendarEvents', e.id, e.semesterId);
+            }
+            last.calendarEvents = new Map(newList.map(e => [e.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (calendar events) failed', err);
+            toast("Couldn't save that event to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushNotes(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(n => n.id));
+        const toDelete = [...last.notes.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) {
+                await supabase.from('notes').delete().in('id', toDelete);
+                toDelete.forEach(id => dropSemFor('notes', id));
+            }
+            for (const n of newList) {
+                if (!isUuid(n.id)) continue;
+                const { error } = await supabase.from('notes').upsert(notesLocalToRow(n, userId), { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('notes', n.id, n.semesterId);
+            }
+            last.notes = new Map(newList.map(n => [n.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (notes) failed', err);
+            toast("Couldn't save that note to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushAttendance(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(r => r.id));
+        const toDelete = [...last.attendance.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) {
+                await supabase.from('attendance').delete().in('id', toDelete);
+                toDelete.forEach(id => dropSemFor('attendance', id));
+            }
+            for (const r of newList) {
+                if (!isUuid(r.id)) continue;
+                const { error } = await supabase.from('attendance').upsert(attendanceLocalToRow(r, userId), { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('attendance', r.id, r.semesterId);
+            }
+            last.attendance = new Map(newList.map(r => [r.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (attendance) failed', err);
+            toast("Couldn't save that attendance record to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushGwaCalc(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(r => r.id));
+        const toDelete = [...last.gwaCalc.keys()].filter(id => !newIds.has(id));
+        try {
+            if (toDelete.length) await supabase.from('gwa_calculator').delete().in('id', toDelete);
+            for (const r of newList) {
+                if (!isUuid(r.id)) continue;
+                const { error } = await supabase.from('gwa_calculator').upsert(gwaLocalToRow(r, userId), { onConflict: 'id' });
+                if (error) throw error;
+            }
+            last.gwaCalc = new Map(newList.map(r => [r.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (GWA calculator) failed', err);
+            toast("Couldn't save the GWA calculator to the server. Please check your connection and try again.");
+        }
+    }
+
+    /* grades: each grade row owns its own components/assessments. Ids on components
+       and assessments ARE stable across edits (grades.js keeps them via `c.id || DB.uid()`),
+       so a straightforward delete-missing / upsert-rest pass works, scoped per grade row. */
+    async function pushGrades(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+
+        // Local grade records are sometimes created without a top-level id
+        // (grades.js keys them by subjectId); give each one a real id so it can
+        // be a primary key, and persist that back into the local cache.
+        let mutated = false;
+        newList.forEach(g => { if (!g.id) { g.id = DB.uid(); mutated = true; } });
+        if (mutated) DB.set('grades', newList);
+
+        const newIds = new Set(newList.map(g => g.id));
+        const toDelete = [...last.grades.keys()].filter(id => !newIds.has(id));
+        try {
+            const serverSemId = await getServerSemesterId(userId);
+
+            for (const gradeId of toDelete) {
+                const { data: comps } = await supabase.from('grade_components').select('id').eq('grade_id', gradeId);
+                const compIds = (comps || []).map(c => c.id);
+                if (compIds.length) await supabase.from('grade_assessments').delete().in('component_id', compIds);
+                await supabase.from('grade_components').delete().eq('grade_id', gradeId);
+                await supabase.from('grades').delete().eq('id', gradeId);
+                dropSemFor('grades', gradeId);
+            }
+
+            for (const g of newList) {
+                if (!isUuid(g.id)) continue;
+                const { error: gErr } = await supabase.from('grades').upsert({
+                    id: g.id, user_id: userId, semester_id: serverSemId, subject_id: g.subjectId,
+                    updated_at: new Date().toISOString(),
+                }, { onConflict: 'id' });
+                if (gErr) throw gErr;
+                setSemFor('grades', g.id, g.semesterId);
+
+                const { data: existingComps } = await supabase.from('grade_components').select('id').eq('grade_id', g.id);
+                const keepCompIds = new Set((g.components || []).map(c => c.id));
+                const removedComps = (existingComps || []).map(c => c.id).filter(id => !keepCompIds.has(id));
+                if (removedComps.length) {
+                    await supabase.from('grade_assessments').delete().in('component_id', removedComps);
+                    await supabase.from('grade_components').delete().in('id', removedComps);
+                }
+
+                for (let ci = 0; ci < (g.components || []).length; ci++) {
+                    const c = g.components[ci];
+                    if (!isUuid(c.id)) continue;
+                    const { error: cErr } = await supabase.from('grade_components').upsert({
+                        id: c.id, grade_id: g.id, name: c.name || '', weight: c.weight || 0, position: ci,
+                    }, { onConflict: 'id' });
+                    if (cErr) throw cErr;
+
+                    const { data: existingAss } = await supabase.from('grade_assessments').select('id').eq('component_id', c.id);
+                    const keepAssIds = new Set((c.assessments || []).map(a => a.id));
+                    const removedAss = (existingAss || []).map(a => a.id).filter(id => !keepAssIds.has(id));
+                    if (removedAss.length) await supabase.from('grade_assessments').delete().in('id', removedAss);
+
+                    for (let ai = 0; ai < (c.assessments || []).length; ai++) {
+                        const a = c.assessments[ai];
+                        if (!isUuid(a.id)) continue;
+                        // score / total_items are NOT NULL on this table -- an assessment
+                        // can exist locally with a name but no numbers typed in yet, so
+                        // default those to 0 ("not scored") rather than fail the insert.
+                        const { error: aErr } = await supabase.from('grade_assessments').upsert({
+                            id: a.id, component_id: c.id, name: a.name || '',
+                            score: a.score != null ? a.score : 0,
+                            total_items: a.totalItems != null ? a.totalItems : 0,
+                            position: ai,
+                        }, { onConflict: 'id' });
+                        if (aErr) throw aErr;
+                    }
+                }
+            }
+            last.grades = new Map(newList.map(g => [g.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (grades) failed', err);
+            toast("Couldn't save that grade to the server. Please check your connection and try again.");
+        }
+    }
+
+    async function pushSyllabusCourses(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(c => c.id));
+        const toDelete = [...last.syllabusCourses.keys()].filter(id => !newIds.has(id));
+        try {
+            const serverSemId = await getServerSemesterId(userId);
+            if (toDelete.length) {
+                await supabase.from('syllabus_courses').delete().in('id', toDelete);
+                toDelete.forEach(id => dropSemFor('syllabusCourses', id));
+            }
+            for (const c of newList) {
+                if (!isUuid(c.id)) continue;
+                const { error } = await supabase.from('syllabus_courses').upsert(syllabusLocalToRow(c, userId, serverSemId), { onConflict: 'id' });
+                if (error) throw error;
+                setSemFor('syllabusCourses', c.id, c.semesterId);
+            }
+            last.syllabusCourses = new Map(newList.map(c => [c.id, true]));
+        } catch (err) {
+            console.warn('Cloud sync (syllabus) failed', err);
+            toast("Couldn't save that syllabus to the server. Please check your connection and try again.");
+        }
+    }
+
+    /* ---------- wire into DB ---------- */
+
+    const _saveSubjects = DB.saveSubjects.bind(DB);
+    DB.saveSubjects = function (list) {
+        const r = _saveSubjects(list);
+        pushSubjects(list.slice());
+        return r;
+    };
+    const _saveTasks = DB.saveTasks.bind(DB);
+    DB.saveTasks = function (list) {
+        const r = _saveTasks(list);
+        pushTasks(list.slice());
+        return r;
+    };
+    const _saveCalendarEvents = DB.saveCalendarEvents.bind(DB);
+    DB.saveCalendarEvents = function (list) {
+        const r = _saveCalendarEvents(list);
+        pushCalendarEvents(list.slice());
+        return r;
+    };
+    const _saveNotes = DB.saveNotes.bind(DB);
+    DB.saveNotes = function (list) {
+        const r = _saveNotes(list);
+        pushNotes(list.slice());
+        return r;
+    };
+    const _saveAttendance = DB.saveAttendance.bind(DB);
+    DB.saveAttendance = function (list) {
+        const r = _saveAttendance(list);
+        pushAttendance(list.slice());
+        return r;
+    };
+    const _saveGrades = DB.saveGrades.bind(DB);
+    DB.saveGrades = function (list) {
+        const r = _saveGrades(list);
+        pushGrades(list.slice());
+        return r;
+    };
+    const _saveGwaCalcRows = DB.saveGwaCalcRows.bind(DB);
+    DB.saveGwaCalcRows = function (list) {
+        const r = _saveGwaCalcRows(list);
+        pushGwaCalc(list.slice());
+        return r;
+    };
+    const _saveSyllabusCourses = DB.saveSyllabusCourses.bind(DB);
+    DB.saveSyllabusCourses = function (list) {
+        const r = _saveSyllabusCourses(list);
+        pushSyllabusCourses(list.slice());
+        return r;
+    };
+
+    /* ---------- public: boot + ready gate ---------- */
+
+    showLoader();
+    DB.cloudReady = hydrate().finally(hideLoader);
+
+    /* Call once the DOM-ready init() for a page is defined. Runs it immediately
+       if the initial hydrate is already done; otherwise waits for it (showing the
+       loader above) so pages never render against an empty-but-not-yet-loaded cache. */
+    DB.whenCloudReady = function (fn) {
+        if (typeof fn !== 'function') return;
+        DB.cloudReady.then(fn, fn);
+    };
+
+    /* ---------- Settings page: Reset Data / Import Backup ----------
+       Both bypass the DB.saveX wrappers above (they write the localStorage
+       keys directly), so they need their own explicit cloud sync. */
+
+    async function wipeCloudData(userId) {
+        const supabase = await getClient();
+        // Children first (no ON DELETE CASCADE assumed), then the owning rows.
+        const { data: myGrades } = await supabase.from('grades').select('id').eq('user_id', userId);
+        const gradeIds = (myGrades || []).map(g => g.id);
+        if (gradeIds.length) {
+            const { data: comps } = await supabase.from('grade_components').select('id').in('grade_id', gradeIds);
+            const compIds = (comps || []).map(c => c.id);
+            if (compIds.length) await supabase.from('grade_assessments').delete().in('component_id', compIds);
+            await supabase.from('grade_components').delete().in('grade_id', gradeIds);
+        }
+        const { data: myTasks } = await supabase.from('tasks').select('id').eq('user_id', userId);
+        const taskIds = (myTasks || []).map(t => t.id);
+        if (taskIds.length) await supabase.from('task_checklist_items').delete().in('task_id', taskIds);
+
+        await Promise.all([
+            supabase.from('subjects').delete().eq('user_id', userId),
+            supabase.from('tasks').delete().eq('user_id', userId),
+            supabase.from('calendar_events').delete().eq('user_id', userId),
+            supabase.from('notes').delete().eq('user_id', userId),
+            supabase.from('attendance').delete().eq('user_id', userId),
+            supabase.from('grades').delete().eq('user_id', userId),
+            supabase.from('gwa_calculator').delete().eq('user_id', userId),
+            supabase.from('syllabus_courses').delete().eq('user_id', userId),
+        ]);
+        Object.keys(last).forEach(k => last[k] = new Map());
+        try {
+            localStorage.removeItem(MAP_KEY);
+            localStorage.removeItem(SERVER_SEM_KEY);
+        } catch (e) { /* ignore */ }
+    }
+
+    const _resetAll = DB.resetAll.bind(DB);
+    DB.resetAll = function () {
+        const r = _resetAll();
+        getUserId().then(userId => {
+            if (!userId) return;
+            wipeCloudData(userId).catch(err => {
+                console.warn('Cloud sync (reset) failed', err);
+                toast("Local data was reset, but the server copy could not be cleared. Please check your connection.");
+            });
+        });
+        return r;
+    };
+
+    const _importAll = DB.importAll.bind(DB);
+    DB.importAll = function (obj) {
+        const r = _importAll(obj);
+        // Push every imported list through the normal save wrappers so each one
+        // gets diffed against the server and synced the same way a manual edit would.
+        pushSubjects(DB.getSubjects());
+        pushTasks(DB.getTasks());
+        pushCalendarEvents(DB.getCalendarEvents());
+        pushNotes(DB.getNotes());
+        pushAttendance(DB.getAttendance());
+        pushGrades(DB.getGrades());
+        pushGwaCalc(DB.getGwaCalcRows());
+        pushSyllabusCourses(DB.getSyllabusCourses());
+        return r;
+    };
+})();
