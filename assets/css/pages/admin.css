@@ -748,13 +748,9 @@ a.adm-stat-card:focus-visible {
     cursor: default;
 }
 
-.nav-link-label {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+/* .nav-link-label, .nav-badge, .nav-link-soon / .drawer-link-soon and .nav-pill-soon
+   now live in assets/css/layout/sidebar.css — they're shared by the student sidebar
+   too (e.g. the "Soon" items in AI Tools / Safety & Support), not just admin. */
 
 .nav-badge {
     flex: 0 0 auto;

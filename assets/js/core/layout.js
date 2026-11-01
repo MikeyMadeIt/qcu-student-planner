@@ -2,35 +2,48 @@
    NAV
    ============================================================ */
 const NAV_ITEMS = [
+    /* COMMUNICATION */
+    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
+    { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
+    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'announcements', base: 'app', soon: true },
+    /* OVERVIEW */
     { href: 'dashboard.html', icon: 'bi-grid-1x2-fill', label: 'Dashboard', key: 'dashboard', base: 'app' },
+    /* ACADEMICS */
     { href: 'schedule.html', icon: 'bi-calendar2-week-fill', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
     { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
     { href: 'grades.html', icon: 'bi-mortarboard-fill', label: 'Grades', key: 'grades', base: 'app' },
     { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
-    { href: 'syllabus.html', icon: 'bi-journal-bookmark-fill', label: 'Syllabus', key: 'syllabus', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
-    { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
-    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
+    { href: 'syllabus.html', icon: 'bi-journal-bookmark-fill', label: 'Syllabus', key: 'syllabus', base: 'app' },
+    /* UNIVERSITY */
     { href: 'university.html', icon: 'bi-building-fill', label: 'University', key: 'university', base: 'app' },
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
+    /* AI TOOLS */
+    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
+    { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
+    { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
+    { href: 'ai-summarizer.html', icon: 'bi-file-earmark-text-fill', label: 'AI Summarizer', key: 'ai-summarizer', base: 'app', soon: true },
+    { href: 'ai-reviewer.html', icon: 'bi-clipboard2-check-fill', label: 'AI Reviewer', key: 'ai-reviewer', base: 'app', soon: true },
+    /* PERSONALIZATION */
     { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
+    /* SAFETY & SUPPORT */
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
-    { href: 'help.html', icon: 'bi-question-circle', label: 'Help', key: 'help', base: 'app' },
-    { href: 'report.html', icon: 'bi-flag', label: 'Report', key: 'report', base: 'app' },
+    { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
+    { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
+    { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app', soon: true },
     { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
     { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
     { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
     { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
     { href: 'tickets.html', icon: 'bi-life-preserver', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
-    { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin' },
-    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'admin-announcements', base: 'admin' },
-    { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin' },
+    { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin', soon: true },
+    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'admin-announcements', base: 'admin', soon: true },
+    { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin', soon: true },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
-    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin' },
+    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
 ];
-const QUICK_ACCESS_KEYS = ['inbox', 'notifications'];
 const THEME_OPTIONS = [
     { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
     { value: 'light', label: 'Light', icon: 'bi-sun' },
@@ -40,22 +53,29 @@ const THEME_OPTIONS = [
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 
 const PAGE_SECTIONS = {
+    inbox: 'Communication',
+    notifications: 'Communication',
+    announcements: 'Communication',
     dashboard: 'Overview',
     schedule: 'Academics',
     tasks: 'Academics',
     calendar: 'Academics',
     grades: 'Academics',
     attendance: 'Academics',
-    syllabus: 'Academics',
     notes: 'Academics',
-    notifications: 'Quick Access',
-    inbox: 'Quick Access',
+    syllabus: 'Academics',
     university: 'University',
     curriculum: 'University',
-    wallpaper: 'App',
-    settings: 'Utilities',
-    help: 'Utilities',
-    report: 'Utilities',
+    'ai-quiz-maker': 'AI Tools',
+    'ai-flashcard-maker': 'AI Tools',
+    'ai-study-assistant': 'AI Tools',
+    'ai-summarizer': 'AI Tools',
+    'ai-reviewer': 'AI Tools',
+    wallpaper: 'Personalization',
+    settings: 'Safety & Support',
+    help: 'Safety & Support',
+    report: 'Safety & Support',
+    'legal-policies': 'Safety & Support',
     'admin-dashboard': 'Overview',
     'admin-users': 'User Management',
     'admin-verification': 'User Management',
@@ -81,6 +101,30 @@ async function signOutAndRedirect(button) {
     location.href = '../auth/login.html';
 }
 window.signOutAndRedirect = signOutAndRedirect;
+
+/* ---------- Current-semester card (header avatar popup) ----------
+   Reuses the same active-semester data source and "Active" concept as Settings'
+   semester manager (DB.getActiveSemester / DB.getActiveSemesterId) — this is a
+   manually-configured flag, not a dynamically verified status, same as on Settings. */
+function formatSemesterCardDate(ymd) {
+    if (!ymd) return '';
+    const d = new Date(ymd + 'T00:00:00');
+    if (isNaN(d)) return ymd;
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+function renderShellSemesterCardHtml() {
+    const sem = (typeof DB !== 'undefined') ? DB.getActiveSemester() : null;
+    if (!sem) return '';
+    const range = `${formatSemesterCardDate(sem.startDate)} &ndash; ${formatSemesterCardDate(sem.endDate)}`;
+    return `
+        <div class="shell-semester-card" id="shellSemesterCard">
+            <div class="shell-semester-info">
+                <div class="shell-semester-name">${escHtml(sem.name)}</div>
+                <div class="shell-semester-dates">${range}</div>
+            </div>
+            <span class="shell-semester-status"><i class="bi bi-check-lg" aria-hidden="true"></i>Active</span>
+        </div>`;
+}
 
 /* ---------- Theme switcher (topbar) ---------- */
 function renderThemeSwitchHtml() {
@@ -159,7 +203,7 @@ function syncSidebarToggleIcon(isOpen) {
         btn.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
         const icon = btn.querySelector('i');
         if (icon)
-            icon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-layout-sidebar';
+            icon.className = isOpen ? 'bi bi-layout-sidebar-reverse' : 'bi bi-layout-sidebar';
     });
 }
 function wireSidebarToggles() {
@@ -448,15 +492,18 @@ function renderShellBar(activeKey) {
                             <div class="profile-panel-sub" id="topbarUserEmail">Signed in on this device</div>
                         </div>
                     </div>
+                    ${renderShellSemesterCardHtml() ? `<div class="profile-panel-section-semester">${renderShellSemesterCardHtml()}</div>` : ''}
                     <div class="profile-panel-section">
                         <div class="profile-panel-label">Theme</div>
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
                     </div>
                     <div class="profile-panel-section">
                         <a class="profile-item" role="menuitem" href="../app/settings.html"><i class="bi bi-sliders" aria-hidden="true"></i>Settings</a>
-                        <a class="profile-item" role="menuitem" href="../app/wallpaper.html"><i class="bi bi-image" aria-hidden="true"></i>Wallpaper</a>
                         <a class="profile-item" role="menuitem" href="../app/help.html"><i class="bi bi-question-circle" aria-hidden="true"></i>Help</a>
                         <a class="profile-item" role="menuitem" href="../app/report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report</a>
+                    </div>
+                    <div class="profile-panel-section">
+                        <button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" id="topbarProfileLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
                     </div>
                 </div>
             </div>
@@ -652,11 +699,13 @@ function renderShell(activeKey, admin) {
                 { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
             ]
             : [
+                { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
                 { label: 'Overview', keys: ['dashboard'] },
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
                 { label: 'University', keys: ['university', 'curriculum'] },
-                { label: 'App', keys: ['wallpaper'] },
-                { label: 'Utilities', keys: ['settings', 'help', 'report'] },
+                { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
+                { label: 'Personalization', keys: ['wallpaper'] },
+                { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
             ];
         const itemMap = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n]));
         const sidebarSettings = (typeof DB !== 'undefined') ? DB.getSettings() : {};
@@ -666,16 +715,6 @@ function renderShell(activeKey, admin) {
         const brandIcon = isAdminArea ? 'bi-shield-lock-fill' : 'bi-mortarboard';
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
-        if (!isAdminArea) {
-            sidebarHtml += `<div class="sidebar-quick-row" aria-label="Quick access">`;
-            QUICK_ACCESS_KEYS.forEach(key => {
-                const item = itemMap[key];
-                const isActive = item.key === activeKey;
-                const dotHtml = item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                sidebarHtml += `<a class="nav-link sidebar-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}><i class="bi ${item.icon}" aria-hidden="true"></i>${item.label}${dotHtml}</a>`;
-            });
-            sidebarHtml += `</div>`;
-        }
         sidebarGroups.forEach(g => {
             if (g.label)
                 sidebarHtml += `<div class="nav-group-label" role="heading" aria-level="2">${g.label}</div>`;
@@ -684,9 +723,10 @@ function renderShell(activeKey, admin) {
                 if (!n)
                     return;
                 const isActive = n.key === activeKey;
-                const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
+                const badgeHtml = n.soon ? `<span class="nav-pill-soon">Soon</span>`
+                    : isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
                     : n.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                sidebarHtml += `<a class="nav-link ${isActive ? 'active' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
+                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${n.soon ? ' nav-link-soon' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
         });
         sidebarHtml += `</nav><div class="sidebar-bottom">`;
@@ -702,30 +742,113 @@ function renderShell(activeKey, admin) {
                button, and Settings' "Export All Data" button) — removing the sidebar-only copy
                does not remove any functionality, it just stops duplicating nav real estate on
                desktop. See tasks.html and settings.html. */
-            const _sem = DB.getActiveSemester();
-            const _semLabel = _sem ? `${_sem.schoolYear} &bull; ${_sem.name}` : '';
-            sidebarHtml += `${_semLabel ? `<div class="sem-banner-nav"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>${_semLabel}</div>` : ''}
-    <div class="sidebar-utility">
-      <button type="button" class="nav-link sidebar-logout-btn" id="sidebarLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
-    </div>
-    <div class="sidebar-profile" id="sidebarProfile">
+            sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
       <span class="profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
         <div class="sidebar-profile-name" id="sidebarProfileName">${escHtml(name)}</div>
         <div class="sidebar-profile-sub" id="sidebarUserName">Signed in on this device</div>
       </div>
+      <button type="button" class="sidebar-profile-more" id="sidebarProfileMoreBtn"
+        aria-haspopup="true" aria-expanded="false" aria-controls="sidebarProfilePanel" aria-label="Profile options">
+        <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+      </button>
     </div>`;
         }
         sidebarHtml += `</div>`;
         sidebar.innerHTML = sidebarHtml;
     }
     ensureNavDrawer(activeKey);
+    if (!isAdminArea) {
+        ensureSidebarProfileMenu();
+        ensureDrawerProfileMenu();
+    }
     initThemeSwitches();
     initThemeOptions();
     wireSidebarToggles();
     wireModalDefaults();
     hydrateProfileIdentity();
     if (isAdminArea) refreshAdminNavBadges();
+}
+
+/* ---------- Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer ----------
+   Builds one such menu per (triggerId, panelId) pair, rendered into document.body (not
+   inside .sidebar/.nav-drawer) and positioned with fixed coordinates, so it is never
+   clipped by the sidebar's/drawer's own overflow:hidden. Flips open upward or downward
+   based on available space, closes on outside click/Escape, and participates in the same
+   closeOthers() set (.header-panel, .profile-panel) as the header popups in initHeaderPanel(). */
+function ensureFooterProfileMenu(triggerId, panelId) {
+    const trigger = document.getElementById(triggerId);
+    if (!trigger) {
+        const stalePanel = document.getElementById(panelId);
+        if (stalePanel) stalePanel.hidden = true;
+        return;
+    }
+    let panel = document.getElementById(panelId);
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = panelId;
+        panel.className = 'profile-panel sidebar-profile-panel';
+        panel.setAttribute('role', 'menu');
+        panel.setAttribute('aria-label', 'Profile options');
+        panel.hidden = true;
+        document.body.appendChild(panel);
+    }
+    panel.innerHTML = `<button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>`;
+
+    function closeOthers() {
+        document.querySelectorAll('.header-panel, .profile-panel').forEach(p => {
+            if (p.id !== panelId && !p.hidden) {
+                p.hidden = true;
+                const t = document.querySelector('[aria-controls="' + p.id + '"]');
+                if (t) t.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+    function positionPanel() {
+        const rect = trigger.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        const gutter = 8;
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        /* The footer trigger usually has little or no room below it, so prefer
+           opening upward; fall back to downward only when there is genuinely
+           more room that way (e.g. a very short viewport). */
+        const openUp = spaceAbove >= (panelRect.height + gutter) || spaceAbove >= spaceBelow;
+        const top = openUp
+            ? Math.max(gutter, rect.top - panelRect.height - 8)
+            : Math.min(window.innerHeight - panelRect.height - gutter, rect.bottom + 8);
+        let left = rect.right - panelRect.width;
+        left = Math.min(Math.max(left, gutter), window.innerWidth - panelRect.width - gutter);
+        panel.style.top = `${top}px`;
+        panel.style.left = `${left}px`;
+    }
+    function setOpen(isOpen) {
+        if (isOpen) closeOthers();
+        panel.hidden = !isOpen;
+        trigger.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) positionPanel();
+    }
+    trigger.addEventListener('click', event => {
+        event.stopPropagation();
+        setOpen(panel.hidden);
+    });
+    window.addEventListener('resize', () => { if (!panel.hidden) positionPanel(); });
+    document.addEventListener('click', event => {
+        if (!panel.hidden && !trigger.contains(event.target) && !panel.contains(event.target))
+            setOpen(false);
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !panel.hidden) {
+            setOpen(false);
+            trigger.focus();
+        }
+    });
+}
+function ensureSidebarProfileMenu() {
+    ensureFooterProfileMenu('sidebarProfileMoreBtn', 'sidebarProfilePanel');
+}
+function ensureDrawerProfileMenu() {
+    ensureFooterProfileMenu('drawerProfileMoreBtn', 'drawerProfilePanel');
 }
 
 /* Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
@@ -794,11 +917,13 @@ async function hydrateProfileIdentity() {
 /* ---------- MOBILE NAVIGATION DRAWER ---------- */
 /* Keep the student navigation hierarchy identical in the desktop sidebar and mobile drawer. */
 const DRAWER_GROUPS = [
+    { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
     { label: 'Overview', keys: ['dashboard'] },
     { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
     { label: 'University', keys: ['university', 'curriculum'] },
-    { label: 'App', keys: ['wallpaper'] },
-    { label: 'Utilities', keys: ['settings', 'help', 'report'] }
+    { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
+    { label: 'Personalization', keys: ['wallpaper'] },
+    { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
 ];
 const ADMIN_DRAWER_GROUPS = [
     { label: 'Overview', keys: ['admin-dashboard'] },
@@ -813,27 +938,16 @@ function ensureNavDrawer(activeKey) {
     const isAdminArea = String(activeKey).startsWith('admin-');
     const groups = isAdminArea ? ADMIN_DRAWER_GROUPS : DRAWER_GROUPS;
     const itemMap = Object.fromEntries(NAV_ITEMS.map(item => [item.key, item]));
-    const quickAccessHtml = isAdminArea ? '' : `
-        <div class="drawer-quick-row" aria-label="Quick access">
-            ${QUICK_ACCESS_KEYS.map(key => {
-                const item = itemMap[key];
-                const isActive = key === activeKey;
-                const dotHtml = item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                return `<a class="drawer-link drawer-quick-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
-                    <i class="bi ${item.icon}" aria-hidden="true"></i>
-                    <span>${item.label}</span>${dotHtml}
-                </a>`;
-            }).join('')}
-        </div>`;
     const groupsHtml = groups.map(group => `
         <div class="drawer-group">
             <div class="drawer-group-label">${group.label}</div>
             ${group.keys.map(key => {
         const item = itemMap[key];
         const isActive = key === activeKey;
-        const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>`
+        const badgeHtml = item.soon ? `<span class="nav-pill-soon">Soon</span>`
+            : isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>`
             : item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-        return `<a class="drawer-link${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
+        return `<a class="drawer-link${isActive ? ' active' : ''}${item.soon ? ' drawer-link-soon' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
                     <i class="bi ${item.icon}" aria-hidden="true"></i>
                     <span>${item.label}</span>${badgeHtml}
                 </a>`;
@@ -842,22 +956,20 @@ function ensureNavDrawer(activeKey) {
     const sidebarSettingsForDrawer = (!isAdminArea && typeof DB !== 'undefined') ? DB.getSettings() : {};
     const drawerName = (sidebarSettingsForDrawer.name || '').trim() || 'Student';
     const drawerInitial = escHtml(drawerName.charAt(0).toUpperCase() || 'S');
-    const activeSemester = (!isAdminArea && typeof DB !== 'undefined') ? DB.getActiveSemester() : null;
-    const semesterLabel = activeSemester ? `${activeSemester.schoolYear} &bull; ${activeSemester.name}` : '';
     const bottomHtml = isAdminArea ? `
             <div class="drawer-group drawer-bottom">
                 <button type="button" class="drawer-link drawer-link-danger js-admin-logout" id="admDrawerLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
             </div>` : `
-            <div class="drawer-bottom">
-                ${semesterLabel ? `<div class="sem-banner-nav drawer-sem-banner"><i class="bi bi-calendar3 me-1" aria-hidden="true"></i>${semesterLabel}</div>` : ''}
-                <button type="button" class="drawer-link drawer-link-danger" id="drawerLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
-            </div>
             <div class="drawer-profile" id="drawerProfile">
                 <span class="profile-avatar" aria-hidden="true" id="drawerProfileAvatar">${drawerInitial}</span>
                 <div class="drawer-profile-text">
                     <div class="drawer-profile-name" id="drawerProfileName">${escHtml(drawerName)}</div>
                     <div class="drawer-profile-sub" id="drawerUserEmail">Signed in on this device</div>
                 </div>
+                <button type="button" class="drawer-profile-more" id="drawerProfileMoreBtn"
+                    aria-haspopup="true" aria-expanded="false" aria-controls="drawerProfilePanel" aria-label="Profile options">
+                    <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                </button>
             </div>`;
     const drawer = document.createElement('div');
     drawer.id = 'navDrawer';
@@ -872,10 +984,10 @@ function ensureNavDrawer(activeKey) {
                     <span>QCU Planner</span>
                 </span>
                 <button type="button" class="drawer-close" data-drawer-close aria-label="Close navigation">
-                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    <i class="bi bi-layout-sidebar-reverse" aria-hidden="true"></i>
                 </button>
             </div>
-            <nav class="nav-drawer-body" aria-label="All pages">${quickAccessHtml}${groupsHtml}</nav>
+            <nav class="nav-drawer-body" aria-label="All pages">${groupsHtml}</nav>
             ${bottomHtml}
         </aside>`;
     document.body.appendChild(drawer);
