@@ -221,10 +221,10 @@ async function loadRecentActivity() {
     table.hidden = false;
     list.innerHTML = rows.map(r => `
         <tr>
-            <td data-label="When">${formatDateTime(r.created_at)}</td>
-            <td data-label="Admin">${escHtml(r.actor && r.actor.full_name ? r.actor.full_name : 'Administrator')}</td>
-            <td data-label="Action">${escHtml(ACTION_LABELS[r.action] || r.action)}</td>
-            <td data-label="Account">${escHtml(r.target && r.target.full_name ? r.target.full_name : '—')}</td>
+            <td data-label="When" class="adm-col-secondary">${formatDateTime(r.created_at)}</td>
+            <td data-label="Admin" class="adm-col-hide-compact">${escHtml(r.actor && r.actor.full_name ? r.actor.full_name : 'Administrator')}</td>
+            <td data-label="Action" class="adm-col-primary">${escHtml(ACTION_LABELS[r.action] || r.action)}</td>
+            <td data-label="Account" class="adm-col-hide-compact">${escHtml(r.target && r.target.full_name ? r.target.full_name : '—')}</td>
         </tr>`).join('');
 }
 
@@ -277,10 +277,10 @@ async function loadCommsStats() {
         msgsEmpty.hidden = true;
         msgsList.innerHTML = recentMessages.map(m => `
             <tr>
-                <td data-label="Subject">${escHtml(m.subject)}</td>
-                <td data-label="Category">${escHtml(MESSAGE_CATEGORY_LABELS[m.category] || m.category)}</td>
-                <td data-label="Recipients">${m.recipient_count}</td>
-                <td data-label="Sent">${formatDateTime(m.sent_at)}</td>
+                <td data-label="Subject" class="adm-col-primary">${escHtml(m.subject)}</td>
+                <td data-label="Category" class="adm-col-secondary">${escHtml(MESSAGE_CATEGORY_LABELS[m.category] || m.category)}</td>
+                <td data-label="Recipients" class="adm-col-status"><i class="bi bi-people" aria-hidden="true"></i> ${m.recipient_count}</td>
+                <td data-label="Sent" class="adm-col-hide-compact">${formatDateTime(m.sent_at)}</td>
             </tr>`).join('');
     }
 
@@ -294,10 +294,10 @@ async function loadCommsStats() {
         ticketsEmpty.hidden = true;
         ticketsList.innerHTML = recentTickets.map(t => `
             <tr>
-                <td data-label="Ticket"><span class="text-faint" style="font-family:var(--font-mono);font-size:.76rem">${escHtml(t.ticket_ref)}</span></td>
-                <td data-label="Student">${escHtml(t.student && t.student.full_name ? t.student.full_name : 'Unnamed account')}</td>
-                <td data-label="Subject">${escHtml(t.subject)}</td>
-                <td data-label="Status">${ticketStatusBadge(escHtml, t.status)}</td>
+                <td data-label="Ticket" class="adm-col-hide-compact"><span class="text-faint" style="font-family:var(--font-mono);font-size:.76rem">${escHtml(t.ticket_ref)}</span></td>
+                <td data-label="Student" class="adm-col-secondary">${escHtml(t.student && t.student.full_name ? t.student.full_name : 'Unnamed account')}</td>
+                <td data-label="Subject" class="adm-col-primary">${escHtml(t.subject)}</td>
+                <td data-label="Status" class="adm-col-status">${ticketStatusBadge(escHtml, t.status)}</td>
             </tr>`).join('');
     }
 }
@@ -363,12 +363,12 @@ async function loadDashboard() {
                 : `users.html?q=${encodeURIComponent(r.full_name || '')}`;
             return `
             <tr>
-                <td data-label="Student">${escHtml(r.full_name || 'Unnamed account')}</td>
-                <td data-label="Program">${escHtml(r.course || '—')}${r.year_level ? ' · ' + escHtml(r.year_level) : ''}</td>
-                <td data-label="Campus">${escHtml(r.school || '—')}</td>
-                <td data-label="Submitted">${formatDateTime(r.created_at)}</td>
-                <td data-label="Status">${statusBadge(r.account_status)}</td>
-                <td class="text-end adm-actions"><a class="btn btn-ghost btn-sm" href="${reviewHref}"><i class="bi bi-arrow-right"></i> ${r.account_status === 'pending' ? 'Review' : 'View'}</a></td>
+                <td data-label="Student" class="adm-col-primary">${escHtml(r.full_name || 'Unnamed account')}</td>
+                <td data-label="Program" class="adm-col-secondary">${escHtml(r.course || '—')}${r.year_level ? ' · ' + escHtml(r.year_level) : ''}</td>
+                <td data-label="Campus" class="adm-col-hide-compact">${escHtml(r.school || '—')}</td>
+                <td data-label="Submitted" class="adm-col-hide-compact">${formatDateTime(r.created_at)}</td>
+                <td data-label="Status" class="adm-col-status">${statusBadge(r.account_status)}</td>
+                <td class="text-end adm-actions"><a class="btn btn-ghost btn-sm" href="${reviewHref}"><i class="bi bi-arrow-right"></i> <span class="adm-actions-label">${r.account_status === 'pending' ? 'Review' : 'View'}</span></a></td>
             </tr>`;
         }).join('');
     }
