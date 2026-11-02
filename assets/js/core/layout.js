@@ -17,8 +17,8 @@ const NAV_ITEMS = [
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
     { href: 'syllabus.html', icon: 'bi-journal-bookmark-fill', label: 'Syllabus', key: 'syllabus', base: 'app' },
     /* UNIVERSITY */
-    { href: 'university.html', icon: 'bi-building-fill', label: 'University', key: 'university', base: 'app' },
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
+    { href: 'university.html', icon: 'bi-building-fill', label: 'University', key: 'university', base: 'app' },
     /* AI TOOLS */
     { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
     { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
@@ -701,8 +701,8 @@ function renderShell(activeKey, admin) {
             : [
                 { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
                 { label: 'Overview', keys: ['dashboard'] },
-                { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
-                { label: 'University', keys: ['university', 'curriculum'] },
+                { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus', 'curriculum'] },
+                { label: 'University', keys: ['university'] },
                 { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
                 { label: 'Personalization', keys: ['wallpaper'] },
                 { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
@@ -919,8 +919,8 @@ async function hydrateProfileIdentity() {
 const DRAWER_GROUPS = [
     { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
     { label: 'Overview', keys: ['dashboard'] },
-    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus'] },
-    { label: 'University', keys: ['university', 'curriculum'] },
+    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus', 'curriculum'] },
+    { label: 'University', keys: ['university'] },
     { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
     { label: 'Personalization', keys: ['wallpaper'] },
     { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
