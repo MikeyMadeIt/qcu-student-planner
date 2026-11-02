@@ -15,10 +15,8 @@ const NAV_ITEMS = [
     { href: 'grades.html', icon: 'bi-mortarboard-fill', label: 'Grades', key: 'grades', base: 'app' },
     { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
-    { href: 'syllabus.html', icon: 'bi-journal-bookmark-fill', label: 'Syllabus', key: 'syllabus', base: 'app' },
     /* UNIVERSITY */
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
-    { href: 'university.html', icon: 'bi-building-fill', label: 'University', key: 'university', base: 'app' },
     /* AI TOOLS */
     { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
     { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
@@ -63,8 +61,6 @@ const PAGE_SECTIONS = {
     grades: 'Academics',
     attendance: 'Academics',
     notes: 'Academics',
-    syllabus: 'Academics',
-    university: 'University',
     curriculum: 'University',
     'ai-quiz-maker': 'AI Tools',
     'ai-flashcard-maker': 'AI Tools',
@@ -701,8 +697,7 @@ function renderShell(activeKey, admin) {
             : [
                 { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
                 { label: 'Overview', keys: ['dashboard'] },
-                { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus', 'curriculum'] },
-                { label: 'University', keys: ['university'] },
+                { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
                 { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
                 { label: 'Personalization', keys: ['wallpaper'] },
                 { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
@@ -919,8 +914,7 @@ async function hydrateProfileIdentity() {
 const DRAWER_GROUPS = [
     { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
     { label: 'Overview', keys: ['dashboard'] },
-    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'syllabus', 'curriculum'] },
-    { label: 'University', keys: ['university'] },
+    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
     { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
     { label: 'Personalization', keys: ['wallpaper'] },
     { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
