@@ -658,20 +658,7 @@ GRADES PAGE — v3 Refinements
 .grade-card-detail {
     padding: 8px 10px 10px;
     border-top: 1px solid var(--border);
-}
-
-.grade-card-bar {
-    height: 3px;
-    border-radius: 0;
-    margin: 0;
-    background: var(--surface-2);
-}
-
-.grade-card-bar .progress-bar {
-    border-radius: 0;
-}
-
-/* Pass badge smaller in card */
+}/* Pass badge smaller in card */
 
 .grade-card-left .grade-pass-badge {
     font-size: .6rem;
@@ -765,40 +752,11 @@ GRADES — v4 Refinements (override earlier rules)
     max-width: 100%;
 }
 
-.grade-card-center {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1px;
-    flex-shrink: 0;
-}
-
-.grade-card-pct {
-    font-family: var(--font-mono);
-    font-weight: 800;
-    font-size: .94rem;
-    color: rgb(var(--accent));
-    white-space: nowrap;
-    line-height: 1.2;
-}
-
 .grade-card-gwa {
     font-size: .65rem;
     font-weight: 600;
     color: var(--text-faint);
     white-space: nowrap;
-}
-
-.grade-card-actions {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-}
-
-.grade-card-detail {
-    padding: 8px 10px 10px;
-    border-top: 1px solid var(--border);
 }
 
 /* ---- Target Grade section header ---- */
@@ -964,33 +922,13 @@ GRADES — v4 Refinements (override earlier rules)
     color: #fb7185;
 }
 
-/* ---- GWA Calculator Header (override previous) ---- */
-
-.gwa-calc-header {
-    padding: 12px 16px 0;
-    border-bottom: 1px solid var(--border);
-}
-
 .gwa-calc-header-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     padding-bottom: 6px;
-}
-
-.gwa-calc-header-btns {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.gwa-clear-btn {
-    color: #fb7185 !important;
-    border-color: rgba(251,113,133,.25) !important;
-}
-
-.gwa-calc-desc {
+}.gwa-calc-desc {
     font-size: .76rem;
     color: var(--text-faint);
     line-height: 1.5;

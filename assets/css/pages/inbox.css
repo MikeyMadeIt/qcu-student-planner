@@ -1,0 +1,103 @@
+.inbox-backend-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--info) 35%, var(--border));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--info) 8%, var(--surface));
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.inbox-backend-notice i {
+    flex: 0 0 auto;
+    color: var(--info);
+}
+
+/* The msg-list / msg-row / msg-pill / msg-time / msg-action-btn component
+   itself now lives in assets/css/components/message-row.css (it's global,
+   loaded via main.css) so the header inbox dropdown on every page can use
+   the exact same row as this page's full list. Only this page's own chrome
+   (search box, filter pills, pagination, detail-modal body) stays here. */
+
+.inbox-filter-row {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.inbox-filter-row .btn.active {
+    background: rgba(var(--accent), .14);
+    color: rgb(var(--accent));
+    border-color: rgba(var(--accent), .35);
+}
+
+.inbox-search {
+    position: relative;
+    width: 100%;
+    max-width: 22rem;
+    margin-bottom: var(--space-3);
+}
+
+.inbox-search > i {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    z-index: 1;
+    color: var(--text-faint);
+    font-size: 0.9rem;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.inbox-search input.form-control {
+    min-width: 0;
+    width: 100%;
+    padding-left: 36px;
+    box-sizing: border-box;
+}
+
+.inbox-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: .82rem;
+    color: var(--text-soft);
+}
+
+/* ---------- Message detail modal body (both admin + student) ---------- */
+
+.msg-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    font-size: .78rem;
+    color: var(--text-faint);
+}
+
+.msg-detail-body {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    font-size: .9rem;
+    color: var(--text-soft);
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.msg-detail-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+}
