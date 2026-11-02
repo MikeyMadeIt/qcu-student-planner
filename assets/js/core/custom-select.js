@@ -78,6 +78,22 @@ function convertSelect(select) {
     renderOptions();
     syncTrigger();
 
+    function syncMenuWidth() {
+        const triggerWidth = trigger.getBoundingClientRect().width;
+        const viewportWidth = document.documentElement.clientWidth;
+        menu.style.width = `${Math.min(triggerWidth, Math.max(0, viewportWidth - 16))}px`;
+    }
+
+    wrap.addEventListener('show.bs.dropdown', syncMenuWidth);
+    window.addEventListener('resize', () => {
+        if (!menu.classList.contains('show'))
+            return;
+        syncMenuWidth();
+        const dropdown = window.bootstrap && bootstrap.Dropdown.getInstance(trigger);
+        if (dropdown)
+            dropdown.update();
+    });
+
     select.classList.add('cs-native-hidden');
     select.setAttribute('aria-hidden', 'true');
     select.setAttribute('tabindex', '-1');
@@ -100,11 +116,13 @@ function convertSelect(select) {
     observer.observe(select, { childList: true, attributes: true, attributeFilter: ['disabled'] });
     select.addEventListener('cs-refresh', () => { renderOptions(); syncTrigger(); });
 
-    // Fixed-strategy Popper so the menu is never clipped by a scrollable
-    // modal body, and always stays within the viewport.
+    // Fixed positioning avoids modal-body clipping. An absolute strategy can
+    // be selected for controls inside transformed page cards so the menu stays
+    // anchored to its trigger.
     if (window.bootstrap && bootstrap.Dropdown) {
+        const strategy = select.dataset.dropdownStrategy === 'absolute' ? 'absolute' : 'fixed';
         bootstrap.Dropdown.getOrCreateInstance(trigger, {
-            popperConfig: (defaultConfig) => ({ ...defaultConfig, strategy: 'fixed' })
+            popperConfig: (defaultConfig) => ({ ...defaultConfig, strategy })
         });
     }
 }
