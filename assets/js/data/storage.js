@@ -58,7 +58,7 @@ function writeKey(key, value) {
 }
 
 const DEFAULT_SETTINGS = {
-    name: 'Student', studentNumber: '', course: '', yearLevel: '', section: '', school: '',
+    name: 'Student', studentNumber: '', course: '', yearLevel: '', school: '',
     theme: 'dark', accent: 'blue',
     notifications: { upcomingClass: true, assignmentDue: true, examReminder: true, pomodoroFinished: true, dailyReview: false },
 };

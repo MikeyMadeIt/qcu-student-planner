@@ -1,22 +1,29 @@
-/* Authentication pages: log in, sign up, password reset and status screens. */
+/* Authentication pages: log in, sign up, password reset and status screens.
+   Swiss / International Typographic Style: strict grid, strong type, restrained
+   colour, flat geometry. Reuses the app's shared tokens (--space-*, --radius-*,
+   --accent, theme variables) so the pages stay inside the existing system. */
 
-/* ---------- Theme tokens (dark and light are designed separately) ---------- */
+/* ---------- Theme tokens (dark and light share structure, differ in value) ---------- */
 
 .auth-page {
+    /* Swiss geometry: hairline rules, no elevation. Radii reuse the app's own
+       scale (base/variables.css) rather than inventing new values. */
+    --auth-rule: 1px;
+
     --auth-bg: #0F172A;
     --auth-surface: #111827;
     --auth-elevated: #1E293B;
     --auth-text: #F8FAFC;
     --auth-text-soft: #94A3B8;
     --auth-text-faint: #7C8BA1;
-    --auth-border: rgba(148, 163, 184, 0.22);
-    --auth-input-bg: #0F172A;
-    --auth-input-border: rgba(148, 163, 184, 0.3);
-    --auth-link: #2457D6;
+    --auth-border: rgba(148, 163, 184, 0.24);
+    --auth-border-strong: rgba(148, 163, 184, 0.4);
+    --auth-input-bg: #0B1120;
+    --auth-input-border: rgba(148, 163, 184, 0.32);
+    --auth-link: rgb(var(--accent));
     --auth-danger: #FB7185;
     --auth-success: #34D399;
     --auth-info: #38BDF8;
-    --auth-shadow: 0 1px 2px rgba(2, 6, 23, .4);
     --auth-scroll-thumb: #64748B;
     --auth-scroll-track: rgba(148, 163, 184, 0.14);
 }
@@ -29,13 +36,13 @@
     --auth-text-soft: #475569;
     --auth-text-faint: #64748B;
     --auth-border: #D5DCE6;
+    --auth-border-strong: #B9C3D1;
     --auth-input-bg: #FFFFFF;
     --auth-input-border: #BAC4D3;
-    --auth-link: #B45309;
+    --auth-link: rgb(var(--accent));
     --auth-danger: #BE123C;
     --auth-success: #047857;
     --auth-info: #0369A1;
-    --auth-shadow: 0 1px 2px rgba(15, 23, 42, .08);
     --auth-scroll-thumb: #94A3B8;
     --auth-scroll-track: #E2E8F0;
 }
@@ -49,7 +56,22 @@ body.auth-page {
     color: var(--auth-text);
 }
 
+/* Calm, static backdrop grid -- no motion, no illustration. Reuses the shared
+   .grid-bg component (defined in components/grid-background.css) but quiets it
+   for an authentication context. */
+.auth-page .grid-bg::before,
+.auth-page .grid-bg::after {
+    animation: none;
+}
+
+.auth-page .grid-bg::after {
+    opacity: 0.6;
+}
+
 /* ---------- Layout ---------- */
+/* The card sits on a single, centred grid column. Centring is true flex
+   centring: on short viewports or with the keyboard open the column simply
+   scrolls, it is never clipped. */
 
 .auth-main {
     position: relative;
@@ -58,24 +80,24 @@ body.auth-page {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-4);
+    gap: var(--space-5);
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 4.5rem var(--space-4) var(--space-6);
+    padding: 4rem var(--space-4) var(--space-5);
 }
 
 .auth-card {
     width: 100%;
     max-width: 26rem;
-    padding: var(--space-6) var(--space-6) var(--space-5);
+    padding: var(--space-6);
     background: var(--auth-surface);
-    border: 1px solid var(--auth-border);
+    border: var(--auth-rule) solid var(--auth-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--auth-shadow);
+    box-shadow: none;
 }
 
 .auth-card-wide {
-    max-width: 37rem;
+    max-width: 38rem;
 }
 
 .auth-brand {
@@ -83,39 +105,42 @@ body.auth-page {
     align-items: center;
     gap: var(--space-3);
     margin-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--auth-rule) solid var(--auth-border);
     color: var(--auth-text);
     font-weight: 600;
     text-decoration: none;
 }
 
-.auth-brand img {
+.auth-brand .dot {
+    display: flex;
     flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    object-fit: contain;
-}
-
-.auth-brand small {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--auth-text-faint);
+    border-radius: var(--radius-sm);
+    background: rgb(var(--accent));
+    color: var(--on-accent);
+    font-size: 1.2rem;
 }
 
 .auth-title {
     margin: 0 0 var(--space-2);
     font-size: 1.6rem;
-    line-height: 1.25;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: var(--auth-text);
 }
 
 .auth-sub {
     margin: 0 0 var(--space-5);
     font-size: 0.92rem;
-    line-height: 1.6;
+    line-height: 1.5;
     color: var(--auth-text-soft);
 }
 
@@ -123,13 +148,14 @@ body.auth-page {
     max-width: 26rem;
     margin: 0;
     text-align: center;
-    font-size: 0.75rem;
-    line-height: 1.5;
+    font-size: 0.72rem;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
     color: var(--auth-text-faint);
 }
 
 .auth-card-wide + .auth-note {
-    max-width: 37rem;
+    max-width: 38rem;
 }
 
 /* ---------- Theme toggle (same place on every auth page) ---------- */
@@ -146,7 +172,7 @@ body.auth-page {
     height: 2.75rem;
     padding: 0;
     background: var(--auth-surface);
-    border: 1px solid var(--auth-border);
+    border: var(--auth-rule) solid var(--auth-border);
     border-radius: 50%;
     color: var(--auth-text);
     font-size: 1.1rem;
@@ -159,6 +185,11 @@ body.auth-page {
 
 .theme-toggle:active {
     transform: scale(0.94);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--auth-link);
+    outline-offset: 2px;
 }
 
 .theme-toggle .bi {
@@ -186,9 +217,12 @@ body.auth-page {
 .auth-field label {
     display: block;
     margin-bottom: var(--space-2);
-    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
     font-weight: 600;
-    color: var(--auth-text);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--auth-text-soft);
 }
 
 .auth-page .form-control,
@@ -197,10 +231,12 @@ body.auth-page {
     height: 3rem;
     padding: 0 var(--space-4);
     background-color: var(--auth-input-bg);
-    border: 1px solid var(--auth-input-border);
-    border-radius: var(--radius-sm);
+    background-image: none;
+    border: var(--auth-rule) solid var(--auth-input-border);
+    border-radius: var(--input-radius);
     color: var(--auth-text);
     font-size: 0.95rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .auth-page .form-control::placeholder {
@@ -212,13 +248,18 @@ body.auth-page {
 .auth-page .form-select:focus {
     background-color: var(--auth-input-bg);
     border-color: var(--auth-link);
-    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.22);
+    box-shadow: 0 0 0 3px rgba(var(--accent), 0.22);
     color: var(--auth-text);
 }
 
 .auth-page .form-control[aria-invalid="true"],
 .auth-page .form-select[aria-invalid="true"] {
     border-color: var(--auth-danger);
+}
+
+.auth-page .form-control[aria-invalid="true"]:focus,
+.auth-page .form-select[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.2);
 }
 
 .auth-page .form-select {
@@ -247,6 +288,9 @@ body.auth-page {
 }
 
 .auth-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
     margin: var(--space-2) 0 0;
     font-size: 0.8rem;
     line-height: 1.4;
@@ -255,6 +299,12 @@ body.auth-page {
 
 .auth-error[hidden] {
     display: none;
+}
+
+.auth-error::before {
+    content: "—";
+    flex: 0 0 auto;
+    font-weight: 700;
 }
 
 .pw-wrap {
@@ -281,6 +331,7 @@ body.auth-page {
     color: var(--auth-text-soft);
     font-size: 1.05rem;
     transform: translateY(-50%);
+    transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .pw-toggle:hover {
@@ -288,9 +339,43 @@ body.auth-page {
     background: var(--auth-elevated);
 }
 
+.pw-toggle:focus-visible {
+    outline: 2px solid var(--auth-link);
+    outline-offset: 2px;
+}
+
+/* Row beneath the password field: "Remember me" on the left, "Forgot
+   password?" on the right, on a shared baseline. */
+.auth-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+    margin-bottom: var(--space-4);
+}
+
+.auth-remember {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--auth-text-soft);
+    cursor: pointer;
+}
+
+.auth-remember input {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    accent-color: rgb(var(--accent));
+    cursor: pointer;
+}
+
 .auth-forgot {
     display: inline-block;
-    margin-top: var(--space-2);
+    flex: 0 0 auto;
     font-size: 0.85rem;
 }
 
@@ -335,8 +420,10 @@ body.auth-page {
 .auth-submit {
     width: 100%;
     min-height: 3rem;
-    font-size: 0.95rem;
-    font-weight: 600;
+    border-radius: var(--btn-radius);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 .auth-page .btn-accent:hover:not(:disabled) {
@@ -344,7 +431,7 @@ body.auth-page {
 }
 
 .auth-submit:disabled {
-    opacity: 0.65;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -375,14 +462,16 @@ body.auth-page {
 
 .auth-page .btn-ghost {
     min-height: 3rem;
+    border-radius: var(--btn-radius);
     background: transparent;
-    border: 1px solid var(--auth-input-border);
+    border: var(--auth-rule) solid var(--auth-input-border);
     color: var(--auth-text);
     font-weight: 600;
 }
 
 .auth-page .btn-ghost:hover {
     background: var(--auth-elevated);
+    border-color: var(--auth-border-strong);
 }
 
 /* ---------- Google sign-in ---------- */
@@ -393,9 +482,11 @@ body.auth-page {
     gap: var(--space-3);
     margin: var(--space-5) 0;
     color: var(--auth-text-faint);
-    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
 }
 
 .auth-divider::before,
@@ -412,14 +503,16 @@ body.auth-page {
     justify-content: center;
     gap: var(--space-3);
     min-height: 3rem;
+    border-radius: var(--btn-radius);
     background: var(--auth-input-bg);
-    border: 1px solid var(--auth-input-border);
+    border: var(--auth-rule) solid var(--auth-input-border);
     color: var(--auth-text);
     font-weight: 600;
 }
 
 .auth-page .btn-google:hover:not(:disabled) {
     background: var(--auth-elevated);
+    border-color: var(--auth-border-strong);
 }
 
 .auth-page .btn-google .google-g {
@@ -463,7 +556,7 @@ body.auth-page {
     gap: var(--space-3);
     margin-bottom: var(--space-4);
     padding: var(--space-3) var(--space-4);
-    border: 1px solid;
+    border: var(--auth-rule) solid;
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
     line-height: 1.5;
@@ -493,6 +586,8 @@ body.auth-page {
 
 .auth-foot {
     margin: var(--space-5) 0 0;
+    padding-top: var(--space-4);
+    border-top: var(--auth-rule) solid var(--auth-border);
     text-align: center;
     font-size: 0.9rem;
     color: var(--auth-text-soft);
@@ -508,7 +603,7 @@ body.auth-page {
     padding: var(--space-3) var(--space-4);
     list-style: none;
     background: var(--auth-elevated);
-    border: 1px solid var(--auth-border);
+    border: var(--auth-rule) solid var(--auth-border);
     border-radius: var(--radius-sm);
 }
 
@@ -516,83 +611,92 @@ body.auth-page {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--auth-text-soft);
 }
 
 .req-list li.met {
     color: var(--auth-success);
+    font-weight: 600;
 }
 
 /* ---------- Registration stepper ---------- */
+/* A flat, ruled progress track instead of numbered circles and connector
+   lines: three labelled segments, the filled portion marking current/complete.
+   Quieter than a badge-and-line stepper, still legible at a glance. */
 
 .stepper {
+    counter-reset: step;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-2);
+    gap: var(--space-3);
     margin: 0 0 var(--space-6);
     padding: 0;
     list-style: none;
 }
 
 .stepper-item {
-    position: relative;
+    counter-increment: step;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: var(--space-2);
-    text-align: center;
 }
 
-.stepper-item:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 1.1rem;
-    left: calc(50% + 1.5rem);
-    width: calc(100% - 3rem);
-    height: 2px;
-    background: var(--auth-border);
-}
-
-.stepper-item.is-complete:not(:last-child)::after {
-    background: var(--auth-link);
-}
-
+/* The marker is not shown in this layout -- step state reads from the label
+   colour and the track below it -- but it stays in the DOM since the wizard
+   script writes the step number / checkmark into it. */
 .stepper-marker {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    background: var(--auth-surface);
-    border: 2px solid var(--auth-border);
-    border-radius: 50%;
-    font-size: 0.85rem;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.stepper-item::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
     font-weight: 700;
-    color: var(--auth-text-soft);
+    letter-spacing: 0.04em;
+    color: var(--auth-text-faint);
 }
 
-.stepper-item.is-current .stepper-marker {
-    border-color: rgb(var(--accent));
-    background: rgba(var(--accent), 0.14);
-    color: var(--auth-text);
-}
-
-.stepper-item.is-complete .stepper-marker {
-    border-color: rgb(var(--accent));
-    background: rgb(var(--accent));
-    color: var(--on-accent);
+.stepper-item.is-current::before,
+.stepper-item.is-complete::before {
+    color: rgb(var(--accent));
 }
 
 .stepper-label {
-    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
     font-weight: 600;
     line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     color: var(--auth-text-faint);
 }
 
 .stepper-item.is-current .stepper-label {
     color: var(--auth-text);
+}
+
+.stepper-item.is-complete .stepper-label {
+    color: var(--auth-text-soft);
+}
+
+/* Progress track: the ruled bar does the work a row of circles used to. */
+.stepper-item::after {
+    content: "";
+    display: block;
+    height: 3px;
+    margin-top: auto;
+    background: var(--auth-border);
+}
+
+.stepper-item.is-current::after,
+.stepper-item.is-complete::after {
+    background: rgb(var(--accent));
 }
 
 /* ---------- Wizard steps ---------- */
@@ -611,6 +715,8 @@ body.auth-page {
 .step-title {
     margin: 0 0 var(--space-2);
     font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--auth-text);
     scroll-margin-top: 5rem;
 }
@@ -643,8 +749,14 @@ body.auth-page {
 }
 
 .legal-title {
-    margin: 0 0 var(--space-2);
-    font-size: 0.95rem;
+    margin: 0 0 var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--auth-rule) solid var(--auth-border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--auth-text);
 }
 
@@ -653,10 +765,15 @@ body.auth-page {
     padding: var(--space-4);
     overflow-y: scroll;
     background: var(--auth-input-bg);
-    border: 1px solid var(--auth-input-border);
+    border: var(--auth-rule) solid var(--auth-input-border);
     border-radius: var(--radius-sm);
     scrollbar-width: auto;
     scrollbar-color: var(--auth-scroll-thumb) var(--auth-scroll-track);
+}
+
+.legal-box:focus-visible {
+    outline: 2px solid var(--auth-link);
+    outline-offset: -1px;
 }
 
 .legal-box::-webkit-scrollbar {
@@ -665,7 +782,6 @@ body.auth-page {
 
 .legal-box::-webkit-scrollbar-track {
     background: var(--auth-scroll-track);
-    border-radius: var(--radius-pill);
 }
 
 .legal-box::-webkit-scrollbar-thumb {
@@ -676,7 +792,8 @@ body.auth-page {
 
 .legal-text h4 {
     margin: var(--space-4) 0 var(--space-1);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
+    font-weight: 700;
     color: var(--auth-text);
 }
 
@@ -728,7 +845,8 @@ body.auth-page {
     height: 3.5rem;
     margin-bottom: var(--space-4);
     background: rgba(var(--accent), 0.14);
-    border-radius: 50%;
+    border: 2px solid rgb(var(--accent));
+    border-radius: var(--radius-sm);
     color: var(--auth-link);
     font-size: 1.5rem;
 }
@@ -758,6 +876,7 @@ body.auth-page {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--btn-radius);
 }
 
 .visually-hidden {
@@ -776,8 +895,8 @@ body.auth-page {
 
 @media (max-width: 575.98px) {
     .auth-main {
-        /* Centered top-to-bottom and side-to-side, same as desktop. When content is taller
-           than the viewport this still scrolls normally -- centering a flex item never clips
+        /* Centred top-to-bottom and side-to-side, same as desktop. When content is taller
+           than the viewport this still scrolls normally -- centring a flex item never clips
            it, it only changes where the extra space goes when there IS extra space. */
         justify-content: center;
         padding: max(4.5rem, env(safe-area-inset-top) + 3.5rem) var(--space-4) var(--space-5);
@@ -792,17 +911,22 @@ body.auth-page {
         font-size: 1.4rem;
     }
 
-    .stepper-label {
-        font-size: 0.68rem;
+    .auth-brand {
+        margin-bottom: var(--space-5);
+        padding-bottom: var(--space-4);
     }
 
-    .stepper-item:not(:last-child)::after {
-        left: calc(50% + 1.4rem);
-        width: calc(100% - 2.8rem);
+    .stepper-item::before,
+    .stepper-label {
+        font-size: 0.6rem;
     }
 }
 
 @media (max-width: 399.98px) {
+    .auth-title {
+        font-size: 1.3rem;
+    }
+
     .req-list {
         grid-template-columns: 1fr;
     }
@@ -818,10 +942,10 @@ body.auth-page {
 
 @media (min-width: 992px) {
     .auth-main {
-        padding-top: var(--space-6);
+        padding-top: var(--space-5);
     }
 
     .auth-card {
-        padding: var(--space-7) var(--space-7) var(--space-6);
+        padding: var(--space-7);
     }
 }

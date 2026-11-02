@@ -26,8 +26,8 @@
     <main class="auth-main" id="main">
         <div class="auth-card auth-card-wide">
             <a class="auth-brand" href="login.html">
-                <img src="../../assets/images/branding/qcu-logo.webp" alt="">
-                <span>QCU Student Planner<small>Student portal</small></span>
+                <span class="dot" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+                <span>QCU Student Planner</span>
             </a>
 
             <h1 class="auth-title">Create your account</h1>
@@ -76,8 +76,8 @@
                     </div>
 
                     <div class="auth-field">
-                        <label for="email">Personal Email</label>
-                        <input class="form-control" id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" data-rule="email" aria-describedby="email-err" aria-invalid="false">
+                        <label for="email">Email Address</label>
+                        <input class="form-control" id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="lastname.firstname.middlename@gmail.com" data-rule="email" aria-describedby="email-err" aria-invalid="false">
                         <p class="auth-error" id="email-err" hidden></p>
                     </div>
 
@@ -136,11 +136,6 @@
                         </select>
                         <p class="auth-error" id="yearLevel-err" hidden></p>
                     </div>
-                    <div class="auth-field">
-                        <label for="section">Section</label>
-                        <input class="form-control" id="section" name="section" type="text" autocomplete="off" placeholder="e.g. BSIT 2A" data-rule="section" aria-describedby="section-err" aria-invalid="false">
-                        <p class="auth-error" id="section-err" hidden></p>
-                    </div>
 
                     <div class="wizard-actions two">
                         <button type="button" class="btn btn-ghost" data-step-back>Back</button>
@@ -182,9 +177,9 @@
                                 <h4>1. Draft notice</h4>
                                 <p>This Privacy Notice is a draft that describes the intended handling of information. It has not been reviewed by the university's data protection officer and must be confirmed before production deployment.</p>
                                 <h4>2. Information the system is intended to collect</h4>
-                                <p>To create an account the system collects your full name, personal email address, a password, your academic program, campus, year level and section. Your student number is not collected during registration.</p>
+                                <p>To create an account the system collects your full name, personal email address, a password, your academic program, campus and year level. Your student number is not collected during registration.</p>
                                 <h4>3. Why the information is collected</h4>
-                                <p>Your email address and password identify your account. Your name, program, campus, year level and section help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
+                                <p>Your email address and password identify your account. Your name, program, campus and year level help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
                                 <h4>4. Handling and access</h4>
                                 <p>Registration details are intended to be visible only to authorized administrators who review accounts, and to you. They are not intended to be sold or used for advertising. The exact storage, retention period and security safeguards will be described here once they are decided and verified.</p>
                                 <h4>5. Your choices</h4>
