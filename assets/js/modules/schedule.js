@@ -1244,6 +1244,28 @@ function showSubjectDetail(id) {
 
 /* ── CRUD ── */
 
+function updateSubjectTimeValidation() {
+  const startInput = document.getElementById('subStart');
+  const endInput = document.getElementById('subEnd');
+  const startError = document.getElementById('subStartError');
+  const endError = document.getElementById('subEndError');
+  const startInvalid = !startInput.value;
+  const endMissing = !endInput.value;
+  const toMinutes = value => {
+    const [hours, minutes] = value.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+  const endOrderInvalid = !startInvalid && !endMissing && toMinutes(endInput.value) <= toMinutes(startInput.value);
+  const endInvalid = endMissing || endOrderInvalid;
+
+  startInput.setAttribute('aria-invalid', startInvalid ? 'true' : 'false');
+  startError.hidden = !startInvalid;
+  endInput.setAttribute('aria-invalid', endInvalid ? 'true' : 'false');
+  endError.textContent = endMissing ? 'End time is required' : 'End time must be later than start time';
+  endError.hidden = !endInvalid;
+  return { startInvalid, endInvalid };
+}
+
 function openSubjectModal(id) {
     const s = id ? DB.getSubject(id) : null;
     document.getElementById('subjectModalTitle').textContent = s ? 'Edit Subject' : 'Add Subject';
@@ -1254,23 +1276,26 @@ function openSubjectModal(id) {
     body.innerHTML = `
     <input type="hidden" id="subId" value="${s ? s.id : ''}">
     <div class="row g-2">
-      <div class="col-5"><label class="form-label" style="font-size:.82rem">Subject Code</label><input class="form-control" id="subCode" value="${s ? esc(s.code) : ''}" placeholder="CS101" aria-label="Subject Code"></div>
+      <div class="col-5"><label class="form-label" style="font-size:.82rem">Subject Code <span class="sch-subject-required" aria-hidden="true">*</span></label><input class="form-control sch-subject-code" id="subCode" value="${s ? esc(s.code) : ''}" placeholder="CS101" aria-label="Subject Code" aria-invalid="false" aria-describedby="subCodeError"><p class="sch-subject-error" id="subCodeError" hidden>Subject code is required</p></div>
       <div class="col-7"><label class="form-label" style="font-size:.82rem">Description</label><input class="form-control" id="subDesc" value="${s ? esc(s.desc) : ''}" placeholder="Introduction to Computing" aria-label="Subject Description"></div>
       <div class="col-4"><label class="form-label" style="font-size:.82rem">Type</label>
         <select class="form-select" id="subType" aria-label="Subject Type">${['Lecture', 'Laboratory', 'Seminar', 'Hybrid'].map(t => `<option ${s && s.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
       <div class="col-4"><label class="form-label" style="font-size:.82rem">Units</label><input type="number" step="0.5" class="form-control" id="subUnits" value="${s ? s.units : 3}" aria-label="Units"></div>
       <div class="col-4"><label class="form-label" style="font-size:.82rem">Section</label><input class="form-control" id="subSection" value="${s ? esc(s.section) : ''}" placeholder="BSCS-1A" aria-label="Section"></div>
-      <div class="col-12"><label class="form-label" style="font-size:.82rem">Days</label>
-        <div class="day-selector" role="group" aria-label="Select class days">
+      <div class="col-12"><label class="form-label" style="font-size:.82rem">Days <span class="sch-subject-required" aria-hidden="true">*</span></label>
+        <div class="sch-subject-days" id="subDaysGroup" role="group" aria-label="Select class days" aria-describedby="subDaysError" aria-invalid="false">
+        <div class="day-selector">
           ${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => `
             <label class="day-chip">
               <input class="day-check" type="checkbox" value="${d}" id="day_${d}" ${days.includes(d) ? 'checked' : ''}>
               <span>${d}</span>
             </label>`).join('')}
         </div>
+        </div>
+        <p class="sch-subject-error" id="subDaysError" hidden>Select at least one day</p>
       </div>
-      <div class="col-6"><label class="form-label" style="font-size:.82rem">Start Time</label><input type="time" class="form-control" id="subStart" value="${s ? s.start : '08:00'}" aria-label="Start Time"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.82rem">End Time</label><input type="time" class="form-control" id="subEnd" value="${s ? s.end : '09:00'}" aria-label="End Time"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.82rem">Start Time <span class="sch-subject-required" aria-hidden="true">*</span></label><input type="time" class="form-control sch-subject-time" id="subStart" value="${s ? s.start || '' : ''}" aria-label="Start Time" aria-invalid="false" aria-describedby="subStartError"><p class="sch-subject-error" id="subStartError" hidden>Start time is required</p></div>
+      <div class="col-6"><label class="form-label" style="font-size:.82rem">End Time <span class="sch-subject-required" aria-hidden="true">*</span></label><input type="time" class="form-control sch-subject-time" id="subEnd" value="${s ? s.end || '' : ''}" aria-label="End Time" aria-invalid="false" aria-describedby="subEndError"><p class="sch-subject-error" id="subEndError" hidden></p></div>
       <div class="col-12">
         <div class="form-check form-switch mb-1">
           <input class="form-check-input" type="checkbox" id="subOnline" ${isOnline ? 'checked' : ''} aria-label="Online class">
@@ -1302,6 +1327,54 @@ function openSubjectModal(id) {
     }
     togglePhysical();
     onlineCheck.addEventListener('change', togglePhysical);
+    const codeInput = body.querySelector('#subCode');
+    const codeError = body.querySelector('#subCodeError');
+    const daysGroup = body.querySelector('#subDaysGroup');
+    const daysError = body.querySelector('#subDaysError');
+    codeInput.addEventListener('input', () => {
+      if (codeInput.value.trim()) {
+        codeInput.setAttribute('aria-invalid', 'false');
+        codeError.hidden = true;
+      }
+    });
+    daysGroup.addEventListener('change', () => {
+      if (daysGroup.querySelector('.day-check:checked')) {
+        daysGroup.classList.remove('has-error');
+        daysGroup.setAttribute('aria-invalid', 'false');
+        daysError.hidden = true;
+      }
+    });
+    const openTimePicker = event => {
+      const input = event.currentTarget;
+      if (typeof input.showPicker !== 'function')
+        return;
+      try {
+        input.showPicker();
+      }
+      catch { }
+    };
+    ['#subStart', '#subEnd'].forEach(selector => {
+      const input = body.querySelector(selector);
+      input.addEventListener('click', openTimePicker);
+      input.addEventListener('focus', openTimePicker);
+      ['input', 'change'].forEach(eventName => {
+        input.addEventListener(eventName, () => {
+          if (document.getElementById('subjectModal').dataset.timeValidationAttempted === 'true')
+            updateSubjectTimeValidation();
+        });
+      });
+    });
+    const subjectModal = document.getElementById('subjectModal');
+    subjectModal.dataset.timeValidationAttempted = 'false';
+    subjectModal.addEventListener('hidden.bs.modal', () => {
+      body.querySelector('#subStart').value = '';
+      body.querySelector('#subEnd').value = '';
+      body.querySelector('#subStart').setAttribute('aria-invalid', 'false');
+      body.querySelector('#subEnd').setAttribute('aria-invalid', 'false');
+      body.querySelector('#subStartError').hidden = true;
+      body.querySelector('#subEndError').hidden = true;
+      subjectModal.dataset.timeValidationAttempted = 'false';
+    }, { once: true });
     new bootstrap.Modal(document.getElementById('subjectModal')).show();
 }
 
@@ -1316,14 +1389,37 @@ function selectColor(c) {
 
 function saveSubject() {
     const id = document.getElementById('subId').value;
-    const code = document.getElementById('subCode').value.trim();
-    if (!code) {
-        Toast.show('Subject code is required', 'high', 'bi-exclamation-triangle');
+    const codeInput = document.getElementById('subCode');
+    const code = codeInput.value.trim();
+    const codeInvalid = !code;
+    const daysGroup = document.getElementById('subDaysGroup');
+    const days = [...daysGroup.querySelectorAll('.day-check:checked')].map(c => c.value);
+    const daysInvalid = days.length === 0;
+    const codeError = document.getElementById('subCodeError');
+    const daysError = document.getElementById('subDaysError');
+    const startInput = document.getElementById('subStart');
+    const endInput = document.getElementById('subEnd');
+    const subjectModal = document.getElementById('subjectModal');
+    subjectModal.dataset.timeValidationAttempted = 'true';
+    const timeInvalid = updateSubjectTimeValidation();
+    codeInput.setAttribute('aria-invalid', codeInvalid ? 'true' : 'false');
+    codeError.hidden = !codeInvalid;
+    daysGroup.classList.toggle('has-error', daysInvalid);
+    daysGroup.setAttribute('aria-invalid', daysInvalid ? 'true' : 'false');
+    daysError.hidden = !daysInvalid;
+    if (codeInvalid || daysInvalid || timeInvalid.startInvalid || timeInvalid.endInvalid) {
+        if (codeInvalid)
+            codeInput.focus();
+        else if (daysInvalid)
+            daysGroup.querySelector('.day-check').focus();
+        else if (timeInvalid.startInvalid)
+            startInput.focus();
+        else
+            endInput.focus();
         return;
     }
-    const days = [...document.querySelectorAll('.day-check:checked')].map(c => c.value);
-    const start = document.getElementById('subStart').value;
-    const end = document.getElementById('subEnd').value;
+    const start = startInput.value;
+    const end = endInput.value;
     const isOnline = document.getElementById('subOnline').checked;
     const sem = DB.getActiveSemester();
     const data = {
@@ -1376,7 +1472,7 @@ function deleteSubject(id) {
     confirmAction({
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
         onConfirm() { DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)); Toast.show('Subject deleted'); renderAllViews(); }
     });
 }

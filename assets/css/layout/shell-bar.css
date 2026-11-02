@@ -4,7 +4,7 @@
 .shell-bar {
     position: sticky;
     top: 0;
-    z-index: 45;
+    z-index: var(--layer-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -67,6 +67,7 @@
 }
 
 .shell-icon-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -80,6 +81,27 @@
     transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
+.notification-count {
+    position: absolute;
+    top: -0.15rem;
+    right: -0.2rem;
+    min-width: 1.05rem;
+    height: 1.05rem;
+    padding: 0 0.22rem;
+    border: 2px solid var(--nav-bg);
+    border-radius: var(--radius-pill);
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 0.85rem;
+    text-align: center;
+}
+
+.notification-count[hidden] {
+    display: none;
+}
+
 .shell-icon-btn:hover,
 .shell-icon-btn[aria-expanded="true"] {
     background: var(--surface-2);
@@ -91,7 +113,7 @@
     position: absolute;
     top: calc(100% + 0.5rem);
     right: 0;
-    z-index: 60;
+    z-index: var(--layer-popover);
     width: min(20rem, calc(100vw - 2rem));
     max-height: min(26rem, calc(100vh - 6rem));
     overflow-y: auto;
@@ -127,6 +149,32 @@
 
 .header-panel-item:hover,
 .header-panel-item:focus-visible {
+    background: var(--surface-2);
+}
+
+.header-panel-item.is-unread .header-panel-item-title {
+    font-weight: 700;
+}
+
+.header-panel-item.is-read .header-panel-dot {
+    background: var(--border);
+}
+
+.header-panel-footer {
+    display: block;
+    margin-top: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--border);
+    color: rgb(var(--accent));
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.header-panel-footer:hover,
+.header-panel-footer:focus-visible {
+    color: var(--text);
     background: var(--surface-2);
 }
 
@@ -311,6 +359,19 @@
     border-color: var(--border);
 }
 
+/* The avatar-only trigger (student header avatar, admin header avatar) must stay a
+   perfect circle on hover/focus too. .profile-trigger's own asymmetric padding
+   (sized for the name+caret variant) was winning the cascade over
+   .profile-trigger-circle's padding:0/fixed size, since both are single-class
+   selectors — this combined, higher-specificity selector makes the circle variant
+   reliably square regardless of file order. */
+.profile-trigger.profile-trigger-circle {
+    padding: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    min-height: 0;
+}
+
 .profile-caret {
     font-size: 0.65rem;
     color: var(--text-faint);
@@ -354,6 +415,108 @@
 
 .profile-panel[hidden] {
     display: none;
+}
+
+/* The sidebar footer's three-dot menu reuses .profile-panel's look, but is
+   appended to <body> and positioned with fixed coordinates in JS (see
+   ensureSidebarProfileMenu in layout.js) instead of being anchored inside
+   .sidebar, which clips absolutely-positioned descendants via overflow:hidden. */
+.sidebar-profile-panel {
+    position: fixed;
+    top: auto;
+    right: auto;
+    width: min(14rem, calc(100vw - 2rem));
+    /* Must outrank the mobile nav-drawer overlay (--layer-nav-drawer), since the
+       drawer footer's three-dot trigger lives inside that overlay on mobile — a
+       plain .profile-panel z-index would render this panel underneath it,
+       invisibly, even though it's "open". */
+    z-index: var(--layer-drawer-popover);
+}
+
+/* Current-semester info card (header avatar popup), above the theme selector. */
+.profile-panel-section-semester {
+    padding: var(--space-2) 0;
+}
+
+.shell-semester-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+}
+
+.shell-semester-info {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.shell-semester-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shell-semester-dates {
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shell-semester-status {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--success) 16%, transparent);
+    color: var(--success);
+    border: 1px solid color-mix(in srgb, var(--success) 40%, transparent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.shell-semester-status i {
+    font-size: 0.72rem;
+}
+
+/* Logout row, shared by the header popup and the sidebar footer menu — same
+   native-button reset as the admin profile panel's logout control. */
+.profile-item-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    appearance: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.profile-item-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.profile-item-danger {
+    color: var(--danger);
+}
+
+.profile-item-danger:hover,
+.profile-item-danger:focus-visible {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
 }
 
 .profile-panel-head {
@@ -502,7 +665,8 @@
 
     .shell-icon-btn,
     .shell-menu-btn,
-    .profile-trigger-circle {
+    .profile-trigger-circle,
+    .profile-trigger.profile-trigger-circle {
         width: 2.125rem;
         height: 2.125rem;
     }
