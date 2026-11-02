@@ -55,7 +55,7 @@
           <div class="row g-2">
             <div class="col-6 col-sm-3">
               <label class="att-form-label" for="attSubject">Subject</label>
-              <select class="form-select form-select-sm" id="attSubject"></select>
+              <select class="form-select form-select-sm" id="attSubject" data-dropdown-strategy="absolute"></select>
             </div>
             <div class="col-6 col-sm-3">
               <label class="att-form-label" for="attDate">Date</label>
@@ -63,7 +63,7 @@
             </div>
             <div class="col-6 col-sm-3">
               <label class="att-form-label" for="attStatus">Status</label>
-              <select class="form-select form-select-sm" id="attStatus">
+              <select class="form-select form-select-sm" id="attStatus" data-dropdown-strategy="absolute">
                 <option>Present</option>
                 <option>Absent</option>
                 <option>Late</option>
@@ -205,9 +205,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -217,7 +219,7 @@
 <script>
   renderShell('attendance');
   applyTheme();
-  initAttendance();
+  DB.whenCloudReady(initAttendance);
 </script>
 </body>
 </html>

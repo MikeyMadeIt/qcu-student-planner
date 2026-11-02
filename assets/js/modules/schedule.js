@@ -1244,17 +1244,6 @@ function showSubjectDetail(id) {
 
 /* ── CRUD ── */
 
-/* Persist the subject list locally and confirm it actually landed in storage
-   before the UI reports success. Returns true only if every subject can be read back. */
-function commitSubjects(list) {
-    const ok = DB.saveSubjects(list) !== false;
-    const stored = new Set(DB.getSubjects().map(s => s.id));
-    const verified = ok && list.every(s => stored.has(s.id)) && stored.size === list.length;
-    if (!verified)
-        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
-    return verified;
-}
-
 function updateSubjectTimeValidation() {
   const startInput = document.getElementById('subStart');
   const endInput = document.getElementById('subEnd');
@@ -1485,7 +1474,7 @@ function deleteSubject(id) {
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
         confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
-        onConfirm() { if (!commitSubjects(DB.getSubjects().filter(x => x.id !== id))) return; Toast.show('Subject deleted'); renderAllViews(); }
+        onConfirm() { DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)); Toast.show('Subject deleted'); renderAllViews(); }
     });
 }
 

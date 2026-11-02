@@ -463,7 +463,7 @@ const DB = {
             if (k === 'settings') return; // device-level UI preference, not student data
             localStorage.removeItem(DB_KEYS[k]);
         });
-        ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map', 'sp_cloud_subject_sync']
+        ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map']
             .forEach(k => localStorage.removeItem(k));
     },
     validateImport,

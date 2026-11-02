@@ -87,73 +87,6 @@
         } catch (e) { /* ignore */ }
     }
 
-    /* ---------- subject sync bookkeeping ----------
-       Lets hydrate() tell "never reached the server / edited offline / deleted
-       offline" apart from "deleted on another device", so a refresh can't wipe
-       locally saved subjects. */
-    const SUBJ_SYNC_KEY = 'sp_cloud_subject_sync';
-    function loadSubjSync() {
-        try {
-            const p = JSON.parse(localStorage.getItem(SUBJ_SYNC_KEY)) || {};
-            return {
-                upserts: (p.upserts && typeof p.upserts === 'object') ? p.upserts : {},
-                deletes: (p.deletes && typeof p.deletes === 'object') ? p.deletes : {},
-                synced: Array.isArray(p.synced) ? p.synced : [],
-            };
-        } catch (e) { return { upserts: {}, deletes: {}, synced: [] }; }
-    }
-    function saveSubjSync(st) {
-        try { localStorage.setItem(SUBJ_SYNC_KEY, JSON.stringify(st)); } catch (e) { /* ignore */ }
-    }
-    function markSubjectChanges(oldList, newList) {
-        const st = loadSubjSync();
-        const stamp = Date.now() + '-' + Math.random().toString(36).slice(2);
-        const oldById = new Map(oldList.map(s => [s.id, s]));
-        const newIds = new Set(newList.map(s => s.id));
-        newList.forEach(s => {
-            if (!isUuid(s.id)) return;
-            const o = oldById.get(s.id);
-            if (!o || JSON.stringify(o) !== JSON.stringify(s)) {
-                st.upserts[s.id] = stamp;
-                delete st.deletes[s.id];
-            }
-        });
-        oldList.forEach(s => {
-            if (!newIds.has(s.id) && isUuid(s.id)) {
-                st.deletes[s.id] = stamp;
-                delete st.upserts[s.id];
-            }
-        });
-        saveSubjSync(st);
-    }
-    function mergeSubjects(serverSubjects) {
-        const st = loadSubjSync();
-        const synced = new Set(st.synced);
-        const local = DB.getSubjects();
-        const localById = new Map(local.map(s => [s.id, s]));
-        const serverIds = new Set(serverSubjects.map(s => s.id));
-        const merged = [];
-        let needsFlush = false;
-        serverSubjects.forEach(s => {
-            if (st.deletes[s.id]) { needsFlush = true; return; }          // deleted locally, delete not confirmed yet
-            if (st.upserts[s.id] && localById.has(s.id)) {                 // edited locally, edit not confirmed yet
-                merged.push(localById.get(s.id)); needsFlush = true; return;
-            }
-            merged.push(s);
-        });
-        local.forEach(s => {
-            if (serverIds.has(s.id) || st.deletes[s.id]) return;
-            // Not on the server: keep it unless it was previously synced (=> deleted elsewhere).
-            if (st.upserts[s.id] || !synced.has(s.id)) {
-                merged.push(s);
-                if (isUuid(s.id)) needsFlush = true;
-            }
-        });
-        st.synced = serverSubjects.map(s => s.id);
-        saveSubjSync(st);
-        return { list: merged, needsFlush };
-    }
-
     function hhmm(t) { return t ? String(t).slice(0, 5) : ''; }
     function isUuid(id) { return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id); }
 
@@ -225,12 +158,7 @@
     function subjectLocalToRow(s, userId) {
         return {
             id: s.id, user_id: userId,
-            code: s.code || '',
-            // `subjects.title` is NOT NULL with no default. The Schedule form has no separate
-            // title input: the subject's name is `desc` ("Description") and its short id is
-            // `code`. Use the name, falling back to the code when the name was left blank.
-            title: s.desc || s.code || '',
-            description: s.desc || '', type: s.type || '',
+            code: s.code || '', description: s.desc || '', type: s.type || '',
             units: s.units || 0, section: s.section || '',
             days: Array.isArray(s.days) ? s.days : [],
             start_time: s.start || null, end_time: s.end || null,
@@ -494,8 +422,7 @@
             const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
             const syllabusCourses = (sylRes.data || []).map(syllabusRowToLocal);
 
-            const subjectMerge = mergeSubjects(subjects);
-            DB.set('subjects', subjectMerge.list);
+            DB.set('subjects', subjects);
             DB.set('tasks', tasks);
             DB.set('calendarEvents', events);
             DB.set('notes', notes);
@@ -514,7 +441,6 @@
             last.syllabusCourses = new Map(syllabusCourses.map(c => [c.id, true]));
 
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
-            if (subjectMerge.needsFlush) pushSubjects(subjectMerge.list.slice());
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
             toast("Couldn't load your latest data from the server. Showing cached data.", 'high');
@@ -523,49 +449,28 @@
 
     /* ---------- push (write-through diffing) ---------- */
 
-    // Pushes are serialized so a slow earlier push can't clear bookkeeping that a later save set.
-    let subjectPushChain = Promise.resolve();
-    function pushSubjects(newList) {
-        subjectPushChain = subjectPushChain.then(() => pushSubjectsNow(newList));
-        return subjectPushChain;
-    }
-
-    async function pushSubjectsNow(newList) {
+    async function pushSubjects(newList) {
         const userId = await getUserId();
-        if (!userId) return; // stays marked pending; hydrate() re-pushes it on the next load
-        const snap = loadSubjSync();
+        if (!userId) return;
+        const supabase = await getClient();
         const newIds = new Set(newList.map(s => s.id));
-        const toDelete = [...new Set([...last.subjects.keys(), ...Object.keys(snap.deletes)])]
-            .filter(id => !newIds.has(id) && isUuid(id));
+        const toDelete = [...last.subjects.keys()].filter(id => !newIds.has(id));
         try {
-            const supabase = await getClient();
             if (toDelete.length) {
-                const { error: dErr } = await supabase.from('subjects').delete().in('id', toDelete);
-                if (dErr) throw dErr;
+                await supabase.from('subjects').delete().in('id', toDelete);
                 toDelete.forEach(id => dropSemFor('subjects', id));
             }
-            const pushed = [];
             for (const s of newList) {
                 if (!isUuid(s.id)) continue;
                 const row = subjectLocalToRow(s, userId);
                 const { error } = await supabase.from('subjects').upsert(row, { onConflict: 'id' });
                 if (error) throw error;
                 setSemFor('subjects', s.id, s.semesterId);
-                pushed.push(s.id);
             }
             last.subjects = new Map(newList.map(s => [s.id, true]));
-            // Confirmed on the server: clear only the bookkeeping this push actually covered.
-            const cur = loadSubjSync();
-            toDelete.forEach(id => { if (cur.deletes[id] === snap.deletes[id]) delete cur.deletes[id]; });
-            pushed.forEach(id => { if (cur.upserts[id] === snap.upserts[id]) delete cur.upserts[id]; });
-            const syncedSet = new Set(cur.synced);
-            pushed.forEach(id => syncedSet.add(id));
-            toDelete.forEach(id => syncedSet.delete(id));
-            cur.synced = [...syncedSet];
-            saveSubjSync(cur);
         } catch (err) {
             console.warn('Cloud sync (subjects) failed', err);
-            toast("Couldn't save that subject to the server. It is saved on this device and will retry on the next load.");
+            toast("Couldn't save that subject to the server. Please check your connection and try again.");
         }
     }
 
@@ -813,10 +718,7 @@
 
     const _saveSubjects = DB.saveSubjects.bind(DB);
     DB.saveSubjects = function (list) {
-        const before = DB.getSubjects();
         const r = _saveSubjects(list);
-        if (r === false) return r; // local write failed (e.g. storage quota): don't mark or push
-        markSubjectChanges(before, list);
         pushSubjects(list.slice());
         return r;
     };
@@ -909,7 +811,6 @@
         try {
             localStorage.removeItem(MAP_KEY);
             localStorage.removeItem(SERVER_SEM_KEY);
-            localStorage.removeItem(SUBJ_SYNC_KEY);
         } catch (e) { /* ignore */ }
     }
 
@@ -928,9 +829,7 @@
 
     const _importAll = DB.importAll.bind(DB);
     DB.importAll = function (obj) {
-        const subjectsBefore = DB.getSubjects();
         const r = _importAll(obj);
-        markSubjectChanges(subjectsBefore, DB.getSubjects());
         // Push every imported list through the normal save wrappers so each one
         // gets diffed against the server and synced the same way a manual edit would.
         pushSubjects(DB.getSubjects());
