@@ -79,3 +79,57 @@
 .page-stack > * + * {
     margin-top: var(--page-gap);
 }
+
+/* ---------- Upcoming-feature placeholder (student sidebar items not built yet) ----------
+   Shown on student pages whose sidebar entry is marked "Soon" (or any AI tool that
+   isn't implemented yet) instead of a blank or broken page. Mirrors the admin side's
+   .adm-placeholder look so both read as the same pattern. See feature-placeholder.js. */
+.feature-placeholder {
+    text-align: center;
+    padding: var(--space-6) var(--space-4);
+    color: var(--text-faint);
+}
+
+.feature-placeholder-icon {
+    font-size: 2rem;
+    opacity: .5;
+    margin-bottom: var(--space-3);
+}
+
+.feature-placeholder h2 {
+    color: var(--text);
+    font-size: 1.1rem;
+    margin-bottom: var(--space-2);
+}
+
+.feature-placeholder p {
+    max-width: 34rem;
+    margin: 0 auto;
+    font-size: .88rem;
+}
+
+.feature-placeholder-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: var(--space-3) !important;
+    color: var(--text-soft);
+}
+
+.feature-placeholder-tag {
+    display: inline-block;
+    margin-bottom: var(--space-3);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    border: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    font-size: .64rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.feature-placeholder-close {
+    margin-top: var(--space-5);
+}

@@ -7,14 +7,14 @@
    ============================================================ */
 
 const CURRICULA = {
-    'BSA':       { title: 'Bachelor of Science in Accountancy', version: 'AY 2025-2026', file: '../../assets/pdfs/bsa.pdf' },
-    'BS Entrep': { title: 'Bachelor of Science in Entrepreneurship', version: 'AY 2021-2022', file: '../../assets/pdfs/bsentrep.pdf' },
-    'BSECE':     { title: 'Bachelor of Science in Electronics Engineering', version: 'BSECE-2021', file: '../../assets/pdfs/bsece.pdf' },
-    'BSIE':      { title: 'Bachelor of Science in Industrial Engineering', version: 'BSIE-2021', file: '../../assets/pdfs/bsie.pdf' },
-    'BSIT':      { title: 'Bachelor of Science in Information Technology', version: 'BSIT-2021', file: '../../assets/pdfs/bsit.pdf' },
-    'BSIS':      { title: 'Bachelor of Science in Information Systems', version: 'AY 2023-2024', file: '../../assets/pdfs/bsis.pdf' },
-    'BSCS':      { title: 'Bachelor of Science in Computer Science', version: 'AY 2023-2024', file: '../../assets/pdfs/bscs.pdf' },
-    'BECEd':     { title: 'Bachelor of Early Childhood Education', version: 'BECEd-2022', file: '../../assets/pdfs/becd.pdf' },
+    'BSA':       { title: 'Bachelor of Science in Accountancy', version: 'AY 2025-2026', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsa.pdf' },
+    'BS Entrep': { title: 'Bachelor of Science in Entrepreneurship', version: 'AY 2021-2022', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsentrep.pdf' },
+    'BSECE':     { title: 'Bachelor of Science in Electronics Engineering', version: 'BSECE-2021', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsece.pdf' },
+    'BSIE':      { title: 'Bachelor of Science in Industrial Engineering', version: 'BSIE-2021', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsie.pdf' },
+    'BSIT':      { title: 'Bachelor of Science in Information Technology', version: 'BSIT-2021', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsis.pdf' },
+    'BSIS':      { title: 'Bachelor of Science in Information Systems', version: 'AY 2023-2024', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsit.pdf' },
+    'BSCS':      { title: 'Bachelor of Science in Computer Science', version: 'AY 2023-2024', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bscs.pdf' },
+    'BECEd':     { title: 'Bachelor of Early Childhood Education', version: 'BECEd-2022', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/becd.pdf' },
 
     /* No curriculum PDF yet */
     'BSMA':      { title: 'Bachelor of Science in Management Accounting', version: '', file: null },
