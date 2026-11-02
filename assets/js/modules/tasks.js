@@ -210,6 +210,13 @@ function updateFilterBadge() {
     btn.classList.toggle('tk-filter-active', count > 0);
 }
 
+function ShortcutFilter(SFilter) {
+    tkFilter = SFilter;
+    closeFilterDrawer();
+    updateFilterBadge();
+    renderTasks();
+}
+
 /* ── Recurring helpers ── */
 
 function addDays(dateStr, n) {
@@ -609,7 +616,7 @@ function buildBoardCard(t) {
         (isCompleted ? ' completed' : '') +
         (isOverdue ? ' overdue' : '') +
         (isSelected ? ' tk-selected' : '') +
-        '" data-taskid="' + t.id + 
+        '" data-taskid="' + t.id +
         '" style="--sc-color:' + (sub ? (sub.color || 'rgb(var(--accent))') : '#525252') + '">' +
         '<div class="tk-bc-top">' +
         '<button class="tk-bulk-check' + (isSelected ? ' selected' : '') + '" ' +

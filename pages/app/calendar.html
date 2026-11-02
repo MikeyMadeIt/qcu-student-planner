@@ -17,7 +17,7 @@
 <body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
-  <main class="main-content">
+  <main class="main-content calendar-page">
     <div class="topbar">
       <div><h1 class="page-title">Calendar</h1><p class="page-sub" id="calSubtitle">Classes, tasks, and events in one place</p></div>
     </div>
@@ -175,9 +175,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -186,7 +188,7 @@
 <script>
   renderShell('calendar');
   applyTheme();
-  initCalendar();
+  DB.whenCloudReady(initCalendar);
 </script>
 </body>
 </html>

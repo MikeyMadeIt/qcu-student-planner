@@ -16,7 +16,7 @@
     height: 100vh;
     padding: var(--space-4) var(--sidebar-padding-x);
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     border-right: 1px solid var(--border);
     background: var(--nav-bg);
     backdrop-filter: blur(18px);
@@ -58,6 +58,16 @@
     padding-bottom: var(--space-3);
     margin-bottom: var(--space-2);
     border-bottom: 1px solid var(--border);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .sidebar-quick-link {
@@ -105,6 +115,66 @@
     box-shadow: inset 2px 0 0 rgb(var(--accent));
 }
 
+/* Small unread-messages indicator on the sidebar/drawer "Inbox" entry and the
+   mobile quick-access icon. Never fabricated: refreshInboxPreview() in
+   core/layout.js is the only thing that un-hides it, and only with a real
+   unread count from Supabase. */
+.nav-dot {
+    flex: 0 0 auto;
+    width: 0.44rem;
+    height: 0.44rem;
+    border-radius: 50%;
+    background: var(--danger);
+    margin-left: auto;
+}
+
+.nav-dot[hidden] {
+    display: none;
+}
+
+/* Label text inside a .nav-link row — lets the row's icon/label/badge sit in a flex
+   line without the badge ever overlapping the label (label ellipsizes instead). */
+.nav-link-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sidebar/drawer entries for sections that aren't built yet (e.g. Announcements,
+   AI Summarizer, AI Reviewer, Legal & Policies on the student side; Email Center
+   etc. on the admin side). Still a real, clickable link to the page's own
+   "Not yet implemented" card — just visually de-emphasized with a "Soon" pill so
+   it reads as inactive at a glance, on both the desktop sidebar and the mobile
+   drawer. Pointer events are never disabled and focus/hover states stay intact. */
+.nav-link-soon,
+.drawer-link-soon {
+    opacity: .5;
+}
+
+.nav-link-soon:hover,
+.drawer-link-soon:hover,
+.nav-link-soon:focus-visible,
+.drawer-link-soon:focus-visible {
+    opacity: .8;
+}
+
+.nav-pill-soon {
+    flex: 0 0 auto;
+    padding: 1px 7px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
 /* Group headings share the nav-link inset so labels and headings align. */
 .nav-group-label {
     padding: var(--space-3) var(--sidebar-item-padding-x) var(--space-1);
@@ -126,6 +196,7 @@
 /* Everything from "Add Task / Export" down through the profile row is pinned to the bottom
    of the sidebar, below the scrollable nav, in a single predictable block. */
 .sidebar-bottom {
+    flex: 0 0 auto;
     margin-top: auto;
     display: flex;
     flex-direction: column;
@@ -167,8 +238,33 @@
 }
 
 .sidebar-profile-text {
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
+}
+
+/* Overflow ("...") trigger for the sidebar footer profile menu — stays pinned to
+   the far right regardless of how long the name/email text next to it gets. */
+.sidebar-profile-more {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-profile-more:hover,
+.sidebar-profile-more:focus-visible,
+.sidebar-profile-more[aria-expanded="true"] {
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .sidebar-profile-name {
