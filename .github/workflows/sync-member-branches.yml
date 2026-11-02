@@ -1,0 +1,75 @@
+name: Sync Member Branches
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync member branches with develop
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sourceBranch = "develop";
+
+            const memberBranches = [
+              "dev/mikey",
+              "dev/felices",
+              "dev/tejada",
+              "dev/ramos", 
+              "dev/mapalo",
+              "dev/reyes",
+              "dev/rimando",
+              "dev/plaza",
+              "dev/cruzandrei"
+            ];
+
+            const { owner, repo } = context.repo;
+
+            for (const branch of memberBranches) {
+              try {
+                core.info(`Syncing ${branch} with ${sourceBranch}`);
+
+                const { data: source } = await github.rest.repos.getBranch({
+                  owner,
+                  repo,
+                  branch: sourceBranch
+                });
+
+                const { data: target } = await github.rest.repos.getBranch({
+                  owner,
+                  repo,
+                  branch
+                });
+
+                if (target.commit.sha === source.commit.sha) {
+                  core.info(`${branch} is already up to date.`);
+                  continue;
+                }
+
+                try {
+                  await github.rest.repos.merge({
+                    owner,
+                    repo,
+                    base: branch,
+                    head: sourceBranch,
+                    commit_message: `chore: sync ${sourceBranch} into ${branch}`
+                  });
+
+                  core.info(`Successfully synced ${branch}.`);
+                } catch (error) {
+                  if (error.status === 409) {
+                    core.warning(`Conflict in ${branch}. Manual resolution required.`);
+                  } else {
+                    core.warning(`Could not sync ${branch}: ${error.message}`);
+                  }
+                }
+              } catch (error) {
+                core.warning(`Could not process ${branch}: ${error.message}`);
+              }
+            }
