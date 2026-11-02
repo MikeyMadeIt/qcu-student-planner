@@ -1,7 +1,7 @@
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
 import { escHtml, formatDateTime, mountAdminTopbar, renderErrorWithRetry } from './admin-shared.js';
-import { REPORT_CATEGORY_LABELS, TICKET_STATUS_LABELS, ticketStatusBadge } from './comms-shared.js';
+import { REPORT_CATEGORY_LABELS, TICKET_STATUS_LABELS, ticketStatusBadge, ticketCategoryBadge } from './comms-shared.js';
 
 const PAGE_SIZE = 20;
 let currentPage = 1;
@@ -46,17 +46,17 @@ async function loadRows() {
 
     table.hidden = false;
     body.innerHTML = rows.map(r => `
-      <tr>
-        <td data-label="Ticket"><span class="text-faint" style="font-family:var(--font-mono);font-size:.76rem">${escHtml(r.ticket_ref)}</span></td>
-        <td data-label="Student">
+      <tr class="adm-row-clickable" data-id="${r.id}">
+        <td data-label="Ticket" class="adm-col-hide-compact"><span class="text-faint" style="font-family:var(--font-mono);font-size:.76rem">${escHtml(r.ticket_ref)}</span></td>
+        <td data-label="Student" class="adm-col-secondary">
           <div class="adm-name">${escHtml(r.student && r.student.full_name ? r.student.full_name : 'Unnamed account')}</div>
           <div class="adm-sub">${escHtml(r.student && r.student.email ? r.student.email : '—')}</div>
         </td>
-        <td data-label="Subject">${escHtml(r.subject)}</td>
-        <td data-label="Category">${escHtml(REPORT_CATEGORY_LABELS[r.category] || r.category)}</td>
-        <td data-label="Status">${ticketStatusBadge(escHtml, r.status)}</td>
-        <td data-label="Submitted">${formatDateTime(r.created_at)}</td>
-        <td data-label="Updated">${formatDateTime(r.updated_at)}</td>
+        <td data-label="Subject" class="adm-col-primary">${escHtml(r.subject)}</td>
+        <td data-label="Category" class="adm-col-status">${ticketCategoryBadge(escHtml, r.category)}</td>
+        <td data-label="Status" class="adm-col-hide-compact">${ticketStatusBadge(escHtml, r.status)}</td>
+        <td data-label="Submitted" class="adm-col-hide-compact">${formatDateTime(r.created_at)}</td>
+        <td data-label="Updated" class="adm-col-hide-compact">${formatDateTime(r.updated_at)}</td>
         <td class="text-end adm-actions">
           <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View ticket" aria-label="View ticket"><i class="bi bi-eye"></i></button>
         </td>
@@ -128,7 +128,7 @@ async function viewTicket(id) {
 
         <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-journal-lock"></i>Internal notes <span class="text-faint">(admin-only, never visible to the student)</span></div>
         <div id="tkNotesList" class="mb-2">${notesMarkup(notes)}</div>
-        <div class="d-flex gap-2">
+        <div class="adm-compose-row">
           <input id="tkNoteInput" class="form-control" maxlength="2000" placeholder="Add an internal note…">
           <button type="button" class="btn btn-ghost" id="tkNoteAddBtn"><i class="bi bi-plus-lg"></i> Add</button>
         </div>
@@ -192,8 +192,13 @@ async function onAddNote() {
 
 function onRowAction(e) {
     const btn = e.target.closest('[data-act]');
-    if (!btn || btn.disabled) return;
-    if (btn.dataset.act === 'view') viewTicket(btn.dataset.id);
+    if (btn && !btn.disabled) {
+        if (btn.dataset.act === 'view') viewTicket(btn.dataset.id);
+        return;
+    }
+    // Clicking anywhere else on the row (Gmail-style) opens the ticket too.
+    const row = e.target.closest('.adm-row-clickable');
+    if (row) viewTicket(row.dataset.id);
 }
 
 function wireFilters() {

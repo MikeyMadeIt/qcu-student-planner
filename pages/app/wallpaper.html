@@ -101,6 +101,7 @@
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -109,7 +110,7 @@
 <script>
   renderShell('wallpaper');
   applyTheme();
-  initWallpaper();
+  DB.whenCloudReady(initWallpaper);
 </script>
 </body>
 </html>

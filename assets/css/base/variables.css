@@ -88,6 +88,7 @@
     --layer-modal-backdrop: 1050;
     --layer-modal: 1055;
     --layer-nav-drawer: 1200;
+    --layer-drawer-popover: 1210;
 
     /* Focus ring */
     --focus-ring-color: rgba(var(--accent), 0.45);

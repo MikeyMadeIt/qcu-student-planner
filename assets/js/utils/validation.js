@@ -39,8 +39,8 @@ export function passwordIssues(value) {
 /* Each validator returns an error message, or '' when valid. */
 export const validators = {
     email: value => {
-        if (!value) return 'Enter your personal email address.';
-        return isEmail(value) ? '' : 'Enter a valid email address, for example name@example.com.';
+        if (!value) return 'Enter your email address.';
+        return isEmail(value) ? '' : 'Enter a valid email address, for example lastname.firstname.middlename@gmail.com.';
     },
 
     password: value => (value ? '' : 'Enter your password.'),
@@ -65,8 +65,4 @@ export const validators = {
         return /^[a-zA-Z\u00C0-\u017F.,'\- ]+$/.test(value.trim()) ? '' : 'Use letters only for your full name.';
     },
 
-    section: value => {
-        if (!value.trim()) return 'Enter your section.';
-        return /^[a-zA-Z0-9.\- ]+$/.test(value.trim()) ? '' : 'Enter a valid section (letters and numbers).';
-    },
 };

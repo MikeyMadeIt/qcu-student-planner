@@ -110,14 +110,14 @@
         </div>
       </div>
 
-      <div class="adm-chart-grid mb-3">
+      <div class="adm-stack-grid mb-3">
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="section-title mb-0"><i class="bi bi-person-plus-fill"></i>Recent registrations</div>
             <a class="text-faint" style="font-size:.8rem" href="users.html">View all &rarr;</a>
           </div>
           <div class="adm-table-wrap">
-            <table class="adm-table">
+            <table class="adm-table adm-table-compact">
               <thead><tr><th scope="col">Student</th><th scope="col">Program</th><th scope="col">Campus</th><th scope="col">Submitted</th><th scope="col">Status</th><th scope="col" class="text-end">Action</th></tr></thead>
               <tbody id="recentList"></tbody>
             </table>
@@ -132,7 +132,7 @@
           </div>
           <div id="activityLoading" class="adm-loading" hidden><i class="bi bi-hourglass-split"></i> Loading…</div>
           <div class="adm-table-wrap">
-            <table class="adm-table">
+            <table class="adm-table adm-table-compact">
               <thead><tr><th scope="col">When</th><th scope="col">Admin</th><th scope="col">Action</th><th scope="col">Account</th></tr></thead>
               <tbody id="activityList"></tbody>
             </table>
@@ -140,9 +140,7 @@
           <div id="activityEmpty" class="empty-state" hidden>No administrative actions have been recorded yet.</div>
           <div id="activityError" hidden></div>
         </div>
-      </div>
 
-      <div class="adm-chart-grid mb-3">
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="section-title mb-0"><i class="bi bi-envelope-paper-fill"></i>Recent administrative messages</div>
@@ -150,7 +148,7 @@
           </div>
           <p class="text-faint mb-2" style="font-size:.78rem" id="msgsTotalLine"></p>
           <div class="adm-table-wrap">
-            <table class="adm-table">
+            <table class="adm-table adm-table-compact">
               <thead><tr><th scope="col">Subject</th><th scope="col">Category</th><th scope="col">Recipients</th><th scope="col">Sent</th></tr></thead>
               <tbody id="recentMsgsList"></tbody>
             </table>
@@ -165,7 +163,7 @@
           </div>
           <p class="text-faint mb-2" style="font-size:.78rem" id="ticketsTotalLine"></p>
           <div class="adm-table-wrap">
-            <table class="adm-table">
+            <table class="adm-table adm-table-compact">
               <thead><tr><th scope="col">Ticket</th><th scope="col">Student</th><th scope="col">Subject</th><th scope="col">Status</th></tr></thead>
               <tbody id="recentTicketsList"></tbody>
             </table>

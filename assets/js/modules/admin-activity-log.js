@@ -30,12 +30,14 @@ async function loadRows() {
 
     body.innerHTML = rows.map(r => `
       <tr>
-        <td data-label="When">${formatDateTime(r.created_at)}</td>
-        <td data-label="Admin">${escHtml(r.actor && r.actor.full_name ? r.actor.full_name : 'Administrator')}</td>
-        <td data-label="Action">${escHtml(ACTION_LABELS[r.action] || r.action)}</td>
-        <td data-label="Account">${escHtml(r.target && r.target.full_name ? r.target.full_name : '—')}</td>
-        <td data-label="Change">${escHtml(r.previous_status || '—')} &rarr; ${escHtml(r.new_status || '—')}</td>
-        <td data-label="Reason">${escHtml(r.reason || '—')}</td>
+        <td data-label="Action" class="adm-col-primary">${escHtml(ACTION_LABELS[r.action] || r.action)}</td>
+        <td data-label="Account" class="adm-col-secondary">
+          <div class="adm-name">${escHtml(r.target && r.target.full_name ? r.target.full_name : '—')}</div>
+          <div class="adm-sub">by ${escHtml(r.actor && r.actor.full_name ? r.actor.full_name : 'Administrator')}</div>
+        </td>
+        <td data-label="When" class="adm-col-status"><span class="text-faint" style="font-size:.72rem">${formatDateTime(r.created_at)}</span></td>
+        <td data-label="Change" class="adm-col-hide-compact">${escHtml(r.previous_status || '—')} &rarr; ${escHtml(r.new_status || '—')}</td>
+        <td data-label="Reason" class="adm-col-hide-compact">${escHtml(r.reason || '—')}</td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

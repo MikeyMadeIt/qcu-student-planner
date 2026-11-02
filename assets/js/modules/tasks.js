@@ -616,7 +616,7 @@ function buildBoardCard(t) {
         (isCompleted ? ' completed' : '') +
         (isOverdue ? ' overdue' : '') +
         (isSelected ? ' tk-selected' : '') +
-        '" data-taskid="' + t.id + 
+        '" data-taskid="' + t.id +
         '" style="--sc-color:' + (sub ? (sub.color || 'rgb(var(--accent))') : '#525252') + '">' +
         '<div class="tk-bc-top">' +
         '<button class="tk-bulk-check' + (isSelected ? ' selected' : '') + '" ' +

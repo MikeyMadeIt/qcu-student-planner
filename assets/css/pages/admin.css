@@ -129,6 +129,156 @@
     }
 }
 
+/* ---------- Compact tables: Support Tickets + the Dashboard "recent" panels ----------
+   Desktop: a real table, but rows never wrap — long text keeps to one line and the
+   `.adm-table-wrap` scrolls sideways if a row genuinely needs more room than the
+   viewport, instead of growing tall.
+   Mobile: not the generic stacked label/value card above — a single-line "rectangle"
+   row (same idea as the inbox's message rows): one bold primary line, one faint
+   secondary line underneath, a status pill / count top-right, and the existing
+   view action bottom-right. Only the handful of columns flagged by the row markup
+   (.adm-col-primary / .adm-col-secondary / .adm-col-status) are shown; everything
+   else (.adm-col-hide-compact) is hidden rather than turned into another stacked row. */
+.adm-table-compact th,
+.adm-table-compact td {
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    /* Right-side cluster (status/category pill, then the action button) sits
+       in its own two columns so it can sit SIDE BY SIDE as one unit, vertically
+       centered against the whole two-line left column -- not stacked as its
+       own two rows. Spacing between the pieces is done with margin on the
+       pieces themselves (not `column-gap`), so a row that only has a pill, or
+       only a button, never reserves empty gap space for the piece it lacks. */
+    .adm-table-compact tr {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        grid-template-rows: min-content min-content;
+        row-gap: 0;
+        align-items: center;
+        padding: 9px 2px;
+        border-bottom: 1px solid var(--border);
+        cursor: default;
+    }
+    .adm-table-compact td {
+        display: block;
+        border: 0;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    /* Padding alone is split into its own, more specific selector
+       (.adm-table-compact.adm-table, both classes are always present
+       together on these tables) so it reliably beats the unconditional
+       `.adm-table td { padding: var(--space-3) var(--space-4); }` rule
+       further down this file -- same specificity otherwise, and that rule
+       comes later in source order, so it was silently winning and re-adding
+       ~12px of top/bottom padding to every cell. Kept separate from the
+       `display` rule above: bumping specificity on that one too would (and
+       briefly did) also beat `.adm-col-hide-compact { display: none; }`
+       below, since that selector's specificity is lower, which switched the
+       hidden columns back on. */
+    .adm-table-compact.adm-table td {
+        padding: 0;
+    }
+    .adm-table-compact td::before {
+        content: none;
+    }
+    .adm-table-compact .adm-col-hide-compact {
+        display: none;
+    }
+    .adm-table-compact .adm-col-primary {
+        grid-column: 1;
+        grid-row: 1;
+        font-weight: 700;
+        font-size: .86rem;
+        line-height: 1.3;
+    }
+    .adm-table-compact .adm-col-secondary {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: .76rem;
+        line-height: 1.3;
+        margin-top: 2px;
+        color: var(--text-faint);
+    }
+    .adm-table-compact .adm-col-secondary .adm-sub {
+        display: none;
+    }
+    .adm-table-compact .adm-col-status {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        justify-self: end;
+        align-self: center;
+        margin-left: 8px;
+    }
+    .adm-table-compact td.adm-actions {
+        grid-column: 3;
+        grid-row: 1 / -1;
+        justify-self: end;
+        align-self: center;
+        padding: 0;
+        margin-left: 6px;
+    }
+    /* Category/status pills in the compact top-right slot can carry long
+       labels ("Account or Login Issue") -- cap their width so one long
+       label never forces the row wider than the screen. */
+    .adm-table-compact .adm-col-status .status-badge {
+        max-width: 7.5rem;
+        padding: 1px 8px;
+        font-size: .68rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .adm-table-compact tr:last-child {
+        border-bottom: 0;
+    }
+
+    /* Row actions on mobile: icon only, no label (e.g. "Review" / "View") --
+       the row's own tap target and the pill above it already say enough. The
+       button also shrinks to a tight icon-only square instead of carrying
+       the full-size text button's height and side padding. */
+    .adm-table-compact .adm-actions-label {
+        display: none;
+    }
+    .adm-table-compact td.adm-actions .btn {
+        height: 1.65rem;
+        width: 1.65rem;
+        padding-inline: 0;
+    }
+}
+
+/* Dashboard "recent" panel pairs: never two-up — a table-shaped panel in the
+   right-hand column of a 2-col grid has nowhere to shrink to and overflows the
+   page, so these always stack as single full-width cards instead. */
+.adm-stack-grid {
+    display: grid;
+    /* minmax(0, 1fr), not a bare 1fr: a grid track won't shrink below its
+       content's intrinsic width unless told it can. These cards hold
+       .adm-table-compact tables (white-space: nowrap cells), so without the
+       0 floor the track -- and the card -- grows to fit the table's full
+       unwrapped width and pushes past .main-content's right padding,
+       sitting flush against the edge of the screen instead of fitting
+       inside it. The table's own .adm-table-wrap still scrolls sideways
+       for genuinely-too-wide rows; this just stops the card itself from
+       stretching the page. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.adm-stack-grid > .glass {
+    min-width: 0;
+}
+
+/* Rows that open a detail view on a tap/click anywhere on them (not just their
+   small action button) — same Gmail-style pattern as the inbox's message rows. */
+.adm-row-clickable {
+    cursor: pointer;
+}
+
 /* Filter bar: search gets its own full-width row so it never fights the
    other controls for space; status/date/sort wrap onto a second row and
    shrink onto their own lines on narrow screens instead of being forced
@@ -304,12 +454,6 @@ a.adm-stat-card:focus-visible {
     margin-left: auto;
     font-size: .76rem;
 }
-
-.adm-sub {
-    font-size: .76rem;
-    color: var(--text-faint);
-}
-
 .adm-spin {
     display: inline-block;
     animation: admSpin .8s linear infinite;
@@ -482,6 +626,41 @@ a.adm-stat-card:focus-visible {
 
 .adm-detail-grid dd {
     margin: 0 0 6px;
+    overflow-wrap: anywhere;
+}
+
+/* Modal body polish shared by the ticket/message detail modals: predictable
+   vertical rhythm between sections, and the note/reply composer row never
+   wraps its button under the input on a narrow phone-width modal. */
+.modal-content .section-title {
+    margin-top: var(--space-4);
+}
+
+.modal-content .section-title:first-child {
+    margin-top: 0;
+}
+
+.adm-compose-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.adm-compose-row .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.adm-compose-row .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .adm-compose-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 .adm-loading {
@@ -563,13 +742,9 @@ a.adm-stat-card:focus-visible {
     cursor: default;
 }
 
-.nav-link-label {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+/* .nav-link-label, .nav-badge, .nav-link-soon / .drawer-link-soon and .nav-pill-soon
+   now live in assets/css/layout/sidebar.css — they're shared by the student sidebar
+   too (e.g. the "Soon" items in AI Tools / Safety & Support), not just admin. */
 
 .nav-badge {
     flex: 0 0 auto;
