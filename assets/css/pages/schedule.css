@@ -1494,6 +1494,22 @@ SCHEDULE — UI/UX REFINEMENT PATCH
     margin-top: 2px;
     line-height: 1.45;
 }
+
+/* ── 2. Header layout: title+desc stacked, controls row below ── */
+
+.sch-topbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 14px;
+    min-height: 0;
+}
+
+.sch-topbar-left {
+    width: 100%;
+    min-width: 0;
+}
+
 /* Controls row: icon-only view switcher, one line */
 
 .sch-topbar-controls {
@@ -1913,6 +1929,7 @@ SCHEDULE — UI/UX REFINEMENT PATCH
 .sch-list-archive-btn {
     flex-shrink: 0;
 }
+
 
 /* ── Week nav: "‹ date ›  Today  [view icon]" ── */
 /* Today stays a compact text button (never wraps below the date); the view

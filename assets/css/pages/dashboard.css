@@ -409,7 +409,38 @@
     height: 120px;
     flex-shrink: 0;
     align-self: center;
-}.att-legend {
+}
+
+.donut-wrap svg {
+    transform: rotate(-90deg);
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* SVG text elements need counter-rotation to be readable */
+
+.donut-wrap svg text {
+    transform-origin: 65px 65px;
+    transform: rotate(90deg);
+}
+
+.donut-svg-pct {
+    font-family: var(--font-mono), monospace;
+    font-weight: 800;
+    font-size: 18px;
+    fill: rgb(var(--accent));
+}
+
+.donut-svg-sub {
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    fill: var(--text-faint);
+    text-transform: uppercase;
+}
+
+.att-legend {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -743,26 +774,23 @@
 /* ---- Mobile responsive refinements ---- */
 
 @media (max-width: 575px) {
-    .dash-stats .dash-stat-link {
-        min-height: 92px;
-        padding: 12px;
-        gap: 8px;
+    /* Stat cards more compact on mobile, same icon-left layout */
+    .stat-card {
+        gap: var(--space-2);
     }
-    .dash-stats .stat-card-val {
+    .stat-card-val {
         font-size: 1.15rem;
     }
-    .dash-stats .stat-card-icon {
-        width: 1.8rem;
-        height: 1.8rem;
+    .stat-card-icon {
+        width: 2rem;
+        height: 2rem;
         font-size: var(--icon-size-sm);
     }
-    .dash-stats .stat-card-lbl {
+    .stat-card-lbl {
         font-size: .6rem;
         margin-top: 2px;
     }
-    .dash-stats .stat-card-hint {
-        font-size: .58rem;
-    }
+    /* Donut legend on narrow screens */
     .att-legend-label {
         font-size: .66rem;
     }
@@ -776,11 +804,13 @@
     .sem-label {
         font-size: .92rem;
     }
+    /* Grade bar labels shorter */
     .grade-bar-label {
         min-width: 64px;
         max-width: 64px;
         font-size: .67rem;
     }
+    /* schedule/task rows */
     .sched-time {
         min-width: 60px;
         font-size: .6rem;
@@ -791,6 +821,7 @@
 }
 
 @media (min-width: 768px) {
+    /* Desktop: wider grade label */
     .grade-bar-label {
         min-width: 96px;
         max-width: 96px;
@@ -825,52 +856,7 @@
 }
 
 .dash-stats .stat-card {
-    min-height: 104px;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 16px;
-    color: var(--text);
-    text-decoration: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-color: var(--border);
-}
-
-.dash-stats .dash-stat-link:hover {
-    color: var(--text);
-    border-color: var(--border);
-    box-shadow: none;
-}
-
-.dash-stats .dash-stat-link::after {
-    display: none;
-}
-
-.dash-stats .stat-card-text {
-    order: 1;
-}
-
-.dash-stats .stat-card-icon {
-    order: 2;
-    width: 1.8rem;
-    height: 1.8rem;
-    background: var(--surface-2);
-    color: var(--text-faint);
-    font-size: .9rem;
-}
-
-.dash-stats .stat-card-val {
-    color: var(--text);
-    background: none;
-    -webkit-text-fill-color: currentColor;
-    font-size: 1.5rem;
-}
-
-.dash-stats .stat-card-hint {
-    margin-top: 6px;
-    color: var(--text-faint);
-    font-size: .66rem;
-    line-height: 1.3;
+    justify-content: center;
 }
 
 .dash-two-col {

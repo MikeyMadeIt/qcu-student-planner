@@ -59,32 +59,6 @@ function renderSemesterOverview() {
    2. STAT CARDS
    ============================================================ */
 
-function computeSyllabusCoverage(semId) {
-    var courses = DB.getSyllabusCourses().filter(function (c) { return c.semesterId === semId; });
-    if (!courses.length)
-        return null;
-    var sem = DB.getActiveSemester();
-    var totalWks = sem ? (sem.totalWeeks || 15) : 15;
-    var totalTopics = 0;
-    var coveredTopics = 0;
-    var hasTopicData = false;
-    courses.forEach(function (c) {
-        if (Array.isArray(c.topics) && c.topics.length) {
-            hasTopicData = true;
-            c.topics.forEach(function (t) {
-                totalTopics++;
-                if (t.completed)
-                    coveredTopics++;
-            });
-        }
-    });
-    if (hasTopicData && totalTopics > 0)
-        return Math.round(coveredTopics / totalTopics * 100);
-    var covered = courses.reduce(function (sum, course) { return sum + ((course.weeks || []).length); }, 0);
-    var expected = courses.length * totalWks;
-    return expected > 0 ? Math.min(100, Math.round(covered / expected * 100)) : 0;
-}
-
 function renderStatCards() {
     const semId = DB.getActiveSemesterId();
     const subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
@@ -94,11 +68,6 @@ function renderStatCards() {
     if (subjectsHint)
         subjectsHint.textContent = subjects.length ? 'Active this semester' : 'No data yet';
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
-    var subjectsHint = document.getElementById('statSubjectsHint');
-    if (subjectsHint)
-        subjectsHint.textContent = !subjects.length ? 'No data yet'
-            : syllabusCoverage !== null ? 'Syllabus ' + syllabusCoverage + '% covered'
-                : 'Active this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
