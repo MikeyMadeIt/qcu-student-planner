@@ -21,7 +21,7 @@ const TOTAL_STEPS = 3;
 /* Fields to validate on each step, in display order. */
 const STEP_FIELDS = {
     1: ['fullName', 'email', 'password', 'confirmPassword'],
-    2: ['program', 'campus', 'yearLevel', 'section'],
+    2: ['program', 'campus', 'yearLevel'],
     3: ['acceptTerms', 'acknowledgePrivacy'],
 };
 
@@ -33,7 +33,6 @@ const FIELD_RULES = {
     program: validators.select('program'),
     campus: validators.select('campus'),
     yearLevel: validators.select('year level'),
-    section: (value) => validators.section(value),
     acceptTerms: validators.consent('Accept the Terms and Conditions to continue.'),
     acknowledgePrivacy: validators.consent('Acknowledge the Privacy Notice to continue.'),
 };
@@ -223,7 +222,6 @@ function collectRegistration(form) {
         program: form.elements.program.value,
         campus: form.elements.campus.value,
         yearLevel: form.elements.yearLevel.value,
-        section: readValue(form.elements.section),
         acceptedTerms: form.elements.acceptTerms.checked,
         acknowledgedPrivacy: form.elements.acknowledgePrivacy.checked,
     };
