@@ -13,44 +13,6 @@ import {
     showAlert,
 } from '../utils/auth-ui.js';
 
-const REMEMBER_EMAIL_KEY = 'qcuRememberedEmail';
-
-/* "Remember me" only affects what's pre-filled next time -- it never touches
-   the Supabase session itself, so sign-in/sign-out behaviour is unchanged. */
-function applyRememberedEmail(form) {
-    const emailInput = $('[name="email"]', form);
-    const rememberInput = $('[name="rememberMe"]', form);
-
-    if (!emailInput || !rememberInput) return;
-
-    try {
-        const saved = window.localStorage.getItem(REMEMBER_EMAIL_KEY);
-        if (saved) {
-            emailInput.value = saved;
-            rememberInput.checked = true;
-        }
-    } catch (error) {
-        /* Storage unavailable (private browsing, disabled storage) -- fall back silently. */
-    }
-}
-
-function persistRememberedEmail(form) {
-    const emailInput = $('[name="email"]', form);
-    const rememberInput = $('[name="rememberMe"]', form);
-
-    if (!emailInput || !rememberInput) return;
-
-    try {
-        if (rememberInput.checked) {
-            window.localStorage.setItem(REMEMBER_EMAIL_KEY, emailInput.value.trim());
-        } else {
-            window.localStorage.removeItem(REMEMBER_EMAIL_KEY);
-        }
-    } catch (error) {
-        /* Storage unavailable -- nothing to persist, login still succeeds. */
-    }
-}
-
 const RULES = {
     email: input => validators.email(readValue(input)),
     password: input => validators.password(readValue(input)),
@@ -130,7 +92,6 @@ async function submitForm(form, submitButton) {
             const destination = resolveLandingRoute({ role, accountStatus, rejectionReason });
 
             if (destination.type === 'go') {
-                persistRememberedEmail(form);
                 location.href = destination.href;
             } else {
                 showAlert(form, destination.message, 'error');
@@ -158,8 +119,6 @@ async function submitForm(form, submitButton) {
 function setupForm(form) {
     const inputs = $$('[data-rule]', form);
     const submitButton = $('[type="submit"]', form);
-
-    if (form.dataset.authForm === 'login') applyRememberedEmail(form);
 
     setupPasswordRequirements($('[data-requirements]', form), $('[name="password"]', form));
     attachLiveValidation(inputs, form);
