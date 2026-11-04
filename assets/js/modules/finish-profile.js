@@ -1,5 +1,5 @@
 /* pages/auth/finish-profile.html entry point (ES module). Only reached by a Google sign-in
-   whose profile is still missing program/campus/year level/section -- password sign-ups always
+   whose profile is still missing program/campus/year level -- password sign-ups always
    collect these during register-wizard.js and never see this page. */
 
 import { AuthService } from '../services/auth-service.js';
@@ -21,7 +21,6 @@ const FIELD_RULES = {
     program: validators.select('program'),
     campus: validators.select('campus'),
     yearLevel: validators.select('year level'),
-    section: value => validators.section(value),
     acceptTerms: validators.consent('Accept the Terms and Conditions and Privacy Notice to continue.'),
 };
 
@@ -107,7 +106,6 @@ async function submitDetails(form, submitButton) {
         program: form.elements.program.value,
         campus: form.elements.campus.value,
         yearLevel: form.elements.yearLevel.value,
-        section: readValue(form.elements.section),
     });
 
     if (!result.ok) {
