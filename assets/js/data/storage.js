@@ -25,13 +25,7 @@ const DB_KEYS = {
    ============================================================ */
 
 const EXPORT_SCHEMA_VERSION = 1;
-/* Real UUIDs are required now that subjects/tasks/calendar events are persisted to
-   Supabase (uuid primary keys) -- see assets/js/data/cloud-sync.js. Falls back to the
-   old short id only if the browser has no crypto.randomUUID (very old browsers), in
-   which case cloud sync for that one record is skipped rather than sent with a bad id. */
-const uid = () => (window.crypto && typeof window.crypto.randomUUID === 'function')
-    ? window.crypto.randomUUID()
-    : Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 function readKey(key, fallback) {
     try {
@@ -58,7 +52,7 @@ function writeKey(key, value) {
 }
 
 const DEFAULT_SETTINGS = {
-    name: 'Student', studentNumber: '', course: '', yearLevel: '', school: '',
+    name: 'Student', studentNumber: '', course: '', yearLevel: '', section: '', school: '',
     theme: 'dark', accent: 'blue',
     notifications: { upcomingClass: true, assignmentDue: true, examReminder: true, pomodoroFinished: true, dailyReview: false },
 };
@@ -445,26 +439,6 @@ const DB = {
         localStorage.setItem('sp_initialized', '1');
         localStorage.setItem('sp_semester_migrated', '1');
         return true;
-    },
-    /* ---- SIGN-OUT CACHE WIPE ----
-       Security: this is a shared/public-device risk, not just a Supabase RLS
-       one. storage.js's keys are a *local cache* of one signed-in student's
-       Supabase rows (see cloud-sync.js). If they are left in localStorage
-       after sign-out and a different student signs in on the same browser,
-       that student's pages would render against the previous student's
-       cached subjects/tasks/notes/etc. until (and unless) a fresh cloud
-       hydrate overwrites every key -- an accidental cross-student data
-       exposure that has nothing to do with RLS. Called from
-       AuthService.signOut(). Deliberately leaves `sp_settings` (theme/accent,
-       a device preference, not student data) and Supabase's own auth
-       storage (it manages/clears that itself) untouched. */
-    clearPrivateCacheOnSignOut() {
-        Object.keys(DB_KEYS).forEach(k => {
-            if (k === 'settings') return; // device-level UI preference, not student data
-            localStorage.removeItem(DB_KEYS[k]);
-        });
-        ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map']
-            .forEach(k => localStorage.removeItem(k));
     },
     validateImport,
     /* ---- RESET — clears planner data, leaves app functional ---- */

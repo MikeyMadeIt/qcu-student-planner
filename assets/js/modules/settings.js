@@ -8,6 +8,7 @@ function initSettings() {
     document.getElementById('sNumber').value = s.studentNumber || '';
     document.getElementById('sCourse').value = s.course || '';
     document.getElementById('sYear').value = s.yearLevel || '';
+    document.getElementById('sSection').value = s.section || '';
     document.getElementById('sSchool').value = s.school || '';
     highlightTheme(s.theme);
     renderAccentPicker(s.accent);
@@ -33,6 +34,7 @@ function saveProfile() {
     s.studentNumber = document.getElementById('sNumber').value.trim();
     s.course = document.getElementById('sCourse').value.trim();
     s.yearLevel = document.getElementById('sYear').value.trim();
+    s.section = document.getElementById('sSection').value.trim();
     s.school = document.getElementById('sSchool').value.trim();
     DB.saveSettings(s);
     Toast.show('Profile saved');
