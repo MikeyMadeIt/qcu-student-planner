@@ -90,6 +90,24 @@
     function hhmm(t) { return t ? String(t).slice(0, 5) : ''; }
     function isUuid(id) { return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id); }
 
+    const DIRTY_SUBJ_KEY = 'sp_cloud_dirty_subjects';
+    function getDirty() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_SUBJ_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirty(set) {
+        try { localStorage.setItem(DIRTY_SUBJ_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
+    const DIRTY_ATT_KEY = 'sp_cloud_dirty_attendance';
+    function getDirtyAtt() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_ATT_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirtyAtt(set) {
+        try { localStorage.setItem(DIRTY_ATT_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
     /* ---------- loading overlay ---------- */
     let overlayCount = 0;
     function showLoader() {
@@ -356,6 +374,8 @@
         notes: new Map(), attendance: new Map(), grades: new Map(),
         gwaCalc: new Map(), syllabusCourses: new Map(),
     };
+    // AJ-08: cancelled occurrences snapshot (not diffed per-row; whole-blob replace)
+    let _lastCancelledJson = '[]';
 
     /* ---------- hydrate (pull) ---------- */
 
@@ -363,7 +383,9 @@
 
     async function hydrate() {
         const userId = await getUserId();
-        if (!userId) return; // not signed in yet / auth guard will redirect
+        if (!userId) return;
+        await _subjQueue; // not signed in yet / auth guard will redirect
+        await _attQueue;
 
         // Defense in depth against stale cross-student data on a shared device:
         // AuthService.signOut() already wipes this cache (see storage.js
@@ -382,7 +404,7 @@
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes] = await Promise.all([
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -394,9 +416,11 @@
                 supabase.from('grade_assessments').select('*').order('position', { ascending: true }),
                 supabase.from('gwa_calculator').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('syllabus_courses').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+                // AJ-08: single-row blob storing cancelled class occurrences
+                supabase.from('cancelled_occurrences').select('occurrences').eq('user_id', userId).maybeSingle(),
             ]);
 
-            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes]
+            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
 
@@ -413,11 +437,23 @@
                 (componentsByGrade[c.grade_id] = componentsByGrade[c.grade_id] || []).push(c);
             });
 
-            const subjects = (subjRes.data || []).map(subjectRowToLocal);
+            const serverSubjects = (subjRes.data || []).map(subjectRowToLocal);
+            const dirtyIds = getDirty();
+            const localDirty = DB.getSubjects().filter(s => dirtyIds.has(s.id));
+            const localDirtyMap = new Map(localDirty.map(s => [s.id, s]));
+            const subjects = serverSubjects.map(s => localDirtyMap.get(s.id) || s);
+            localDirty.forEach(s => { if (!serverSubjects.some(x => x.id === s.id)) subjects.push(s); });
+            setDirty(new Set(localDirty.map(s => s.id)));
             const tasks = (taskRes.data || []).map(r => taskRowToLocal(r, checklistByTask[r.id]));
             const events = (evRes.data || []).map(eventRowToLocal);
             const notes = (noteRes.data || []).map(notesRowToLocal);
-            const attendance = (attRes.data || []).map(attendanceRowToLocal);
+            const serverAtt = (attRes.data || []).map(attendanceRowToLocal);
+            const dirtyAttIds = getDirtyAtt();
+            const localDirtyAtt = DB.getAttendance().filter(r => dirtyAttIds.has(r.id));
+            const dirtyAttMap = new Map(localDirtyAtt.map(r => [r.id, r]));
+            const attendance = serverAtt.map(r => dirtyAttMap.get(r.id) || r);
+            localDirtyAtt.forEach(r => { if (!serverAtt.some(x => x.id === r.id)) attendance.push(r); });
+            setDirtyAtt(new Set(localDirtyAtt.map(r => r.id)));
             const grades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
             const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
             const syllabusCourses = (sylRes.data || []).map(syllabusRowToLocal);
@@ -431,15 +467,23 @@
             DB.set('gwaCalc', gwaRows);
             DB.set('syllabusCourses', syllabusCourses);
 
-            last.subjects = new Map(subjects.map(s => [s.id, true]));
+            // AJ-08: hydrate cancelled occurrences from Supabase blob
+            if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
+                DB.saveCancelledOccurrences(coRes.data.occurrences);
+                _lastCancelledJson = JSON.stringify(coRes.data.occurrences);
+            }
+
+            last.subjects = new Map(serverSubjects.map(s => [s.id, true]));
             last.tasks = new Map(tasks.map(t => [t.id, true]));
             last.calendarEvents = new Map(events.map(e => [e.id, true]));
             last.notes = new Map(notes.map(n => [n.id, true]));
-            last.attendance = new Map(attendance.map(a => [a.id, true]));
+            last.attendance = new Map(serverAtt.map(a => [a.id, true]));
             last.grades = new Map(grades.map(g => [g.id, true]));
             last.gwaCalc = new Map(gwaRows.map(r => [r.id, true]));
             last.syllabusCourses = new Map(syllabusCourses.map(c => [c.id, true]));
 
+            if (localDirty.length) pushSubjects(subjects.slice());
+            if (localDirtyAtt.length) pushAttendance(attendance.slice());
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
@@ -449,28 +493,44 @@
 
     /* ---------- push (write-through diffing) ---------- */
 
-    async function pushSubjects(newList) {
+    let _subjQueue = Promise.resolve();
+    function pushSubjects(newList) {
+        _subjQueue = _subjQueue.then(() => doPushSubjects(newList)).catch(() => {});
+        return _subjQueue;
+    }
+
+    async function doPushSubjects(newList) {
         const userId = await getUserId();
         if (!userId) return;
         const supabase = await getClient();
         const newIds = new Set(newList.map(s => s.id));
         const toDelete = [...last.subjects.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirty();
+        let failure = null;
         try {
             if (toDelete.length) {
-                await supabase.from('subjects').delete().in('id', toDelete);
-                toDelete.forEach(id => dropSemFor('subjects', id));
+                const { error } = await supabase.from('subjects').delete().in('id', toDelete);
+                if (error) failure = error;
+                else toDelete.forEach(id => { dropSemFor('subjects', id); last.subjects.delete(id); });
             }
             for (const s of newList) {
-                if (!isUuid(s.id)) continue;
-                const row = subjectLocalToRow(s, userId);
-                const { error } = await supabase.from('subjects').upsert(row, { onConflict: 'id' });
-                if (error) throw error;
+                if (!isUuid(s.id)) {
+                    failure = failure || new Error('Subject "' + (s.code || '?') + '" has an invalid id');
+                    continue;
+                }
+                const { error } = await supabase.from('subjects').upsert(subjectLocalToRow(s, userId), { onConflict: 'id' });
+                if (error) { failure = failure || error; continue; }
                 setSemFor('subjects', s.id, s.semesterId);
+                last.subjects.set(s.id, true);
+                dirty.delete(s.id);
             }
-            last.subjects = new Map(newList.map(s => [s.id, true]));
         } catch (err) {
-            console.warn('Cloud sync (subjects) failed', err);
-            toast("Couldn't save that subject to the server. Please check your connection and try again.");
+            failure = failure || err;
+        }
+        setDirty(dirty);
+        if (failure) {
+            console.warn('Cloud sync (subjects) failed', failure);
+            toast("Couldn't save a subject to the server: " + (failure.message || 'unknown error'));
         }
     }
 
@@ -563,30 +623,47 @@
         }
     }
 
-    async function pushAttendance(newList) {
+        let _attQueue = Promise.resolve();
+    function pushAttendance(newList) {
+        _attQueue = _attQueue.then(() => doPushAttendance(newList)).catch(() => {});
+        return _attQueue;
+    }
+
+    async function doPushAttendance(newList) {
+        await _subjQueue; // subjects must exist on the server before attendance rows reference them
         const userId = await getUserId();
         if (!userId) return;
         const supabase = await getClient();
         const newIds = new Set(newList.map(r => r.id));
         const toDelete = [...last.attendance.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirtyAtt();
+        let failure = null;
         try {
             if (toDelete.length) {
-                await supabase.from('attendance').delete().in('id', toDelete);
-                toDelete.forEach(id => dropSemFor('attendance', id));
+                const { error } = await supabase.from('attendance').delete().in('id', toDelete);
+                if (error) failure = error;
+                else toDelete.forEach(id => { dropSemFor('attendance', id); last.attendance.delete(id); });
             }
             for (const r of newList) {
-                if (!isUuid(r.id)) continue;
+                if (!isUuid(r.id)) {
+                    failure = failure || new Error('Attendance record has an invalid id');
+                    continue;
+                }
                 const { error } = await supabase.from('attendance').upsert(attendanceLocalToRow(r, userId), { onConflict: 'id' });
-                if (error) throw error;
+                if (error) { failure = failure || error; continue; }
                 setSemFor('attendance', r.id, r.semesterId);
+                last.attendance.set(r.id, true);
+                dirty.delete(r.id);
             }
-            last.attendance = new Map(newList.map(r => [r.id, true]));
         } catch (err) {
-            console.warn('Cloud sync (attendance) failed', err);
-            toast("Couldn't save that attendance record to the server. Please check your connection and try again.");
+            failure = failure || err;
+        }
+        setDirtyAtt(dirty);
+        if (failure) {
+            console.warn('Cloud sync (attendance) failed', failure);
+            toast("Couldn't save attendance to the server: " + (failure.message || 'unknown error'));
         }
     }
-
     async function pushGwaCalc(newList) {
         const userId = await getUserId();
         if (!userId) return;
@@ -604,6 +681,39 @@
         } catch (err) {
             console.warn('Cloud sync (GWA calculator) failed', err);
             toast("Couldn't save the GWA calculator to the server. Please check your connection and try again.");
+        }
+    }
+
+    /* AJ-08: cancelled occurrences — stored as a single JSONB row (upsert) keyed
+       by user_id. The table schema is:
+         CREATE TABLE cancelled_occurrences (
+           user_id uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+           occurrences jsonb NOT NULL DEFAULT '[]',
+           updated_at timestamptz NOT NULL DEFAULT now()
+         );
+         ALTER TABLE cancelled_occurrences ENABLE ROW LEVEL SECURITY;
+         CREATE POLICY "own rows" ON cancelled_occurrences
+           USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+       No diffing needed: the whole array is upserted on every change. */
+    async function pushCancelledOccurrences(list) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const json = JSON.stringify(list);
+        if (json === _lastCancelledJson) return; // nothing changed
+        try {
+            const supabase = await getClient();
+            const { error } = await supabase.from('cancelled_occurrences').upsert(
+                { user_id: userId, occurrences: list, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+            );
+            if (error) throw error;
+            _lastCancelledJson = json;
+        } catch (err) {
+            console.warn('Cloud sync (cancelled occurrences) failed', err);
+            toast(
+                "Couldn't save cancelled class occurrences to the server. Please check your connection.",
+                'high'
+            );
         }
     }
 
@@ -718,7 +828,11 @@
 
     const _saveSubjects = DB.saveSubjects.bind(DB);
     DB.saveSubjects = function (list) {
+        const prev = new Map(DB.getSubjects().map(s => [s.id, JSON.stringify(s)]));
         const r = _saveSubjects(list);
+        const dirty = getDirty();
+        list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
+        setDirty(dirty);
         pushSubjects(list.slice());
         return r;
     };
@@ -742,7 +856,11 @@
     };
     const _saveAttendance = DB.saveAttendance.bind(DB);
     DB.saveAttendance = function (list) {
+        const prev = new Map(DB.getAttendance().map(r => [r.id, JSON.stringify(r)]));
         const r = _saveAttendance(list);
+        const dirty = getDirtyAtt();
+        list.forEach(x => { if (prev.get(x.id) !== JSON.stringify(x)) dirty.add(x.id); });
+        setDirtyAtt(dirty);
         pushAttendance(list.slice());
         return r;
     };
@@ -762,6 +880,13 @@
     DB.saveSyllabusCourses = function (list) {
         const r = _saveSyllabusCourses(list);
         pushSyllabusCourses(list.slice());
+        return r;
+    };
+    // AJ-08: intercept cancelled occurrences saves so they propagate to Supabase
+    const _saveCancelledOccurrences = DB.saveCancelledOccurrences.bind(DB);
+    DB.saveCancelledOccurrences = function (list) {
+        const r = _saveCancelledOccurrences(list);
+        pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []);
         return r;
     };
 
@@ -806,8 +931,11 @@
             supabase.from('grades').delete().eq('user_id', userId),
             supabase.from('gwa_calculator').delete().eq('user_id', userId),
             supabase.from('syllabus_courses').delete().eq('user_id', userId),
+            // AJ-08: wipe cancelled occurrences blob
+            supabase.from('cancelled_occurrences').delete().eq('user_id', userId),
         ]);
         Object.keys(last).forEach(k => last[k] = new Map());
+        _lastCancelledJson = '[]';
         try {
             localStorage.removeItem(MAP_KEY);
             localStorage.removeItem(SERVER_SEM_KEY);
@@ -840,6 +968,8 @@
         pushGrades(DB.getGrades());
         pushGwaCalc(DB.getGwaCalcRows());
         pushSyllabusCourses(DB.getSyllabusCourses());
+        // AJ-08: also sync cancelled occurrences on import
+        pushCancelledOccurrences(DB.getCancelledOccurrences());
         return r;
     };
 })();

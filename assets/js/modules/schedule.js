@@ -41,17 +41,13 @@ const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 /* ── Cancellation helpers ── */
 
+/* AJ-08: Route through DB so cloud-sync.js can intercept saves/hydrate. */
 function getCancelledOccurrences() {
-    try {
-        return JSON.parse(localStorage.getItem('sp_cancelled_occurrences') || '[]');
-    }
-    catch (e) {
-        return [];
-    }
+    return DB.getCancelledOccurrences();
 }
 
 function saveCancelledOccurrences(arr) {
-    localStorage.setItem('sp_cancelled_occurrences', JSON.stringify(arr));
+    DB.saveCancelledOccurrences(arr);
 }
 
 function isOccurrenceCancelled(subjectId, dateStr) {

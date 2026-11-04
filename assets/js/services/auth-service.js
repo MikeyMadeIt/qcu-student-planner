@@ -88,7 +88,7 @@ export const AuthService = {
 
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('role, account_status, full_name, rejection_reason')
+                .select('role, account_status, full_name, rejection_reason, course, year_level, school')
                 .eq('id', data.user.id)
                 .maybeSingle();
 
@@ -97,12 +97,18 @@ export const AuthService = {
                 return fail('We could not load your account. Please try again or contact an administrator.', 'PROFILE_ERROR');
             }
 
+            /* A pending profile is considered incomplete when any of the academic-detail
+               fields that the registration form collects (and Google never supplies) are
+               still missing -- matching the same logic used in auth-routing.js. */
+            const profileIncomplete = !profile.course || !profile.year_level || !profile.school;
+
             return ok({
                 userId: data.user.id,
                 role: profile.role,
                 accountStatus: profile.account_status,
                 fullName: profile.full_name,
                 rejectionReason: profile.rejection_reason,
+                needsProfileDetails: profile.account_status === 'pending' && profileIncomplete,
             });
         } catch (error) {
             return fail(readableAuthError(error), 'AUTH_ERROR');
