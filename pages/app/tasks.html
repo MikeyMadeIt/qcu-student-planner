@@ -29,7 +29,7 @@
     </div>
 
     <div class="tk-main-body">
-      <!-- STATS ROW -->
+      <!-- STATS ROW --> 
       <div class="tk-stats-row fade-in" id="tkStatsRow">
         <div class="tk-stat-card glass" onclick="ShortcutFilter('all')">
           <div class="tk-stat-icon tk-stat-icon-total"><i class="bi bi-list-check"></i></div>
@@ -56,12 +56,12 @@
           <div class="tk-stat-icon tk-stat-icon-overdue"><i class="bi bi-exclamation-triangle"></i></div>
           <div class="tk-stat-text">
             <div class="tk-stat-num tk-stat-overdue" id="statOverdue">0</div>
-            <div class="tk-stat-lbl">Overdue</div>
+            <div class="tk-stat-lbl">Overdue</div> 
           </div>
         </div>
       </div>
 
-
+      
       <div class="tk-control-and-task">
         <!-- CONTROLS -->
         <div class="tk-controls fade-in">
@@ -108,7 +108,6 @@
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
-<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -117,7 +116,7 @@
 <script>
   renderShell('tasks');
   applyTheme();
-  DB.whenCloudReady(initTasks);
+  initTasks();
 </script>
 </body>
 </html>
