@@ -86,7 +86,6 @@ export function renderAccountDetail(account) {
         <dt>Campus</dt><dd>${escHtml(account.school || '—')}</dd>
         <dt>Program</dt><dd>${escHtml(account.course || '—')}</dd>
         <dt>Year level</dt><dd>${escHtml(account.year_level || '—')}</dd>
-        <dt>Section</dt><dd>${escHtml(account.section || '—')}</dd>
         <dt>Registration date</dt><dd>${formatDateTime(account.created_at)}</dd>
         <dt>Last reviewed</dt><dd>${formatDateTime(account.reviewed_at)}</dd>
         <dt>Last decision reason</dt><dd>${escHtml(account.rejection_reason || '—')}</dd>`;
