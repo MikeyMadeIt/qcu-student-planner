@@ -61,7 +61,7 @@ const PAGE_SECTIONS = {
     grades: 'Academics',
     attendance: 'Academics',
     notes: 'Academics',
-    curriculum: 'University',
+    curriculum: 'Academics',
     'ai-quiz-maker': 'AI Tools',
     'ai-flashcard-maker': 'AI Tools',
     'ai-study-assistant': 'AI Tools',
