@@ -109,7 +109,7 @@ export const AuthService = {
         }
     },
 
-    async signUp({ fullName, email, password, program, campus, yearLevel }) {
+    async signUp({ fullName, email, password, program, campus, yearLevel, section }) {
         try {
             const supabase = getSupabase();
 
@@ -127,6 +127,7 @@ export const AuthService = {
                         full_name: fullName || null,
                         course: program || null,
                         year_level: yearLevel || null,
+                        section: section || null,
                         school: campus || null,
                     },
                 },
@@ -192,9 +193,9 @@ export const AuthService = {
     },
 
     /* Fills in the academic details a Google sign-in never provides (program, campus, year
-       level). Only ever touches the caller's own row, and only while still pending --
+       level, section). Only ever touches the caller's own row, and only while still pending --
        enforced server-side by submit_profile_details(). */
-    async completeProfile({ fullName, program, campus, yearLevel }) {
+    async completeProfile({ fullName, program, campus, yearLevel, section }) {
         try {
             const supabase = getSupabase();
             const { data: sessionData } = await supabase.auth.getSession();
@@ -205,6 +206,7 @@ export const AuthService = {
                 p_full_name: fullName || null,
                 p_course: program || null,
                 p_year_level: yearLevel || null,
+                p_section: section || null,
                 p_school: campus || null,
             });
 
@@ -296,13 +298,6 @@ export const AuthService = {
         try {
             const supabase = getSupabase();
             await supabase.auth.signOut();
-            // Security: clear this device's local cache of the signed-out student's
-            // planner data so a different student signing in on the same browser
-            // never sees stale subjects/tasks/notes/etc. in the moment before (or if)
-            // a fresh cloud sync overwrites them. See storage.js clearPrivateCacheOnSignOut.
-            if (typeof DB !== 'undefined' && typeof DB.clearPrivateCacheOnSignOut === 'function') {
-                DB.clearPrivateCacheOnSignOut();
-            }
             return ok({});
         } catch (error) {
             return fail(readableAuthError(error), 'AUTH_ERROR');
