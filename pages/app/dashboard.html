@@ -19,7 +19,7 @@
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
 
-  <main class="main-content dashboard-main">
+  <main class="main-content">
     <div class="topbar dash-topbar">
       <div>
         <h1 class="page-title" id="greetText">Dashboard</h1>
@@ -83,67 +83,94 @@
       </a>
     </div>
 
-    <div class="dash-workspace">
-      <!-- TODAY'S SCHEDULE + UPCOMING TASKS -->
-      <div class="dash-two-col dash-panel-row dash-card-anim">
-        <div class="dash-card-anim">
-          <div class="glass card-pad h-100 dash-panel">
-            <div class="card-header-row">
-              <div class="dash-section-title"><i class="bi bi-calendar2-day"></i>Today's Schedule</div>
-              <a href="schedule.html" class="view-all-link">Schedule →</a>
-            </div>
-            <div id="dashTodaySchedule" class="dash-panel-body"></div>
+    <!-- TODAY'S SCHEDULE + UPCOMING TASKS -->
+    <div class="dash-two-col dash-section dash-card-anim">
+      <div class="dash-card-anim">
+        <div class="glass card-pad h-100 dash-panel">
+          <div class="card-header-row">
+            <div class="dash-section-title"><i class="bi bi-calendar2-day"></i>Today's Schedule</div>
+            <a href="schedule.html" class="view-all-link">Schedule →</a>
           </div>
-        </div>
-        <div class="dash-card-anim">
-          <div class="glass card-pad h-100 dash-panel">
-            <div class="card-header-row">
-              <div class="dash-section-title"><i class="bi bi-alarm"></i>Upcoming Tasks</div>
-              <a href="tasks.html" class="view-all-link">View All →</a>
-            </div>
-            <div id="dashUpcomingTasks" class="dash-panel-body"></div>
-          </div>
+          <div id="dashTodaySchedule"></div>
         </div>
       </div>
-
-      <!-- ATTENDANCE + GRADE PERFORMANCE -->
-      <div class="dash-two-col dash-panel-row dash-card-anim">
-        <div class="dash-card-anim">
-          <div class="glass card-pad h-100 dash-panel">
-            <div class="card-header-row">
-              <div class="dash-section-title"><i class="bi bi-pie-chart-fill"></i>Attendance</div>
-              <a href="attendance.html" class="view-all-link">Attendance →</a>
-            </div>
-            <div class="donut-legend-wrap">
-              <div class="donut-wrap">
-                <svg width="130" height="130" viewBox="0 0 130 130">
-                  <circle cx="65" cy="65" r="50" fill="none" stroke="var(--surface-2)" stroke-width="13"/>
-                  <circle id="donutPresent" cx="65" cy="65" r="50" fill="none" stroke="#7c6cf6" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1)"/>
-                  <circle id="donutLate" cx="65" cy="65" r="50" fill="none" stroke="#B45309" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .15s"/>
-                  <circle id="donutExcused" cx="65" cy="65" r="50" fill="none" stroke="#34d399" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .25s"/>
-                  <circle id="donutAbsent" cx="65" cy="65" r="50" fill="none" stroke="#fb7185" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .35s"/>
-                  <text id="donutPct" x="65" y="60" text-anchor="middle" dominant-baseline="auto" class="donut-svg-pct">–</text>
-                  <text x="65" y="78" text-anchor="middle" dominant-baseline="auto" class="donut-svg-sub">ATTENDANCE</text>
-                </svg>
-              </div>
-              <div class="att-legend" id="donutLegend">
-                <div class="att-legend-row"><div class="att-dot" style="background:#7c6cf6"></div><span class="att-legend-label">Present</span><span class="att-legend-val" id="attPresent">–</span></div>
-                <div class="att-legend-row"><div class="att-dot" style="background:#B45309"></div><span class="att-legend-label">Late</span><span class="att-legend-val" id="attLate">–</span></div>
-                <div class="att-legend-row"><div class="att-dot" style="background:#34d399"></div><span class="att-legend-label">Excused</span><span class="att-legend-val" id="attExcused">–</span></div>
-                <div class="att-legend-row"><div class="att-dot" style="background:#fb7185"></div><span class="att-legend-label">Absent</span><span class="att-legend-val" id="attAbsent">–</span></div>
-              </div>
-            </div>
-            <div class="dash-attendance-note">No classes excluded from rate</div>
+      <div class="dash-card-anim">
+        <div class="glass card-pad h-100 dash-panel">
+          <div class="card-header-row">
+            <div class="dash-section-title"><i class="bi bi-alarm"></i>Upcoming Tasks</div>
+            <a href="tasks.html" class="view-all-link">View All →</a>
           </div>
+          <div id="dashUpcomingTasks"></div>
         </div>
-        <div class="dash-card-anim">
-          <div class="glass card-pad h-100 dash-panel">
-            <div class="card-header-row">
-              <div class="dash-section-title"><i class="bi bi-bar-chart-fill"></i>Grade Performance</div>
-              <a href="grades.html" class="view-all-link">View Grades →</a>
-            </div>
-            <div id="dashGradeChart" class="dash-panel-body"></div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE + GRADE PERFORMANCE -->
+    <div class="dash-two-col dash-section dash-card-anim">
+      <div class="dash-card-anim">
+        <div class="glass card-pad h-100 dash-panel">
+          <div class="card-header-row">
+            <div class="dash-section-title"><i class="bi bi-pie-chart-fill"></i>Attendance</div>
+            <a href="attendance.html" class="view-all-link">Attendance →</a>
           </div>
+          <div class="donut-legend-wrap">
+            <div class="donut-wrap">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                <circle cx="65" cy="65" r="50" fill="none" stroke="var(--surface-2)" stroke-width="13"/>
+                <circle id="donutPresent" cx="65" cy="65" r="50" fill="none" stroke="#7c6cf6" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1)"/>
+                <circle id="donutLate" cx="65" cy="65" r="50" fill="none" stroke="#B45309" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .15s"/>
+                <circle id="donutExcused" cx="65" cy="65" r="50" fill="none" stroke="#34d399" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .25s"/>
+                <circle id="donutAbsent" cx="65" cy="65" r="50" fill="none" stroke="#fb7185" stroke-width="13" stroke-linecap="butt" stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition:stroke-dashoffset 1.2s cubic-bezier(.22,.9,.35,1) .35s"/>
+                <text id="donutPct" x="65" y="60" text-anchor="middle" dominant-baseline="auto" class="donut-svg-pct">–</text>
+                <text x="65" y="78" text-anchor="middle" dominant-baseline="auto" class="donut-svg-sub">ATTENDANCE</text>
+              </svg>
+            </div>
+            <div class="att-legend" id="donutLegend">
+              <div class="att-legend-row"><div class="att-dot" style="background:#7c6cf6"></div><span class="att-legend-label">Present</span><span class="att-legend-val" id="attPresent">–</span></div>
+              <div class="att-legend-row"><div class="att-dot" style="background:#B45309"></div><span class="att-legend-label">Late</span><span class="att-legend-val" id="attLate">–</span></div>
+              <div class="att-legend-row"><div class="att-dot" style="background:#34d399"></div><span class="att-legend-label">Excused</span><span class="att-legend-val" id="attExcused">–</span></div>
+              <div class="att-legend-row"><div class="att-dot" style="background:#fb7185"></div><span class="att-legend-label">Absent</span><span class="att-legend-val" id="attAbsent">–</span></div>
+            </div>
+          </div>
+          <div class="dash-attendance-note">No Classes excluded from rate</div>
+        </div>
+      </div>
+      <div class="dash-card-anim">
+        <div class="glass card-pad h-100 dash-panel">
+          <div class="card-header-row">
+            <div class="dash-section-title"><i class="bi bi-bar-chart-fill"></i>Grade Performance</div>
+            <a href="grades.html" class="view-all-link">View Grades →</a>
+          </div>
+          <div id="dashGradeChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONDITIONAL ATTENTION BANNER -->
+    <div class="dash-context-banner dash-card-anim" id="dashContextBanner" hidden aria-live="polite">
+      <i class="bi bi-bell-fill" aria-hidden="true"></i>
+      <span class="dash-context-label">Needs attention</span>
+      <div id="dashContextSummary" class="ctx-summary-content"></div>
+    </div>
+
+    <!-- LOW-EMPHASIS SUPPORT STRIP -->
+    <div class="dash-bottom-strip dash-card-anim">
+      <div class="dash-strip-tip" id="dashTipWidget">
+        <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
+        <div class="tip-body">
+          <div class="tip-label">STUDENT TIP</div>
+          <div class="tip-text">Loading tip…</div>
+        </div>
+      </div>
+      <div class="dash-strip-weather" id="dashWeatherWidget">
+        <div class="weather-loading-state"><i class="bi bi-cloud" aria-hidden="true"></i><span>Loading weather…</span></div>
+      </div>
+      <div class="dash-strip-streak" id="dashStreakWidget">
+        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+        <span class="streak-num" id="streakNumVal">–</span>
+        <div class="streak-text-stack">
+          <div class="streak-label-row">DAY STREAK</div>
+          <div class="streak-sub-txt">Tasks completed</div>
         </div>
       </div>
     </div>
@@ -151,12 +178,12 @@
   </main>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -165,7 +192,7 @@
 <script>
   renderShell('dashboard');
   startClock(document.getElementById('clockText'), document.getElementById('dateText'), document.getElementById('greetText'));
-  initDashboard();
+  DB.whenCloudReady(initDashboard);
 </script>
 </body>
 </html>
