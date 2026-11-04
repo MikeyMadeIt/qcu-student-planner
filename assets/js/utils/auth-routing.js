@@ -28,5 +28,5 @@ export function resolveLandingRoute({ role, accountStatus, rejectionReason, need
    form collects (and Google never supplies) are missing. */
 export function needsProfileDetails(profile) {
     if (!profile) return false;
-    return !profile.course || !profile.year_level || !profile.school;
+    return !profile.course || !profile.year_level || !profile.section || !profile.school;
 }

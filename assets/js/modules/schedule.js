@@ -1459,8 +1459,7 @@ function saveSubject() {
     }
     else
         subjects.push({ id: DB.uid(), ...data });
-    if (!commitSubjects(subjects))
-        return;
+    DB.saveSubjects(subjects);
     bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
     Toast.show(id ? 'Subject updated' : 'Subject added');
     renderAllViews();
@@ -1484,8 +1483,7 @@ function duplicateSubject(id) {
     if (!s)
         return;
     subjects.push({ ...s, id: DB.uid(), code: s.code + ' (copy)' });
-    if (!commitSubjects(subjects))
-        return;
+    DB.saveSubjects(subjects);
     Toast.show('Subject duplicated');
     renderAllViews();
 }
@@ -1496,8 +1494,7 @@ function archiveSubject(id) {
     if (!s)
         return;
     s.archived = !s.archived;
-    if (!commitSubjects(subjects))
-        return;
+    DB.saveSubjects(subjects);
     Toast.show(s.archived ? 'Subject archived' : 'Subject restored');
     renderAllViews();
 }
