@@ -549,6 +549,39 @@ body.auth-page {
     animation: auth-spin 1s linear infinite;
 }
 
+/* ---------- Student email hint ---------- */
+/* A single quiet line under the button, not a boxed callout -- the label
+   reuses the same small mono/uppercase treatment as .auth-field label so it
+   reads as part of the form rather than a bolted-on notice. */
+
+.auth-hint {
+    margin: var(--space-4) 0 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--auth-text-faint);
+}
+
+.auth-hint-label {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--auth-text-soft);
+}
+
+.auth-inline-code {
+    padding: 0.05rem 0.35rem;
+    background: var(--auth-elevated);
+    border-radius: var(--radius-sm);
+    color: var(--auth-text-soft);
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    word-break: break-all;
+}
+
 /* ---------- Alerts and footer text ---------- */
 
 .auth-alert {
