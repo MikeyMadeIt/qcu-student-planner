@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    SETTINGS.JS — includes Academic Semester Management
    ============================================================ */
 
@@ -72,9 +72,9 @@ function renderSemesterManager() {
           </div>
           <div class="sem-item-actions">
             ${isActive ? '<span class="chip sem-active-chip"><i class="bi bi-check2" aria-hidden="true"></i> Active</span>' :
-                `<button class="btn btn-ghost btn-sm" onclick="switchActiveSemester('${sem.id}')" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
-            <button class="btn btn-ghost btn-sm" onclick="openEditSemesterModal('${sem.id}')" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger" onclick="confirmDeleteSemester('${sem.id}')" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
+                `<button class="btn btn-ghost btn-sm sem-switch-btn" data-id="${escHtml(sem.id)}" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
+            <button class="btn btn-ghost btn-sm sem-edit-btn" data-id="${escHtml(sem.id)}" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger sem-delete-btn" data-id="${escHtml(sem.id)}" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
           </div>
         </div>`;
         }).join('')}
@@ -84,6 +84,16 @@ function renderSemesterManager() {
     <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
   </div>`;
     wrap.innerHTML = html;
+    // MAJ-09: Event delegation — read id from data-id attribute (safe DOM property),
+    // never from an interpolated onclick string, so crafted sem IDs can't XSS.
+    wrap.addEventListener('click', function _semClick(e) {
+        const switchBtn = e.target.closest('.sem-switch-btn');
+        if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
+        const editBtn = e.target.closest('.sem-edit-btn');
+        if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
+        const deleteBtn = e.target.closest('.sem-delete-btn');
+        if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
+    }, { once: true }); // { once: true } auto-removes listener on next renderSemesterManager call
 }
 
 function switchActiveSemester(id) {
@@ -287,7 +297,9 @@ function exportData() {
     a.href = url;
     a.download = `student-planner-backup-${todayKey()}.json`;
     a.click();
-    URL.revokeObjectURL(url);
+    // MIN-05: Defer revokeObjectURL — calling it synchronously races the browser's download
+    // queue and can produce a 0-byte file on some browsers (compare copyGwaCardAsImage pattern).
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
     Toast.show('Data exported');
 }
 

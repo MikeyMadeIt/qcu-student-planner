@@ -41,17 +41,13 @@ const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 /* ── Cancellation helpers ── */
 
+/* AJ-08: Route through DB so cloud-sync.js can intercept saves/hydrate. */
 function getCancelledOccurrences() {
-    try {
-        return JSON.parse(localStorage.getItem('sp_cancelled_occurrences') || '[]');
-    }
-    catch (e) {
-        return [];
-    }
+    return DB.getCancelledOccurrences();
 }
 
 function saveCancelledOccurrences(arr) {
-    localStorage.setItem('sp_cancelled_occurrences', JSON.stringify(arr));
+    DB.saveCancelledOccurrences(arr);
 }
 
 function isOccurrenceCancelled(subjectId, dateStr) {
@@ -1459,8 +1455,11 @@ function saveSubject() {
     }
     else
         subjects.push({ id: DB.uid(), ...data });
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
     Toast.show(id ? 'Subject updated' : 'Subject added');
     renderAllViews();
@@ -1474,7 +1473,15 @@ function deleteSubject(id) {
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
         confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
-        onConfirm() { DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)); Toast.show('Subject deleted'); renderAllViews(); }
+        onConfirm() {
+            // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+            if (DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)) === false) {
+                Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+                return;
+            }
+            Toast.show('Subject deleted');
+            renderAllViews();
+        }
     });
 }
 
@@ -1484,8 +1491,11 @@ function duplicateSubject(id) {
     if (!s)
         return;
     subjects.push({ ...s, id: DB.uid(), code: s.code + ' (copy)' });
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     Toast.show('Subject duplicated');
     renderAllViews();
 }
@@ -1496,8 +1506,11 @@ function archiveSubject(id) {
     if (!s)
         return;
     s.archived = !s.archived;
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     Toast.show(s.archived ? 'Subject archived' : 'Subject restored');
     renderAllViews();
 }

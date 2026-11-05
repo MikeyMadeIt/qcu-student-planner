@@ -18,7 +18,8 @@ let tkView = 'list'; // 'list' | 'board'
 
 function initTasks() {
     renderTasks();
-    document.getElementById('tkSearch').addEventListener('input', debounce(renderTasks, 180));
+    const searchEl = document.getElementById('tkSearch');
+    if (searchEl) searchEl.addEventListener('input', debounce(renderTasks, 180));
     // Unified filter/sort drawer
     var drawerBtn = document.getElementById('filterSortBtn');
     if (drawerBtn) {

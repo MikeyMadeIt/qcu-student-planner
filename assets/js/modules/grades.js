@@ -348,6 +348,7 @@ function renderGradeCards() {
           <div class="grade-card-center">
             <div class="grade-card-pct">${pct === null ? '--' : pct.toFixed(1) + '%'}</div>
             <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}${equivBadge}</div>
+            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle-fill me-1"></i>${totalWeight}%</div>` : ''}
           </div>
           <div class="grade-card-actions">
             <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil"></i></button>
@@ -459,9 +460,9 @@ function renderGradeModalBody() {
     <button type="button" class="btn btn-ghost btn-sm mt-3 w-100" onclick="addComponent()">
       <i class="bi bi-plus-lg me-1"></i>Add Component
     </button>
-    ${weightWarn ? `<div class="mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2))">
-      <i class="bi bi-exclamation-triangle me-1"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.
-    </div>` : ''}
+    <div id="modalWeightWarn" class="mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2));${weightWarn ? '' : 'display:none'}">
+      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : ''}
+    </div>
     <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--border)">
       <div class="text-faint" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Computed Final Grade</div>
       <div class="stat-num" style="font-size:2rem;color:${isPassing === null ? 'var(--text)' : isPassing ? '#34d399' : '#fb7185'}" id="modalFinalPct">${finalPct === null ? '--' : finalPct.toFixed(2) + '%'}</div>
@@ -607,6 +608,15 @@ function removeComponent(ci) {
 function refreshGradePreview() {
     const finalPct = computeSubjectFinalPct(gradeDraft.components);
     const isPassing = finalPct !== null ? finalPct >= PASSING_PCT : null;
+    /* MAJ-04: keep the weight-warning banner in sync while the user edits. */
+    const totalWeight = sumWeights(gradeDraft.components);
+    const weightWarnEl = document.getElementById('modalWeightWarn');
+    if (weightWarnEl) {
+        const hasComponents = gradeDraft.components.length > 0;
+        const warn = hasComponents && totalWeight !== 100 && totalWeight !== 0;
+        weightWarnEl.style.display = warn ? '' : 'none';
+        if (warn) weightWarnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Weights total <strong>${totalWeight}%</strong> \u2014 should add up to 100%.`;
+    }
     const pctEl = document.getElementById('modalFinalPct');
     const gwaEl = document.getElementById('modalFinalGwa');
     const statusEl = document.getElementById('modalPassStatus');
@@ -649,8 +659,16 @@ function saveGradeComponents() {
     const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
     if (inst)
         inst.hide();
-    if (typeof Toast !== 'undefined')
-        Toast.show('Grading breakdown saved');
+    if (typeof Toast !== 'undefined') {
+        const savedWeight = sumWeights(cleaned);
+        if (cleaned.length && savedWeight !== 100) {
+            /* MAJ-04: warn when the saved weights don't sum to 100 so the user
+               knows the displayed grade is normalised, not the raw weighted sum. */
+            Toast.show(`Saved \u2014 note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
+        } else {
+            Toast.show('Grading breakdown saved');
+        }
+    }
     gradeDraft = null;
     gradeDraftSubjectId = null;
     renderGradesOverview();
@@ -975,12 +993,13 @@ function copyGwaCardAsImage() {
     // App label
     ctx.font = '700 11px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(124,108,246,0.8)';
-    ctx.letterSpacing = '0.08em';
+    // MAJ-07: ctx.letterSpacing is not in the Canvas 2D spec and is unsupported
+    // in Firefox; removed to avoid silent mis-renders or throws in older
+    // Chromium builds where the property setter is non-writable.
     ctx.fillText('STUDENT PLANNER', 28, 30);
     // Student name
     ctx.font = '600 18px system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.letterSpacing = '0';
     ctx.fillText(name, 28, 56);
     // Semester
     ctx.font = '400 12px system-ui, sans-serif';
@@ -996,7 +1015,6 @@ function copyGwaCardAsImage() {
     // GWA label
     ctx.font = '700 10px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.letterSpacing = '0.1em';
     ctx.fillText('CURRENT GWA', 28, 118);
     // GWA value
     ctx.font = '800 56px monospace';
@@ -1004,12 +1022,10 @@ function copyGwaCardAsImage() {
     gwaGrad.addColorStop(0, 'rgba(124,108,246,1)');
     gwaGrad.addColorStop(1, 'rgba(79,140,255,1)');
     ctx.fillStyle = gwaGrad;
-    ctx.letterSpacing = '0';
     ctx.fillText(gwa, 26, 176);
     // GWA sub label
     ctx.font = '400 13px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.letterSpacing = '0';
     ctx.fillText(gwaSub, 28, 200);
     // Date
     const dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
