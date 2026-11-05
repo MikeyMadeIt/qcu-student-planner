@@ -73,6 +73,9 @@
     window.CloudSync.waitForPendingSync = function (timeoutMs) {
         return waitForPendingPushes(timeoutMs != null ? timeoutMs : 8000);
     };
+    // Lets a page (e.g. Settings > Sync Status) show the student the last sync
+    // failure in plain language without needing a desktop browser's DevTools.
+    window.CloudSync.getLastSyncError = function () { return getLastSyncError(); };
 
     function loadMap() {
         const empty = { subjects: {}, tasks: {}, calendarEvents: {}, notes: {}, attendance: {}, grades: {}, syllabusCourses: {} };
@@ -98,7 +101,26 @@
         saveMap(m);
     }
 
-    function toast(msg, kind) {
+    // Students on mobile have no DevTools console to see why a save failed --
+    // the toast (see ui.js) was the only trace, and it auto-faded in 2.6s. Every
+    // sync failure is now also written here so it can be read back later (e.g.
+    // from Settings > Sync Status) instead of relying on having seen the toast
+    // in time. Successes clear it so a stale error doesn't linger forever.
+    const LAST_ERROR_KEY = 'sp_cloud_last_error';
+    function recordSyncError(area, message) {
+        try {
+            localStorage.setItem(LAST_ERROR_KEY, JSON.stringify({ area, message: String(message || 'Unknown error'), at: Date.now() }));
+        } catch (e) { /* ignore */ }
+    }
+    function clearSyncError() {
+        try { localStorage.removeItem(LAST_ERROR_KEY); } catch (e) { /* ignore */ }
+    }
+    function getLastSyncError() {
+        try { return JSON.parse(localStorage.getItem(LAST_ERROR_KEY)); } catch (e) { return null; }
+    }
+
+    function toast(msg, kind, area) {
+        if (kind === 'high' || kind === 'danger') recordSyncError(area || 'sync', msg);
         if (window.Toast && typeof window.Toast.show === 'function') {
             window.Toast.show(msg, kind || 'high', 'bi-cloud-slash');
         }
@@ -960,7 +982,9 @@
         setDirtyGrades(dirty);
         if (failure) {
             console.warn('Cloud sync (grades) failed', failure);
-            toast("Couldn't save that grade to the server. Please check your connection and try again.");
+            toast("Couldn't save that grade to the server: " + (failure.message || 'unknown error'), 'high', 'grades');
+        } else {
+            clearSyncError();
         }
     }
 
@@ -1005,7 +1029,9 @@
         setDirtySem(dirty);
         if (failure) {
             console.warn('Cloud sync (semesters) failed', failure);
-            toast("Couldn't save that semester to the server: " + (failure.message || 'unknown error'));
+            toast("Couldn't save that semester to the server: " + (failure.message || 'unknown error'), 'high', 'semesters');
+        } else {
+            clearSyncError();
         }
     }
 
