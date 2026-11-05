@@ -484,8 +484,24 @@ const DB = {
         // Extra keys written directly to localStorage by feature modules (not via DB_KEYS):
         //   sp_cancelled_occurrences -- schedule.js: per-student cancelled class occurrences
         //   sp_cloud_*              -- cloud-sync.js: sync state tied to the signed-in user
-        ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id',
-         'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
+        //
+        // MAJ-14: `sp_cloud_semester_map` and `sp_cloud_server_semester_id` used to be
+        // wiped here too. They hold no student content at all -- just internal
+        // bookkeeping (server-row-id -> local-semester-id, and the id of the one
+        // placeholder semester row) that cloud-sync.js's semFor()/getServerSemesterId()
+        // need to know which semester a subject/grade/attendance/calendar/syllabus row
+        // pulled from the server actually belongs to. Wiping it on logout meant that on
+        // the very next login, every one of those rows forgot which semester it came
+        // from and silently fell back to whatever semester loaded first -- this is what
+        // made a grade breakdown or an added semester look like it had "disappeared"
+        // after logging back in, even though the row itself was still on the server the
+        // whole time. Since it contains only UUID->UUID associations (never grade
+        // content, subject names, etc.), keeping it across logout on the same device is
+        // not a student-data exposure, so it's left alone here. (A different student
+        // signing in afterwards still can't be affected: the hydrate() cross-user guard
+        // in cloud-sync.js detects that case independently and clears everything,
+        // including this map, before rendering that student's pages.)
+        ['sp_program_code', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
          'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance',
          'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
             .forEach(k => localStorage.removeItem(k));
