@@ -42,6 +42,38 @@
 (function () {
     const MAP_KEY = 'sp_cloud_semester_map';
 
+    /* MAJ-12: every push*() below is fired-and-forgotten by the DB.saveX wrappers
+       (so the UI never blocks on the network) -- but that means signOut() could
+       previously kill the Supabase session and wipe the local cache (see
+       clearPrivateCacheOnSignOut) WHILE a save was still in flight. The save's
+       getUserId() lookup would then come back empty (no session left), the push
+       would silently no-op, and the edit the student just made -- most visibly a
+       grade breakdown or a newly added semester -- would be gone for good on the
+       next login, even though it looked saved right up until logout.
+       trackPush() records every in-flight push promise; waitForPendingPushes()
+       (exposed as window.CloudSync.waitForPendingSync) lets signOut() wait for
+       them to actually land before it tears down the session/cache. A timeout
+       keeps a stuck network call from blocking logout forever. */
+    let _pending = [];
+    function trackPush(p) {
+        const entry = p.catch(() => {});
+        _pending.push(entry);
+        entry.finally(() => { _pending = _pending.filter(x => x !== entry); });
+        return p;
+    }
+    function waitForPendingPushes(timeoutMs) {
+        const all = Promise.all(_pending.slice());
+        if (!timeoutMs) return all;
+        return Promise.race([
+            all,
+            new Promise(resolve => setTimeout(resolve, timeoutMs)),
+        ]);
+    }
+    window.CloudSync = window.CloudSync || {};
+    window.CloudSync.waitForPendingSync = function (timeoutMs) {
+        return waitForPendingPushes(timeoutMs != null ? timeoutMs : 8000);
+    };
+
     function loadMap() {
         const empty = { subjects: {}, tasks: {}, calendarEvents: {}, notes: {}, attendance: {}, grades: {}, syllabusCourses: {} };
         try { return Object.assign(empty, JSON.parse(localStorage.getItem(MAP_KEY)) || {}); }
@@ -973,25 +1005,25 @@
         const dirty = getDirty();
         list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
         setDirty(dirty);
-        pushSubjects(list.slice());
+        trackPush(pushSubjects(list.slice()));
         return r;
     };
     const _saveTasks = DB.saveTasks.bind(DB);
     DB.saveTasks = function (list) {
         const r = _saveTasks(list);
-        pushTasks(list.slice());
+        trackPush(pushTasks(list.slice()));
         return r;
     };
     const _saveCalendarEvents = DB.saveCalendarEvents.bind(DB);
     DB.saveCalendarEvents = function (list) {
         const r = _saveCalendarEvents(list);
-        pushCalendarEvents(list.slice());
+        trackPush(pushCalendarEvents(list.slice()));
         return r;
     };
     const _saveNotes = DB.saveNotes.bind(DB);
     DB.saveNotes = function (list) {
         const r = _saveNotes(list);
-        pushNotes(list.slice());
+        trackPush(pushNotes(list.slice()));
         return r;
     };
     const _saveAttendance = DB.saveAttendance.bind(DB);
@@ -1001,7 +1033,7 @@
         const dirty = getDirtyAtt();
         list.forEach(x => { if (prev.get(x.id) !== JSON.stringify(x)) dirty.add(x.id); });
         setDirtyAtt(dirty);
-        pushAttendance(list.slice());
+        trackPush(pushAttendance(list.slice()));
         return r;
     };
     const _saveGrades = DB.saveGrades.bind(DB);
@@ -1014,13 +1046,13 @@
         const dirty = getDirtyGrades();
         list.forEach(g => { if (prev.get(g.id) !== JSON.stringify(g)) dirty.add(g.id); });
         setDirtyGrades(dirty);
-        pushGrades(list.slice());
+        trackPush(pushGrades(list.slice()));
         return r;
     };
     const _saveGwaCalcRows = DB.saveGwaCalcRows.bind(DB);
     DB.saveGwaCalcRows = function (list) {
         const r = _saveGwaCalcRows(list);
-        pushGwaCalc(list.slice());
+        trackPush(pushGwaCalc(list.slice()));
         return r;
     };
     const _saveSemesters = DB.saveSemesters.bind(DB);
@@ -1030,20 +1062,20 @@
         const dirty = getDirtySem();
         list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
         setDirtySem(dirty);
-        pushSemesters(list.slice());
+        trackPush(pushSemesters(list.slice()));
         return r;
     };
     const _saveSyllabusCourses = DB.saveSyllabusCourses.bind(DB);
     DB.saveSyllabusCourses = function (list) {
         const r = _saveSyllabusCourses(list);
-        pushSyllabusCourses(list.slice());
+        trackPush(pushSyllabusCourses(list.slice()));
         return r;
     };
     // AJ-08: intercept cancelled occurrences saves so they propagate to Supabase
     const _saveCancelledOccurrences = DB.saveCancelledOccurrences.bind(DB);
     DB.saveCancelledOccurrences = function (list) {
         const r = _saveCancelledOccurrences(list);
-        pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []);
+        trackPush(pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []));
         return r;
     };
 
