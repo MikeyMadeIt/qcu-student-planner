@@ -29,9 +29,18 @@ const EXPORT_SCHEMA_VERSION = 1;
    Supabase (uuid primary keys) -- see assets/js/data/cloud-sync.js. Falls back to the
    old short id only if the browser has no crypto.randomUUID (very old browsers), in
    which case cloud sync for that one record is skipped rather than sent with a bad id. */
-const uid = () => (window.crypto && typeof window.crypto.randomUUID === 'function')
-    ? window.crypto.randomUUID()
-    : Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const uid = () => {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function')
+        return window.crypto.randomUUID();
+    // Fallback: still a valid RFC 4122 v4 UUID (insecure contexts / old browsers)
+    const b = new Uint8Array(16);
+    if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(b);
+    else for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const h = Array.from(b, x => x.toString(16).padStart(2, '0'));
+    return `${h.slice(0, 4).join('')}-${h.slice(4, 6).join('')}-${h.slice(6, 8).join('')}-${h.slice(8, 10).join('')}-${h.slice(10).join('')}`;
+};
 
 function readKey(key, fallback) {
     try {
@@ -368,6 +377,15 @@ const DB = {
     saveGrades(list) { return writeKey(DB_KEYS.grades, list); },
     getGwaCalcRows() { return readKey(DB_KEYS.gwaCalc, []); },
     saveGwaCalcRows(list) { return writeKey(DB_KEYS.gwaCalc, list); },
+    // AJ-08: cancelled class occurrences — routed through DB so cloud-sync.js
+    // can intercept saveCancelledOccurrences and push/hydrate from Supabase.
+    getCancelledOccurrences() {
+        try { return JSON.parse(localStorage.getItem('sp_cancelled_occurrences') || '[]'); }
+        catch (e) { return []; }
+    },
+    saveCancelledOccurrences(list) {
+        try { localStorage.setItem('sp_cancelled_occurrences', JSON.stringify(list)); } catch (e) { /* ignore */ }
+    },
     getUniversityEvents() { return readKey(DB_KEYS.universityEvents, []); },
     saveUniversityEvents(list) { return writeKey(DB_KEYS.universityEvents, list); },
     getCalendarEvents() { return readKey(DB_KEYS.calendarEvents, []); },
@@ -463,7 +481,29 @@ const DB = {
             if (k === 'settings') return; // device-level UI preference, not student data
             localStorage.removeItem(DB_KEYS[k]);
         });
-        ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map']
+        // Extra keys written directly to localStorage by feature modules (not via DB_KEYS):
+        //   sp_cancelled_occurrences -- schedule.js: per-student cancelled class occurrences
+        //   sp_cloud_*              -- cloud-sync.js: sync state tied to the signed-in user
+        //
+        // MAJ-14: `sp_cloud_semester_map` and `sp_cloud_server_semester_id` used to be
+        // wiped here too. They hold no student content at all -- just internal
+        // bookkeeping (server-row-id -> local-semester-id, and the id of the one
+        // placeholder semester row) that cloud-sync.js's semFor()/getServerSemesterId()
+        // need to know which semester a subject/grade/attendance/calendar/syllabus row
+        // pulled from the server actually belongs to. Wiping it on logout meant that on
+        // the very next login, every one of those rows forgot which semester it came
+        // from and silently fell back to whatever semester loaded first -- this is what
+        // made a grade breakdown or an added semester look like it had "disappeared"
+        // after logging back in, even though the row itself was still on the server the
+        // whole time. Since it contains only UUID->UUID associations (never grade
+        // content, subject names, etc.), keeping it across logout on the same device is
+        // not a student-data exposure, so it's left alone here. (A different student
+        // signing in afterwards still can't be affected: the hydrate() cross-user guard
+        // in cloud-sync.js detects that case independently and clears everything,
+        // including this map, before rendering that student's pages.)
+        ['sp_program_code', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
+         'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance',
+         'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
             .forEach(k => localStorage.removeItem(k));
     },
     validateImport,

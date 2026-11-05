@@ -408,13 +408,13 @@ function renderAdminShellBar(activeKey, admin) {
             <div class="profile-menu" id="profileMenu">
                 <button type="button" class="profile-trigger profile-trigger-circle" id="profileTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="profilePanel" aria-label="Account menu">
-                    <span class="profile-avatar js-admin-avatar" aria-hidden="true" id="shellAdminAvatar">${initial}</span>
+                    <span class="profile-avatar js-admin-avatar js-profile-avatar" aria-hidden="true" id="shellAdminAvatar">${initial}</span>
                 </button>
                 <div class="profile-panel" id="profilePanel" role="menu" aria-label="Account menu" hidden>
                     <div class="profile-panel-head">
-                        <span class="profile-avatar profile-avatar-lg js-admin-avatar" aria-hidden="true">${initial}</span>
-                        <div>
-                            <div class="profile-panel-name js-admin-fullname">${escHtml(name)}</div>
+                        <span class="profile-avatar profile-avatar-lg js-admin-avatar js-profile-avatar" aria-hidden="true">${initial}</span>
+                        <div class="profile-panel-id">
+                            <div class="profile-panel-name js-admin-fullname" title="${escHtml(name)}">${escHtml(name)}</div>
                             <div class="profile-panel-sub js-admin-email" id="shellAdminEmail">&nbsp;</div>
                         </div>
                     </div>
@@ -478,17 +478,17 @@ function renderShellBar(activeKey) {
             <div class="profile-menu" id="profileMenu">
                 <button type="button" class="profile-trigger profile-trigger-circle" id="profileTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="profilePanel" aria-label="Account menu">
-                    <span class="profile-avatar" aria-hidden="true">${initial}</span>
+                    <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="topbarProfileAvatarTrigger">${initial}</span>
                 </button>
                 <div class="profile-panel" id="profilePanel" role="menu" aria-label="Account menu" hidden>
                     <div class="profile-panel-head">
-                        <span class="profile-avatar profile-avatar-lg" aria-hidden="true" id="topbarProfileAvatar">${initial}</span>
-                        <div>
-                            <div class="profile-panel-name" id="topbarProfileName">${escHtml(name)}</div>
+                        <span class="profile-avatar profile-avatar-lg js-profile-avatar" aria-hidden="true" id="topbarProfileAvatar">${initial}</span>
+                        <div class="profile-panel-id">
+                            <div class="profile-panel-name" id="topbarProfileName" title="${escHtml(name)}">${escHtml(name)}</div>
                             <div class="profile-panel-sub" id="topbarUserEmail">Signed in on this device</div>
                         </div>
                     </div>
-                    ${renderShellSemesterCardHtml() ? `<div class="profile-panel-section-semester">${renderShellSemesterCardHtml()}</div>` : ''}
+                    <div class="profile-panel-section-semester" id="shellSemesterCardWrap">${renderShellSemesterCardHtml()}</div>
                     <div class="profile-panel-section">
                         <div class="profile-panel-label">Theme</div>
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
@@ -515,6 +515,19 @@ function renderShellBar(activeKey) {
     });
     window.addEventListener('planner:notifications-changed', refreshNotificationPreview);
     window.addEventListener('planner:tasks-changed', refreshNotificationPreview);
+    // The shell bar (and this semester card inside the avatar popup) is built
+    // synchronously on page load, straight from whatever is in localStorage at
+    // that instant -- but right after login that cache is still empty/stale,
+    // because cloud-sync.js's hydrate() (which pulls the real semester list from
+    // Supabase) finishes afterwards, asynchronously. Without this listener the
+    // card just silently stayed blank/outdated until the student manually
+    // refreshed the page, even though the correct data had already arrived.
+    window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
+}
+
+function refreshShellSemesterCard() {
+    const wrap = document.getElementById('shellSemesterCardWrap');
+    if (wrap) wrap.innerHTML = renderShellSemesterCardHtml();
 }
 
 function refreshNotificationPreview() {
@@ -738,7 +751,7 @@ function renderShell(activeKey, admin) {
                does not remove any functionality, it just stops duplicating nav real estate on
                desktop. See tasks.html and settings.html. */
             sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
-      <span class="profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
+      <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
         <div class="sidebar-profile-name" id="sidebarProfileName">${escHtml(name)}</div>
         <div class="sidebar-profile-sub" id="sidebarUserName">Signed in on this device</div>
@@ -875,6 +888,28 @@ async function refreshAdminNavBadges() {
    same AuthService/Supabase client every other page already uses. Never fabricated: if the
    session/profile call fails (e.g. offline, or this is a static preview with no backend), the
    device-local fallback already in the DOM is simply left in place. */
+/* Fills a .profile-avatar (or .profile-avatar-lg) element with the user's
+   Google account photo when one is available, replacing the single-letter
+   fallback with a real <img>. Falls back to the initial — never left blank —
+   if there is no photo URL, or if the image itself fails to load (a revoked/
+   expired Google photo URL, an offline moment, etc.). */
+function setAvatarPhoto(el, photoUrl, initial) {
+    if (!el) return;
+    if (!photoUrl) {
+        el.textContent = initial;
+        return;
+    }
+    const img = document.createElement('img');
+    img.src = photoUrl;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.onerror = () => {
+        el.textContent = initial;
+    };
+    el.replaceChildren(img);
+}
+
 async function hydrateProfileIdentity() {
     try {
         const [{ AuthService }, { getSupabase }] = await Promise.all([
@@ -883,10 +918,16 @@ async function hydrateProfileIdentity() {
         ]);
         const supabase = getSupabase();
         const { data: sessionData } = await supabase.auth.getSession();
-        const email = sessionData && sessionData.session && sessionData.session.user
-            ? sessionData.session.user.email
-            : '';
+        const user = sessionData && sessionData.session && sessionData.session.user
+            ? sessionData.session.user
+            : null;
+        const email = user ? user.email : '';
         if (!email) return;
+
+        /* Google OAuth profile data Supabase attaches to the session — no extra
+           request needed. Different providers/versions use either key. */
+        const metadata = user.user_metadata || {};
+        const photoUrl = metadata.avatar_url || metadata.picture || '';
 
         let fullName = '';
         const profileResult = await AuthService.getCurrentProfile();
@@ -897,13 +938,13 @@ async function hydrateProfileIdentity() {
             el.textContent = email;
             el.title = email;
         });
+
+        const initial = escHtml(((fullName || email).charAt(0) || 'S').toUpperCase());
         if (fullName) {
-            const initial = escHtml(fullName.charAt(0).toUpperCase() || 'S');
-            document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; });
-            document.querySelectorAll('#sidebarProfileAvatar, #drawerProfileAvatar, #topbarProfileAvatar').forEach(el => { el.textContent = initial; });
-            document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; });
-            document.querySelectorAll('.js-admin-avatar').forEach(el => { el.textContent = initial; });
+            document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; el.title = fullName; });
+            document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; el.title = fullName; });
         }
+        document.querySelectorAll('.js-profile-avatar').forEach(el => setAvatarPhoto(el, photoUrl, initial));
     } catch (error) {
         /* No live Supabase session available (offline, static preview, etc.) — keep the
            device-local fallback already rendered. */
@@ -955,7 +996,7 @@ function ensureNavDrawer(activeKey) {
                 <button type="button" class="drawer-link drawer-link-danger js-admin-logout" id="admDrawerLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
             </div>` : `
             <div class="drawer-profile" id="drawerProfile">
-                <span class="profile-avatar" aria-hidden="true" id="drawerProfileAvatar">${drawerInitial}</span>
+                <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="drawerProfileAvatar">${drawerInitial}</span>
                 <div class="drawer-profile-text">
                     <div class="drawer-profile-name" id="drawerProfileName">${escHtml(drawerName)}</div>
                     <div class="drawer-profile-sub" id="drawerUserEmail">Signed in on this device</div>

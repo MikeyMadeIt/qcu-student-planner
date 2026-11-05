@@ -394,6 +394,16 @@
     object-fit: cover;
 }
 
+/* object-fit on .profile-avatar itself only affects the element if it IS an
+   image; when a Google account photo is injected as a child <img> (see
+   setAvatarPhoto in layout.js) it needs its own sizing to fill the circle. */
+.profile-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .profile-avatar-lg {
     width: 2.5rem;
     height: 2.5rem;
@@ -433,9 +443,15 @@
     z-index: var(--layer-drawer-popover);
 }
 
-/* Current-semester info card (header avatar popup), above the theme selector. */
+/* Current-semester info card (header avatar popup), above the theme selector.
+   The wrapper is now always rendered (see layout.js refreshShellSemesterCard)
+   so it can be refreshed after cloud sync completes -- :empty keeps it from
+   taking up visible padding when there's no active semester to show yet. */
 .profile-panel-section-semester {
     padding: var(--space-2) 0;
+}
+.profile-panel-section-semester:empty {
+    padding: 0;
 }
 
 .shell-semester-card {
@@ -524,16 +540,37 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3);
+    /* Without this the name/email column (a flex item) refuses to shrink
+       below its text's intrinsic width, so a long value pushes the popup
+       wider instead of truncating. */
+    min-width: 0;
+}
+
+/* Name + email column: fixed to the space left by the avatar, never grows
+   the popup. Each line truncates independently so a long name doesn't
+   shrink the email's own space, and vice versa. */
+.profile-panel-id {
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 auto;
 }
 
 .profile-panel-name {
+    max-width: 100%;
+    overflow: hidden;
     font-weight: 600;
     font-size: 0.9rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .profile-panel-sub {
+    max-width: 100%;
+    overflow: hidden;
     font-size: 0.75rem;
     color: var(--text-faint);
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .profile-panel-section {

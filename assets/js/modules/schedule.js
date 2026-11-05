@@ -41,17 +41,13 @@ const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 /* ── Cancellation helpers ── */
 
+/* AJ-08: Route through DB so cloud-sync.js can intercept saves/hydrate. */
 function getCancelledOccurrences() {
-    try {
-        return JSON.parse(localStorage.getItem('sp_cancelled_occurrences') || '[]');
-    }
-    catch (e) {
-        return [];
-    }
+    return DB.getCancelledOccurrences();
 }
 
 function saveCancelledOccurrences(arr) {
-    localStorage.setItem('sp_cancelled_occurrences', JSON.stringify(arr));
+    DB.saveCancelledOccurrences(arr);
 }
 
 function isOccurrenceCancelled(subjectId, dateStr) {
@@ -590,7 +586,7 @@ function ensureQuickAttModal() {
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
           <h5 class="modal-title" id="quickAttModalLabel"><i class="bi bi-person-check me-2" aria-hidden="true"></i>Log Attendance</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="quickAttModalBody"></div>
       </div>
@@ -698,7 +694,7 @@ function ensureCancelModal() {
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
           <h5 class="modal-title" id="cancelModalLabel"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i>Cancel Class</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="cancelModalBody"></div>
       </div>
@@ -1018,7 +1014,7 @@ function showTimetablePopup(subjectId, dateStr) {
         ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
         ${cancelled ? '<span class="sch-cancelled-chip"><i class="bi bi-ban" aria-hidden="true"></i> CANCELLED</span>' : ''}
       </div>
-      <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div style="padding:0 1rem 1rem">
       <div class="sch-tt-popup-name">${esc(s.desc)}</div>
@@ -1213,7 +1209,7 @@ function showSubjectDetail(id) {
         <h5 class="modal-title mb-0">${esc(s.code)}</h5>
         ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
       </div>
-      <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <p class="text-soft mb-3" style="font-size:.88rem">${esc(s.desc)}</p>
     <div class="d-flex flex-column gap-2 mb-3" style="font-size:.83rem">
@@ -1459,8 +1455,11 @@ function saveSubject() {
     }
     else
         subjects.push({ id: DB.uid(), ...data });
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
     Toast.show(id ? 'Subject updated' : 'Subject added');
     renderAllViews();
@@ -1474,7 +1473,15 @@ function deleteSubject(id) {
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
         confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
-        onConfirm() { DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)); Toast.show('Subject deleted'); renderAllViews(); }
+        onConfirm() {
+            // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+            if (DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)) === false) {
+                Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+                return;
+            }
+            Toast.show('Subject deleted');
+            renderAllViews();
+        }
     });
 }
 
@@ -1484,8 +1491,11 @@ function duplicateSubject(id) {
     if (!s)
         return;
     subjects.push({ ...s, id: DB.uid(), code: s.code + ' (copy)' });
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     Toast.show('Subject duplicated');
     renderAllViews();
 }
@@ -1496,8 +1506,11 @@ function archiveSubject(id) {
     if (!s)
         return;
     s.archived = !s.archived;
-    if (!commitSubjects(subjects))
+    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
+    if (DB.saveSubjects(subjects) === false) {
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
+    }
     Toast.show(s.archived ? 'Subject archived' : 'Subject restored');
     renderAllViews();
 }

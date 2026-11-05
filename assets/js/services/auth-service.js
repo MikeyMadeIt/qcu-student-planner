@@ -88,7 +88,7 @@ export const AuthService = {
 
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('role, account_status, full_name, rejection_reason')
+                .select('role, account_status, full_name, rejection_reason, course, year_level, school')
                 .eq('id', data.user.id)
                 .maybeSingle();
 
@@ -97,12 +97,18 @@ export const AuthService = {
                 return fail('We could not load your account. Please try again or contact an administrator.', 'PROFILE_ERROR');
             }
 
+            /* A pending profile is considered incomplete when any of the academic-detail
+               fields that the registration form collects (and Google never supplies) are
+               still missing -- matching the same logic used in auth-routing.js. */
+            const profileIncomplete = !profile.course || !profile.year_level || !profile.school;
+
             return ok({
                 userId: data.user.id,
                 role: profile.role,
                 accountStatus: profile.account_status,
                 fullName: profile.full_name,
                 rejectionReason: profile.rejection_reason,
+                needsProfileDetails: profile.account_status === 'pending' && profileIncomplete,
             });
         } catch (error) {
             return fail(readableAuthError(error), 'AUTH_ERROR');
@@ -294,6 +300,16 @@ export const AuthService = {
 
     async signOut() {
         try {
+            // MAJ-12: grade edits and semester adds/edits save to localStorage
+            // instantly but push to Supabase in the background (see cloud-sync.js).
+            // Tearing down the session and wiping the local cache before that push
+            // lands silently drops the edit -- it still looked saved right up until
+            // logout, but the server never got it, so it's gone on the next login.
+            // Give any in-flight saves a chance to actually finish first (bounded
+            // by a timeout so a stuck connection can't block logout forever).
+            if (typeof window !== 'undefined' && window.CloudSync && typeof window.CloudSync.waitForPendingSync === 'function') {
+                try { await window.CloudSync.waitForPendingSync(); } catch (e) { /* ignore */ }
+            }
             const supabase = getSupabase();
             await supabase.auth.signOut();
             // Security: clear this device's local cache of the signed-out student's

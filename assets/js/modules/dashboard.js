@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    DASHBOARD.JS — Enhanced Command Center
    ============================================================ */
 
@@ -31,11 +31,16 @@ function renderSemesterOverview() {
     const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
     const pct = totalMs > 0 ? Math.round(elapsedMs / totalMs * 100) : 0;
     const totalWeeks = sem.totalWeeks || 15;
-    const weekNum = Math.min(totalWeeks, Math.max(1, Math.ceil((now - start) / (1000 * 60 * 60 * 24 * 7))));
+    // MIN-03: guard pre-semester state — Math.max(1,...) previously forced Week 1 even before the
+    // semester started. Now weekNum is 0 when now < start so we can show "Not started yet".
+    const weekNum = now < start ? 0 : Math.min(totalWeeks, Math.ceil((now - start) / 604800000));
     const weeksLeft = Math.max(0, totalWeeks - weekNum);
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
-        wiEl.innerHTML = '<i class="bi bi-calendar3-week me-1"></i>Week ' + weekNum + ' of ' + totalWeeks;
+        // MIN-03: Render 'Not started yet' when weekNum === 0 (before semester start date).
+        wiEl.innerHTML = weekNum === 0
+            ? '<i class="bi bi-calendar3-week me-1"></i>Not started yet'
+            : '<i class="bi bi-calendar3-week me-1"></i>Week ' + weekNum + ' of ' + totalWeeks;
     var wlEl = document.getElementById('dashWeeksLeft');
     if (wlEl)
         wlEl.textContent = weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
@@ -344,8 +349,14 @@ function renderTodaySchedule() {
         return;
     var semId = DB.getActiveSemesterId();
     var dayName = DAY_NAMES[new Date().getDay()];
+    // MIN-04: Exclude cancelled occurrences so suspended classes don't appear on the dashboard.
+    // DB.getCancelledOccurrences() is the same data source isOccurrenceCancelled() uses in schedule.js.
+    var todayStr = todayKey();
     var list = DB.getSubjects()
-        .filter(function (s) { return s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName); })
+        .filter(function (s) {
+            if (!(s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;
+            return !DB.getCancelledOccurrences().some(function (c) { return c.subjectId === s.id && c.date === todayStr; });
+        })
         .sort(function (a, b) { return a.start.localeCompare(b.start); });
     if (!list.length) {
         wrap.innerHTML = dashEmpty('bi-calendar-x', 'No classes today', 'Enjoy the free day!');

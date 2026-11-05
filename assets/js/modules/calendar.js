@@ -687,7 +687,7 @@ function openDayModal(dateStr) {
         body.innerHTML = `
       <div class="d-flex justify-content-between align-items-start mb-3">
         <h5 class="mb-0">${dateLabel}</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
