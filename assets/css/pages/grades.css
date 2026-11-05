@@ -1285,3 +1285,21 @@ GRADES PAGE — Enhanced v4 additions
 .gwa-input-row > :last-child {
     width: 40px;
 }
+
+
+/* ---- Weight-warning badge (always-visible card header, MAJ-04) ---- */
+
+.weight-warn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: .62rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    background: rgba(251,191,36,.12);
+    color: #fbbf24;
+    border: 1px solid rgba(251,191,36,.28);
+    margin-top: 3px;
+}
