@@ -426,12 +426,25 @@
             totalWeeks: row.total_weeks != null ? Number(row.total_weeks) : 15,
         };
     }
-    function semesterLocalToRow(s, userId) {
+    function semesterLocalToRow(s, userId, activeId) {
         return {
             user_id: userId, client_id: s.id,
             name: s.name || '', school_year: s.schoolYear || '',
             start_date: s.startDate || null, end_date: s.endDate || null,
             finals_date: s.finalsDate || null, total_weeks: s.totalWeeks || 15,
+            // MAJ-13: which semester is "active" (the one the Settings > Academic
+            // Semester Management picker currently has selected) was never synced
+            // at all -- it only ever lived in localStorage's sp_active_semester_id,
+            // which clearPrivateCacheOnSignOut() wipes on every logout. The real
+            // semester objects (and their grades, tied to them via semesterId)
+            // were still on the server after re-login, but getActiveSemesterId()
+            // fell back to the chronologically-first semester, so the grade
+            // breakdown and semester banner for whichever semester the student
+            // had actually been using just silently stopped showing -- looking
+            // exactly like the data had disappeared. Piggybacking this flag onto
+            // the existing is_active column (previously only ever true on the
+            // throwaway placeholder row) lets hydrate() below restore it.
+            is_active: s.id === activeId,
         };
     }
 
@@ -566,6 +579,18 @@
             const localOnlySemesters = DB.getSemesters().filter(s => !serverSemIds.has(s.id));
             const semesters = [...serverSemesters, ...localOnlySemesters];
             setDirtySem(new Set(localOnlySemesters.map(s => s.id)));
+
+            // MAJ-13: restore which semester was active. Only do this when nothing
+            // local has it set yet (a fresh login, right after
+            // clearPrivateCacheOnSignOut wiped sp_active_semester_id) -- never
+            // clobber a choice already made this session, e.g. the student just
+            // switched semesters and that push hasn't round-tripped yet.
+            if (!DB.get('activeSemesterId', null)) {
+                const serverActiveRow = (semRes.data || []).find(r => r.is_active && r.client_id);
+                if (serverActiveRow && semesters.some(s => s.id === serverActiveRow.client_id)) {
+                    DB.set('activeSemesterId', serverActiveRow.client_id);
+                }
+            }
 
             DB.set('subjects', subjects);
             DB.set('tasks', tasks);
@@ -954,9 +979,13 @@
                 if (error) failure = error;
                 else toDelete.forEach(id => last.semesters.delete(id));
             }
+            // MAJ-13: whichever semester is locally active right now gets
+            // is_active=true on its row; every other real semester row gets
+            // false, so the flag always matches exactly one row server-side.
+            const activeId = DB.get('activeSemesterId', null) || (newList[0] && newList[0].id) || null;
             for (const s of newList) {
                 const { error } = await supabase.from('semesters')
-                    .upsert(semesterLocalToRow(s, userId), { onConflict: 'user_id,client_id' });
+                    .upsert(semesterLocalToRow(s, userId, activeId), { onConflict: 'user_id,client_id' });
                 if (error) { failure = failure || error; continue; }
                 last.semesters.set(s.id, true);
                 dirty.delete(s.id);
@@ -1063,6 +1092,16 @@
         list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
         setDirtySem(dirty);
         trackPush(pushSemesters(list.slice()));
+        return r;
+    };
+    // MAJ-13: picking a different semester (Settings > Academic Semester
+    // Management) only ever wrote sp_active_semester_id locally. Re-push the
+    // semester rows so the server's is_active flag follows along -- see
+    // semesterLocalToRow/doPushSemesters above and the hydrate restore logic.
+    const _setActiveSemester = DB.setActiveSemester.bind(DB);
+    DB.setActiveSemester = function (id) {
+        const r = _setActiveSemester(id);
+        trackPush(pushSemesters(DB.getSemesters().slice()));
         return r;
     };
     const _saveSyllabusCourses = DB.saveSyllabusCourses.bind(DB);
