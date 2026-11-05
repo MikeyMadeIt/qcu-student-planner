@@ -300,6 +300,16 @@ export const AuthService = {
 
     async signOut() {
         try {
+            // MAJ-12: grade edits and semester adds/edits save to localStorage
+            // instantly but push to Supabase in the background (see cloud-sync.js).
+            // Tearing down the session and wiping the local cache before that push
+            // lands silently drops the edit -- it still looked saved right up until
+            // logout, but the server never got it, so it's gone on the next login.
+            // Give any in-flight saves a chance to actually finish first (bounded
+            // by a timeout so a stuck connection can't block logout forever).
+            if (typeof window !== 'undefined' && window.CloudSync && typeof window.CloudSync.waitForPendingSync === 'function') {
+                try { await window.CloudSync.waitForPendingSync(); } catch (e) { /* ignore */ }
+            }
             const supabase = getSupabase();
             await supabase.auth.signOut();
             // Security: clear this device's local cache of the signed-out student's
