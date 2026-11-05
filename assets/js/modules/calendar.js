@@ -37,11 +37,6 @@ let taskEditingId = null;
 /* ── Init ──────────────────────────────────────────────────── */
 
 function initCalendar() {
-    // Mobile: default to week view
-    if (window.innerWidth < 768) {
-        calMode = 'week';
-        _updateViewBtns();
-    }
     calSelectedDate = todayKey();
     renderCalendar();
     renderAgenda(calSelectedDate);
