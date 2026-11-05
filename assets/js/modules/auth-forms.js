@@ -2,6 +2,7 @@
 
 import { AuthService } from '../services/auth-service.js';
 import { validators } from '../utils/validation.js';
+import { resolveLandingRoute } from '../utils/auth-routing.js';
 import {
     $,
     $$,
@@ -11,6 +12,44 @@ import {
     setupPasswordRequirements,
     showAlert,
 } from '../utils/auth-ui.js';
+
+const REMEMBER_EMAIL_KEY = 'qcuRememberedEmail';
+
+/* "Remember me" only affects what's pre-filled next time -- it never touches
+   the Supabase session itself, so sign-in/sign-out behaviour is unchanged. */
+function applyRememberedEmail(form) {
+    const emailInput = $('[name="email"]', form);
+    const rememberInput = $('[name="rememberMe"]', form);
+
+    if (!emailInput || !rememberInput) return;
+
+    try {
+        const saved = window.localStorage.getItem(REMEMBER_EMAIL_KEY);
+        if (saved) {
+            emailInput.value = saved;
+            rememberInput.checked = true;
+        }
+    } catch (error) {
+        /* Storage unavailable (private browsing, disabled storage) -- fall back silently. */
+    }
+}
+
+function persistRememberedEmail(form) {
+    const emailInput = $('[name="email"]', form);
+    const rememberInput = $('[name="rememberMe"]', form);
+
+    if (!emailInput || !rememberInput) return;
+
+    try {
+        if (rememberInput.checked) {
+            window.localStorage.setItem(REMEMBER_EMAIL_KEY, emailInput.value.trim());
+        } else {
+            window.localStorage.removeItem(REMEMBER_EMAIL_KEY);
+        }
+    } catch (error) {
+        /* Storage unavailable -- nothing to persist, login still succeeds. */
+    }
+}
 
 const RULES = {
     email: input => validators.email(readValue(input)),
@@ -87,18 +126,14 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'login') {
-            const { role, accountStatus } = result.data;
+            const { role, accountStatus, rejectionReason, needsProfileDetails } = result.data;
+            const destination = resolveLandingRoute({ role, accountStatus, rejectionReason, needsProfileDetails });
 
-            if (accountStatus === 'approved' && role === 'admin') {
-                location.href = '../admin/dashboard.html';
-            } else if (accountStatus === 'approved') {
-                location.href = '../app/dashboard.html';
-            } else if (accountStatus === 'pending') {
-                location.href = 'pending.html';
+            if (destination.type === 'go') {
+                persistRememberedEmail(form);
+                location.href = destination.href;
             } else {
-                showAlert(form, result.data.accountStatus === 'rejected'
-                    ? `Your registration was not approved.${result.data.rejectionReason ? ` Reason: ${result.data.rejectionReason}` : ''}`
-                    : 'Your account has been suspended. Contact an administrator for help.', 'error');
+                showAlert(form, destination.message, 'error');
             }
             return;
         }
@@ -109,7 +144,7 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'reset') {
-            showAlert(form, 'Your password has been updated. Redirecting to log in…', 'info');
+            showAlert(form, 'Your password has been updated. Redirecting to log in\u2026', 'info'); // MIN-01: \u2026 escaped to avoid mojibake if served without UTF-8 charset header
             setTimeout(() => { location.href = 'login.html'; }, 1500);
             return;
         }
@@ -124,6 +159,8 @@ function setupForm(form) {
     const inputs = $$('[data-rule]', form);
     const submitButton = $('[type="submit"]', form);
 
+    if (form.dataset.authForm === 'login') applyRememberedEmail(form);
+
     setupPasswordRequirements($('[data-requirements]', form), $('[name="password"]', form));
     attachLiveValidation(inputs, form);
 
@@ -135,4 +172,28 @@ function setupForm(form) {
 
 export function initAuthForms() {
     $$('[data-auth-form]').forEach(setupForm);
+}
+
+/* "Continue with Google" button on login.html / register.html. Clicking it redirects the
+   whole page to Google -- there is nothing to show success/failure for on *this* page beyond
+   a possible immediate error (e.g. offline), since the real outcome is decided after the
+   redirect back, on callback.html. */
+export function initGoogleButton() {
+    const button = $('[data-google-signin]');
+
+    if (!button) return;
+
+    button.addEventListener('click', async () => {
+        setLoading(button, true);
+
+        const result = await AuthService.signInWithGoogle();
+
+        if (!result.ok) {
+            setLoading(button, false);
+            const card = button.closest('.auth-card');
+            if (card) showAlert(card, result.message);
+        }
+        /* On success the browser is already navigating away to Google; leave the button
+           disabled/loading so it can't be double-clicked while that happens. */
+    });
 }

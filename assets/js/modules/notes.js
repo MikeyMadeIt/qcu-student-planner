@@ -13,6 +13,7 @@ let noteLinkTaskId = '';
 let ntSelectMode = false;
 let ntSelected = new Set();
 let ntTagFilter = '';
+var ntEditorSelection = null;
 /* ── Templates ── */
 const NOTE_TEMPLATES = {
     blank: { label: 'Blank Note', icon: 'bi-file-earmark', content: '' },
@@ -139,6 +140,38 @@ function toggleFavFilter() {
         btn.querySelector('i').className = favFilterOn ? 'bi bi-star-fill' : 'bi bi-star';
         btn.title = favFilterOn ? 'Show all notes' : 'Favorites only';
     }
+    renderNotes();
+}
+
+function clearNoteFilters() {
+    ['noteSearch', 'noteCatFilter', 'noteSubFilterSel', 'noteTaskFilterSel'].forEach(function (id) {
+        var control = document.getElementById(id);
+        if (control)
+            control.value = '';
+    });
+    var linkFilter = document.getElementById('noteLinkFilterSel');
+    if (linkFilter)
+        linkFilter.value = 'all';
+    noteLinkFilter = 'all';
+    noteLinkSubId = '';
+    noteLinkTaskId = '';
+    ntTagFilter = '';
+    favFilterOn = false;
+    var favButton = document.getElementById('favFilterBtn');
+    if (favButton) {
+        favButton.classList.remove('nt-icon-btn-active');
+        var icon = favButton.querySelector('i');
+        if (icon)
+            icon.className = 'bi bi-star';
+        favButton.title = 'Favorites only';
+    }
+    var subjectFilter = document.getElementById('noteSubFilterSelDd');
+    var taskFilter = document.getElementById('noteTaskFilterSelDd');
+    if (subjectFilter)
+        subjectFilter.style.display = 'none';
+    if (taskFilter)
+        taskFilter.style.display = 'none';
+    ['noteCatFilter', 'noteLinkFilterSel', 'noteSubFilterSel', 'noteTaskFilterSel'].forEach(ntSyncDropdown);
     renderNotes();
 }
 
@@ -352,7 +385,12 @@ function renderNotes() {
     var wrap = document.getElementById('notesGrid');
     var list = getFilteredNotes();
     if (!list.length) {
-        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center py-5 text-faint"><i class="bi bi-journal-x" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.4"></i>No notes found. Create your first note!</div>';
+        var semId = DB.getActiveSemesterId();
+        var hasSemesterNotes = DB.getNotes().some(function (note) { return note.semesterId === semId; });
+        var emptyMessage = hasSemesterNotes
+            ? '<p>No notes match your current filters.</p><button type="button" class="btn btn-ghost btn-sm" onclick="clearNoteFilters()">Clear filters</button>'
+            : '<p>No notes found. Create your first note!</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()">Create note</button>';
+        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center text-faint"><i class="bi bi-journal-x" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.4" aria-hidden="true"></i>' + emptyMessage + '</div>';
         return;
     }
     var semId = DB.getActiveSemesterId();
@@ -523,86 +561,149 @@ function closeNotePreview() {
 
 /* ── Markdown renderer (unchanged + checklist toggling) ── */
 
-function renderMarkdown(src, noteId) {
-    var html = src || '';
-    var codeBlocks = [];
-    html = html.replace(/```([\w]*)\n?([\s\S]*?)```/g, function (m, lang, code) {
-        var idx = codeBlocks.length;
-        codeBlocks.push('<pre class="md-code-block"><code>' + escapeHtml(code) + '</code></pre>');
-        return '\x00CODE' + idx + '\x00';
-    });
-    html = escapeHtml(html);
-    html = html.replace(/`([^`]+)`/g, '<code class="md-inline-code">$1</code>');
-    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    html = html.replace(/^### (.*$)/gim, '<h6 class="md-h">$1</h6>');
-    html = html.replace(/^## (.*$)/gim, '<h5 class="md-h">$1</h5>');
-    html = html.replace(/^# (.*$)/gim, '<h4 class="md-h">$1</h4>');
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-    // Checklists
-    html = html.replace(/^- \[x\] (.*$)/gim, function (m, text) {
-        if (noteId) {
-            return '<div class="md-checklist-item md-checked" onclick="toggleNoteChecklistItem(\'' + noteId + '\', this, true)">' +
-                '<span class="md-cl-box md-cl-checked"><i class="bi bi-check-lg"></i></span>' +
-                '<span class="md-cl-text md-cl-done">' + text + '</span></div>';
+function renderMarkdown(src, noteId, forEditor) {
+    var lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
+    var output = [];
+    var paragraph = [];
+
+    function inline(text) {
+        var code = [];
+        var escaped = [];
+        var html = escapeHtml(text).replace(/\\([\\`*_{}\[\]()#+.!>-])/g, function (match, character) {
+            var token = '\u0002' + escaped.length + '\u0002';
+            escaped.push(character);
+            return token;
+        }).replace(/`([^`]+)`/g, function (match, content) {
+            var token = '\u0001' + code.length + '\u0001';
+            code.push('<code class="md-inline-code">' + content + '</code>');
+            return token;
+        });
+        html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
+            .replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>')
+            .replace(/~~(.+?)~~/g, '<del>$1</del>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
+                if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href))
+                    return label;
+                return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+            });
+        code.forEach(function (fragment, index) {
+            html = html.replace('\u0001' + index + '\u0001', fragment);
+        });
+        escaped.forEach(function (character, index) {
+            html = html.replace('\u0002' + index + '\u0002', escapeHtml(character));
+        });
+        return html;
+    }
+
+    function flushParagraph() {
+        if (paragraph.length) {
+            output.push('<p class="md-p">' + paragraph.map(inline).join('<br>') + '</p>');
+            paragraph = [];
         }
-        return '<div class="md-checklist-item md-checked"><span class="md-cl-box md-cl-checked"><i class="bi bi-check-lg"></i></span><span class="md-cl-text md-cl-done">' + text + '</span></div>';
-    });
-    html = html.replace(/^- \[ \] (.*$)/gim, function (m, text) {
-        if (noteId) {
-            return '<div class="md-checklist-item" onclick="toggleNoteChecklistItem(\'' + noteId + '\', this, false)">' +
-                '<span class="md-cl-box"></span><span class="md-cl-text">' + text + '</span></div>';
+    }
+
+    for (var index = 0; index < lines.length;) {
+        var line = lines[index];
+        var fence = line.match(/^\s*```/);
+        var heading = line.match(/^(#{1,3})\s+(.+)$/);
+        var checklist = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
+        var ordered = line.match(/^\s*(\d+)[.)]\s+(.*)$/);
+        var bullet = line.match(/^\s*[-*]\s+(.*)$/);
+
+        if (!line.trim()) {
+            flushParagraph();
+            index++;
+            continue;
         }
-        return '<div class="md-checklist-item"><span class="md-cl-box"></span><span class="md-cl-text">' + text + '</span></div>';
-    });
-    // Numbered lists
-    var inOl = false;
-    var lines = html.split('\n');
-    html = lines.map(function (line) {
-        var nm = line.match(/^(\d+)\. (.*)$/);
-        if (nm) {
-            if (!inOl) {
-                inOl = true;
-                return '<ol><li>' + nm[2] + '</li>';
+        if (fence) {
+            flushParagraph();
+            var codeLines = [];
+            index++;
+            while (index < lines.length && !/^\s*```\s*$/.test(lines[index]))
+                codeLines.push(lines[index++]);
+            if (index < lines.length)
+                index++;
+            output.push('<pre class="md-code-block"><code>' + escapeHtml(codeLines.join('\n')) + '</code></pre>');
+            continue;
+        }
+        if (heading) {
+            flushParagraph();
+            var headingLevel = heading[1].length + 3;
+            output.push('<h' + headingLevel + ' class="md-h">' + inline(heading[2]) + '</h' + headingLevel + '>');
+            index++;
+            continue;
+        }
+        if (checklist) {
+            flushParagraph();
+            var checklistItems = [];
+            while (index < lines.length) {
+                var checkItem = lines[index].match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
+                if (!checkItem)
+                    break;
+                var checked = checkItem[1].toLowerCase() === 'x';
+                var click = noteId ? ' onclick="toggleNoteChecklistItem(\'' + escapeHtml(noteId) + '\', this, ' + checked + ', ' + index + ')"' : '';
+                var checklistContent = inline(checkItem[2]);
+                if (forEditor) {
+                    checklistItems.push('<li class="md-checklist-item' + (checked ? ' md-checked' : '') + '"><input class="md-checklist-input" type="checkbox" contenteditable="false"' + (checked ? ' checked' : '') + ' aria-label="' + (checked ? 'Mark checklist item incomplete' : 'Mark checklist item complete') + '"><span class="md-cl-text' + (checked ? ' md-cl-done' : '') + '">' + checklistContent + '</span></li>');
+                } else {
+                    checklistItems.push('<li class="md-checklist-item' + (checked ? ' md-checked' : '') + '"' + click + '><span class="md-cl-box' + (checked ? ' md-cl-checked' : '') + '" aria-hidden="true"></span><span class="md-cl-text' + (checked ? ' md-cl-done' : '') + '">' + checklistContent + '</span></li>');
+                }
+                index++;
             }
-            return '<li>' + nm[2] + '</li>';
+            output.push('<ul class="md-ul md-checklist">' + checklistItems.join('') + '</ul>');
+            continue;
         }
-        if (inOl) {
-            inOl = false;
-            return '</ol>' + line;
+        if (ordered) {
+            flushParagraph();
+            var orderedItems = [];
+            var listStart = Number(ordered[1]);
+            while (index < lines.length) {
+                var orderedItem = lines[index].match(/^\s*(\d+)[.)]\s+(.*)$/);
+                if (!orderedItem)
+                    break;
+                orderedItems.push('<li>' + inline(orderedItem[2]) + '</li>');
+                index++;
+            }
+            output.push('<ol' + (listStart === 1 ? '' : ' start="' + listStart + '"') + '>' + orderedItems.join('') + '</ol>');
+            continue;
         }
-        return line;
-    }).join('\n');
-    if (inOl)
-        html += '</ol>';
-    html = html.replace(/^[-*] (.*$)/gim, '<li class="md-li">$1</li>');
-    html = html.replace(/(<li class="md-li">[\s\S]*?<\/li>(?:\n<li class="md-li">[\s\S]*?<\/li>)*)/g, '<ul class="md-ul">$1</ul>');
-    html = html.replace(/\n{2,}/g, '</p><p class="md-p">');
-    html = html.replace(/\n/g, '<br>');
-    html = '<p class="md-p">' + html + '</p>';
-    codeBlocks.forEach(function (block, idx) { html = html.replace('\x00CODE' + idx + '\x00', block); });
-    html = html.replace(/<p class="md-p"><\/p>/g, '');
-    html = html.replace(/<p class="md-p"><br><\/p>/g, '');
-    return html;
+        if (bullet) {
+            flushParagraph();
+            var bulletItems = [];
+            while (index < lines.length) {
+                var bulletItem = lines[index].match(/^\s*[-*]\s+(.*)$/);
+                if (!bulletItem || /^\[[ xX]\]\s+/.test(bulletItem[1]))
+                    break;
+                bulletItems.push('<li class="md-li">' + inline(bulletItem[1]) + '</li>');
+                index++;
+            }
+            output.push('<ul class="md-ul">' + bulletItems.join('') + '</ul>');
+            continue;
+        }
+        paragraph.push(line);
+        index++;
+    }
+    flushParagraph();
+    return output.join('\n');
 }
 
-function toggleNoteChecklistItem(noteId, el, currentlyChecked) {
+function toggleNoteChecklistItem(noteId, el, currentlyChecked, sourceLineIndex) {
     var notes = DB.getNotes();
     var n = notes.find(function (x) { return x.id === noteId; });
     if (!n)
         return;
-    var textEl = el.querySelector('.md-cl-text');
-    var textTxt = textEl ? textEl.textContent : '';
-    var lines = n.content.split('\n');
-    var pattern = currentlyChecked
-        ? new RegExp('^- \\[x\\] ' + escapeRegExp(textTxt) + '$')
-        : new RegExp('^- \\[ \\] ' + escapeRegExp(textTxt) + '$');
     var changed = false;
-    n.content = lines.map(function (line) {
-        if (!changed && pattern.test(line)) {
+    var lines = n.content.split('\n');
+    n.content = lines.map(function (line, index) {
+        var item = line.match(/^([-*])\s+\[([ xX])\]\s+(.*)$/);
+        var matchesTarget = Number.isInteger(sourceLineIndex)
+            ? index === sourceLineIndex
+            : item && (el.querySelector('.md-cl-text') || {}).textContent === item[3];
+        if (!changed && matchesTarget && item && (item[2].toLowerCase() === 'x') === currentlyChecked) {
             changed = true;
-            return currentlyChecked ? line.replace(/^- \[x\] /, '- [ ] ') : line.replace(/^- \[ \] /, '- [x] ');
+            return item[1] + (currentlyChecked ? ' [ ] ' : ' [x] ') + item[3];
         }
         return line;
     }).join('\n');
@@ -616,52 +717,397 @@ function toggleNoteChecklistItem(noteId, el, currentlyChecked) {
         if (previewContent)
             previewContent.innerHTML = renderMarkdown(n.content, n.id);
         var ta = document.getElementById('nContent');
-        if (ta)
-            ta.value = n.content;
+        if (ta) {
+            ta.innerHTML = renderMarkdown(n.content, null, true);
+            updateNotePreview();
+        }
     }
 }
 
-function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 /* ── Markdown toolbar ── */
 
-function mdInsert(before, after, placeholder) {
-    var ta = document.getElementById('nContent');
-    if (!ta)
+function saveNoteEditorSelection(editor) {
+    if (!editor)
         return;
-    var start = ta.selectionStart, end = ta.selectionEnd;
-    var sel = ta.value.substring(start, end) || placeholder || '';
-    ta.value = ta.value.substring(0, start) + before + sel + (after || '') + ta.value.substring(end);
-    ta.selectionStart = start + before.length;
-    ta.selectionEnd = start + before.length + sel.length;
-    ta.focus();
+    var selection = window.getSelection();
+    if (selection && selection.rangeCount && editor.contains(selection.anchorNode)) {
+        ntEditorSelection = { editor: editor, range: selection.getRangeAt(0).cloneRange() };
+    }
+}
+
+function restoreNoteEditorSelection(editor) {
+    if (!ntEditorSelection || ntEditorSelection.editor !== editor) {
+        editor.focus();
+        var fallbackSelection = window.getSelection();
+        var fallbackRange = document.createRange();
+        fallbackRange.selectNodeContents(editor);
+        fallbackRange.collapse(false);
+        fallbackSelection.removeAllRanges();
+        fallbackSelection.addRange(fallbackRange);
+        ntEditorSelection = { editor: editor, range: fallbackRange.cloneRange() };
+        return true;
+    }
+    editor.focus();
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(ntEditorSelection.range);
+    return true;
+}
+
+function serializeNoteInline(node, blockSeparator) {
+    if (node.nodeType === 3)
+        return node.nodeValue.replace(/([\\`*_{}\[\]()])/g, '\\$1');
+    if (node.nodeType !== 1)
+        return '';
+    var tag = node.tagName.toLowerCase();
+    if (tag === 'br')
+        return '\n';
+    if (tag === 'input')
+        return '';
+    var childSeparator = blockSeparator || (tag === 'li' ? ' ' : '\n');
+    var content = serializeNoteChildren(node, childSeparator);
+    if (tag === 'strong' || tag === 'b')
+        return '**' + content + '**';
+    if (tag === 'em' || tag === 'i')
+        return '*' + content + '*';
+    if (tag === 'del' || tag === 's' || tag === 'strike')
+        return '~~' + content + '~~';
+    if (tag === 'code')
+        return '`' + content.replace(/`/g, '\\`') + '`';
+    if (tag === 'a') {
+        var href = node.getAttribute('href') || '';
+        return /^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href) ? '[' + content + '](' + href.replace(/[)\s]/g, encodeURIComponent) + ')' : content;
+    }
+    return content;
+}
+
+function serializeNoteChildren(node, blockSeparator, excludedNode) {
+    var output = '';
+    Array.prototype.forEach.call(node.childNodes, function (child) {
+        if (child === excludedNode || (child.nodeType === 1 && child.tagName.toLowerCase() === 'input' && child.type === 'checkbox'))
+            return;
+        var isBlock = child.nodeType === 1 && /^(P|DIV)$/.test(child.tagName);
+        var content = serializeNoteInline(child, blockSeparator);
+        if (!content)
+            return;
+        if (isBlock && output && !/\s$/.test(output) && !/^\s/.test(content))
+            output += blockSeparator;
+        output += content;
+    });
+    return output;
+}
+
+function isNoteChecklistChecked(checkbox) {
+    return !!(checkbox && (checkbox.checked || checkbox.getAttribute('checked') !== null));
+}
+
+function serializeNoteBlock(node) {
+    if (node.nodeType !== 1)
+        return node.nodeType === 3 ? node.nodeValue.trim() : '';
+    var tag = node.tagName.toLowerCase();
+    if (/^h[1-6]$/.test(tag)) {
+        var headingLevel = Math.max(1, Math.min(3, Number(tag.slice(1)) - 3));
+        return new Array(headingLevel + 1).join('#') + ' ' + serializeNoteInline(node).trim();
+    }
+    if (tag === 'pre')
+        return '```\n' + node.textContent.replace(/\n+$/, '') + '\n```';
+    if (tag === 'ul' || tag === 'ol') {
+        var items = Array.prototype.filter.call(node.children, function (child) { return child.tagName.toLowerCase() === 'li'; });
+        return items.map(function (item, index) {
+            var checkbox = item.querySelector('input[type="checkbox"]');
+            var text = serializeNoteChildren(item, ' ', checkbox).trim();
+            if (node.classList.contains('md-checklist'))
+                return '- [' + (isNoteChecklistChecked(checkbox) ? 'x' : ' ') + '] ' + text;
+            var start = tag === 'ol' ? Number(node.getAttribute('start')) || 1 : 1;
+            return (tag === 'ol' ? (start + index) + '. ' : '- ') + text;
+        }).join('\n');
+    }
+    if (tag === 'p' || tag === 'div')
+        return serializeNoteChildren(node, '\n').trim();
+    return serializeNoteInline(node).trim();
+}
+
+function serializeNoteEditor(editor) {
+    var blocks = [];
+    var inlineNodes = [];
+    function flushInline() {
+        if (inlineNodes.length) {
+            blocks.push(inlineNodes.map(serializeNoteInline).join('').trim());
+            inlineNodes = [];
+        }
+    }
+    Array.prototype.forEach.call(editor.childNodes, function (node) {
+        var isBlock = node.nodeType === 1 && /^(P|DIV|H[1-6]|UL|OL|PRE)$/.test(node.tagName);
+        if (isBlock) {
+            flushInline();
+            blocks.push(serializeNoteBlock(node));
+        } else {
+            inlineNodes.push(node);
+        }
+    });
+    flushInline();
+    return blocks.filter(Boolean).join('\n\n').replace(/\n{3,}/g, '\n\n');
+}
+
+function getNoteEditorBlock(editor) {
+    var selection = window.getSelection();
+    var node = selection && selection.anchorNode;
+    if (node && node.nodeType === 3)
+        node = node.parentElement;
+    while (node && node !== editor) {
+        if (/^(P|DIV|H[1-6]|LI|PRE)$/.test(node.tagName))
+            return node;
+        node = node.parentElement;
+    }
+    return null;
+}
+
+function updateNoteToolbarState(editor) {
+    var formats = { bold: 'bold', italic: 'italic', strike: 'strikeThrough' };
+    Object.keys(formats).forEach(function (name) {
+        var button = document.querySelector('.note-md-btn[data-format="' + name + '"]');
+        if (!button)
+            return;
+        var active = typeof document.queryCommandState === 'function'
+            ? document.queryCommandState(formats[name])
+            : false;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    var codeButton = document.querySelector('.note-md-btn[data-format="code"]');
+    if (codeButton) {
+        var block = getNoteEditorBlock(editor);
+        var activeCode = !!(block && (block.tagName === 'PRE' || block.closest('code')));
+        codeButton.classList.toggle('active', activeCode);
+        codeButton.setAttribute('aria-pressed', activeCode ? 'true' : 'false');
+    }
+}
+
+function wireNoteEditor(editor) {
+    if (!editor || editor.dataset.formattingWired)
+        return;
+    editor.dataset.formattingWired = 'true';
+    editor.setAttribute('contenteditable', 'true');
+    editor.setAttribute('role', 'textbox');
+    editor.setAttribute('aria-multiline', 'true');
+    editor.innerHTML = renderMarkdown(editor.dataset.markdown || '', null, true);
+    editor.addEventListener('focus', function () { saveNoteEditorSelection(editor); });
+    editor.addEventListener('keyup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
+    editor.addEventListener('mouseup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
+    editor.addEventListener('input', function () { saveNoteEditorSelection(editor); updateNotePreview(); updateNoteToolbarState(editor); });
+    editor.addEventListener('change', function (event) {
+        if (event.target.matches('.md-checklist-input')) {
+            updateNoteChecklistInput(event.target);
+        }
+    });
+    editor.addEventListener('keydown', function (event) {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey)
+            return;
+        var key = event.key.toLowerCase();
+        var command = key === 'b' ? 'bold' : key === 'i' ? 'italic'
+            : key === 'x' && event.shiftKey ? 'strikeThrough' : '';
+        if (!command)
+            return;
+        event.preventDefault();
+        restoreNoteEditorSelection(editor);
+        document.execCommand(command, false, null);
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        updateNoteToolbarState(editor);
+    });
+    editor.addEventListener('paste', function (event) {
+        var text = event.clipboardData && event.clipboardData.getData('text/plain');
+        if (text == null)
+            return;
+        event.preventDefault();
+        restoreNoteEditorSelection(editor);
+        document.execCommand('insertText', false, text);
+        updateNotePreview();
+    });
+    var toolbar = editor.closest('.modal-body').querySelector('.note-md-toolbar');
+    toolbar.addEventListener('pointerdown', function (event) {
+        if (event.target.closest('.note-md-btn'))
+            saveNoteEditorSelection(editor);
+    });
+    toolbar.addEventListener('mousedown', function (event) {
+        if (event.button === 0 && event.target.closest('.note-md-btn'))
+            event.preventDefault();
+    });
+    editor.addEventListener('click', function (event) {
+        if (event.target.matches('.md-checklist-input'))
+            event.stopPropagation();
+    });
+}
+
+function updateNoteChecklistInput(checkbox) {
+    var checked = checkbox.checked;
+    if (checked)
+        checkbox.setAttribute('checked', '');
+    else
+        checkbox.removeAttribute('checked');
+    var item = checkbox.closest('.md-checklist-item');
+    if (item) {
+        item.classList.toggle('md-checked', checked);
+        var text = item.querySelector('.md-cl-text');
+        if (text)
+            text.classList.toggle('md-cl-done', checked);
+    }
+    checkbox.setAttribute('aria-label', checked ? 'Mark checklist item incomplete' : 'Mark checklist item complete');
+    updateNotePreview();
+}
+
+function runNoteEditorCommand(command, value) {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return;
+    restoreNoteEditorSelection(editor);
+    document.execCommand(command, false, value || null);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    updateNoteToolbarState(editor);
+}
+
+function mdToggleInline(marker) {
+    var commands = { '**': 'bold', '*': 'italic', '~~': 'strikeThrough' };
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return;
+    if (marker === '`') {
+        restoreNoteEditorSelection(editor);
+        var selection = window.getSelection();
+        if (!selection || !selection.rangeCount)
+            return;
+        var range = selection.getRangeAt(0);
+        var parentCode = range.commonAncestorContainer.nodeType === 1
+            ? range.commonAncestorContainer.closest('code')
+            : range.commonAncestorContainer.parentElement.closest('code');
+        if (parentCode) {
+            var plain = document.createTextNode(parentCode.textContent);
+            parentCode.replaceWith(plain);
+            range.selectNodeContents(plain);
+        } else {
+            var code = document.createElement('code');
+            if (range.collapsed)
+                code.textContent = 'code';
+            else
+                code.appendChild(range.extractContents());
+            range.insertNode(code);
+            range.selectNodeContents(code);
+        }
+        selection.removeAllRanges();
+        selection.addRange(range);
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        return;
+    }
+    runNoteEditorCommand(commands[marker], null);
+}
+
+function mdInsertLink() {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return;
+    var href = prompt('Enter a link URL');
+    if (!href)
+        return;
+    if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href)) {
+        Toast.show('Enter a valid http, https, or mailto link', 'warning');
+        return;
+    }
+    var selection = window.getSelection();
+    restoreNoteEditorSelection(editor);
+    if (selection && selection.isCollapsed)
+        document.execCommand('insertHTML', false, '<a href="' + escapeHtml(href) + '">' + escapeHtml(href) + '</a>');
+    else
+        document.execCommand('createLink', false, href);
     updateNotePreview();
 }
 
 function mdInsertLine(prefix) {
-    var ta = document.getElementById('nContent');
-    if (!ta)
+    var levels = { '# ': 'H4', '## ': 'H5', '### ': 'H6' };
+    var editor = document.getElementById('nContent');
+    if (!editor)
         return;
-    var start = ta.selectionStart, val = ta.value;
-    var lineStart = val.lastIndexOf('\n', start - 1) + 1;
-    var lineEnd = val.indexOf('\n', start);
-    if (lineEnd === -1)
-        lineEnd = val.length;
-    var line = val.substring(lineStart, lineEnd);
-    ta.value = val.substring(0, lineStart) + prefix + line + val.substring(lineEnd);
-    ta.selectionStart = ta.selectionEnd = lineStart + prefix.length + line.length;
-    ta.focus();
+    restoreNoteEditorSelection(editor);
+    var block = getNoteEditorBlock(editor);
+    var target = levels[prefix];
+    document.execCommand('formatBlock', false, block && block.tagName === target ? 'P' : target);
+    var formattedBlock = getNoteEditorBlock(editor);
+    if (formattedBlock && /^H[4-6]$/.test(formattedBlock.tagName))
+        formattedBlock.classList.add('md-h');
     updateNotePreview();
 }
 
+function convertChecklistList(list) {
+    list.classList.add('md-checklist');
+    Array.prototype.forEach.call(list.children, function (item) {
+        if (item.tagName.toLowerCase() !== 'li' || Array.prototype.some.call(item.children, function (child) {
+            return child.tagName.toLowerCase() === 'input' && child.type === 'checkbox';
+        }))
+            return;
+        var checkbox = document.createElement('input');
+        checkbox.className = 'md-checklist-input';
+        checkbox.type = 'checkbox';
+        checkbox.setAttribute('contenteditable', 'false');
+        checkbox.setAttribute('aria-label', 'Mark checklist item complete');
+        var text = document.createElement('span');
+        text.className = 'md-cl-text';
+        while (item.firstChild)
+            text.appendChild(item.firstChild);
+        item.appendChild(checkbox);
+        item.appendChild(text);
+        item.classList.add('md-checklist-item');
+    });
+}
+
+function removeChecklistFormatting(list) {
+    Array.prototype.forEach.call(list.querySelectorAll('input[type="checkbox"]'), function (checkbox) { checkbox.remove(); });
+    Array.prototype.forEach.call(list.querySelectorAll('.md-cl-text'), function (span) {
+        span.replaceWith.apply(span, Array.prototype.slice.call(span.childNodes));
+    });
+    list.classList.remove('md-checklist');
+    list.querySelectorAll('li').forEach(function (item) {
+        item.classList.remove('md-checklist-item', 'md-checked');
+    });
+}
+
 function mdInsertBlock(text) {
-    var ta = document.getElementById('nContent');
-    if (!ta)
+    var editor = document.getElementById('nContent');
+    if (!editor)
         return;
-    var pos = ta.selectionStart, val = ta.value;
-    var pre = (pos > 0 && val[pos - 1] !== '\n') ? '\n' : '';
-    ta.value = val.substring(0, pos) + pre + text + val.substring(pos);
-    ta.selectionStart = ta.selectionEnd = pos + pre.length + text.length;
-    ta.focus();
+    restoreNoteEditorSelection(editor);
+    if (text.startsWith('```')) {
+        var block = getNoteEditorBlock(editor);
+        document.execCommand('formatBlock', false, block && block.tagName === 'PRE' ? 'P' : 'PRE');
+    } else if (text.startsWith('- [ ]')) {
+        var listItem = getNoteEditorBlock(editor);
+        var currentList = listItem && listItem.closest('ul,ol');
+        if (currentList && currentList.classList.contains('md-checklist')) {
+            removeChecklistFormatting(currentList);
+            document.execCommand('insertUnorderedList', false, null);
+        } else {
+            document.execCommand('insertUnorderedList', false, null);
+            var selection = window.getSelection();
+            var node = selection && selection.anchorNode;
+            if (node && node.nodeType === 3)
+                node = node.parentElement;
+            var li = node && node.closest('li');
+            var list = li && li.closest('ul');
+            if (list)
+                convertChecklistList(list);
+        }
+    } else {
+        var activeBlock = getNoteEditorBlock(editor);
+        var activeList = activeBlock && activeBlock.closest('ul,ol');
+        if (activeList && activeList.classList.contains('md-checklist')) {
+            removeChecklistFormatting(activeList);
+            if (text.startsWith('1.'))
+                document.execCommand('insertOrderedList', false, null);
+        } else {
+            document.execCommand(text.startsWith('1.') ? 'insertOrderedList' : 'insertUnorderedList', false, null);
+        }
+    }
+    saveNoteEditorSelection(editor);
     updateNotePreview();
 }
 
@@ -744,13 +1190,14 @@ function applyTemplate(key) {
     var ta = document.getElementById('nContent');
     if (!ta)
         return;
-    if (ta.value.trim() && key !== 'blank') {
+    if (serializeNoteEditor(ta).trim() && key !== 'blank') {
         if (!confirm('Replace current content with the "' + tmpl.label + '" template?'))
             return;
     }
-    ta.value = tmpl.content;
+    ta.innerHTML = renderMarkdown(tmpl.content, null, true);
     updateNotePreview();
     ta.focus();
+    saveNoteEditorSelection(ta);
     // Close template dropdown if open
     var dd = document.getElementById('ntTemplateDropdown');
     if (dd)
@@ -811,8 +1258,9 @@ function openNoteModal(id) {
             tmplHtml +
             '</div>' +
             '<div class="note-md-toolbar">' +
-            '<button type="button" class="note-md-btn" onclick="mdInsert(\'**\',\'**\',\'bold text\')" title="Bold" aria-label="Bold"><b>B</b></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsert(\'*\',\'*\',\'italic text\')" title="Italic" aria-label="Italic"><i>I</i></button>' +
+            '<button type="button" class="note-md-btn" data-format="bold" onclick="mdToggleInline(\'**\')" title="Bold (Ctrl+B)" aria-label="Bold" aria-pressed="false"><b>B</b></button>' +
+            '<button type="button" class="note-md-btn" data-format="italic" onclick="mdToggleInline(\'*\')" title="Italic (Ctrl+I)" aria-label="Italic" aria-pressed="false"><i>I</i></button>' +
+            '<button type="button" class="note-md-btn" data-format="strike" onclick="mdToggleInline(\'~~\')" title="Strikethrough" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>' +
             '<div class="nt-tb-sep"></div>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertLine(\'# \')" title="Heading 1" aria-label="Heading 1"><span style="font-weight:800;font-size:.75rem">H1</span></button>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertLine(\'## \')" title="Heading 2" aria-label="Heading 2"><span style="font-weight:700;font-size:.72rem">H2</span></button>' +
@@ -822,12 +1270,12 @@ function openNoteModal(id) {
             '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'1. item\')" title="Numbered list" aria-label="Numbered list"><i class="bi bi-list-ol"></i></button>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'- [ ] item\')" title="Checklist item" aria-label="Checklist item"><i class="bi bi-check2-square"></i></button>' +
             '<div class="nt-tb-sep"></div>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsert(\'[\',\'](url)\',\'link text\')" title="Link" aria-label="Link"><i class="bi bi-link-45deg"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsert(\'`\',\'`\',\'code\')" title="Inline code" aria-label="Inline code"><i class="bi bi-code"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertLink()" title="Link" aria-label="Link"><i class="bi bi-link-45deg"></i></button>' +
+            '<button type="button" class="note-md-btn" data-format="code" onclick="mdToggleInline(\'`\')" title="Inline code" aria-label="Inline code" aria-pressed="false"><i class="bi bi-code"></i></button>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'```\\n\\n```\')" title="Code block" aria-label="Code block"><i class="bi bi-code-slash"></i></button>' +
             '</div>' +
             '<div id="noteTabWritePane">' +
-            '<textarea class="form-control note-editor-ta" id="nContent" rows="12" oninput="updateNotePreview()" placeholder="Write your note here…">' + (n ? escapeHtml(n.content || '') : '') + '</textarea>' +
+            '<div class="form-control note-editor-ta" id="nContent" data-markdown="' + escapeHtml(n ? n.content || '' : '') + '" data-placeholder="Write your note here…" aria-label="Note content"></div>' +
             '</div>' +
             '<div id="noteTabPreviewPane" style="display:none">' +
             '<div class="note-preview-pane" id="nPreview"><span class="text-faint">Switch to Write tab to enter content.</span></div>' +
@@ -842,6 +1290,8 @@ function openNoteModal(id) {
             (n ? '<button class="btn btn-ghost" type="button" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="bi bi-file-earmark-pdf"></i></button>' : '') +
             (n ? '<button class="btn btn-ghost" type="button" onclick="deleteNote(\'' + n.id + '\')" aria-label="Delete note"><i class="bi bi-trash"></i></button>' : '') +
             '</div>';
+    wireNoteEditor(document.getElementById('nContent'));
+    updateNotePreview();
     // Prevent Enter from submitting modal when in tag input
     document.getElementById('noteModalBody').addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && e.target && e.target.id === 'nTagInput') {
@@ -886,7 +1336,8 @@ function switchNoteTab(tab) {
 }
 
 function updateNotePreview() {
-    var content = (document.getElementById('nContent') || {}).value || '';
+    var editor = document.getElementById('nContent');
+    var content = editor ? serializeNoteEditor(editor) : '';
     var idEl = document.getElementById('nId');
     var noteId = idEl ? idEl.value : null;
     var previewEl = document.getElementById('nPreview');
@@ -901,7 +1352,7 @@ function updateNotePreview() {
 
 function saveNote() {
     var title = (document.getElementById('nTitle').value.trim()) || 'Untitled';
-    var content = document.getElementById('nContent').value;
+    var content = serializeNoteEditor(document.getElementById('nContent'));
     var category = document.getElementById('nCategory').value;
     var pinned = document.getElementById('nPinned').checked;
     var favorite = document.getElementById('nFavorite').checked;
@@ -963,48 +1414,46 @@ function exportNotePdf(id) {
     var tags = n.tags || [];
     var wc = calcWordCount(n.content);
     var metaRows = '';
+    function addMetadata(label, value) {
+        metaRows += '<div class="meta-row"><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value) + '</dd></div>';
+    }
     if (n.category)
-        metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Category</td><td style="font-size:.82rem">' + escapeHtml(n.category) + '</td></tr>';
+        addMetadata('Category', n.category);
     if (sub)
-        metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Subject</td><td style="font-size:.82rem">' + escapeHtml(sub.code || sub.name) + '</td></tr>';
+        addMetadata('Subject', sub.code || sub.name);
     if (task)
-        metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Task</td><td style="font-size:.82rem">' + escapeHtml(task.title) + '</td></tr>';
+        addMetadata('Task', task.title);
     if (tags.length)
-        metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Tags</td><td style="font-size:.82rem">' + tags.map(escapeHtml).join(', ') + '</td></tr>';
+        addMetadata('Tags', tags.join(', '));
     if (wc)
-        metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Length</td><td style="font-size:.82rem">' + wc.toLocaleString() + ' words · ' + calcReadingTime(wc) + '</td></tr>';
-    metaRows += '<tr><td style="color:#888;padding:3px 12px 3px 0;font-size:.82rem;white-space:nowrap">Updated</td><td style="font-size:.82rem">' + new Date(n.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '</td></tr>';
+        addMetadata('Length', wc.toLocaleString() + ' words · ' + calcReadingTime(wc));
+    addMetadata('Updated', new Date(n.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
     var renderedContent = renderMarkdown(n.content, null);
-    // Make checklist items non-interactive for PDF
-    renderedContent = renderedContent.replace(/onclick="[^"]*"/g, '');
     var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
         '<title>' + escapeHtml(n.title) + '</title>' +
         '<style>' +
-        'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.65;color:#1a1a2e;margin:0;padding:0}' +
-        '.page{max-width:720px;margin:0 auto;padding:48px 40px}' +
-        'h1.note-title{font-size:1.7rem;font-weight:800;color:#1a1a2e;margin:0 0 4px;line-height:1.25}' +
-        '.meta-table{border-collapse:collapse;margin:12px 0 24px}' +
-        '.divider{border:none;border-top:2px solid #e8e8f0;margin:0 0 24px}' +
-        '.md-h{font-weight:800;margin:.9em 0 .3em;padding-bottom:4px;border-bottom:1px solid #e8e8f0;color:#1a1a2e}' +
+        '@page{size:auto;margin:20mm}' +
+        '*{box-sizing:border-box}' +
+        'body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.6;color:#1a1a2e;margin:0;overflow-wrap:anywhere;word-break:normal}' +
+        '.page{width:100%;max-width:180mm;margin:0 auto}' +
+        'h1.note-title{font-size:22pt;font-weight:700;color:#1a1a2e;margin:0 0 8pt;line-height:1.25;overflow-wrap:anywhere}' +
+        '.meta-list{display:grid;grid-template-columns:max-content 1fr;gap:3pt 12pt;margin:12pt 0 20pt;font-size:9pt}' +
+        '.meta-row{display:contents}.meta-row dt{color:#666}.meta-row dd{margin:0;overflow-wrap:anywhere}' +
+        '.divider{border:none;border-top:1px solid #d5d8e0;margin:0 0 18pt}' +
+        '.md-h{font-weight:700;margin:1em 0 .35em;padding-bottom:3pt;border-bottom:1px solid #e8e8f0;color:#1a1a2e;break-after:avoid}' +
         'h4.md-h{font-size:1.1rem}h5.md-h{font-size:.96rem}h6.md-h{font-size:.88rem}' +
-        '.md-p{margin:0 0 .6em}' +
-        '.md-ul{margin:0 0 .6em;padding-left:1.5em}' +
-        '.md-li{margin-bottom:3px}' +
-        'ol{margin:0 0 .6em;padding-left:1.5em}' +
-        '.md-inline-code{background:#f0f0f8;border:1px solid #ddd;border-radius:4px;padding:1px 5px;font-family:monospace;font-size:.85em}' +
-        '.md-code-block{background:#f5f5fa;border:1px solid #ddd;border-radius:8px;padding:12px 16px;overflow-x:auto;margin:.6em 0;font-family:monospace;font-size:.82rem;line-height:1.55}' +
-        '.md-checklist-item{display:flex;align-items:flex-start;gap:8px;margin:4px 0;break-inside:avoid}' +
-        '.md-cl-box{width:16px;height:16px;min-width:16px;border:1.5px solid #999;border-radius:4px;display:flex;align-items:center;justify-content:center;margin-top:3px;flex-shrink:0}' +
-        '.md-cl-checked{background:#7c6cf6;border-color:#7c6cf6}' +
-        '.md-cl-checked::after{content:"✓";color:#fff;font-size:.68rem;font-weight:700;margin-top:-1px}' +
-        '.md-cl-text{font-size:.9rem;line-height:1.5}' +
-        '.md-cl-done{text-decoration:line-through;color:#aaa}' +
-        'a{color:#7c6cf6}' +
-        '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:32px 32px}}' +
+        '.md-p{margin:0 0 .75em;white-space:normal}' +
+        '.md-ul,ol{margin:0 0 .75em;padding-left:1.5em}' +
+        '.md-li,ol li{margin:0 0 3pt;break-inside:avoid}' +
+        '.md-inline-code{background:#f0f0f8;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:.9em;overflow-wrap:anywhere}' +
+        '.md-code-block{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow:hidden;background:#f5f5fa;border:1px solid #ddd;border-radius:4px;padding:10pt;margin:.75em 0;font-family:monospace;font-size:9pt;line-height:1.5}' +
+        '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
+        'a{color:#2548a8;overflow-wrap:anywhere}' +
+        '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:none}pre,li{break-inside:avoid}}' +
         '</style></head><body>' +
         '<div class="page">' +
         '<h1 class="note-title">' + escapeHtml(n.title) + '</h1>' +
-        (metaRows ? '<table class="meta-table">' + metaRows + '</table>' : '') +
+        (metaRows ? '<dl class="meta-list">' + metaRows + '</dl>' : '') +
         '<hr class="divider">' +
         renderedContent +
         '</div></body></html>';

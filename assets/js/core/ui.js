@@ -20,7 +20,14 @@ const Toast = {
         el.setAttribute('role', kind === 'danger' ? 'alert' : 'status');
         el.innerHTML = `<i class="bi ${icon} toast-item-icon" aria-hidden="true"></i><span class="toast-item-msg">${escHtml(msg)}</span>`;
         c.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); }, 2600);
+        // Error/warning toasts (e.g. "Couldn't save ... to the server") stay up much
+        // longer and are tap-to-dismiss -- on mobile there's no DevTools console to
+        // fall back on to read what went wrong, so the toast IS the only error log
+        // the student has. A 2.6s auto-fade was effectively hiding real sync failures.
+        const isUrgent = kind === 'danger' || kind === 'warning';
+        el.addEventListener('click', () => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); });
+        if (isUrgent) el.style.cursor = 'pointer';
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); }, isUrgent ? 12000 : 2600);
     },
     confirmExport() { window.exportData ? window.exportData() : this.show('Open Settings to export data', 'accent', 'bi-download'); }
 };
@@ -87,7 +94,7 @@ function ensureConfirmModal() {
    in the popup instead of falling back to a native window.prompt() after the fact. onConfirm
    is then called with the trimmed reason string (or '' if left blank and not required). */
 function confirmAction(opts) {
-    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, onConfirm } = opts;
+    const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, hideCloseButton = false, onConfirm } = opts;
     ensureConfirmModal();
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
@@ -127,8 +134,10 @@ function confirmAction(opts) {
         if (onConfirm)
             onConfirm(reasonValue);
     });
-    const modal = new bootstrap.Modal(document.getElementById('confirmActionModal'));
-    document.getElementById('confirmActionModal').addEventListener('shown.bs.modal', () => {
+    const modalElement = document.getElementById('confirmActionModal');
+    modalElement.dataset.hideCloseButton = hideCloseButton ? 'true' : 'false';
+    const modal = new bootstrap.Modal(modalElement);
+    modalElement.addEventListener('shown.bs.modal', () => {
         if (reasonField) reasonInput.focus();
     }, { once: true });
     modal.show();

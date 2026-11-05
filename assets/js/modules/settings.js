@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    SETTINGS.JS — includes Academic Semester Management
    ============================================================ */
 
@@ -8,13 +8,29 @@ function initSettings() {
     document.getElementById('sNumber').value = s.studentNumber || '';
     document.getElementById('sCourse').value = s.course || '';
     document.getElementById('sYear').value = s.yearLevel || '';
-    document.getElementById('sSection').value = s.section || '';
     document.getElementById('sSchool').value = s.school || '';
     highlightTheme(s.theme);
     renderAccentPicker(s.accent);
     renderNotifToggles(s.notifications);
     renderSemesterManager();
     initDisplayPrefs(s);
+    renderSyncStatus();
+}
+
+/* Shows the last Supabase sync failure (grades, semesters, etc.) in plain
+   language, so a student on mobile -- with no DevTools console -- has
+   somewhere to actually see why something "isn't saving". See
+   cloud-sync.js's recordSyncError/getLastSyncError. */
+function renderSyncStatus() {
+    const card = document.getElementById('syncStatusCard');
+    const msgEl = document.getElementById('syncStatusMsg');
+    if (!card || !msgEl) return;
+    const err = (window.CloudSync && typeof window.CloudSync.getLastSyncError === 'function')
+        ? window.CloudSync.getLastSyncError() : null;
+    if (!err) { card.hidden = true; return; }
+    const when = err.at ? new Date(err.at).toLocaleString() : '';
+    msgEl.textContent = `${err.message}${when ? ' (' + when + ')' : ''}`;
+    card.hidden = false;
 }
 
 function initDisplayPrefs(s) {
@@ -34,7 +50,6 @@ function saveProfile() {
     s.studentNumber = document.getElementById('sNumber').value.trim();
     s.course = document.getElementById('sCourse').value.trim();
     s.yearLevel = document.getElementById('sYear').value.trim();
-    s.section = document.getElementById('sSection').value.trim();
     s.school = document.getElementById('sSchool').value.trim();
     DB.saveSettings(s);
     Toast.show('Profile saved');
@@ -74,9 +89,9 @@ function renderSemesterManager() {
           </div>
           <div class="sem-item-actions">
             ${isActive ? '<span class="chip sem-active-chip"><i class="bi bi-check2" aria-hidden="true"></i> Active</span>' :
-                `<button class="btn btn-ghost btn-sm" onclick="switchActiveSemester('${sem.id}')" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
-            <button class="btn btn-ghost btn-sm" onclick="openEditSemesterModal('${sem.id}')" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger" onclick="confirmDeleteSemester('${sem.id}')" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
+                `<button class="btn btn-ghost btn-sm sem-switch-btn" data-id="${escHtml(sem.id)}" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
+            <button class="btn btn-ghost btn-sm sem-edit-btn" data-id="${escHtml(sem.id)}" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger sem-delete-btn" data-id="${escHtml(sem.id)}" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
           </div>
         </div>`;
         }).join('')}
@@ -86,6 +101,16 @@ function renderSemesterManager() {
     <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
   </div>`;
     wrap.innerHTML = html;
+    // MAJ-09: Event delegation — read id from data-id attribute (safe DOM property),
+    // never from an interpolated onclick string, so crafted sem IDs can't XSS.
+    wrap.addEventListener('click', function _semClick(e) {
+        const switchBtn = e.target.closest('.sem-switch-btn');
+        if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
+        const editBtn = e.target.closest('.sem-edit-btn');
+        if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
+        const deleteBtn = e.target.closest('.sem-delete-btn');
+        if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
+    }, { once: true }); // { once: true } auto-removes listener on next renderSemesterManager call
 }
 
 function switchActiveSemester(id) {
@@ -289,7 +314,9 @@ function exportData() {
     a.href = url;
     a.download = `student-planner-backup-${todayKey()}.json`;
     a.click();
-    URL.revokeObjectURL(url);
+    // MIN-05: Defer revokeObjectURL — calling it synchronously races the browser's download
+    // queue and can produce a 0-byte file on some browsers (compare copyGwaCardAsImage pattern).
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
     Toast.show('Data exported');
 }
 

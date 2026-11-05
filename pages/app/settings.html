@@ -27,8 +27,7 @@
             <div class="col-md-6"><label for="sName">Name</label><input class="form-control" id="sName" autocomplete="name"></div>
             <div class="col-md-6"><label for="sNumber">Student Number</label><input class="form-control" id="sNumber" autocomplete="off"></div>
             <div class="col-md-6"><label for="sCourse">Course</label><input class="form-control" id="sCourse" autocomplete="off"></div>
-            <div class="col-md-3"><label for="sYear">Year Level</label><input class="form-control" id="sYear" autocomplete="off"></div>
-            <div class="col-md-3"><label for="sSection">Section</label><input class="form-control" id="sSection" autocomplete="off"></div>
+            <div class="col-md-6"><label for="sYear">Year Level</label><input class="form-control" id="sYear" autocomplete="off"></div>
             <div class="col-12"><label for="sSchool">School</label><input class="form-control" id="sSchool" autocomplete="organization"></div>
           </div>
           <button class="btn btn-accent w-100 mt-3" onclick="saveProfile()">Save Profile</button>
@@ -38,6 +37,12 @@
           <div class="section-title"><i class="bi bi-calendar3"></i>Academic Semesters</div>
           <p class="text-faint mb-3" style="font-size:.8rem">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, notes, and syllabi.</p>
           <div id="semesterManager">Loading…</div>
+        </div>
+
+        <div class="glass card-pad fade-in mb-3" id="syncStatusCard" hidden>
+          <div class="section-title"><i class="bi bi-cloud-slash"></i>Sync Status</div>
+          <p class="text-faint mb-2" style="font-size:.8rem" id="syncStatusMsg"></p>
+          <button class="btn btn-ghost w-100" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh &amp; Retry</button>
         </div>
 
         <div class="glass card-pad fade-in">
@@ -100,7 +105,7 @@
       <div class="modal-body p-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
           <h5 class="mb-0 fw-bold" id="semModalTitle">Add Semester</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="semModalBody"></div>
       </div>
@@ -110,9 +115,11 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
@@ -121,7 +128,7 @@
 <script>
   renderShell('settings');
   applyTheme();
-  initSettings();
+  DB.whenCloudReady(initSettings);
 </script>
 </body>
 </html>
