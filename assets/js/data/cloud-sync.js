@@ -499,6 +499,15 @@
         try { lastUserId = localStorage.getItem(LAST_USER_KEY); } catch (e) { /* ignore */ }
         if (lastUserId && lastUserId !== userId) {
             DB.clearPrivateCacheOnSignOut();
+            // MAJ-14: clearPrivateCacheOnSignOut() deliberately leaves the semester
+            // bookkeeping map/placeholder-id alone now (see storage.js) since a plain
+            // logout needs them to survive for the SAME student's next login. This is
+            // the one path that's actually a different student landing in this tab, so
+            // scrub those two here instead, directly.
+            try {
+                localStorage.removeItem(MAP_KEY);
+                localStorage.removeItem(SERVER_SEM_KEY);
+            } catch (e) { /* ignore */ }
         }
         try { localStorage.setItem(LAST_USER_KEY, userId); } catch (e) { /* ignore */ }
 
