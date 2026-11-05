@@ -19,7 +19,7 @@
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
 
-  <main class="main-content">
+  <main class="main-content dashboard-page">
     <div class="topbar dash-topbar">
       <div>
         <h1 class="page-title" id="greetText">Dashboard</h1>
@@ -132,7 +132,7 @@
               <div class="att-legend-row"><div class="att-dot" style="background:#fb7185"></div><span class="att-legend-label">Absent</span><span class="att-legend-val" id="attAbsent">–</span></div>
             </div>
           </div>
-          <div class="dash-attendance-note">No Classes excluded from rate</div>
+          <div class="dash-attendance-note">No classes excluded from rate</div>
         </div>
       </div>
       <div class="dash-card-anim">
@@ -142,35 +142,6 @@
             <a href="grades.html" class="view-all-link">View Grades →</a>
           </div>
           <div id="dashGradeChart"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONDITIONAL ATTENTION BANNER -->
-    <div class="dash-context-banner dash-card-anim" id="dashContextBanner" hidden aria-live="polite">
-      <i class="bi bi-bell-fill" aria-hidden="true"></i>
-      <span class="dash-context-label">Needs attention</span>
-      <div id="dashContextSummary" class="ctx-summary-content"></div>
-    </div>
-
-    <!-- LOW-EMPHASIS SUPPORT STRIP -->
-    <div class="dash-bottom-strip dash-card-anim">
-      <div class="dash-strip-tip" id="dashTipWidget">
-        <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
-        <div class="tip-body">
-          <div class="tip-label">STUDENT TIP</div>
-          <div class="tip-text">Loading tip…</div>
-        </div>
-      </div>
-      <div class="dash-strip-weather" id="dashWeatherWidget">
-        <div class="weather-loading-state"><i class="bi bi-cloud" aria-hidden="true"></i><span>Loading weather…</span></div>
-      </div>
-      <div class="dash-strip-streak" id="dashStreakWidget">
-        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
-        <span class="streak-num" id="streakNumVal">–</span>
-        <div class="streak-text-stack">
-          <div class="streak-label-row">DAY STREAK</div>
-          <div class="streak-sub-txt">Tasks completed</div>
         </div>
       </div>
     </div>
