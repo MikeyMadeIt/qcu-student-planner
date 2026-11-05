@@ -586,7 +586,7 @@ function ensureQuickAttModal() {
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
           <h5 class="modal-title" id="quickAttModalLabel"><i class="bi bi-person-check me-2" aria-hidden="true"></i>Log Attendance</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="quickAttModalBody"></div>
       </div>
@@ -694,7 +694,7 @@ function ensureCancelModal() {
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
           <h5 class="modal-title" id="cancelModalLabel"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i>Cancel Class</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="cancelModalBody"></div>
       </div>
@@ -1014,7 +1014,7 @@ function showTimetablePopup(subjectId, dateStr) {
         ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
         ${cancelled ? '<span class="sch-cancelled-chip"><i class="bi bi-ban" aria-hidden="true"></i> CANCELLED</span>' : ''}
       </div>
-      <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div style="padding:0 1rem 1rem">
       <div class="sch-tt-popup-name">${esc(s.desc)}</div>
@@ -1209,7 +1209,7 @@ function showSubjectDetail(id) {
         <h5 class="modal-title mb-0">${esc(s.code)}</h5>
         ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
       </div>
-      <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <p class="text-soft mb-3" style="font-size:.88rem">${esc(s.desc)}</p>
     <div class="d-flex flex-column gap-2 mb-3" style="font-size:.83rem">
