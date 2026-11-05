@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    ATTENDANCE.JS — Enhanced v4
    Features: Heatmap, Mark All Present, Consecutive Absence
    Warnings, Export CSV/PDF, Skeleton states, Mode toggle,
@@ -19,9 +19,10 @@ function formatDisplayDate(ymd) {
 }
 
 function formatShortDate(ymd) {
-    if (!ymd)
-        return '';
-    return ymd.replace(/^\d{4}-/, '').replace('-', '/');
+    if (!ymd) return '';
+    // MIN-06: Use slice(5,10) so ISO timestamps like '2026-11-04T10:30:00' don't produce
+    // garbled output ('11/04T10:30:00') the way the old two-step regex chain did.
+    return ymd.slice(5, 10).replace('-', '/');
 }
 
 /* ---- Absence limit storage ---- */
@@ -70,10 +71,13 @@ function initAttendance() {
     const semId = DB.getActiveSemesterId();
     const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
     const subSel = document.getElementById('attSubject');
-    subSel.innerHTML = subs.length
-        ? subs.map(s => `<option value="${s.id}">${escapeAttHtml(s.code)}</option>`).join('')
-        : '<option value="">No subjects</option>';
-    document.getElementById('attDate').value = todayKey();
+    if (subSel) {
+        subSel.innerHTML = subs.length
+            ? subs.map(s => `<option value="${s.id}">${escapeAttHtml(s.code)}</option>`).join('')
+            : '<option value="">No subjects</option>';
+    }
+    const attDate = document.getElementById('attDate');
+    if (attDate) attDate.value = todayKey();
     // Populate heatmap subject filter
     const heatmapFilter = document.getElementById('heatmapSubjectFilter');
     if (heatmapFilter) {
