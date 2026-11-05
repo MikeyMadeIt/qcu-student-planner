@@ -126,8 +126,8 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'login') {
-            const { role, accountStatus, rejectionReason } = result.data;
-            const destination = resolveLandingRoute({ role, accountStatus, rejectionReason });
+            const { role, accountStatus, rejectionReason, needsProfileDetails } = result.data;
+            const destination = resolveLandingRoute({ role, accountStatus, rejectionReason, needsProfileDetails });
 
             if (destination.type === 'go') {
                 persistRememberedEmail(form);
@@ -144,7 +144,7 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'reset') {
-            showAlert(form, 'Your password has been updated. Redirecting to log in…', 'info');
+            showAlert(form, 'Your password has been updated. Redirecting to log in\u2026', 'info'); // MIN-01: \u2026 escaped to avoid mojibake if served without UTF-8 charset header
             setTimeout(() => { location.href = 'login.html'; }, 1500);
             return;
         }
