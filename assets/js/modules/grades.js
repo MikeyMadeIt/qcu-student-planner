@@ -639,13 +639,17 @@ function refreshGradePreview() {
 }
 
 function saveGradeComponents() {
+    // MAJ-10b: a component left unnamed used to be silently dropped here on
+    // save (no warning), making it look like the whole breakdown vanished.
+    // Only drop a component that's genuinely empty (no name AND no
+    // assessments entered); otherwise keep it and give it a default name.
     const cleaned = gradeDraft.components
-        .map(c => ({
-        id: c.id || DB.uid(), name: (c.name || '').trim(), weight: +c.weight || 0,
+        .map((c, i) => ({
+        id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
         assessments: (c.assessments || [])
             .filter(a => a.name || (a.score !== null && a.totalItems !== null))
             .map(a => ({ id: a.id || DB.uid(), name: (a.name || '').trim(), score: a.score, totalItems: a.totalItems }))
-    })).filter(c => c.name);
+    })).filter(c => c.name.trim() || c.weight || c.assessments.length);
     const semId = DB.getActiveSemesterId();
     const grades = DB.getGrades().map(normalizeGradeRecord);
     const idx = grades.findIndex(g => g.subjectId === gradeDraftSubjectId);

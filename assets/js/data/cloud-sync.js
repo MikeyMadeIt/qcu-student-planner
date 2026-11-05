@@ -42,6 +42,41 @@
 (function () {
     const MAP_KEY = 'sp_cloud_semester_map';
 
+    /* MAJ-12: every push*() below is fired-and-forgotten by the DB.saveX wrappers
+       (so the UI never blocks on the network) -- but that means signOut() could
+       previously kill the Supabase session and wipe the local cache (see
+       clearPrivateCacheOnSignOut) WHILE a save was still in flight. The save's
+       getUserId() lookup would then come back empty (no session left), the push
+       would silently no-op, and the edit the student just made -- most visibly a
+       grade breakdown or a newly added semester -- would be gone for good on the
+       next login, even though it looked saved right up until logout.
+       trackPush() records every in-flight push promise; waitForPendingPushes()
+       (exposed as window.CloudSync.waitForPendingSync) lets signOut() wait for
+       them to actually land before it tears down the session/cache. A timeout
+       keeps a stuck network call from blocking logout forever. */
+    let _pending = [];
+    function trackPush(p) {
+        const entry = p.catch(() => {});
+        _pending.push(entry);
+        entry.finally(() => { _pending = _pending.filter(x => x !== entry); });
+        return p;
+    }
+    function waitForPendingPushes(timeoutMs) {
+        const all = Promise.all(_pending.slice());
+        if (!timeoutMs) return all;
+        return Promise.race([
+            all,
+            new Promise(resolve => setTimeout(resolve, timeoutMs)),
+        ]);
+    }
+    window.CloudSync = window.CloudSync || {};
+    window.CloudSync.waitForPendingSync = function (timeoutMs) {
+        return waitForPendingPushes(timeoutMs != null ? timeoutMs : 8000);
+    };
+    // Lets a page (e.g. Settings > Sync Status) show the student the last sync
+    // failure in plain language without needing a desktop browser's DevTools.
+    window.CloudSync.getLastSyncError = function () { return getLastSyncError(); };
+
     function loadMap() {
         const empty = { subjects: {}, tasks: {}, calendarEvents: {}, notes: {}, attendance: {}, grades: {}, syllabusCourses: {} };
         try { return Object.assign(empty, JSON.parse(localStorage.getItem(MAP_KEY)) || {}); }
@@ -66,7 +101,26 @@
         saveMap(m);
     }
 
-    function toast(msg, kind) {
+    // Students on mobile have no DevTools console to see why a save failed --
+    // the toast (see ui.js) was the only trace, and it auto-faded in 2.6s. Every
+    // sync failure is now also written here so it can be read back later (e.g.
+    // from Settings > Sync Status) instead of relying on having seen the toast
+    // in time. Successes clear it so a stale error doesn't linger forever.
+    const LAST_ERROR_KEY = 'sp_cloud_last_error';
+    function recordSyncError(area, message) {
+        try {
+            localStorage.setItem(LAST_ERROR_KEY, JSON.stringify({ area, message: String(message || 'Unknown error'), at: Date.now() }));
+        } catch (e) { /* ignore */ }
+    }
+    function clearSyncError() {
+        try { localStorage.removeItem(LAST_ERROR_KEY); } catch (e) { /* ignore */ }
+    }
+    function getLastSyncError() {
+        try { return JSON.parse(localStorage.getItem(LAST_ERROR_KEY)); } catch (e) { return null; }
+    }
+
+    function toast(msg, kind, area) {
+        if (kind === 'high' || kind === 'danger') recordSyncError(area || 'sync', msg);
         if (window.Toast && typeof window.Toast.show === 'function') {
             window.Toast.show(msg, kind || 'high', 'bi-cloud-slash');
         }
@@ -106,6 +160,36 @@
     }
     function setDirtyAtt(set) {
         try { localStorage.setItem(DIRTY_ATT_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
+    /* MAJ-10: grades previously had no dirty-tracking at all, so a save that
+       hadn't finished reaching Supabase yet (pushGrades runs in the
+       background, un-awaited) could be silently clobbered by the very next
+       hydrate() on the next page load -- the grading breakdown the student
+       just saved would "disappear" the moment they navigated away and back.
+       Mirrors the subjects/attendance dirty pattern above. */
+    const DIRTY_GRADES_KEY = 'sp_cloud_dirty_grades';
+    function getDirtyGrades() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_GRADES_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirtyGrades(set) {
+        try { localStorage.setItem(DIRTY_GRADES_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
+    /* MAJ-11: semesters (Settings > Academic Semester Management) used to be
+       purely local-only -- never pushed to Supabase at all -- so
+       clearPrivateCacheOnSignOut() wiping the local cache on logout meant any
+       semester the student added was permanently gone the next time they
+       signed in. Synced the same write-through + dirty-tracking way as
+       everything else now; see semesterRowToLocal/semesterLocalToRow below. */
+    const DIRTY_SEM_KEY = 'sp_cloud_dirty_semesters';
+    function getDirtySem() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_SEM_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirtySem(set) {
+        try { localStorage.setItem(DIRTY_SEM_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
     }
 
     /* ---------- loading overlay ---------- */
@@ -337,14 +421,89 @@
         try { id = localStorage.getItem(SERVER_SEM_KEY); } catch (e) { /* ignore */ }
         if (id) return id;
         const supabase = await getClient();
+        // Look for an already-existing placeholder row FIRST. SERVER_SEM_KEY can go
+        // missing even though the server-side row still exists (cleared localStorage
+        // for troubleshooting, a different browser/device, etc.) -- blindly inserting
+        // in that case hits the table's own (user_id, school_year, name) unique
+        // constraint and fails every single grade/semester push with "duplicate key
+        // value violates unique constraint ... semesters_user_school_year_name_key".
+        const { data: existing, error: selErr } = await supabase
+            .from('semesters')
+            .select('id')
+            .eq('user_id', userId)
+            .is('client_id', null)
+            .limit(1)
+            .maybeSingle();
+        if (!selErr && existing && existing.id) {
+            try { localStorage.setItem(SERVER_SEM_KEY, existing.id); } catch (e) { /* ignore */ }
+            return existing.id;
+        }
         const { data, error } = await supabase
             .from('semesters')
-            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: true })
+            // is_active: false -- this placeholder row only exists to satisfy the
+            // grades/syllabus_courses NOT NULL semester_id FK; it is never shown in
+            // the UI. Marking it active here permanently occupied the table's
+            // "one active semester per user" unique index (semesters_one_active_
+            // per_user_idx), so every later attempt to activate a REAL semester
+            // (adding/switching semesters in Settings) failed with a duplicate-key
+            // error on that index.
+            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: false })
             .select('id')
             .single();
-        if (error || !data) throw error || new Error('Could not create placeholder semester');
+        if (error) {
+            // 23505 = unique_violation: another tab/request created the placeholder
+            // between our select and this insert. Re-select instead of failing.
+            if (error.code === '23505') {
+                const { data: retry } = await supabase.from('semesters').select('id').eq('user_id', userId).is('client_id', null).limit(1).maybeSingle();
+                if (retry && retry.id) {
+                    try { localStorage.setItem(SERVER_SEM_KEY, retry.id); } catch (e) { /* ignore */ }
+                    return retry.id;
+                }
+            }
+            throw error;
+        }
+        if (!data) throw new Error('Could not create placeholder semester');
         try { localStorage.setItem(SERVER_SEM_KEY, data.id); } catch (e) { /* ignore */ }
         return data.id;
+    }
+
+    /* `semesters.client_id` holds the local deterministic id (e.g. "2026-2027-1",
+       see makeSemesterId() in storage.js) so a row can be matched back up on
+       the next hydrate without needing a separate id-mapping table. The
+       pre-existing placeholder row created by getServerSemesterId() below has
+       client_id = null on purpose, so it's never picked up as a real semester
+       by semesterRowToLocal's caller (hydrate filters client_id is not null). */
+    function semesterRowToLocal(row) {
+        return {
+            id: row.client_id,
+            name: row.name || '',
+            schoolYear: row.school_year || '',
+            startDate: row.start_date || '',
+            endDate: row.end_date || '',
+            finalsDate: row.finals_date || '',
+            totalWeeks: row.total_weeks != null ? Number(row.total_weeks) : 15,
+        };
+    }
+    function semesterLocalToRow(s, userId, activeId) {
+        return {
+            user_id: userId, client_id: s.id,
+            name: s.name || '', school_year: s.schoolYear || '',
+            start_date: s.startDate || null, end_date: s.endDate || null,
+            finals_date: s.finalsDate || null, total_weeks: s.totalWeeks || 15,
+            // MAJ-13: which semester is "active" (the one the Settings > Academic
+            // Semester Management picker currently has selected) was never synced
+            // at all -- it only ever lived in localStorage's sp_active_semester_id,
+            // which clearPrivateCacheOnSignOut() wipes on every logout. The real
+            // semester objects (and their grades, tied to them via semesterId)
+            // were still on the server after re-login, but getActiveSemesterId()
+            // fell back to the chronologically-first semester, so the grade
+            // breakdown and semester banner for whichever semester the student
+            // had actually been using just silently stopped showing -- looking
+            // exactly like the data had disappeared. Piggybacking this flag onto
+            // the existing is_active column (previously only ever true on the
+            // throwaway placeholder row) lets hydrate() below restore it.
+            is_active: s.id === activeId,
+        };
     }
 
     function syllabusRowToLocal(row) {
@@ -372,7 +531,7 @@
     const last = {
         subjects: new Map(), tasks: new Map(), calendarEvents: new Map(),
         notes: new Map(), attendance: new Map(), grades: new Map(),
-        gwaCalc: new Map(), syllabusCourses: new Map(),
+        gwaCalc: new Map(), syllabusCourses: new Map(), semesters: new Map(),
     };
     // AJ-08: cancelled occurrences snapshot (not diffed per-row; whole-blob replace)
     let _lastCancelledJson = '[]';
@@ -398,13 +557,22 @@
         try { lastUserId = localStorage.getItem(LAST_USER_KEY); } catch (e) { /* ignore */ }
         if (lastUserId && lastUserId !== userId) {
             DB.clearPrivateCacheOnSignOut();
+            // MAJ-14: clearPrivateCacheOnSignOut() deliberately leaves the semester
+            // bookkeeping map/placeholder-id alone now (see storage.js) since a plain
+            // logout needs them to survive for the SAME student's next login. This is
+            // the one path that's actually a different student landing in this tab, so
+            // scrub those two here instead, directly.
+            try {
+                localStorage.removeItem(MAP_KEY);
+                localStorage.removeItem(SERVER_SEM_KEY);
+            } catch (e) { /* ignore */ }
         }
         try { localStorage.setItem(LAST_USER_KEY, userId); } catch (e) { /* ignore */ }
 
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes] = await Promise.all([
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -418,9 +586,12 @@
                 supabase.from('syllabus_courses').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 // AJ-08: single-row blob storing cancelled class occurrences
                 supabase.from('cancelled_occurrences').select('occurrences').eq('user_id', userId).maybeSingle(),
+                // MAJ-11: real per-semester rows (client_id not null excludes the
+                // one legacy placeholder row used only to satisfy grades/syllabus FKs)
+                supabase.from('semesters').select('*').eq('user_id', userId).not('client_id', 'is', null).order('created_at', { ascending: true }),
             ]);
 
-            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes]
+            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
 
@@ -454,9 +625,39 @@
             const attendance = serverAtt.map(r => dirtyAttMap.get(r.id) || r);
             localDirtyAtt.forEach(r => { if (!serverAtt.some(x => x.id === r.id)) attendance.push(r); });
             setDirtyAtt(new Set(localDirtyAtt.map(r => r.id)));
-            const grades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const serverGrades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const dirtyGradeIds = getDirtyGrades();
+            const localDirtyGrades = DB.getGrades().filter(g => g.id && dirtyGradeIds.has(g.id));
+            const localDirtyGradesMap = new Map(localDirtyGrades.map(g => [g.id, g]));
+            const grades = serverGrades.map(g => localDirtyGradesMap.get(g.id) || g);
+            localDirtyGrades.forEach(g => { if (!serverGrades.some(x => x.id === g.id)) grades.push(g); });
+            setDirtyGrades(new Set(localDirtyGrades.map(g => g.id)));
+
             const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
             const syllabusCourses = (sylRes.data || []).map(syllabusRowToLocal);
+
+            // MAJ-11: merge in any local semester not yet seen on the server --
+            // covers both a save still in flight (dirty) AND the one-time case
+            // of an existing user's pre-this-fix local semesters that were
+            // never pushed at all, so they get adopted (and pushed up below)
+            // instead of being wiped back to a lone default.
+            const serverSemesters = (semRes.data || []).map(semesterRowToLocal);
+            const serverSemIds = new Set(serverSemesters.map(s => s.id));
+            const localOnlySemesters = DB.getSemesters().filter(s => !serverSemIds.has(s.id));
+            const semesters = [...serverSemesters, ...localOnlySemesters];
+            setDirtySem(new Set(localOnlySemesters.map(s => s.id)));
+
+            // MAJ-13: restore which semester was active. Only do this when nothing
+            // local has it set yet (a fresh login, right after
+            // clearPrivateCacheOnSignOut wiped sp_active_semester_id) -- never
+            // clobber a choice already made this session, e.g. the student just
+            // switched semesters and that push hasn't round-tripped yet.
+            if (!DB.get('activeSemesterId', null)) {
+                const serverActiveRow = (semRes.data || []).find(r => r.is_active && r.client_id);
+                if (serverActiveRow && semesters.some(s => s.id === serverActiveRow.client_id)) {
+                    DB.set('activeSemesterId', serverActiveRow.client_id);
+                }
+            }
 
             DB.set('subjects', subjects);
             DB.set('tasks', tasks);
@@ -466,6 +667,7 @@
             DB.set('grades', grades);
             DB.set('gwaCalc', gwaRows);
             DB.set('syllabusCourses', syllabusCourses);
+            if (semesters.length) DB.set('semesters', semesters);
 
             // AJ-08: hydrate cancelled occurrences from Supabase blob
             if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
@@ -478,12 +680,15 @@
             last.calendarEvents = new Map(events.map(e => [e.id, true]));
             last.notes = new Map(notes.map(n => [n.id, true]));
             last.attendance = new Map(serverAtt.map(a => [a.id, true]));
-            last.grades = new Map(grades.map(g => [g.id, true]));
+            last.grades = new Map(serverGrades.map(g => [g.id, true]));
             last.gwaCalc = new Map(gwaRows.map(r => [r.id, true]));
             last.syllabusCourses = new Map(syllabusCourses.map(c => [c.id, true]));
+            last.semesters = new Map(serverSemesters.map(s => [s.id, true]));
 
             if (localDirty.length) pushSubjects(subjects.slice());
             if (localDirtyAtt.length) pushAttendance(attendance.slice());
+            if (localDirtyGrades.length) pushGrades(grades.slice());
+            if (localOnlySemesters.length) pushSemesters(semesters.slice());
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
@@ -720,7 +925,13 @@
     /* grades: each grade row owns its own components/assessments. Ids on components
        and assessments ARE stable across edits (grades.js keeps them via `c.id || DB.uid()`),
        so a straightforward delete-missing / upsert-rest pass works, scoped per grade row. */
-    async function pushGrades(newList) {
+    let _gradesQueue = Promise.resolve();
+    function pushGrades(newList) {
+        _gradesQueue = _gradesQueue.then(() => doPushGrades(newList)).catch(() => {});
+        return _gradesQueue;
+    }
+
+    async function doPushGrades(newList) {
         const userId = await getUserId();
         if (!userId) return;
         const supabase = await getClient();
@@ -734,6 +945,8 @@
 
         const newIds = new Set(newList.map(g => g.id));
         const toDelete = [...last.grades.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirtyGrades();
+        let failure = null;
         try {
             const serverSemId = await getServerSemesterId(userId);
 
@@ -744,15 +957,20 @@
                 await supabase.from('grade_components').delete().eq('grade_id', gradeId);
                 await supabase.from('grades').delete().eq('id', gradeId);
                 dropSemFor('grades', gradeId);
+                last.grades.delete(gradeId);
             }
 
             for (const g of newList) {
-                if (!isUuid(g.id)) continue;
+                if (!isUuid(g.id)) {
+                    failure = failure || new Error('A grade record has an invalid id');
+                    continue;
+                }
+                let gradeFailed = false;
                 const { error: gErr } = await supabase.from('grades').upsert({
                     id: g.id, user_id: userId, semester_id: serverSemId, subject_id: g.subjectId,
                     updated_at: new Date().toISOString(),
                 }, { onConflict: 'id' });
-                if (gErr) throw gErr;
+                if (gErr) { failure = failure || gErr; continue; }
                 setSemFor('grades', g.id, g.semesterId);
 
                 const { data: existingComps } = await supabase.from('grade_components').select('id').eq('grade_id', g.id);
@@ -765,11 +983,11 @@
 
                 for (let ci = 0; ci < (g.components || []).length; ci++) {
                     const c = g.components[ci];
-                    if (!isUuid(c.id)) continue;
+                    if (!isUuid(c.id)) { gradeFailed = true; continue; }
                     const { error: cErr } = await supabase.from('grade_components').upsert({
                         id: c.id, grade_id: g.id, name: c.name || '', weight: c.weight || 0, position: ci,
                     }, { onConflict: 'id' });
-                    if (cErr) throw cErr;
+                    if (cErr) { failure = failure || cErr; gradeFailed = true; continue; }
 
                     const { data: existingAss } = await supabase.from('grade_assessments').select('id').eq('component_id', c.id);
                     const keepAssIds = new Set((c.assessments || []).map(a => a.id));
@@ -778,7 +996,7 @@
 
                     for (let ai = 0; ai < (c.assessments || []).length; ai++) {
                         const a = c.assessments[ai];
-                        if (!isUuid(a.id)) continue;
+                        if (!isUuid(a.id)) { gradeFailed = true; continue; }
                         // score / total_items are NOT NULL on this table -- an assessment
                         // can exist locally with a name but no numbers typed in yet, so
                         // default those to 0 ("not scored") rather than fail the insert.
@@ -788,14 +1006,83 @@
                             total_items: a.totalItems != null ? a.totalItems : 0,
                             position: ai,
                         }, { onConflict: 'id' });
-                        if (aErr) throw aErr;
+                        if (aErr) { failure = failure || aErr; gradeFailed = true; }
                     }
                 }
+                last.grades.set(g.id, true);
+                if (!gradeFailed) dirty.delete(g.id);
             }
-            last.grades = new Map(newList.map(g => [g.id, true]));
         } catch (err) {
-            console.warn('Cloud sync (grades) failed', err);
-            toast("Couldn't save that grade to the server. Please check your connection and try again.");
+            failure = failure || err;
+        }
+        setDirtyGrades(dirty);
+        if (failure) {
+            console.warn('Cloud sync (grades) failed', failure);
+            toast("Couldn't save that grade to the server: " + (failure.message || 'unknown error'), 'high', 'grades');
+        } else {
+            clearSyncError();
+        }
+    }
+
+    /* MAJ-11: pushes the real semester list (Settings > Academic Semester
+       Management) to the `semesters` table, keyed by client_id (the local
+       deterministic id) rather than the row's own uuid -- see
+       semesterLocalToRow above and migration 0020. */
+    let _semQueue = Promise.resolve();
+    function pushSemesters(newList) {
+        _semQueue = _semQueue.then(() => doPushSemesters(newList)).catch(() => {});
+        return _semQueue;
+    }
+
+    async function doPushSemesters(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(s => s.id));
+        const toDelete = [...last.semesters.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirtySem();
+        let failure = null;
+        try {
+            if (toDelete.length) {
+                const { error } = await supabase.from('semesters').delete().eq('user_id', userId).in('client_id', toDelete);
+                if (error) failure = error;
+                else toDelete.forEach(id => last.semesters.delete(id));
+            }
+            // MAJ-13: whichever semester is locally active right now gets
+            // is_active=true on its row; every other real semester row gets
+            // false, so the flag always matches exactly one row server-side.
+            const activeId = DB.get('activeSemesterId', null) || (newList[0] && newList[0].id) || null;
+            // Deactivate every OTHER row for this user (including the legacy
+            // grades/syllabus placeholder row, and any real semester left over from
+            // before this file's placeholder-is_active fix) before activating the
+            // target one below. semesters_one_active_per_user_idx allows at most one
+            // is_active=true row per user at any instant -- upserting the new active
+            // row first, while an old row is still marked active, trips it even
+            // though the *end state* the loop converges to is valid.
+            if (activeId) {
+                const { error: deactErr } = await supabase.from('semesters')
+                    .update({ is_active: false })
+                    .eq('user_id', userId)
+                    .eq('is_active', true)
+                    .or(`client_id.is.null,client_id.neq.${activeId}`);
+                if (deactErr) failure = failure || deactErr;
+            }
+            for (const s of newList) {
+                const { error } = await supabase.from('semesters')
+                    .upsert(semesterLocalToRow(s, userId, activeId), { onConflict: 'user_id,client_id' });
+                if (error) { failure = failure || error; continue; }
+                last.semesters.set(s.id, true);
+                dirty.delete(s.id);
+            }
+        } catch (err) {
+            failure = failure || err;
+        }
+        setDirtySem(dirty);
+        if (failure) {
+            console.warn('Cloud sync (semesters) failed', failure);
+            toast("Couldn't save that semester to the server: " + (failure.message || 'unknown error'), 'high', 'semesters');
+        } else {
+            clearSyncError();
         }
     }
 
@@ -833,25 +1120,25 @@
         const dirty = getDirty();
         list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
         setDirty(dirty);
-        pushSubjects(list.slice());
+        trackPush(pushSubjects(list.slice()));
         return r;
     };
     const _saveTasks = DB.saveTasks.bind(DB);
     DB.saveTasks = function (list) {
         const r = _saveTasks(list);
-        pushTasks(list.slice());
+        trackPush(pushTasks(list.slice()));
         return r;
     };
     const _saveCalendarEvents = DB.saveCalendarEvents.bind(DB);
     DB.saveCalendarEvents = function (list) {
         const r = _saveCalendarEvents(list);
-        pushCalendarEvents(list.slice());
+        trackPush(pushCalendarEvents(list.slice()));
         return r;
     };
     const _saveNotes = DB.saveNotes.bind(DB);
     DB.saveNotes = function (list) {
         const r = _saveNotes(list);
-        pushNotes(list.slice());
+        trackPush(pushNotes(list.slice()));
         return r;
     };
     const _saveAttendance = DB.saveAttendance.bind(DB);
@@ -861,32 +1148,59 @@
         const dirty = getDirtyAtt();
         list.forEach(x => { if (prev.get(x.id) !== JSON.stringify(x)) dirty.add(x.id); });
         setDirtyAtt(dirty);
-        pushAttendance(list.slice());
+        trackPush(pushAttendance(list.slice()));
         return r;
     };
     const _saveGrades = DB.saveGrades.bind(DB);
     DB.saveGrades = function (list) {
+        // Assign ids up front (not just inside the push) so dirty-tracking has
+        // a stable key to compare against from the very first save.
+        list.forEach(g => { if (!g.id) g.id = DB.uid(); });
+        const prev = new Map(DB.getGrades().map(g => [g.id, JSON.stringify(g)]));
         const r = _saveGrades(list);
-        pushGrades(list.slice());
+        const dirty = getDirtyGrades();
+        list.forEach(g => { if (prev.get(g.id) !== JSON.stringify(g)) dirty.add(g.id); });
+        setDirtyGrades(dirty);
+        trackPush(pushGrades(list.slice()));
         return r;
     };
     const _saveGwaCalcRows = DB.saveGwaCalcRows.bind(DB);
     DB.saveGwaCalcRows = function (list) {
         const r = _saveGwaCalcRows(list);
-        pushGwaCalc(list.slice());
+        trackPush(pushGwaCalc(list.slice()));
+        return r;
+    };
+    const _saveSemesters = DB.saveSemesters.bind(DB);
+    DB.saveSemesters = function (list) {
+        const prev = new Map(DB.getSemesters().map(s => [s.id, JSON.stringify(s)]));
+        const r = _saveSemesters(list);
+        const dirty = getDirtySem();
+        list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
+        setDirtySem(dirty);
+        trackPush(pushSemesters(list.slice()));
+        return r;
+    };
+    // MAJ-13: picking a different semester (Settings > Academic Semester
+    // Management) only ever wrote sp_active_semester_id locally. Re-push the
+    // semester rows so the server's is_active flag follows along -- see
+    // semesterLocalToRow/doPushSemesters above and the hydrate restore logic.
+    const _setActiveSemester = DB.setActiveSemester.bind(DB);
+    DB.setActiveSemester = function (id) {
+        const r = _setActiveSemester(id);
+        trackPush(pushSemesters(DB.getSemesters().slice()));
         return r;
     };
     const _saveSyllabusCourses = DB.saveSyllabusCourses.bind(DB);
     DB.saveSyllabusCourses = function (list) {
         const r = _saveSyllabusCourses(list);
-        pushSyllabusCourses(list.slice());
+        trackPush(pushSyllabusCourses(list.slice()));
         return r;
     };
     // AJ-08: intercept cancelled occurrences saves so they propagate to Supabase
     const _saveCancelledOccurrences = DB.saveCancelledOccurrences.bind(DB);
     DB.saveCancelledOccurrences = function (list) {
         const r = _saveCancelledOccurrences(list);
-        pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []);
+        trackPush(pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []));
         return r;
     };
 
@@ -933,7 +1247,11 @@
             supabase.from('syllabus_courses').delete().eq('user_id', userId),
             // AJ-08: wipe cancelled occurrences blob
             supabase.from('cancelled_occurrences').delete().eq('user_id', userId),
+            // MAJ-11: wipe the real semester rows too (but leave the one
+            // placeholder row with client_id = null alone -- it's reused below).
+            supabase.from('semesters').delete().eq('user_id', userId).not('client_id', 'is', null),
         ]);
+        try { localStorage.removeItem(DIRTY_SEM_KEY); localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
         Object.keys(last).forEach(k => last[k] = new Map());
         _lastCancelledJson = '[]';
         try {
@@ -968,6 +1286,7 @@
         pushGrades(DB.getGrades());
         pushGwaCalc(DB.getGwaCalcRows());
         pushSyllabusCourses(DB.getSyllabusCourses());
+        pushSemesters(DB.getSemesters());
         // AJ-08: also sync cancelled occurrences on import
         pushCancelledOccurrences(DB.getCancelledOccurrences());
         return r;

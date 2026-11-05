@@ -413,8 +413,8 @@ function renderAdminShellBar(activeKey, admin) {
                 <div class="profile-panel" id="profilePanel" role="menu" aria-label="Account menu" hidden>
                     <div class="profile-panel-head">
                         <span class="profile-avatar profile-avatar-lg js-admin-avatar" aria-hidden="true">${initial}</span>
-                        <div>
-                            <div class="profile-panel-name js-admin-fullname">${escHtml(name)}</div>
+                        <div class="profile-panel-id">
+                            <div class="profile-panel-name js-admin-fullname" title="${escHtml(name)}">${escHtml(name)}</div>
                             <div class="profile-panel-sub js-admin-email" id="shellAdminEmail">&nbsp;</div>
                         </div>
                     </div>
@@ -483,12 +483,12 @@ function renderShellBar(activeKey) {
                 <div class="profile-panel" id="profilePanel" role="menu" aria-label="Account menu" hidden>
                     <div class="profile-panel-head">
                         <span class="profile-avatar profile-avatar-lg" aria-hidden="true" id="topbarProfileAvatar">${initial}</span>
-                        <div>
-                            <div class="profile-panel-name" id="topbarProfileName">${escHtml(name)}</div>
+                        <div class="profile-panel-id">
+                            <div class="profile-panel-name" id="topbarProfileName" title="${escHtml(name)}">${escHtml(name)}</div>
                             <div class="profile-panel-sub" id="topbarUserEmail">Signed in on this device</div>
                         </div>
                     </div>
-                    ${renderShellSemesterCardHtml() ? `<div class="profile-panel-section-semester">${renderShellSemesterCardHtml()}</div>` : ''}
+                    <div class="profile-panel-section-semester" id="shellSemesterCardWrap">${renderShellSemesterCardHtml()}</div>
                     <div class="profile-panel-section">
                         <div class="profile-panel-label">Theme</div>
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
@@ -515,6 +515,19 @@ function renderShellBar(activeKey) {
     });
     window.addEventListener('planner:notifications-changed', refreshNotificationPreview);
     window.addEventListener('planner:tasks-changed', refreshNotificationPreview);
+    // The shell bar (and this semester card inside the avatar popup) is built
+    // synchronously on page load, straight from whatever is in localStorage at
+    // that instant -- but right after login that cache is still empty/stale,
+    // because cloud-sync.js's hydrate() (which pulls the real semester list from
+    // Supabase) finishes afterwards, asynchronously. Without this listener the
+    // card just silently stayed blank/outdated until the student manually
+    // refreshed the page, even though the correct data had already arrived.
+    window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
+}
+
+function refreshShellSemesterCard() {
+    const wrap = document.getElementById('shellSemesterCardWrap');
+    if (wrap) wrap.innerHTML = renderShellSemesterCardHtml();
 }
 
 function refreshNotificationPreview() {
@@ -899,9 +912,9 @@ async function hydrateProfileIdentity() {
         });
         if (fullName) {
             const initial = escHtml(fullName.charAt(0).toUpperCase() || 'S');
-            document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; });
+            document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; el.title = fullName; });
             document.querySelectorAll('#sidebarProfileAvatar, #drawerProfileAvatar, #topbarProfileAvatar').forEach(el => { el.textContent = initial; });
-            document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; });
+            document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; el.title = fullName; });
             document.querySelectorAll('.js-admin-avatar').forEach(el => { el.textContent = initial; });
         }
     } catch (error) {
