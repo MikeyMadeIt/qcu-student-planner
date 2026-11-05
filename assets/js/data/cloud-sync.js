@@ -108,6 +108,36 @@
         try { localStorage.setItem(DIRTY_ATT_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
     }
 
+    /* MAJ-10: grades previously had no dirty-tracking at all, so a save that
+       hadn't finished reaching Supabase yet (pushGrades runs in the
+       background, un-awaited) could be silently clobbered by the very next
+       hydrate() on the next page load -- the grading breakdown the student
+       just saved would "disappear" the moment they navigated away and back.
+       Mirrors the subjects/attendance dirty pattern above. */
+    const DIRTY_GRADES_KEY = 'sp_cloud_dirty_grades';
+    function getDirtyGrades() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_GRADES_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirtyGrades(set) {
+        try { localStorage.setItem(DIRTY_GRADES_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
+    /* MAJ-11: semesters (Settings > Academic Semester Management) used to be
+       purely local-only -- never pushed to Supabase at all -- so
+       clearPrivateCacheOnSignOut() wiping the local cache on logout meant any
+       semester the student added was permanently gone the next time they
+       signed in. Synced the same write-through + dirty-tracking way as
+       everything else now; see semesterRowToLocal/semesterLocalToRow below. */
+    const DIRTY_SEM_KEY = 'sp_cloud_dirty_semesters';
+    function getDirtySem() {
+        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_SEM_KEY)) || []); }
+        catch (e) { return new Set(); }
+    }
+    function setDirtySem(set) {
+        try { localStorage.setItem(DIRTY_SEM_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    }
+
     /* ---------- loading overlay ---------- */
     let overlayCount = 0;
     function showLoader() {
@@ -347,6 +377,32 @@
         return data.id;
     }
 
+    /* `semesters.client_id` holds the local deterministic id (e.g. "2026-2027-1",
+       see makeSemesterId() in storage.js) so a row can be matched back up on
+       the next hydrate without needing a separate id-mapping table. The
+       pre-existing placeholder row created by getServerSemesterId() below has
+       client_id = null on purpose, so it's never picked up as a real semester
+       by semesterRowToLocal's caller (hydrate filters client_id is not null). */
+    function semesterRowToLocal(row) {
+        return {
+            id: row.client_id,
+            name: row.name || '',
+            schoolYear: row.school_year || '',
+            startDate: row.start_date || '',
+            endDate: row.end_date || '',
+            finalsDate: row.finals_date || '',
+            totalWeeks: row.total_weeks != null ? Number(row.total_weeks) : 15,
+        };
+    }
+    function semesterLocalToRow(s, userId) {
+        return {
+            user_id: userId, client_id: s.id,
+            name: s.name || '', school_year: s.schoolYear || '',
+            start_date: s.startDate || null, end_date: s.endDate || null,
+            finals_date: s.finalsDate || null, total_weeks: s.totalWeeks || 15,
+        };
+    }
+
     function syllabusRowToLocal(row) {
         const d = (row.data && typeof row.data === 'object') ? row.data : {};
         return Object.assign({
@@ -372,7 +428,7 @@
     const last = {
         subjects: new Map(), tasks: new Map(), calendarEvents: new Map(),
         notes: new Map(), attendance: new Map(), grades: new Map(),
-        gwaCalc: new Map(), syllabusCourses: new Map(),
+        gwaCalc: new Map(), syllabusCourses: new Map(), semesters: new Map(),
     };
     // AJ-08: cancelled occurrences snapshot (not diffed per-row; whole-blob replace)
     let _lastCancelledJson = '[]';
@@ -404,7 +460,7 @@
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes] = await Promise.all([
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -418,9 +474,12 @@
                 supabase.from('syllabus_courses').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 // AJ-08: single-row blob storing cancelled class occurrences
                 supabase.from('cancelled_occurrences').select('occurrences').eq('user_id', userId).maybeSingle(),
+                // MAJ-11: real per-semester rows (client_id not null excludes the
+                // one legacy placeholder row used only to satisfy grades/syllabus FKs)
+                supabase.from('semesters').select('*').eq('user_id', userId).not('client_id', 'is', null).order('created_at', { ascending: true }),
             ]);
 
-            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes]
+            const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
 
@@ -454,9 +513,27 @@
             const attendance = serverAtt.map(r => dirtyAttMap.get(r.id) || r);
             localDirtyAtt.forEach(r => { if (!serverAtt.some(x => x.id === r.id)) attendance.push(r); });
             setDirtyAtt(new Set(localDirtyAtt.map(r => r.id)));
-            const grades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const serverGrades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const dirtyGradeIds = getDirtyGrades();
+            const localDirtyGrades = DB.getGrades().filter(g => g.id && dirtyGradeIds.has(g.id));
+            const localDirtyGradesMap = new Map(localDirtyGrades.map(g => [g.id, g]));
+            const grades = serverGrades.map(g => localDirtyGradesMap.get(g.id) || g);
+            localDirtyGrades.forEach(g => { if (!serverGrades.some(x => x.id === g.id)) grades.push(g); });
+            setDirtyGrades(new Set(localDirtyGrades.map(g => g.id)));
+
             const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
             const syllabusCourses = (sylRes.data || []).map(syllabusRowToLocal);
+
+            // MAJ-11: merge in any local semester not yet seen on the server --
+            // covers both a save still in flight (dirty) AND the one-time case
+            // of an existing user's pre-this-fix local semesters that were
+            // never pushed at all, so they get adopted (and pushed up below)
+            // instead of being wiped back to a lone default.
+            const serverSemesters = (semRes.data || []).map(semesterRowToLocal);
+            const serverSemIds = new Set(serverSemesters.map(s => s.id));
+            const localOnlySemesters = DB.getSemesters().filter(s => !serverSemIds.has(s.id));
+            const semesters = [...serverSemesters, ...localOnlySemesters];
+            setDirtySem(new Set(localOnlySemesters.map(s => s.id)));
 
             DB.set('subjects', subjects);
             DB.set('tasks', tasks);
@@ -466,6 +543,7 @@
             DB.set('grades', grades);
             DB.set('gwaCalc', gwaRows);
             DB.set('syllabusCourses', syllabusCourses);
+            if (semesters.length) DB.set('semesters', semesters);
 
             // AJ-08: hydrate cancelled occurrences from Supabase blob
             if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
@@ -478,12 +556,15 @@
             last.calendarEvents = new Map(events.map(e => [e.id, true]));
             last.notes = new Map(notes.map(n => [n.id, true]));
             last.attendance = new Map(serverAtt.map(a => [a.id, true]));
-            last.grades = new Map(grades.map(g => [g.id, true]));
+            last.grades = new Map(serverGrades.map(g => [g.id, true]));
             last.gwaCalc = new Map(gwaRows.map(r => [r.id, true]));
             last.syllabusCourses = new Map(syllabusCourses.map(c => [c.id, true]));
+            last.semesters = new Map(serverSemesters.map(s => [s.id, true]));
 
             if (localDirty.length) pushSubjects(subjects.slice());
             if (localDirtyAtt.length) pushAttendance(attendance.slice());
+            if (localDirtyGrades.length) pushGrades(grades.slice());
+            if (localOnlySemesters.length) pushSemesters(semesters.slice());
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
@@ -720,7 +801,13 @@
     /* grades: each grade row owns its own components/assessments. Ids on components
        and assessments ARE stable across edits (grades.js keeps them via `c.id || DB.uid()`),
        so a straightforward delete-missing / upsert-rest pass works, scoped per grade row. */
-    async function pushGrades(newList) {
+    let _gradesQueue = Promise.resolve();
+    function pushGrades(newList) {
+        _gradesQueue = _gradesQueue.then(() => doPushGrades(newList)).catch(() => {});
+        return _gradesQueue;
+    }
+
+    async function doPushGrades(newList) {
         const userId = await getUserId();
         if (!userId) return;
         const supabase = await getClient();
@@ -734,6 +821,8 @@
 
         const newIds = new Set(newList.map(g => g.id));
         const toDelete = [...last.grades.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirtyGrades();
+        let failure = null;
         try {
             const serverSemId = await getServerSemesterId(userId);
 
@@ -744,15 +833,20 @@
                 await supabase.from('grade_components').delete().eq('grade_id', gradeId);
                 await supabase.from('grades').delete().eq('id', gradeId);
                 dropSemFor('grades', gradeId);
+                last.grades.delete(gradeId);
             }
 
             for (const g of newList) {
-                if (!isUuid(g.id)) continue;
+                if (!isUuid(g.id)) {
+                    failure = failure || new Error('A grade record has an invalid id');
+                    continue;
+                }
+                let gradeFailed = false;
                 const { error: gErr } = await supabase.from('grades').upsert({
                     id: g.id, user_id: userId, semester_id: serverSemId, subject_id: g.subjectId,
                     updated_at: new Date().toISOString(),
                 }, { onConflict: 'id' });
-                if (gErr) throw gErr;
+                if (gErr) { failure = failure || gErr; continue; }
                 setSemFor('grades', g.id, g.semesterId);
 
                 const { data: existingComps } = await supabase.from('grade_components').select('id').eq('grade_id', g.id);
@@ -765,11 +859,11 @@
 
                 for (let ci = 0; ci < (g.components || []).length; ci++) {
                     const c = g.components[ci];
-                    if (!isUuid(c.id)) continue;
+                    if (!isUuid(c.id)) { gradeFailed = true; continue; }
                     const { error: cErr } = await supabase.from('grade_components').upsert({
                         id: c.id, grade_id: g.id, name: c.name || '', weight: c.weight || 0, position: ci,
                     }, { onConflict: 'id' });
-                    if (cErr) throw cErr;
+                    if (cErr) { failure = failure || cErr; gradeFailed = true; continue; }
 
                     const { data: existingAss } = await supabase.from('grade_assessments').select('id').eq('component_id', c.id);
                     const keepAssIds = new Set((c.assessments || []).map(a => a.id));
@@ -778,7 +872,7 @@
 
                     for (let ai = 0; ai < (c.assessments || []).length; ai++) {
                         const a = c.assessments[ai];
-                        if (!isUuid(a.id)) continue;
+                        if (!isUuid(a.id)) { gradeFailed = true; continue; }
                         // score / total_items are NOT NULL on this table -- an assessment
                         // can exist locally with a name but no numbers typed in yet, so
                         // default those to 0 ("not scored") rather than fail the insert.
@@ -788,14 +882,60 @@
                             total_items: a.totalItems != null ? a.totalItems : 0,
                             position: ai,
                         }, { onConflict: 'id' });
-                        if (aErr) throw aErr;
+                        if (aErr) { failure = failure || aErr; gradeFailed = true; }
                     }
                 }
+                last.grades.set(g.id, true);
+                if (!gradeFailed) dirty.delete(g.id);
             }
-            last.grades = new Map(newList.map(g => [g.id, true]));
         } catch (err) {
-            console.warn('Cloud sync (grades) failed', err);
+            failure = failure || err;
+        }
+        setDirtyGrades(dirty);
+        if (failure) {
+            console.warn('Cloud sync (grades) failed', failure);
             toast("Couldn't save that grade to the server. Please check your connection and try again.");
+        }
+    }
+
+    /* MAJ-11: pushes the real semester list (Settings > Academic Semester
+       Management) to the `semesters` table, keyed by client_id (the local
+       deterministic id) rather than the row's own uuid -- see
+       semesterLocalToRow above and migration 0020. */
+    let _semQueue = Promise.resolve();
+    function pushSemesters(newList) {
+        _semQueue = _semQueue.then(() => doPushSemesters(newList)).catch(() => {});
+        return _semQueue;
+    }
+
+    async function doPushSemesters(newList) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const supabase = await getClient();
+        const newIds = new Set(newList.map(s => s.id));
+        const toDelete = [...last.semesters.keys()].filter(id => !newIds.has(id));
+        const dirty = getDirtySem();
+        let failure = null;
+        try {
+            if (toDelete.length) {
+                const { error } = await supabase.from('semesters').delete().eq('user_id', userId).in('client_id', toDelete);
+                if (error) failure = error;
+                else toDelete.forEach(id => last.semesters.delete(id));
+            }
+            for (const s of newList) {
+                const { error } = await supabase.from('semesters')
+                    .upsert(semesterLocalToRow(s, userId), { onConflict: 'user_id,client_id' });
+                if (error) { failure = failure || error; continue; }
+                last.semesters.set(s.id, true);
+                dirty.delete(s.id);
+            }
+        } catch (err) {
+            failure = failure || err;
+        }
+        setDirtySem(dirty);
+        if (failure) {
+            console.warn('Cloud sync (semesters) failed', failure);
+            toast("Couldn't save that semester to the server: " + (failure.message || 'unknown error'));
         }
     }
 
@@ -866,7 +1006,14 @@
     };
     const _saveGrades = DB.saveGrades.bind(DB);
     DB.saveGrades = function (list) {
+        // Assign ids up front (not just inside the push) so dirty-tracking has
+        // a stable key to compare against from the very first save.
+        list.forEach(g => { if (!g.id) g.id = DB.uid(); });
+        const prev = new Map(DB.getGrades().map(g => [g.id, JSON.stringify(g)]));
         const r = _saveGrades(list);
+        const dirty = getDirtyGrades();
+        list.forEach(g => { if (prev.get(g.id) !== JSON.stringify(g)) dirty.add(g.id); });
+        setDirtyGrades(dirty);
         pushGrades(list.slice());
         return r;
     };
@@ -874,6 +1021,16 @@
     DB.saveGwaCalcRows = function (list) {
         const r = _saveGwaCalcRows(list);
         pushGwaCalc(list.slice());
+        return r;
+    };
+    const _saveSemesters = DB.saveSemesters.bind(DB);
+    DB.saveSemesters = function (list) {
+        const prev = new Map(DB.getSemesters().map(s => [s.id, JSON.stringify(s)]));
+        const r = _saveSemesters(list);
+        const dirty = getDirtySem();
+        list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
+        setDirtySem(dirty);
+        pushSemesters(list.slice());
         return r;
     };
     const _saveSyllabusCourses = DB.saveSyllabusCourses.bind(DB);
@@ -933,7 +1090,11 @@
             supabase.from('syllabus_courses').delete().eq('user_id', userId),
             // AJ-08: wipe cancelled occurrences blob
             supabase.from('cancelled_occurrences').delete().eq('user_id', userId),
+            // MAJ-11: wipe the real semester rows too (but leave the one
+            // placeholder row with client_id = null alone -- it's reused below).
+            supabase.from('semesters').delete().eq('user_id', userId).not('client_id', 'is', null),
         ]);
+        try { localStorage.removeItem(DIRTY_SEM_KEY); localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
         Object.keys(last).forEach(k => last[k] = new Map());
         _lastCancelledJson = '[]';
         try {
@@ -968,6 +1129,7 @@
         pushGrades(DB.getGrades());
         pushGwaCalc(DB.getGwaCalcRows());
         pushSyllabusCourses(DB.getSyllabusCourses());
+        pushSemesters(DB.getSemesters());
         // AJ-08: also sync cancelled occurrences on import
         pushCancelledOccurrences(DB.getCancelledOccurrences());
         return r;
