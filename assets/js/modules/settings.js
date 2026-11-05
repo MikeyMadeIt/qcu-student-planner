@@ -5,7 +5,6 @@
 function initSettings() {
     const s = DB.getSettings();
     document.getElementById('sName').value = s.name || '';
-    document.getElementById('sNumber').value = s.studentNumber || '';
     document.getElementById('sCourse').value = s.course || '';
     document.getElementById('sYear').value = s.yearLevel || '';
     document.getElementById('sSchool').value = s.school || '';
@@ -47,7 +46,6 @@ function initDisplayPrefs(s) {
 function saveProfile() {
     const s = DB.getSettings();
     s.name = document.getElementById('sName').value.trim();
-    s.studentNumber = document.getElementById('sNumber').value.trim();
     s.course = document.getElementById('sCourse').value.trim();
     s.yearLevel = document.getElementById('sYear').value.trim();
     s.school = document.getElementById('sSchool').value.trim();
