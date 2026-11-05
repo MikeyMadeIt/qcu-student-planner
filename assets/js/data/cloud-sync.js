@@ -421,12 +421,41 @@
         try { id = localStorage.getItem(SERVER_SEM_KEY); } catch (e) { /* ignore */ }
         if (id) return id;
         const supabase = await getClient();
+        // Look for an already-existing placeholder row FIRST. SERVER_SEM_KEY can go
+        // missing even though the server-side row still exists (cleared localStorage
+        // for troubleshooting, a different browser/device, etc.) -- blindly inserting
+        // in that case hits the table's own (user_id, school_year, name) unique
+        // constraint and fails every single grade/semester push with "duplicate key
+        // value violates unique constraint ... semesters_user_school_year_name_key".
+        const { data: existing, error: selErr } = await supabase
+            .from('semesters')
+            .select('id')
+            .eq('user_id', userId)
+            .is('client_id', null)
+            .limit(1)
+            .maybeSingle();
+        if (!selErr && existing && existing.id) {
+            try { localStorage.setItem(SERVER_SEM_KEY, existing.id); } catch (e) { /* ignore */ }
+            return existing.id;
+        }
         const { data, error } = await supabase
             .from('semesters')
             .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: true })
             .select('id')
             .single();
-        if (error || !data) throw error || new Error('Could not create placeholder semester');
+        if (error) {
+            // 23505 = unique_violation: another tab/request created the placeholder
+            // between our select and this insert. Re-select instead of failing.
+            if (error.code === '23505') {
+                const { data: retry } = await supabase.from('semesters').select('id').eq('user_id', userId).is('client_id', null).limit(1).maybeSingle();
+                if (retry && retry.id) {
+                    try { localStorage.setItem(SERVER_SEM_KEY, retry.id); } catch (e) { /* ignore */ }
+                    return retry.id;
+                }
+            }
+            throw error;
+        }
+        if (!data) throw new Error('Could not create placeholder semester');
         try { localStorage.setItem(SERVER_SEM_KEY, data.id); } catch (e) { /* ignore */ }
         return data.id;
     }
