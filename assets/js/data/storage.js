@@ -486,7 +486,8 @@ const DB = {
         //   sp_cloud_*              -- cloud-sync.js: sync state tied to the signed-in user
         ['sp_program_code', 'sp_cloud_semester_map', 'sp_cloud_server_semester_id',
          'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
-         'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance']
+         'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance',
+         'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
             .forEach(k => localStorage.removeItem(k));
     },
     validateImport,
