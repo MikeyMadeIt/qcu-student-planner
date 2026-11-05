@@ -14,6 +14,23 @@ function initSettings() {
     renderNotifToggles(s.notifications);
     renderSemesterManager();
     initDisplayPrefs(s);
+    renderSyncStatus();
+}
+
+/* Shows the last Supabase sync failure (grades, semesters, etc.) in plain
+   language, so a student on mobile -- with no DevTools console -- has
+   somewhere to actually see why something "isn't saving". See
+   cloud-sync.js's recordSyncError/getLastSyncError. */
+function renderSyncStatus() {
+    const card = document.getElementById('syncStatusCard');
+    const msgEl = document.getElementById('syncStatusMsg');
+    if (!card || !msgEl) return;
+    const err = (window.CloudSync && typeof window.CloudSync.getLastSyncError === 'function')
+        ? window.CloudSync.getLastSyncError() : null;
+    if (!err) { card.hidden = true; return; }
+    const when = err.at ? new Date(err.at).toLocaleString() : '';
+    msgEl.textContent = `${err.message}${when ? ' (' + when + ')' : ''}`;
+    card.hidden = false;
 }
 
 function initDisplayPrefs(s) {

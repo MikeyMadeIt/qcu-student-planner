@@ -39,6 +39,12 @@
           <div id="semesterManager">Loading…</div>
         </div>
 
+        <div class="glass card-pad fade-in mb-3" id="syncStatusCard" hidden>
+          <div class="section-title"><i class="bi bi-cloud-slash"></i>Sync Status</div>
+          <p class="text-faint mb-2" style="font-size:.8rem" id="syncStatusMsg"></p>
+          <button class="btn btn-ghost w-100" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh &amp; Retry</button>
+        </div>
+
         <div class="glass card-pad fade-in">
           <div class="section-title"><i class="bi bi-bell-fill"></i>Notifications</div>
           <div id="notifToggles"></div>
@@ -99,7 +105,7 @@
       <div class="modal-body p-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
           <h5 class="mb-0 fw-bold" id="semModalTitle">Add Semester</h5>
-          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="semModalBody"></div>
       </div>
