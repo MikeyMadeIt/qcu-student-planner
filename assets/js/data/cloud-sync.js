@@ -440,7 +440,14 @@
         }
         const { data, error } = await supabase
             .from('semesters')
-            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: true })
+            // is_active: false -- this placeholder row only exists to satisfy the
+            // grades/syllabus_courses NOT NULL semester_id FK; it is never shown in
+            // the UI. Marking it active here permanently occupied the table's
+            // "one active semester per user" unique index (semesters_one_active_
+            // per_user_idx), so every later attempt to activate a REAL semester
+            // (adding/switching semesters in Settings) failed with a duplicate-key
+            // error on that index.
+            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: false })
             .select('id')
             .single();
         if (error) {
@@ -1045,6 +1052,21 @@
             // is_active=true on its row; every other real semester row gets
             // false, so the flag always matches exactly one row server-side.
             const activeId = DB.get('activeSemesterId', null) || (newList[0] && newList[0].id) || null;
+            // Deactivate every OTHER row for this user (including the legacy
+            // grades/syllabus placeholder row, and any real semester left over from
+            // before this file's placeholder-is_active fix) before activating the
+            // target one below. semesters_one_active_per_user_idx allows at most one
+            // is_active=true row per user at any instant -- upserting the new active
+            // row first, while an old row is still marked active, trips it even
+            // though the *end state* the loop converges to is valid.
+            if (activeId) {
+                const { error: deactErr } = await supabase.from('semesters')
+                    .update({ is_active: false })
+                    .eq('user_id', userId)
+                    .eq('is_active', true)
+                    .or(`client_id.is.null,client_id.neq.${activeId}`);
+                if (deactErr) failure = failure || deactErr;
+            }
             for (const s of newList) {
                 const { error } = await supabase.from('semesters')
                     .upsert(semesterLocalToRow(s, userId, activeId), { onConflict: 'user_id,client_id' });
