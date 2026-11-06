@@ -26,7 +26,8 @@ jobs:
               "dev/reyes",
               "dev/rimando",
               "dev/plaza",
-              "dev/cruzandrei"
+              "dev/cruzandrei", 
+              "dev/sauce" 
             ];
 
             const { owner, repo } = context.repo;
