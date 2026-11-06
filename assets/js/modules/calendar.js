@@ -64,13 +64,35 @@ function getSubjectColor(subjectObj) {
     return _subjectColorCache[subjectObj.id];
 }
 
+function isDateInSemester(date) {
+    const toDateKey = value => {
+        if (value instanceof Date)
+            return isNaN(value.getTime()) ? null : ymdLocal(value);
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ''));
+        if (!match)
+            return null;
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const localDate = new Date(year, month - 1, day);
+        if (localDate.getFullYear() !== year || localDate.getMonth() !== month - 1 || localDate.getDate() !== day)
+            return null;
+        return ymdLocal(localDate);
+    };
+    const semester = DB.getActiveSemester();
+    const dateKey = toDateKey(date);
+    const startKey = semester && toDateKey(semester.startDate);
+    const endKey = semester && toDateKey(semester.endDate);
+    return !!(dateKey && startKey && endKey && startKey <= dateKey && dateKey <= endKey);
+}
+
 /* ── Unified Event Collection ──────────────────────────────── */
 
 function allEventsForDate(dateStr) {
     const semId = DB.getActiveSemesterId();
     const events = [];
     const dayName = DAY_NAMES[new Date(dateStr + 'T00:00').getDay()];
-    if (calFilters.classes) {
+    if (calFilters.classes && isDateInSemester(dateStr)) {
         DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName)).forEach(s => {
             events.push({
                 type: 'class', id: s.id, title: s.code,
