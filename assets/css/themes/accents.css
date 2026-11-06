@@ -1,6 +1,4 @@
-/* Default, restrained primary accent: blue. Fourteen muted, editorial accent
-   options are available (Settings > Accent Color), seven per row. Every accent
-   is tuned separately for light/dark so contrast against --on-accent holds. */
+/* Accent values are independent of the selected theme. */
 [data-accent="amber"] {
     --accent: 36,87,214;
     --accent-2: 26,66,169;
@@ -30,6 +28,10 @@
     --accent-2: 12,90,98;
     --on-accent: #FFFFFF;
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 [data-accent="emerald"] {
     --accent: 27,128,94;
     --accent-2: 21,100,73;
@@ -83,6 +85,10 @@
     --accent-2: 43,48,58;
     --on-accent: #FFFFFF;
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/main
 [data-accent="steel"] {
     --accent: 62,102,128;
     --accent-2: 48,80,100;
