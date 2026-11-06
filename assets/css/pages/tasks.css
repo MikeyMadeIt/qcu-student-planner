@@ -1480,78 +1480,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Unified Filter & Sort Drawer ── */
-
-.tkd-drawer {
-    position: fixed;
-    inset: 0;
-    z-index: 1060;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    pointer-events: none;
-}
-
-.tkd-drawer.open {
-    pointer-events: all;
-}
-
-.tkd-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    opacity: 0;
-    transition: opacity .3s;
-    cursor: pointer;
-}
-
-.tkd-drawer.open .tkd-backdrop {
-    opacity: 1;
-}
-
-.tkd-panel {
-    position: relative;
-    z-index: 1;
-    width: min(380px, 100vw);
-    max-height: 90dvh;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px 0 0 0;
-    transform: translateX(100%);
-    transition: transform .3s cubic-bezier(.22,.9,.35,1);
-    overflow: hidden;
-}
-
-[data-theme="dark"] .tkd-panel {
-    background: #12152a;
-}
-
-[data-theme="light"] .tkd-panel {
-    background: #f8f9fb;
-}
-
-.tkd-drawer.open .tkd-panel {
-    transform: translateX(0);
-}
-
-.tkd-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-}
-
-.tkd-panel-title {
-    font-size: .9rem;
-    font-weight: 800;
-    color: var(--text);
-    letter-spacing: .02em;
-}
+/* ── Close button (used by the Bulk Move modal) ── */
 
 .tkd-close-btn {
     width: 28px;
@@ -1574,182 +1503,111 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     background: rgba(var(--accent), .1);
 }
 
-.tkd-panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+/* ── Filter & Sort popup (standard .modal; colors come from theme tokens so
+      light, dark and AMOLED all follow automatically) ── */
+
+.tk-filter-modal .modal-dialog {
+    max-width: 440px;
 }
 
-.tkd-panel-body::-webkit-scrollbar {
+.tk-filter-modal .modal-content {
+    max-height: calc(100dvh - 2rem);
+}
+
+.tk-filter-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overscroll-behavior: contain;
+}
+
+.tk-filter-modal .modal-body::-webkit-scrollbar {
     width: 4px;
 }
 
-.tkd-panel-body::-webkit-scrollbar-thumb {
+.tk-filter-modal .modal-body::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 4px;
 }
 
-.tkd-section {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
+.tk-filter-modal .modal-footer {
+    justify-content: space-between;
 }
 
-.tkd-section:last-child {
-    border-bottom: none;
+.tk-filter-modal .modal-footer .btn-accent {
+    flex: 1;
+    max-width: 200px;
 }
 
-.tkd-section-label {
-    font-size: .58rem;
+.tk-fm-section {
+    min-width: 0;
+}
+
+.tk-fm-label {
+    font-size: .62rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .1em;
     color: var(--text-faint);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
-.tkd-radio-row {
+.tk-fm-opts {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: .82rem;
-    color: var(--text-soft);
-    font-weight: 500;
-    transition: background .12s, color .12s;
-    user-select: none;
-    border: 1px solid transparent;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
-.tkd-radio-row:hover {
-    background: rgba(var(--accent), .07);
-    color: var(--text);
+.tk-fm-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
 }
 
-.tkd-radio-row.checked {
-    background: rgba(var(--accent), .12);
-    color: rgb(var(--accent));
-    border-color: rgba(var(--accent), .2);
-    font-weight: 700;
-}
-
-.tkd-radio {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    flex-shrink: 0;
-    position: relative;
-    transition: border-color .12s, background .12s;
-}
-
-.tkd-radio.checked {
-    border-color: rgb(var(--accent));
-    background: rgb(var(--accent));
-}
-
-.tkd-radio.checked::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #fff;
-}
-
-.tkd-panel-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-}
-
-.tkd-reset-btn {
+.tk-fm-opt {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 4px;
+    max-width: 100%;
+    min-height: 32px;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text-soft);
     font-size: .8rem;
     font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     cursor: pointer;
-    transition: background .15s, border-color .15s;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.tkd-reset-btn:hover {
-    background: rgba(251,113,133,.1);
-    border-color: rgba(251,113,133,.3);
-    color: #fb7185;
+.tk-fm-opt:hover {
+    background: rgba(var(--accent), .08);
+    color: var(--text);
 }
 
-.tkd-apply-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    height: 34px;
-    padding: 0 18px;
-    border-radius: 4px;
-    border: none;
-    background: rgb(var(--accent));
-    color: #fff;
-    font-size: .82rem;
+.tk-fm-opt:focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+}
+
+.tk-fm-opt.checked {
+    background: rgba(var(--accent), .14);
+    border-color: rgba(var(--accent), .45);
+    color: rgb(var(--accent));
     font-weight: 700;
-    cursor: pointer;
-    transition: opacity .15s, transform .15s;
-    flex: 1;
-    justify-content: center;
-}
-
-.tkd-apply-btn:hover {
-    opacity: .88;
-    transform: scale(1.02);
 }
 
 @media (max-width: 480px) {
-    .tkd-panel {
-        width: 100vw;
-        border-radius: 6px 6px 0 0;
-        max-height: 85dvh;
+    .tk-fm-row {
+        grid-template-columns: 1fr;
     }
-    .tkd-drawer {
-        align-items: flex-end;
-        justify-content: center;
-    }
-    .tkd-drawer.open .tkd-panel {
-        transform: translateY(0);
-    }
-    .tkd-panel {
-        transform: translateY(100%);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .tkd-panel {
-        transition: none !important;
-    }
-    .tkd-backdrop {
-        transition: none !important;
-    }
-    .tkd-apply-btn {
-        transition: none !important;
+    .tk-fm-opt {
+        min-height: 36px;
     }
 }
 
@@ -2107,13 +1965,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
 /* ── Reduced motion for drawer ── */
 
 @media (prefers-reduced-motion: reduce) {
-    .tkd-radio-row {
-        transition: none !important;
-    }
-    .tkd-radio {
-        transition: none !important;
-    }
-    .tkd-reset-btn {
+    .tk-fm-opt {
         transition: none !important;
     }
 }
@@ -2135,115 +1987,7 @@ TASKS v3 — FIX PATCH
 2. Selected highlight on overdue/completed cards
 3. Board view — vertical columns (no horizontal scroll)
 ============================================================ */
-/* ── FIX 1: Filter drawer — solid, readable background ── */
-
-.tkd-panel {
-    background: #1a1f38 !important;
-    border-color: rgba(255,255,255,.13) !important;
-}
-
-[data-theme="light"] .tkd-panel {
-    background: #ffffff !important;
-    border-color: rgba(0,0,0,.1) !important;
-}
-
-.tkd-panel-header {
-    background: #1e2440;
-    border-bottom-color: rgba(255,255,255,.1) !important;
-}
-
-[data-theme="light"] .tkd-panel-header {
-    background: #f4f5f8;
-    border-bottom-color: rgba(0,0,0,.08) !important;
-}
-
-.tkd-panel-footer {
-    background: #1e2440;
-    border-top-color: rgba(255,255,255,.1) !important;
-}
-
-[data-theme="light"] .tkd-panel-footer {
-    background: #f4f5f8;
-    border-top-color: rgba(0,0,0,.08) !important;
-}
-
-.tkd-panel-title {
-    color: #e8eaf6 !important;
-    font-size: .95rem !important;
-}
-
-[data-theme="light"] .tkd-panel-title {
-    color: #1a1f38 !important;
-}
-
-.tkd-section-label {
-    color: #7b82a8 !important;
-    font-size: .6rem !important;
-}
-
-[data-theme="light"] .tkd-section-label {
-    color: #6b7280 !important;
-}
-
-.tkd-section {
-    border-bottom-color: rgba(255,255,255,.07) !important;
-}
-
-[data-theme="light"] .tkd-section {
-    border-bottom-color: rgba(0,0,0,.06) !important;
-}
-
-/* Radio rows — always legible */
-
-.tkd-radio-row {
-    color: #c8cce8 !important;
-    font-weight: 600 !important;
-}
-
-[data-theme="light"] .tkd-radio-row {
-    color: #374151 !important;
-}
-
-.tkd-radio-row:hover {
-    background: rgba(130,120,255,.12) !important;
-    color: #e8eaf6 !important;
-}
-
-[data-theme="light"] .tkd-radio-row:hover {
-    background: rgba(99,102,241,.08) !important;
-    color: #1a1f38 !important;
-}
-
-.tkd-radio-row.checked {
-    background: rgba(130,120,255,.18) !important;
-    color: #a89eff !important;
-    border-color: rgba(130,120,255,.35) !important;
-    font-weight: 800 !important;
-}
-
-[data-theme="light"] .tkd-radio-row.checked {
-    background: rgba(99,102,241,.12) !important;
-    color: rgb(var(--accent)) !important;
-    border-color: rgba(99,102,241,.3) !important;
-}
-
-.tkd-radio {
-    border-color: rgba(255,255,255,.25) !important;
-}
-
-[data-theme="light"] .tkd-radio {
-    border-color: rgba(0,0,0,.2) !important;
-}
-
-.tkd-radio.checked {
-    border-color: #a89eff !important;
-    background: #a89eff !important;
-}
-
-[data-theme="light"] .tkd-radio.checked {
-    border-color: rgb(var(--accent)) !important;
-    background: rgb(var(--accent)) !important;
-}
+/* ── FIX 1: Close button (Bulk Move modal) ── */
 
 /* Close button in drawer */
 
@@ -2269,35 +2013,7 @@ TASKS v3 — FIX PATCH
     background: rgba(0,0,0,.07) !important;
 }
 
-/* Reset button */
 
-.tkd-reset-btn {
-    background: rgba(255,255,255,.05) !important;
-    border-color: rgba(255,255,255,.1) !important;
-    color: #9aa0c0 !important;
-}
-
-[data-theme="light"] .tkd-reset-btn {
-    background: rgba(0,0,0,.04) !important;
-    border-color: rgba(0,0,0,.1) !important;
-    color: #6b7280 !important;
-}
-
-.tkd-reset-btn:hover {
-    background: rgba(251,113,133,.15) !important;
-    border-color: rgba(251,113,133,.4) !important;
-    color: #fb7185 !important;
-}
-
-/* Panel body scrollbar */
-
-.tkd-panel-body::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.12) !important;
-}
-
-[data-theme="light"] .tkd-panel-body::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,.12) !important;
-}
 
 /* ── FIX 2: Selected state — always wins over overdue/completed ── */
 
