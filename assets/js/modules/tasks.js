@@ -52,7 +52,126 @@ function setView(v) {
     renderTasks();
 }
 
-/* ── Filter Drawer ── */
+/* ── Filter & Sort popup styles (self-contained; injected so this file works on its own) ── */
+
+(function injectFilterPopupStyles() {
+    if (document.getElementById('tkFilterPopupStyles'))
+        return;
+    var style = document.createElement('style');
+    style.id = 'tkFilterPopupStyles';
+    style.textContent = `
+/* ── Filter & Sort popup (standard .modal; colors come from theme tokens so
+      light, dark and AMOLED all follow automatically) ── */
+
+.tk-filter-modal .modal-dialog {
+    max-width: 440px;
+}
+
+.tk-filter-modal .modal-content {
+    max-height: calc(100dvh - 2rem);
+}
+
+.tk-filter-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overscroll-behavior: contain;
+}
+
+.tk-filter-modal .modal-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tk-filter-modal .modal-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.tk-filter-modal .modal-footer {
+    justify-content: space-between;
+}
+
+.tk-filter-modal .modal-footer .btn-accent {
+    flex: 1;
+    max-width: 200px;
+}
+
+.tk-fm-section {
+    min-width: 0;
+}
+
+.tk-fm-label {
+    font-size: .62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+}
+
+.tk-fm-opts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tk-fm-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.tk-fm-opt {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 32px;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-soft);
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tk-fm-opt:hover {
+    background: rgba(var(--accent), .08);
+    color: var(--text);
+}
+
+.tk-fm-opt:focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+}
+
+.tk-fm-opt.checked {
+    background: rgba(var(--accent), .14);
+    border-color: rgba(var(--accent), .45);
+    color: rgb(var(--accent));
+    font-weight: 700;
+}
+
+@media (max-width: 480px) {
+    .tk-fm-row {
+        grid-template-columns: 1fr;
+    }
+    .tk-fm-opt {
+        min-height: 36px;
+    }
+}
+`;
+    document.head.appendChild(style);
+})();
+
+/* ── Filter & Sort popup (standard Bootstrap modal, same pattern as #taskModal) ── */
 
 function openFilterDrawer() {
     var existing = document.getElementById('tkFilterDrawer');
@@ -80,70 +199,80 @@ function openFilterDrawer() {
         { value: 'alpha', label: 'Title' },
         { value: 'updated', label: 'Last Updated' },
     ];
-    function radioRow(name, val, label, checked) {
-        return '<label class="tkd-radio-row ' + (checked ? 'checked' : '') + '" data-name="' + name + '" data-val="' + val + '">' +
-            '<span class="tkd-radio ' + (checked ? 'checked' : '') + '"></span>' +
-            '<span>' + label + '</span></label>';
+    function attr(v) {
+        return escHtml(v).replace(/"/g, '&quot;');
     }
-    var statusHtml = STATUS_OPTS.map(function (o) { return radioRow('status', o.value, o.label, tkFilter === o.value); }).join('');
-    var sortHtml = SORT_OPTS.map(function (o) { return radioRow('sort', o.value, o.label, tkSort === o.value); }).join('');
-    var orderHtml = radioRow('order', 'asc', 'Ascending', tkSortDir === 'asc') + radioRow('order', 'desc', 'Descending', tkSortDir === 'desc');
-    var groupHtml = radioRow('group', 'none', 'None', tkGroupBy === 'none') + radioRow('group', 'subject', 'Subject', tkGroupBy === 'subject');
-    var catHtml = '<label class="tkd-radio-row ' + (tkCatFilter === '' ? 'checked' : '') + '" data-name="cat" data-val=""><span class="tkd-radio ' + (tkCatFilter === '' ? 'checked' : '') + '"></span><span>All Categories</span></label>' +
-        cats.map(function (c) { return radioRow('cat', c, c, tkCatFilter === c); }).join('');
-    var subHtml = '<label class="tkd-radio-row ' + (tkSubFilter === '' ? 'checked' : '') + '" data-name="sub" data-val=""><span class="tkd-radio ' + (tkSubFilter === '' ? 'checked' : '') + '"></span><span>All Subjects</span></label>' +
-        subs.map(function (s) { return radioRow('sub', s.id, escHtml(s.code || s.name), tkSubFilter === s.id); }).join('');
-    var drawer = document.createElement('div');
-    drawer.id = 'tkFilterDrawer';
-    drawer.className = 'tkd-drawer';
-    drawer.setAttribute('role', 'dialog');
-    drawer.setAttribute('aria-label', 'Filter and Sort');
-    drawer.innerHTML =
-        '<div class="tkd-backdrop" onclick="closeFilterDrawer()"></div>' +
-            '<div class="tkd-panel">' +
-            '<div class="tkd-panel-header">' +
-            '<span class="tkd-panel-title">Filter &amp; Sort</span>' +
-            '<button class="tkd-close-btn" onclick="closeFilterDrawer()" aria-label="Close"><i class="bi bi-x-lg"></i></button>' +
+    function opt(name, val, label, checked) {
+        return '<button type="button" class="tk-fm-opt' + (checked ? ' checked' : '') + '" role="radio" aria-checked="' + (checked ? 'true' : 'false') + '" data-name="' + name + '" data-val="' + attr(val) + '">' + escHtml(label) + '</button>';
+    }
+    function section(title, name, inner) {
+        return '<section class="tk-fm-section"><div class="tk-fm-label" id="tkFmLabel-' + name + '">' + title + '</div>' +
+            '<div class="tk-fm-opts" role="radiogroup" aria-labelledby="tkFmLabel-' + name + '">' + inner + '</div></section>';
+    }
+    var statusHtml = STATUS_OPTS.map(function (o) { return opt('status', o.value, o.label, tkFilter === o.value); }).join('');
+    var sortHtml = SORT_OPTS.map(function (o) { return opt('sort', o.value, o.label, tkSort === o.value); }).join('');
+    var orderHtml = opt('order', 'asc', 'Ascending', tkSortDir === 'asc') + opt('order', 'desc', 'Descending', tkSortDir === 'desc');
+    var groupHtml = opt('group', 'none', 'None', tkGroupBy === 'none') + opt('group', 'subject', 'Subject', tkGroupBy === 'subject');
+    var catHtml = opt('cat', '', 'All Categories', tkCatFilter === '') +
+        cats.map(function (c) { return opt('cat', c, c, tkCatFilter === c); }).join('');
+    var subHtml = opt('sub', '', 'All Subjects', tkSubFilter === '') +
+        subs.map(function (s) { return opt('sub', s.id, s.code || s.name, tkSubFilter === s.id); }).join('');
+    var modal = document.createElement('div');
+    modal.id = 'tkFilterDrawer';
+    modal.className = 'modal fade tk-filter-modal';
+    modal.tabIndex = -1;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'tkFilterTitle');
+    modal.innerHTML =
+        '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">' +
+            '<div class="modal-content">' +
+            '<div class="modal-header">' +
+            '<h5 class="modal-title" id="tkFilterTitle"><i class="bi bi-funnel" aria-hidden="true"></i>Filter &amp; Sort</h5>' +
+            '<button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>' +
             '</div>' +
-            '<div class="tkd-panel-body">' +
-            '<div class="tkd-section"><div class="tkd-section-label">Status</div>' + statusHtml + '</div>' +
-            '<div class="tkd-section"><div class="tkd-section-label">Category</div>' + catHtml + '</div>' +
-            (subs.length ? '<div class="tkd-section"><div class="tkd-section-label">Subject</div>' + subHtml + '</div>' : '') +
-            '<div class="tkd-section"><div class="tkd-section-label">Sort By</div>' + sortHtml + '</div>' +
-            '<div class="tkd-section"><div class="tkd-section-label">Order</div>' + orderHtml + '</div>' +
-            '<div class="tkd-section"><div class="tkd-section-label">Group By</div>' + groupHtml + '</div>' +
+            '<div class="modal-body">' +
+            section('Status', 'status', statusHtml) +
+            section('Category', 'cat', catHtml) +
+            (subs.length ? section('Subject', 'sub', subHtml) : '') +
+            section('Sort By', 'sort', sortHtml) +
+            '<div class="tk-fm-row">' + section('Order', 'order', orderHtml) + section('Group By', 'group', groupHtml) + '</div>' +
             '</div>' +
-            '<div class="tkd-panel-footer">' +
-            '<button class="tkd-reset-btn" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>' +
-            '<button class="tkd-apply-btn" onclick="applyDrawerFilters()"><i class="bi bi-check2 me-1"></i>Apply</button>' +
-            '</div></div>';
-    document.body.appendChild(drawer);
-    requestAnimationFrame(function () { drawer.classList.add('open'); });
-    // Radio click handlers
-    drawer.querySelectorAll('.tkd-radio-row').forEach(function (row) {
-        row.addEventListener('click', function () {
+            '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-ghost btn-sm" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>' +
+            '<button type="button" class="btn btn-accent btn-sm" onclick="applyDrawerFilters()"><i class="bi bi-check2 me-1"></i>Apply</button>' +
+            '</div></div></div>';
+    document.body.appendChild(modal);
+    // Single-select per group (same selection model as before)
+    modal.querySelectorAll('.tk-fm-opt').forEach(function (btn) {
+        btn.addEventListener('click', function () {
             var name = this.dataset.name;
-            var val = this.dataset.val;
-            drawer.querySelectorAll('.tkd-radio-row[data-name="' + name + '"]').forEach(function (r) {
+            modal.querySelectorAll('.tk-fm-opt[data-name="' + name + '"]').forEach(function (r) {
                 r.classList.remove('checked');
-                r.querySelector('.tkd-radio').classList.remove('checked');
+                r.setAttribute('aria-checked', 'false');
             });
             this.classList.add('checked');
-            this.querySelector('.tkd-radio').classList.add('checked');
+            this.setAttribute('aria-checked', 'true');
         });
     });
-    // Trap focus
-    setTimeout(function () { var closeBtn = drawer.querySelector('.tkd-close-btn'); if (closeBtn)
-        closeBtn.focus(); }, 100);
+    var inst = new bootstrap.Modal(modal);
+    modal.addEventListener('hidden.bs.modal', function () {
+        inst.dispose();
+        if (modal.parentNode)
+            modal.parentNode.removeChild(modal);
+    });
+    inst.show();
 }
 
 function closeFilterDrawer() {
-    var drawer = document.getElementById('tkFilterDrawer');
-    if (!drawer)
+    var modal = document.getElementById('tkFilterDrawer');
+    if (!modal)
         return;
-    drawer.classList.remove('open');
-    setTimeout(function () { if (drawer.parentNode)
-        drawer.parentNode.removeChild(drawer); }, 300);
+    var inst = bootstrap.Modal.getInstance(modal);
+    if (inst)
+        inst.hide();
+    else if (modal.parentNode)
+        modal.parentNode.removeChild(modal);
 }
 
 function applyDrawerFilters() {
@@ -151,7 +280,7 @@ function applyDrawerFilters() {
     if (!drawer)
         return;
     function getVal(name) {
-        var checked = drawer.querySelector('.tkd-radio-row[data-name="' + name + '"].checked');
+        var checked = drawer.querySelector('.tk-fm-opt[data-name="' + name + '"].checked');
         return checked ? checked.dataset.val : null;
     }
     var status = getVal('status');
