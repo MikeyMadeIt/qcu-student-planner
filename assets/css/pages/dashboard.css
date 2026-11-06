@@ -428,6 +428,14 @@
     min-height: 120px;
 }
 
+.dash-attendance-note {
+    margin-top: var(--space-3);
+    color: var(--text-faint);
+    font-size: .68rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
 .att-legend-row {
     display: flex;
     align-items: center;
@@ -910,7 +918,7 @@
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (pointer: fine) {
     .dashboard-page {
         display: flex;
         flex-direction: column;
