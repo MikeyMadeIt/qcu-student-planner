@@ -25,9 +25,9 @@
     </div>
 
     <!-- Overall Rate + Log Form -->
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
-        <div class="glass card-pad fade-in h-100">
+    <div class="row g-3 mb-3 att-attendance-top-row">
+      <div class="col-md-4 att-overall-rate-column">
+        <div class="glass card-pad fade-in att-overall-rate-card">
           <div class="att-overall-header">
             <div class="section-title mb-0"><i class="bi bi-percent"></i>Overall Rate</div>
             <div class="att-export-group">
@@ -43,50 +43,51 @@
           <div class="progress my-2"><div class="progress-bar att-rate-bar" id="aRateBar" style="width:0%"></div></div>
           <div class="text-faint" style="font-size:.72rem">Excludes No Classes days</div>
         </div>
-      </div>
-      <div class="col-md-8">
-        <div class="glass card-pad fade-in">
+        <div class="glass card-pad fade-in mt-3 mb-3" id="absenceLimitsCard">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-plus-circle"></i>Log Attendance</div>
-            <button class="btn btn-ghost btn-sm att-mark-all-btn" onclick="markAllPresentToday()" aria-label="Mark all scheduled classes today as Present">
-              <i class="bi bi-check2-all me-1"></i><span class="att-mark-all-label">Mark All Present</span>
+            <div class="section-title mb-0"><i class="bi bi-shield-exclamation"></i>Absence Limits</div>
+            <button class="btn btn-ghost btn-sm" onclick="openAbsenceLimitModal()">
+              <i class="bi bi-gear me-1"></i>Configure
             </button>
           </div>
+          <div id="absenceWarnings"></div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="glass card-pad fade-in att-log-form">
+          <div class="att-log-form-header">
+            <div class="section-title mb-0"><i class="bi bi-plus-circle"></i>Log Attendance</div>
+          </div>
           <div class="row g-2">
-            <div class="col-6 col-sm-3">
-              <label class="att-form-label" for="attSubject">Subject</label>
-              <select class="form-select form-select-sm" id="attSubject" data-dropdown-strategy="absolute"></select>
+            <div class="col-12 att-date-bulk-row">
+              <div class="att-date-field">
+                <label class="att-form-label" for="attDate">Date</label>
+                <input type="date" class="form-control form-control-sm" id="attDate">
+              </div>
+              <div class="att-bulk-panel">
+                <label class="att-bulk-label" for="attBulkStatus">Bulk Attendance</label>
+                <div class="att-bulk-controls">
+                  <select class="form-select form-select-sm att-bulk-status" id="attBulkStatus" data-native aria-label="Set all subjects to">
+                    <option value="">Choose status</option>
+                    <option value="Present">Present</option>
+                    <option value="Late">Late</option>
+                    <option value="Excused">Excused</option>
+                    <option value="Absent">Absent</option>
+                    <option value="No Classes">No Class</option>
+                  </select>
+                  <button type="button" class="btn btn-ghost btn-sm att-bulk-apply" id="attBulkApply" onclick="applyBulkAttendanceStatus()" disabled>Apply</button>
+                </div>
+              </div>
             </div>
-            <div class="col-6 col-sm-3">
-              <label class="att-form-label" for="attDate">Date</label>
-              <input type="date" class="form-control form-control-sm" id="attDate">
-            </div>
-            <div class="col-6 col-sm-3">
-              <label class="att-form-label" for="attStatus">Status</label>
-              <select class="form-select form-select-sm" id="attStatus" data-dropdown-strategy="absolute">
-                <option>Present</option>
-                <option>Absent</option>
-                <option>Late</option>
-                <option>Excused</option>
-                <option>No Classes</option>
-              </select>
-            </div>
-            <div class="col-6 col-sm-3">
-              <label class="att-form-label" for="attOnline">Mode</label>
-              <button type="button" class="att-mode-toggle" id="attModeToggle" role="switch" aria-checked="false" aria-label="Online mode toggle" onclick="toggleAttMode()">
-                <span class="att-mode-track">
-                  <span class="att-mode-thumb"></span>
-                </span>
-                <span class="att-mode-label" id="attModeLabel">Offline</span>
-                <input type="checkbox" id="attOnline" class="att-hidden-check" aria-hidden="true" tabindex="-1">
-              </button>
+            <div class="col-12 att-subject-list-column">
+              <div id="attSubjectList" class="att-subject-list" aria-live="polite"></div>
             </div>
             <div class="col-12">
               <label class="att-form-label" for="attNotes">Notes <span class="text-faint">(optional)</span></label>
               <input type="text" class="form-control form-control-sm" id="attNotes" placeholder="Optional note…">
             </div>
             <div class="col-12">
-              <button class="btn btn-accent w-100" onclick="logAttendance()"><i class="bi bi-check2 me-1"></i>Log Attendance</button>
+              <button class="btn btn-accent w-100" id="attLogButton" onclick="logAttendance()"><i class="bi bi-check2 me-1"></i>Log Attendance</button>
             </div>
           </div>
         </div>
@@ -127,17 +128,7 @@
       <div id="attendanceHeatmap" class="att-heatmap-wrap"></div>
       <div class="att-heatmap-legend" id="heatmapLegend"></div>
     </div>
-
-    <!-- Absence Limits -->
-    <div class="glass card-pad mb-3 fade-in">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="section-title mb-0"><i class="bi bi-shield-exclamation"></i>Absence Limits</div>
-        <button class="btn btn-ghost btn-sm" onclick="openAbsenceLimitModal()">
-          <i class="bi bi-gear me-1"></i>Configure
-        </button>
-      </div>
-      <div id="absenceWarnings"></div>
-    </div>
+    <div id="absenceLimitsMobileSlot"></div>
 
     <!-- Per-subject Breakdown -->
     <div class="glass card-pad mb-3 fade-in">
@@ -180,25 +171,6 @@
       <div class="modal-body">
         <div id="attNoteContent" class="att-note-content"></div>
         <div class="att-note-meta" id="attNoteMeta"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Mark All Present Modal -->
-<div class="modal fade" id="markAllPresentModal" tabindex="-1" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header py-2">
-        <h6 class="modal-title mb-0"><i class="bi bi-check2-all me-2"></i>Mark All Present Today?</h6>
-        <button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="markAllPresentBody"></div>
-      <div class="modal-footer py-2">
-        <button class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-accent btn-sm" id="markAllConfirmBtn" onclick="confirmMarkAllPresent()">
-          <i class="bi bi-check2 me-1"></i>Mark Present
-        </button>
       </div>
     </div>
   </div>

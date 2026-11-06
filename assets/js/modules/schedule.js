@@ -262,8 +262,9 @@ function renderNav() {
         const isSel = sameDay(d, _selectedDate);
         const dayName = DAY_SHORT[d.getDay()];
         const dateStr = isoDate(d);
+        const inSemester = isDateInSemester(d);
         // No has-classes dots — removed per requirement #5
-        return `<button class="sch-day-btn ${isSel ? 'selected' : ''} ${isToday ? 'today' : ''}" onclick="selectDay(new Date('${dateStr}T00:00:00'))" aria-label="${DAY_LONG[d.getDay()]} ${d.getDate()}" aria-pressed="${isSel ? 'true' : 'false'}">
+        return `<button class="sch-day-btn ${isSel ? 'selected' : ''} ${isToday ? 'today' : ''}" style="${inSemester ? '' : 'opacity:.45'}" onclick="selectDay(new Date('${dateStr}T00:00:00'))" aria-label="${DAY_LONG[d.getDay()]} ${d.getDate()}${inSemester ? '' : ', outside semester'}" aria-pressed="${isSel ? 'true' : 'false'}">
       <span class="sch-day-name">${dayName.toUpperCase()}</span>
       <span class="sch-day-num">${d.getDate()}</span>
     </button>`;
@@ -274,10 +275,31 @@ function renderNav() {
 
 function getSubjectsForDay(date) {
     const semId = DB.getActiveSemesterId();
+    if (!isDateInSemester(date))
+        return [];
     const dayName = DAY_SHORT[date.getDay()];
     return DB.getSubjects()
         .filter(s => s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))
         .sort((a, b) => toMins(a.start) - toMins(b.start));
+}
+
+function getSemesterEmptyState(date) {
+    const semester = DB.getActiveSemester();
+    if (!semester)
+        return null;
+    const dateKey = isoDate(date);
+    if (semester.startDate && dateKey < semester.startDate) {
+        const startDate = new Date(semester.startDate + 'T00:00:00');
+        if (!isNaN(startDate.getTime())) {
+            return {
+                title: "Semester hasn't started yet",
+                detail: `Classes begin ${startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+            };
+        }
+    }
+    if (semester.endDate && dateKey > semester.endDate)
+        return { title: 'Semester has ended', detail: '' };
+    return null;
 }
 
 /* ── All semester subjects ── */
@@ -421,6 +443,17 @@ function renderNextCard() {
     const todayStr = isoDate(today);
     const info = getNextOrCurrentClass(today);
     if (!info) {
+        const semesterState = getSemesterEmptyState(today);
+        if (semesterState) {
+            host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
+      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-calendar-x"></i></div>
+      <div class="sch-next-body">
+        <div class="sch-next-label">${semesterState.title.toUpperCase()}</div>
+        ${semesterState.detail ? `<div class="sch-next-subject">${semesterState.detail}</div>` : ''}
+      </div>
+    </div>`;
+            return;
+        }
         const classes = getSubjectsForDay(today);
         const hadClasses = classes.length > 0;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
@@ -781,10 +814,11 @@ function renderDaySummary() {
     }
     let timelineHtml = '';
     if (!classes.length) {
+        const semesterState = getSemesterEmptyState(_selectedDate);
         timelineHtml = `<div class="glass card-pad sch-empty-day fade-in">
       <i class="bi bi-calendar-x" style="font-size:1.6rem;opacity:.4" aria-hidden="true"></i>
-      <div class="mt-2 fw-bold" style="color:var(--text)">No Classes ${isToday ? 'Today' : 'This Day'}</div>
-      <div class="text-faint" style="font-size:.85rem">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>
+      <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
+      ${semesterState ? (semesterState.detail ? `<div class="text-faint" style="font-size:.85rem">${semesterState.detail}</div>` : '') : `<div class="text-faint" style="font-size:.85rem">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
       <button class="btn btn-accent btn-sm mt-3" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button>
     </div>`;
     }
@@ -938,7 +972,8 @@ function renderTimetable() {
         const isToday = sameDay(d, today);
         const isSel = sameDay(d, _selectedDate);
         const dayN = DAY_SHORT[d.getDay()];
-        html += `<div class="tt-head ${isToday ? 'tt-head-today' : ''} ${isSel ? 'tt-head-selected' : ''}" aria-label="${DAY_LONG[d.getDay()]} ${d.getDate()}">${dayN}<span class="tt-head-date ${isToday ? 'tt-head-date-today' : ''} ${isSel ? 'tt-head-date-selected' : ''}">${d.getDate()}</span></div>`;
+        const inSemester = isDateInSemester(d);
+        html += `<div class="tt-head ${isToday ? 'tt-head-today' : ''} ${isSel ? 'tt-head-selected' : ''}" style="${inSemester ? '' : 'opacity:.45'}" aria-label="${DAY_LONG[d.getDay()]} ${d.getDate()}${inSemester ? '' : ', outside semester'}">${dayN}<span class="tt-head-date ${isToday ? 'tt-head-date-today' : ''} ${isSel ? 'tt-head-date-selected' : ''}">${d.getDate()}</span></div>`;
     });
     html += `<div class="tt-hour-col">`;
     for (let h = startHour; h <= endHour; h++) {
@@ -950,9 +985,10 @@ function renderTimetable() {
         const dayName = DAY_SHORT[d.getDay()];
         const isToday = sameDay(d, today);
         const isSel = sameDay(d, _selectedDate);
-        const dayClasses = allSubs.filter(s => s.days && s.days.includes(dayName));
+        const inSemester = isDateInSemester(d);
+        const dayClasses = inSemester ? allSubs.filter(s => s.days && s.days.includes(dayName)) : [];
         const overlapMap = computeOverlaps(dayClasses);
-        html += `<div class="tt-col ${isToday ? 'tt-col-today' : ''} ${isSel ? 'tt-col-selected' : ''}" style="position:relative" aria-label="${dayName} classes">`;
+        html += `<div class="tt-col ${isToday ? 'tt-col-today' : ''} ${isSel ? 'tt-col-selected' : ''}" style="position:relative;${inSemester ? '' : 'opacity:.45'}" aria-label="${dayName} classes${inSemester ? '' : ', outside semester'}">`;
         for (let h = startHour; h <= endHour; h++) {
             html += `<div class="tt-cell" style="height:${ttHourHeight}px"></div>`;
         }
