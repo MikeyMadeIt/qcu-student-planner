@@ -883,18 +883,109 @@ function updateNoteToolbarState(editor) {
     }
 }
 
+/* ── Editor cleanup ──
+   Browsers add junk when formatting is spammed through execCommand: inline style spans
+   (white backgrounds, copied colours / font sizes), <font> tags, empty <b>/<i>/<span> and
+   empty lists. This strips that junk and keeps the caret where it was. */
+function getNoteEditorTextOffsets(editor) {
+    try {
+        var selection = window.getSelection();
+        if (!selection || !selection.rangeCount || !editor.contains(selection.anchorNode))
+            return null;
+        var range = selection.getRangeAt(0);
+        var pre = document.createRange();
+        pre.selectNodeContents(editor);
+        pre.setEnd(range.startContainer, range.startOffset);
+        var start = pre.toString().length;
+        pre.setEnd(range.endContainer, range.endOffset);
+        return { start: start, end: pre.toString().length };
+    } catch (e) {
+        return null;
+    }
+}
+
+function setNoteEditorTextOffsets(editor, offsets) {
+    if (!offsets)
+        return;
+    var walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null);
+    var count = 0, startNode = null, startOffset = 0, endNode = null, endOffset = 0, node, last = null;
+    while ((node = walker.nextNode())) {
+        var length = node.nodeValue.length;
+        if (!startNode && offsets.start <= count + length) {
+            startNode = node;
+            startOffset = offsets.start - count;
+        }
+        if (!endNode && offsets.end <= count + length) {
+            endNode = node;
+            endOffset = offsets.end - count;
+        }
+        count += length;
+        last = node;
+        if (startNode && endNode)
+            break;
+    }
+    if (!startNode && last) {
+        startNode = last;
+        startOffset = last.nodeValue.length;
+    }
+    if (!endNode)
+        endNode = startNode, endOffset = startOffset;
+    if (!startNode)
+        return;
+    var range = document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function cleanNoteEditor(editor) {
+    if (!editor || typeof editor.querySelectorAll !== 'function')
+        return;
+    var dirty = editor.querySelector('[style], font, span:not([class]), b:empty, i:empty, strong:empty, em:empty, s:empty, strike:empty, u:empty, ul:empty, ol:empty');
+    if (!dirty)
+        return;
+    var before = getNoteEditorTextOffsets(editor);
+    Array.prototype.forEach.call(editor.querySelectorAll('[style]'), function (el) { el.removeAttribute('style'); });
+    Array.prototype.forEach.call(editor.querySelectorAll('font, span:not([class])'), function (el) {
+        while (el.firstChild)
+            el.parentNode.insertBefore(el.firstChild, el);
+        el.remove();
+    });
+    // empty inline formatting and empty lists (repeat: removing one can empty its parent)
+    for (var pass = 0; pass < 3; pass++) {
+        var empties = editor.querySelectorAll('b:empty, i:empty, strong:empty, em:empty, s:empty, strike:empty, u:empty, ul:empty, ol:empty');
+        if (!empties.length)
+            break;
+        Array.prototype.forEach.call(empties, function (el) { el.remove(); });
+    }
+    editor.normalize();
+    var after = getNoteEditorTextOffsets(editor);
+    if (before && (!after || after.start !== before.start || after.end !== before.end))
+        setNoteEditorTextOffsets(editor, before);
+}
+
+function afterNoteEditorCommand(editor) {
+    cleanNoteEditor(editor);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    updateNoteToolbarState(editor);
+}
+
 function wireNoteEditor(editor) {
     if (!editor || editor.dataset.formattingWired)
         return;
     editor.dataset.formattingWired = 'true';
     editor.setAttribute('contenteditable', 'true');
+    try { document.execCommand('styleWithCSS', false, false); } catch (e) { }
     editor.setAttribute('role', 'textbox');
     editor.setAttribute('aria-multiline', 'true');
     editor.innerHTML = renderMarkdown(editor.dataset.markdown || '', null, true);
     editor.addEventListener('focus', function () { saveNoteEditorSelection(editor); });
     editor.addEventListener('keyup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
     editor.addEventListener('mouseup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
-    editor.addEventListener('input', function () { saveNoteEditorSelection(editor); updateNotePreview(); updateNoteToolbarState(editor); });
+    editor.addEventListener('input', function () { cleanNoteEditor(editor); saveNoteEditorSelection(editor); updateNotePreview(); updateNoteToolbarState(editor); });
     editor.addEventListener('change', function (event) {
         if (event.target.matches('.md-checklist-input')) {
             updateNoteChecklistInput(event.target);
@@ -911,9 +1002,7 @@ function wireNoteEditor(editor) {
         event.preventDefault();
         restoreNoteEditorSelection(editor);
         document.execCommand(command, false, null);
-        saveNoteEditorSelection(editor);
-        updateNotePreview();
-        updateNoteToolbarState(editor);
+        afterNoteEditorCommand(editor);
     });
     editor.addEventListener('paste', function (event) {
         var text = event.clipboardData && event.clipboardData.getData('text/plain');
@@ -922,6 +1011,7 @@ function wireNoteEditor(editor) {
         event.preventDefault();
         restoreNoteEditorSelection(editor);
         document.execCommand('insertText', false, text);
+        cleanNoteEditor(editor);
         updateNotePreview();
     });
     var toolbar = editor.closest('.modal-body').querySelector('.note-md-toolbar');
@@ -962,9 +1052,7 @@ function runNoteEditorCommand(command, value) {
         return;
     restoreNoteEditorSelection(editor);
     document.execCommand(command, false, value || null);
-    saveNoteEditorSelection(editor);
-    updateNotePreview();
-    updateNoteToolbarState(editor);
+    afterNoteEditorCommand(editor);
 }
 
 function mdToggleInline(marker) {
@@ -1020,7 +1108,7 @@ function mdInsertLink() {
         document.execCommand('insertHTML', false, '<a href="' + escapeHtml(href) + '">' + escapeHtml(href) + '</a>');
     else
         document.execCommand('createLink', false, href);
-    updateNotePreview();
+    afterNoteEditorCommand(editor);
 }
 
 function mdInsertLine(prefix) {
@@ -1035,7 +1123,7 @@ function mdInsertLine(prefix) {
     var formattedBlock = getNoteEditorBlock(editor);
     if (formattedBlock && /^H[4-6]$/.test(formattedBlock.tagName))
         formattedBlock.classList.add('md-h');
-    updateNotePreview();
+    afterNoteEditorCommand(editor);
 }
 
 function convertChecklistList(list) {
@@ -1107,8 +1195,7 @@ function mdInsertBlock(text) {
             document.execCommand(text.startsWith('1.') ? 'insertOrderedList' : 'insertUnorderedList', false, null);
         }
     }
-    saveNoteEditorSelection(editor);
-    updateNotePreview();
+    afterNoteEditorCommand(editor);
 }
 
 /* ── Tag management for modal ── */
