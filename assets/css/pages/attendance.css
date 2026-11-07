@@ -3474,5 +3474,95 @@ END ATTENDANCE v4
 /* Mixed-status day: pie-style cell */
 .att-hm-mixed-dot {
     background: conic-gradient(rgba(251,113,133,.8) 0 33%, rgba(96,165,250,.8) 33% 66%, rgba(52,211,153,.75) 66% 100%);
-    border-radius: 50%;
+    border-radius: 2px;
+}
+
+/* Heatmap polish: room for outlines/scrollbar, tidy legend */
+.att-heatmap-week-viewport {
+    padding: 2px 2px 8px;
+    scrollbar-width: thin;
+}
+
+.att-heatmap-legend {
+    margin-top: 12px;
+}
+
+.att-hm-legend-wrap,
+.att-hm-legend-items {
+    gap: 8px 12px;
+}
+
+.att-hm-li {
+    gap: 5px;
+    font-size: .68rem;
+}
+
+.att-hm-li-dot {
+    width: 10px;
+    height: 10px;
+}
+
+.att-hm-legend-cell {
+    width: 10px !important;
+    height: 10px !important;
+    max-width: none !important;
+    border-radius: 2px;
+    outline-offset: 1px;
+}
+
+/* Legend: balanced 4 + 4 grid on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-wrap {
+        display: block;
+    }
+    .att-hm-legend-items {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px 6px;
+    }
+    .att-hm-li {
+        min-width: 0;
+        font-size: .64rem;
+        gap: 4px;
+    }
+}
+
+/* Legend: centered on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: center;
+        column-gap: 14px;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .att-hm-legend-items {
+        column-gap: 8px;
+    }
+}
+
+/* Legend: keep the equal 4 + 4 spacing, center each item in its column */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        justify-content: stretch;
+        column-gap: 6px;
+    }
+    .att-hm-li {
+        justify-content: center;
+    }
+}
+
+/* Legend: columns aligned (dots line up top/bottom), spread evenly across the width */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: space-between;
+        column-gap: 8px;
+        padding: 0 4px;
+    }
+    .att-hm-li {
+        justify-content: flex-start;
+    }
 }
