@@ -2640,9 +2640,8 @@ Consecutive Absence Alerts, Export, Skeleton States
 /* ---- Heatmap ---- */
 
 .att-heatmap-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
+    width: 100%;
+    min-width: 0;
 }
 
 .att-heatmap-filter {
@@ -2657,33 +2656,30 @@ Consecutive Absence Alerts, Export, Skeleton States
     }
 }
 
-/* Heatmap grid — mathematically consistent layout */
-
-:root {
-    --hm-cell: 14px;
-    --hm-gap: 3px;
-}
-
 .att-heatmap-grid-wrap {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
     gap: 4px;
-    min-width: max-content;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
 }
-
-/* Day labels column: one label per row, sizes must match cell exactly */
 
 .att-heatmap-day-labels {
     display: grid;
-    grid-template-rows: repeat(7, var(--hm-cell));
-    gap: var(--hm-gap);
+    grid-template-rows: 16px repeat(7, auto);
+    gap: 4px;
     flex-shrink: 0;
-    align-self: flex-start;
+    align-self: start;
+}
+
+.att-heatmap-month-spacer {
+    height: 16px;
 }
 
 .att-heatmap-day-lbl {
-    width: var(--hm-cell);
-    height: var(--hm-cell);
+    width: 14px;
+    aspect-ratio: 1 / 1;
     font-size: .54rem;
     color: var(--text-faint);
     display: flex;
@@ -2692,27 +2688,46 @@ Consecutive Absence Alerts, Export, Skeleton States
     font-weight: 700;
 }
 
-/* Weeks area: one column per week */
-
-.att-heatmap-weeks {
-    display: flex;
-    gap: var(--hm-gap);
-    align-items: flex-start;
+.att-heatmap-week-viewport {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Each week column: 7 cells stacked vertically */
+.att-heatmap-months,
+.att-heatmap-weeks {
+    display: grid;
+    grid-template-columns: repeat(var(--hm-week-count), minmax(12px, 1fr));
+    column-gap: 4px;
+}
+
+.att-heatmap-months {
+    height: 16px;
+    margin-bottom: 4px;
+}
+
+.att-heatmap-month-label {
+    min-width: 0;
+    color: var(--text-faint);
+    font-size: .62rem;
+    line-height: 16px;
+    white-space: nowrap;
+}
 
 .att-heatmap-col {
     display: grid;
-    grid-template-rows: repeat(7, var(--hm-cell));
-    gap: var(--hm-gap);
+    grid-template-rows: repeat(7, auto);
+    gap: 4px;
+    min-width: 0;
 }
 
-/* Heatmap cells */
-
 .att-hm-cell {
-    width: var(--hm-cell);
-    height: var(--hm-cell);
+    display: block;
+    width: 100%;
+    max-width: 28px;
+    aspect-ratio: 1 / 1;
     border-radius: 3px;
     cursor: pointer;
     transition: transform .1s, opacity .1s;
@@ -2732,11 +2747,22 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-hm-empty {
-    background: transparent;
-    cursor: default;
+    background: color-mix(in srgb, var(--text) 5%, var(--surface-2));
 }
 
-.att-hm-empty:hover {
+.att-hm-dimmed {
+    opacity: .32;
+    cursor: default;
+    pointer-events: none;
+}
+
+.att-hm-today {
+    outline: 1.5px solid rgb(var(--accent));
+    outline-offset: 1px;
+}
+
+.att-hm-empty:hover,
+.att-hm-dimmed:hover {
     transform: none;
 }
 
@@ -2762,20 +2788,6 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-hm-noclasses {
     background: rgba(139,92,246,.35);
-}
-
-@media (max-width: 575.98px) {
-    :root {
-        --hm-cell: 12px;
-        --hm-gap: 2px;
-    }
-}
-
-@media (max-width: 375.98px) {
-    :root {
-        --hm-cell: 10px;
-        --hm-gap: 2px;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2819,7 +2831,8 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-legend-wrap {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: flex-start;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
@@ -2847,9 +2860,10 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-hm-legend-items {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-left: 4px;
+    margin-left: 0;
 }
 
 .att-hm-li {
@@ -2873,14 +2887,14 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-tooltip {
     position: fixed;
     z-index: 9999;
-    background: rgba(15,20,40,.97);
-    border: 1px solid rgba(255,255,255,.15);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 4px;
     padding: 8px 12px;
     font-size: .75rem;
     pointer-events: none;
     max-width: 220px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.4);
+    box-shadow: var(--shadow);
     opacity: 0;
     transition: opacity .12s;
 }
@@ -2895,6 +2909,11 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-tt-subject {
     color: var(--text-soft);
     font-size: .7rem;
+}
+
+.att-hm-tt-entry {
+    display: flex;
+    gap: 4px;
     margin-bottom: 2px;
 }
 
