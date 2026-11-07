@@ -728,6 +728,8 @@ function renderConsecutiveAbsenceAlerts() {
 
 /* ---- Heatmap ---- */
 
+let _hmResizeFrame = 0;
+
 function renderHeatmap() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
@@ -735,49 +737,55 @@ function renderHeatmap() {
     const legend = document.getElementById('heatmapLegend');
     if (!wrap)
         return;
+    if (!window._attendanceHeatmapResizeBound) {
+        window._attendanceHeatmapResizeBound = true;
+        window.addEventListener('resize', () => {
+            cancelAnimationFrame(_hmResizeFrame);
+            _hmResizeFrame = requestAnimationFrame(renderHeatmap);
+        }, { passive: true });
+    }
     const records = DB.getAttendance().filter(r => r.semesterId === semId);
     const filterSubId = document.getElementById('heatmapSubjectFilter')?.value || '';
     const filteredRecords = filterSubId ? records.filter(r => r.subjectId === filterSubId) : records;
-    // Build date range from semester
-    let startDate = sem && sem.startDate ? new Date(sem.startDate + 'T00:00:00') : null;
-    let endDate = sem && sem.endDate ? new Date(sem.endDate + 'T00:00:00') : null;
-    // If no semester dates, derive from records
-    if (filteredRecords.length) {
-        const sortedDates = [...filteredRecords].sort((a, b) => a.date.localeCompare(b.date));
-        if (!startDate)
-            startDate = new Date(sortedDates[0].date + 'T00:00:00');
-        if (!endDate)
-            endDate = new Date(sortedDates[sortedDates.length - 1].date + 'T00:00:00');
-    }
-    if (!startDate || !endDate || !filteredRecords.length) {
-        wrap.innerHTML = `<div class="att-heatmap-empty">
-      <i class="bi bi-grid-3x3-gap"></i>
-      <div>No attendance history yet</div>
-      <div class="att-heatmap-empty-sub">Your attendance activity will appear here once you start logging.</div>
-    </div>`;
-        if (legend)
-            legend.innerHTML = '';
-        return;
-    }
-    // Clamp end to today if in future
+    const toLocalYMD = d => d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    const parseDate = ymd => {
+        if (!ymd)
+            return null;
+        const date = new Date(`${ymd}T00:00:00`);
+        return isNaN(date.getTime()) ? null : date;
+    };
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (endDate > today)
-        endDate = today;
-    // Build a lookup: date -> best status (first non-NoClasses wins, else NoClasses)
+    const todayYmd = toLocalYMD(today);
+    let startDate = parseDate(sem?.startDate);
+    let endDate = parseDate(sem?.endDate);
+    const hasSemesterRange = !!(sem && startDate && endDate && startDate <= endDate);
+    if (!hasSemesterRange) {
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - ((startDate.getDay() + 6) % 7) - 19 * 7);
+        endDate = new Date(today);
+    }
+    const startYmd = toLocalYMD(startDate);
+    const endYmd = toLocalYMD(hasSemesterRange ? endDate : today);
     const subs = DB.getSubjects();
-    const dateMap = {}; // date -> { status, subjects: [...], online }
+    const subjectById = new Map(subs.map(subject => [subject.id, subject]));
+    const dateMap = {};
     for (const r of filteredRecords) {
         if (!dateMap[r.date]) {
-            dateMap[r.date] = { statuses: [], subjects: [], notes: [] };
+            dateMap[r.date] = { statuses: [], subjects: [], notes: [], entries: [] };
         }
-        const sub = subs.find(s => s.id === r.subjectId);
+        const sub = subjectById.get(r.subjectId);
         dateMap[r.date].statuses.push(r.status);
         dateMap[r.date].subjects.push(sub ? sub.code : 'Unknown');
         dateMap[r.date].notes.push(r.notes || '');
         dateMap[r.date].online = dateMap[r.date].online || r.online;
+        dateMap[r.date].entries.push({
+            subject: sub ? sub.code : 'Unknown',
+            status: r.status
+        });
     }
-    // Determine primary status for a date (worst-case: Absent > Late > Excused > NoClasses > Present)
     function primaryStatus(statuses) {
         if (statuses.includes('Absent'))
             return 'Absent';
@@ -791,114 +799,118 @@ function renderHeatmap() {
             return 'Present';
         return 'Present';
     }
-    // Local date formatter — avoids UTC offset shifting the date (toISOString is UTC)
-    function toLocalYMD(d) {
-        return d.getFullYear() + '-' +
-            String(d.getMonth() + 1).padStart(2, '0') + '-' +
-            String(d.getDate()).padStart(2, '0');
+    const startWeek = new Date(startDate);
+    startWeek.setDate(startWeek.getDate() - ((startWeek.getDay() + 6) % 7));
+    const endWeek = new Date(hasSemesterRange ? endDate : today);
+    endWeek.setDate(endWeek.getDate() - ((endWeek.getDay() + 6) % 7));
+    const rangeWeeks = [];
+    const weekStart = new Date(startWeek);
+    while (weekStart <= endWeek) {
+        rangeWeeks.push(new Date(weekStart));
+        weekStart.setDate(weekStart.getDate() + 7);
     }
-    // Build week grid starting from Monday of startDate's week
-    const gridStart = new Date(startDate);
-    const dow = gridStart.getDay(); // 0=Sun
-    gridStart.setDate(gridStart.getDate() - (dow === 0 ? 6 : dow - 1)); // go to Monday
+    const availableWidth = Math.max(0, wrap.clientWidth - 18);
+    const weeksToFill = Math.ceil((availableWidth + 4) / 32);
+    const displayWeekCount = Math.max(rangeWeeks.length, weeksToFill);
+    const gridWidth = Math.max(availableWidth, displayWeekCount * 12 + Math.max(0, displayWeekCount - 1) * 4);
     const weeks = [];
-    let cur = new Date(gridStart);
-    while (cur <= endDate) {
+    for (let weekIndex = 0; weekIndex < displayWeekCount; weekIndex++) {
+        const monday = new Date(rangeWeeks[weekIndex] || rangeWeeks[rangeWeeks.length - 1]);
+        if (weekIndex >= rangeWeeks.length)
+            monday.setDate(monday.getDate() + (weekIndex - rangeWeeks.length + 1) * 7);
         const week = [];
+        let monthLabel = '';
         for (let i = 0; i < 7; i++) {
+            const cur = new Date(monday);
+            cur.setDate(cur.getDate() + i);
             const ymd = toLocalYMD(cur);
-            const inRange = cur >= startDate && cur <= endDate;
+            const inRange = !hasSemesterRange || ymd >= startYmd && ymd <= endYmd;
             const data = dateMap[ymd];
+            if (!monthLabel && cur.getDate() === 1) {
+                monthLabel = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(cur);
+            }
             week.push({
                 ymd,
                 inRange,
                 status: data ? primaryStatus(data.statuses) : null,
                 subjects: data ? data.subjects : [],
-                notes: data ? data.notes.filter(Boolean) : [],
-                online: data ? data.online : false,
-                isWeekend: cur.getDay() === 0 || cur.getDay() === 6
+                entries: data ? data.entries : [],
+                isToday: ymd === todayYmd,
+                isFuture: ymd > todayYmd
             });
-            cur.setDate(cur.getDate() + 1);
         }
-        weeks.push(week);
+        weeks.push({ days: week, monthLabel });
     }
-    // Render
     const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    const gridStyle = `--hm-week-count:${displayWeekCount};width:${gridWidth}px`;
     let html = `<div class="att-heatmap-grid-wrap">
-    <div class="att-heatmap-day-labels">`;
+    <div class="att-heatmap-day-labels"><div class="att-heatmap-month-spacer" aria-hidden="true"></div>`;
     for (const l of dayLabels) {
         html += `<div class="att-heatmap-day-lbl">${l}</div>`;
     }
-    html += `</div><div class="att-heatmap-weeks">`;
+    html += `</div><div class="att-heatmap-week-viewport"><div class="att-heatmap-months" style="${gridStyle}" aria-hidden="true">`;
     for (const week of weeks) {
-        html += `<div class="att-heatmap-col">`;
-        for (const cell of week) {
+        html += `<div class="att-heatmap-month-label">${escapeAttHtml(week.monthLabel)}</div>`;
+    }
+    html += `</div><div class="att-heatmap-weeks" style="${gridStyle}" role="grid" aria-label="Attendance by day">`;
+    const statusClasses = {
+        'Present': 'att-hm-present',
+        'Late': 'att-hm-late',
+        'Excused': 'att-hm-excused',
+        'Absent': 'att-hm-absent',
+        'No Classes': 'att-hm-noclasses'
+    };
+    for (const week of weeks) {
+        html += `<div class="att-heatmap-col" role="row">`;
+        for (const cell of week.days) {
             let cls = 'att-hm-cell';
-            let ariaLabel = '';
-            if (!cell.inRange || cell.isWeekend && !cell.status) {
-                cls += ' att-hm-empty';
-                ariaLabel = cell.ymd;
-            }
-            else if (!cell.status) {
-                cls += ' att-hm-none';
-                ariaLabel = `${cell.ymd}: No record`;
-            }
-            else {
-                const sc = {
-                    'Present': 'att-hm-present',
-                    'Late': 'att-hm-late',
-                    'Excused': 'att-hm-excused',
-                    'Absent': 'att-hm-absent',
-                    'No Classes': 'att-hm-noclasses'
-                }[cell.status] || 'att-hm-none';
-                cls += ' ' + sc;
-                ariaLabel = `${cell.ymd}: ${cell.status}${cell.subjects.length ? ' — ' + cell.subjects.join(', ') : ''}`;
-            }
-            // Tooltip data attributes
-            const subjectsStr = cell.subjects.join(', ') || '—';
-            const notesStr = cell.notes.join(' / ') || '';
-            const modeStr = cell.online ? 'Online' : cell.subjects.length ? 'Offline' : '';
-            html += `<div class="${cls}"
-        role="gridcell"
-        tabindex="0"
-        aria-label="${escapeAttHtml(ariaLabel)}"
-        data-hm-date="${cell.ymd}"
-        data-hm-status="${escapeAttHtml(cell.status || '')}"
-        data-hm-subjects="${escapeAttHtml(subjectsStr)}"
-        data-hm-notes="${escapeAttHtml(notesStr)}"
-        data-hm-mode="${escapeAttHtml(modeStr)}"
+            const dimmed = !cell.inRange || cell.isFuture;
+            if (cell.status)
+                cls += ` ${statusClasses[cell.status] || 'att-hm-none'}`;
+            else
+                cls += ' att-hm-none att-hm-empty';
+            if (dimmed)
+                cls += ' att-hm-dimmed';
+            if (cell.isToday)
+                cls += ' att-hm-today';
+            const tooltipEntries = cell.entries.map(entry => `${entry.subject} · ${entry.status}`).join(', ');
+            const ariaLabel = `${cell.ymd}: ${tooltipEntries || 'No records'}${dimmed ? ', unavailable' : ''}`;
+            const handlers = dimmed ? '' : `tabindex="0"
         onmouseenter="showHmTooltip(event,this)"
         onmouseleave="hideHmTooltip()"
         onfocus="showHmTooltip(event,this)"
         onblur="hideHmTooltip()"
-        onclick="showHmTooltipMobile(event,this)"
+        onclick="showHmTooltipMobile(event,this)"`;
+            html += `<div class="${cls}" role="gridcell" ${handlers}${dimmed ? ' tabindex="-1" aria-disabled="true"' : ''}
+        aria-label="${escapeAttHtml(ariaLabel)}"
+        data-hm-date="${cell.ymd}"
+        data-hm-records="${escapeAttHtml(JSON.stringify(cell.entries))}"
       ></div>`;
         }
         html += `</div>`;
     }
     html += `</div></div>`;
     wrap.innerHTML = html;
-    // Legend
+    const currentMonday = new Date(today);
+    currentMonday.setDate(currentMonday.getDate() - ((currentMonday.getDay() + 6) % 7));
+    const currentWeekYmd = toLocalYMD(currentMonday);
+    let currentWeekIndex = weeks.findIndex(week => week.days[0].ymd === currentWeekYmd);
+    if (currentWeekIndex < 0)
+        currentWeekIndex = currentWeekYmd < weeks[0].days[0].ymd ? 0 : weeks.length - 1;
+    const viewport = wrap.querySelector('.att-heatmap-week-viewport');
+    const currentWeek = wrap.querySelectorAll('.att-heatmap-col')[currentWeekIndex];
+    if (viewport && currentWeek)
+        viewport.scrollLeft = Math.max(0, currentWeek.getBoundingClientRect().left - viewport.getBoundingClientRect().left);
     if (legend) {
-        legend.innerHTML = `<div class="att-hm-legend-wrap">
-      <span class="att-hm-legend-label">Less</span>
-      <div class="att-hm-legend-cells">
-        <div class="att-hm-cell att-hm-none att-hm-legend-cell" title="No record"></div>
-        <div class="att-hm-cell att-hm-present att-hm-legend-cell" title="Present"></div>
-        <div class="att-hm-cell att-hm-late att-hm-legend-cell" title="Late"></div>
-        <div class="att-hm-cell att-hm-excused att-hm-legend-cell" title="Excused"></div>
-        <div class="att-hm-cell att-hm-absent att-hm-legend-cell" title="Absent"></div>
-        <div class="att-hm-cell att-hm-noclasses att-hm-legend-cell" title="No Classes"></div>
-      </div>
-      <span class="att-hm-legend-label">More</span>
-      <div class="att-hm-legend-items">
+        legend.innerHTML = `<div class="att-hm-legend-wrap"><div class="att-hm-legend-items">
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-present"></span>Present</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-late"></span>Late</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-excused"></span>Excused</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-absent"></span>Absent</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-noclasses"></span>No Class</span>
-      </div>
-    </div>`;
+        <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-legend-cell"></span>No record</span>
+        <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-today att-hm-legend-cell"></span>Today</span>
+      </div></div>`;
     }
 }
 
@@ -910,21 +922,26 @@ function showHmTooltip(evt, cell) {
     clearTimeout(_hmTooltipTimer);
     hideHmTooltip();
     const date = cell.dataset.hmDate;
-    const status = cell.dataset.hmStatus;
-    const subjects = cell.dataset.hmSubjects;
-    const notes = cell.dataset.hmNotes;
-    const mode = cell.dataset.hmMode;
     if (!date || date === 'undefined')
         return;
-    if (!status && !subjects)
-        return;
+    const entries = JSON.parse(cell.dataset.hmRecords || '[]');
+    const dateLabel = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    }).format(new Date(`${date}T00:00:00`));
+    const statusClasses = {
+        'Present': 'att-hm-tt-present',
+        'Late': 'att-hm-tt-late',
+        'Excused': 'att-hm-tt-excused',
+        'Absent': 'att-hm-tt-absent',
+        'No Classes': 'att-hm-tt-noclasses'
+    };
     const tip = document.createElement('div');
     tip.className = 'att-hm-tooltip';
-    tip.innerHTML = `<div class="att-hm-tt-date">${formatDisplayDate(date)}</div>` +
-        (subjects && subjects !== '—' ? `<div class="att-hm-tt-subject">${escapeAttHtml(subjects)}</div>` : '') +
-        (status ? `<div class="att-hm-tt-status att-hm-tt-${(status || '').toLowerCase().replace(/\s/g, '')}">${escapeAttHtml(status)}</div>` : '') +
-        (mode ? `<div class="att-hm-tt-mode">${escapeAttHtml(mode)}</div>` : '') +
-        (notes ? `<div class="att-hm-tt-notes"><i class="bi bi-chat-left-text-fill"></i> ${escapeAttHtml(notes)}</div>` : '');
+    tip.innerHTML = `<div class="att-hm-tt-date">${escapeAttHtml(dateLabel)}</div>` +
+        (entries.length ? entries.map(entry => `<div class="att-hm-tt-entry"><span class="att-hm-tt-subject">${escapeAttHtml(entry.subject)}</span><span class="att-hm-tt-status ${statusClasses[entry.status] || ''}">· ${escapeAttHtml(entry.status)}</span></div>`).join('') :
+            '<div class="att-hm-tt-subject">No records</div>');
     document.body.appendChild(tip);
     _hmTooltipEl = tip;
     positionHmTooltip(evt, tip);
