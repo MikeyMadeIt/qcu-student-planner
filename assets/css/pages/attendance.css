@@ -3470,3 +3470,9 @@ END ATTENDANCE v4
         transform: none;
     }
 }
+
+/* Mixed-status day: pie-style cell */
+.att-hm-mixed-dot {
+    background: conic-gradient(rgba(251,113,133,.8) 0 33%, rgba(96,165,250,.8) 33% 66%, rgba(52,211,153,.75) 66% 100%);
+    border-radius: 50%;
+}

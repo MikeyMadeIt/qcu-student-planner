@@ -840,6 +840,7 @@ function renderHeatmap() {
                 ymd,
                 inRange,
                 status: data ? primaryStatus(data.statuses) : null,
+                statuses: data ? data.statuses : [],
                 subjects: data ? data.subjects : [],
                 entries: data ? data.entries : [],
                 isToday: ymd === todayYmd,
@@ -876,6 +877,24 @@ function renderHeatmap() {
                 cls += ` ${statusClasses[cell.status] || 'att-hm-none'}`;
             else
                 cls += ' att-hm-none att-hm-empty';
+            let mixedStyle = '';
+            if (cell.status) {
+                // Several subjects with different statuses -> pie-style cell, one slice per status (sized by count)
+                const order = ['Absent', 'Late', 'Excused', 'Present', 'No Classes'];
+                const colors = { 'Absent': 'rgba(251,113,133,.8)', 'Late': 'rgba(180,83,9,.85)', 'Excused': 'rgba(96,165,250,.8)', 'Present': 'rgba(52,211,153,.75)', 'No Classes': 'rgba(139,92,246,.55)' };
+                const counts = order.map(st => ({ st, n: cell.statuses.filter(x => x === st).length })).filter(x => x.n > 0);
+                if (counts.length > 1) {
+                    const total = counts.reduce((sum, x) => sum + x.n, 0);
+                    let acc = 0;
+                    const stops = counts.map(x => {
+                        const from = acc / total * 100;
+                        acc += x.n;
+                        return `${colors[x.st]} ${from.toFixed(2)}% ${(acc / total * 100).toFixed(2)}%`;
+                    });
+                    mixedStyle = ` style="background:conic-gradient(${stops.join(',')})"`;
+                    cls += ' att-hm-mixed';
+                }
+            }
             if (dimmed)
                 cls += ' att-hm-dimmed';
             if (cell.isToday)
@@ -888,7 +907,7 @@ function renderHeatmap() {
         onfocus="if(!hmIsTouch())showHmTooltip(event,this)"
         onblur="if(!hmIsTouch())hideHmTooltip()"
         onclick="showHmTooltipMobile(event,this)"`;
-            html += `<div class="${cls}" role="gridcell" ${handlers}${dimmed ? ' tabindex="-1" aria-disabled="true"' : ''}
+            html += `<div class="${cls}"${mixedStyle} role="gridcell" ${handlers}${dimmed ? ' tabindex="-1" aria-disabled="true"' : ''}
         aria-label="${escapeAttHtml(ariaLabel)}"
         data-hm-date="${cell.ymd}"
         data-hm-records="${escapeAttHtml(JSON.stringify(cell.entries))}"
@@ -898,6 +917,13 @@ function renderHeatmap() {
     }
     html += `</div></div>`;
     wrap.innerHTML = html;
+    // Apply sizes inline so the layout is correct even if an older cached stylesheet is loaded
+    const hmPx = hmCell + 'px';
+    wrap.querySelectorAll('.att-hm-cell').forEach(el => { el.style.width = hmPx; el.style.height = hmPx; el.style.maxWidth = 'none'; el.style.aspectRatio = 'auto'; });
+    wrap.querySelectorAll('.att-heatmap-day-lbl').forEach(el => { el.style.height = hmPx; el.style.aspectRatio = 'auto'; });
+    wrap.querySelectorAll('.att-heatmap-day-labels').forEach(el => { el.style.gridTemplateRows = `16px repeat(7, ${hmPx})`; });
+    wrap.querySelectorAll('.att-heatmap-col').forEach(el => { el.style.gridTemplateRows = `repeat(7, ${hmPx})`; });
+    wrap.querySelectorAll('.att-heatmap-months, .att-heatmap-weeks').forEach(el => { el.style.gridTemplateColumns = `repeat(${displayWeekCount}, ${hmPx})`; });
     const currentMonday = new Date(today);
     currentMonday.setDate(currentMonday.getDate() - ((currentMonday.getDay() + 6) % 7));
     const currentWeekYmd = toLocalYMD(currentMonday);
@@ -915,6 +941,7 @@ function renderHeatmap() {
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-excused"></span>Excused</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-absent"></span>Absent</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-noclasses"></span>No Class</span>
+        <span class="att-hm-li"><span class="att-hm-li-dot att-hm-mixed-dot"></span>Mixed</span>
         <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-legend-cell"></span>No record</span>
         <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-today att-hm-legend-cell"></span>Today</span>
       </div></div>`;
