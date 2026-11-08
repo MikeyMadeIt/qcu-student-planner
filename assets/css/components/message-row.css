@@ -168,24 +168,27 @@
     line-height: 1.5;
 }
 
-/* Compact variant for the header inbox dropdown: smaller rows, no
-   border/radius/gap between them (the panel already scrolls), and
-   no right-hand time/action column — tapping anywhere opens the
-   full inbox page. */
+/* Compact variant for the header inbox dropdown. Padding, minimum row
+   height and row-to-row gap are kept identical to .header-panel-item
+   (shell-bar.css) — the notification dropdown's row component — so the
+   two header popups line up: same left edge for the icon/dot, same
+   vertical rhythm, same row height, no right-hand time/action column —
+   tapping anywhere opens the full inbox page. */
 .msg-list-compact {
-    gap: 0;
+    gap: 2px;
 }
 
 .msg-list-compact .msg-row {
-    padding: 8px 6px;
+    min-height: 2.75rem;
+    padding: 0.5rem var(--space-3);
     border: none;
-    border-radius: 0;
-    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     background: transparent;
 }
 
-.msg-list-compact .msg-row:last-child {
-    border-bottom: 0;
+.msg-list-compact .msg-row:hover,
+.msg-list-compact .msg-row:focus-visible {
+    background: var(--surface-2);
 }
 
 .msg-list-compact .msg-row-icon {
