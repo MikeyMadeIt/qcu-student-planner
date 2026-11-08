@@ -165,11 +165,10 @@ test('toolbar actions dispatch rich-text commands instead of inserting Markdown 
     app.mdToggleInline('*');
     app.mdToggleInline('~~');
     app.mdInsertLine('## ');
-    app.mdInsertBlock('1. item');
-    app.mdInsertBlock('- item');
 
+    // List buttons no longer go through execCommand (it split/nested lists when spammed).
     assert.deepEqual(app.__commands.map(item => item.command), [
-        'bold', 'italic', 'strikeThrough', 'formatBlock', 'insertOrderedList', 'insertUnorderedList'
+        'bold', 'italic', 'strikeThrough', 'formatBlock'
     ]);
     assert.equal(app.__editor.innerHTML, '');
 });
@@ -306,4 +305,40 @@ test('PDF export keeps formatted paragraphs and lists in semantic HTML', () => {
     assert.match(html, /<ol><li>First<\/li><li>Second<\/li><\/ol>/);
     assert.match(html, /@page\{size:auto;margin:20mm\}/);
     assert.doesNotMatch(html, /<table\b/i);
+});
+
+test('numbered list nested inside a div/p wrapper keeps its numbers when saved', () => {
+    const app = createHarness();
+    const wrapped = element('div', [
+        element('ol', [element('li', [text('Review your class schedule.')]), element('li', [text('Complete pending assignments.')])])
+    ]);
+    const inParagraph = element('p', [
+        element('ol', [element('li', [text('Prepare for exams.')])])
+    ]);
+    assert.equal(app.serializeNoteEditor(element('div', [wrapped])), '1. Review your class schedule.\n2. Complete pending assignments.');
+    assert.equal(app.serializeNoteEditor(element('div', [inParagraph])), '1. Prepare for exams.');
+});
+
+test('lists that were toggled repeatedly (nested / mixed) never lose their markers', () => {
+    const app = createHarness();
+    const root = element('div', [
+        element('ol', [
+            element('li', [text('Remember to:')]),
+            element('li', [text('Review notes'), element('ul', [element('li', [text('Chapter 1')]), element('li', [text('Chapter 2')])])]),
+            element('li', [text('Sleep early')])
+        ]),
+        element('ul', [element('li', [text('Track attendance')])])
+    ]);
+    assert.equal(
+        app.serializeNoteEditor(root),
+        '1. Remember to:\n2. Review notes\n- Chapter 1\n- Chapter 2\n3. Sleep early\n\n- Track attendance'
+    );
+});
+
+test('empty list items and non-breaking spaces serialize cleanly', () => {
+    const app = createHarness();
+    const root = element('div', [
+        element('ol', [element('li', [text('One\u00a0item')]), element('li', [element('br')])])
+    ]);
+    assert.equal(app.serializeNoteEditor(root), '1. One item\n2. ');
 });
