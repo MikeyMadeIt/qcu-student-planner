@@ -9,7 +9,18 @@
     width: 100%;
     max-width: var(--content-max-width);
     margin-inline: auto;
-    padding: 0 var(--content-padding-x) var(--space-6);
+    /* Top padding reserves the space .shell-bar (layout/shell-bar.css) used to
+       occupy in normal flow before it became position: fixed — it's the bar's
+       own height plus its 1px bottom border plus the gap that used to be its
+       margin-bottom, so the page's first block of content clears the fixed
+       bar instead of rendering underneath it. */
+    padding: calc(var(--shell-bar-height) + 1px + var(--page-gap)) var(--content-padding-x) var(--space-6);
+}
+
+@media (max-width: 991.98px) {
+    .main-content {
+        padding-top: calc(var(--shell-bar-height) + 1px + var(--space-4));
+    }
 }
 
 /* Page header */
