@@ -2225,15 +2225,26 @@ Consecutive Absence Alerts, Export, Skeleton States
     margin-bottom: 0;
 }
 
-/* On very narrow screens, stack buttons below title */
+/* On very narrow screens keep title + buttons on one row; shrink buttons instead of wrapping */
+
+.att-overall-header {
+    flex-wrap: nowrap;
+}
+
+.att-overall-header .section-title {
+    min-width: 0;
+}
 
 @media (max-width: 399.98px) {
-    .att-overall-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
     .att-overall-header .att-export-group {
-        align-self: flex-end;
+        gap: 3px;
+    }
+    .att-overall-header .att-export-group .btn {
+        padding: 4px 8px;
+        font-size: .72rem;
+    }
+    .att-overall-header .att-export-label {
+        font-size: .72rem;
     }
 }
 
@@ -2769,7 +2780,13 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-hm-none {
-    background: rgba(255,255,255,.07);
+    background: var(--hm-none-bg, rgba(255,255,255,.07));
+}
+
+/* Legend "No record" swatch: gray picked from the reference cell color (rgb 27,28,30) */
+.att-hm-legend-cell.att-hm-none:not(.att-hm-today) {
+    background: #1b1c1e !important;
+    opacity: 1 !important;
 }
 
 .att-hm-present {
@@ -3564,5 +3581,95 @@ END ATTENDANCE v4
     }
     .att-hm-li {
         justify-content: flex-start;
+    }
+}
+/* =========================================================
+   Log Attendance: Date / Bulk status / Apply
+   - original side-by-side layout kept
+   - same height for all three controls
+   - date box uses the same color as the Bulk Attendance dropdown
+   ========================================================= */
+
+.att-log-form .att-date-bulk-row {
+    align-items: flex-end;
+}
+
+/* Date input: same color + height as bulk status, text never clipped */
+.att-log-form #attDate {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    height: var(--input-height);
+    min-height: var(--input-height);
+    padding: 0 10px;
+    font-size: .8125rem;
+    line-height: normal;
+    background: var(--surface) !important;
+    box-sizing: border-box;
+}
+
+.att-log-form #attDate::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+    min-height: 1.3em;
+    line-height: 1.3;
+}
+
+.att-log-form #attDate::-webkit-datetime-edit,
+.att-log-form #attDate::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+
+.att-log-form #attDate::-webkit-calendar-picker-indicator {
+    margin: 0 0 0 4px;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Bulk status + Apply: same height as the date box */
+.att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger,
+.att-log-form .att-bulk-status {
+    height: var(--input-height);
+    min-height: var(--input-height);
+}
+
+.att-log-form .att-bulk-controls .att-bulk-apply {
+    height: var(--input-height);
+    min-height: var(--input-height);
+    padding-top: 0;
+    padding-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.att-log-form .att-bulk-controls {
+    align-items: flex-end;
+}
+
+/* Small phones: stay side by side, just tighten widths so the date fits */
+@media (max-width: 479.98px) {
+    .att-log-form #attDate {
+        font-size: .75rem;
+        padding: 0 8px;
+    }
+    .att-log-form .att-bulk-controls {
+        gap: 4px;
+    }
+    .att-log-form .att-bulk-controls > .att-status-select {
+        flex: 0 0 104px;
+        width: 104px;
+        min-width: 0;
+    }
+    .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: .75rem;
+    }
+    .att-log-form .att-bulk-apply {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: .75rem;
     }
 }
