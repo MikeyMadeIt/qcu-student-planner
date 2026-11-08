@@ -3598,6 +3598,7 @@ END ATTENDANCE v4
 .att-log-form #attDate {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     width: 100%;
     min-width: 0;
     height: var(--input-height);
@@ -3622,9 +3623,25 @@ END ATTENDANCE v4
 }
 
 .att-log-form #attDate::-webkit-calendar-picker-indicator {
-    margin: 0 0 0 4px;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin: 0 0 0 6px;
+    position: static;
+    opacity: 1;
     padding: 0;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
     cursor: pointer;
+}
+
+/* Icon follows right after the date text and always stays visible; only the text shrinks */
+.att-log-form #attDate::-webkit-datetime-edit {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* Bulk status + Apply: same height as the date box */
@@ -3652,7 +3669,12 @@ END ATTENDANCE v4
 @media (max-width: 479.98px) {
     .att-log-form #attDate {
         font-size: .75rem;
-        padding: 0 8px;
+        padding: 0 10px 0 8px;
+    }
+    .att-log-form #attDate::-webkit-calendar-picker-indicator {
+        width: 13px;
+        height: 13px;
+        margin-left: 4px;
     }
     .att-log-form .att-bulk-controls {
         gap: 4px;
@@ -3671,5 +3693,16 @@ END ATTENDANCE v4
         padding-left: 10px;
         padding-right: 10px;
         font-size: .75rem;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .att-log-form #attDate {
+        font-size: .7rem;
+        padding: 0 8px 0 6px;
+    }
+    .att-log-form .att-bulk-controls > .att-status-select {
+        flex-basis: 94px;
+        width: 94px;
     }
 }
