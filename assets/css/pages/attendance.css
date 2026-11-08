@@ -84,6 +84,65 @@ ATTENDANCE PAGE — Enhanced v2
 
 /* ---- Log Form ---- */
 
+.att-attendance-top-row {
+    align-items: flex-start !important;
+}
+
+.att-attendance-top-row > .att-overall-rate-column {
+    align-self: flex-start;
+}
+
+.att-overall-rate-card {
+    align-self: flex-start;
+    height: auto;
+}
+
+@media (min-width: 768px) {
+    .att-log-form {
+        height: 460px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .att-log-form > .row.g-2 {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .att-log-form > .row.g-2 > .col-12 {
+        flex: 0 0 auto;
+    }
+
+    .att-log-form > .row.g-2 > .att-subject-list-column {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .att-log-form .att-subject-list {
+        flex: 1 1 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .att-log-form .att-subject-list-heading {
+        flex: 0 0 auto;
+    }
+
+    .att-log-form .att-subject-rows {
+        flex: 1 1 0;
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        align-content: start;
+    }
+}
+
 .att-form-label {
     font-size: .72rem;
     font-weight: 600;
@@ -106,6 +165,136 @@ ATTENDANCE PAGE — Enhanced v2
     margin: 0;
     cursor: pointer;
     color: var(--text);
+}
+
+.att-log-form .att-subject-list-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 0;
+}
+
+.att-log-form .att-subject-rows {
+    display: grid;
+    gap: 7px;
+    margin-top: 6px;
+    max-height: min(340px, 50vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.att-log-form .att-subject-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(255,255,255,.02);
+}
+
+.att-log-form .att-subject-select {
+    display: flex;
+    align-items: center;
+    flex: 1 1 160px;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.att-log-form .att-subject-check {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.att-log-form .att-subject-info {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
+.att-log-form .att-subject-code {
+    display: block;
+    font-size: .82rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.att-log-form .att-subject-meta {
+    display: block;
+    overflow: hidden;
+    color: var(--text-faint);
+    font-size: .7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.att-log-form .att-subject-description,
+.att-log-form .att-subject-time {
+    display: inline;
+}
+
+.att-log-form .att-subject-meta.has-description .att-subject-time::before {
+    content: " · ";
+}
+
+.att-log-form .att-subject-controls {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+}
+
+.att-log-form .att-subject-row > .att-subject-controls > .att-status-select {
+    flex: 0 0 118px;
+    width: 118px;
+    min-width: 0;
+}
+
+.att-log-form .att-subject-row .att-status-select-trigger {
+    height: 33px;
+    padding: 0 10px;
+    font-size: .8125rem;
+}
+
+.att-log-form .att-subject-empty {
+    padding: 10px 0;
+    font-size: .78rem;
+}
+
+.att-log-form .att-subject-mode-toggle {
+    width: auto;
+    min-width: 0;
+    height: 33px;
+    min-height: 33px;
+    padding: 0 8px;
+    gap: 6px;
+    font-size: .8125rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 479.98px) {
+    .att-log-form .att-subject-controls {
+        flex: 1 0 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .att-log-form .att-subject-list-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 /* ---- Absence Limit Rows ---- */
@@ -1994,7 +2183,7 @@ TASKS v2 — Recurring, Bulk Actions, Grouping, Score/Remarks
 }
 
 /* ============================================================
-ATTENDANCE v4 — Heatmap, Mode Toggle, Mark All Present,
+ATTENDANCE v4 — Heatmap, Mode Toggle, Bulk Attendance,
 Consecutive Absence Alerts, Export, Skeleton States
 ============================================================ */
 /* ---- Skeleton / No-data state ---- */
@@ -2060,21 +2249,228 @@ Consecutive Absence Alerts, Export, Skeleton States
     font-size: .76rem;
 }
 
-/* ---- Mark All Present button ---- */
+.att-log-form-header {
+    margin-bottom: 12px;
+}
 
-.att-mark-all-btn {
+.att-log-form .att-date-bulk-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.att-log-form .att-date-field {
+    flex: 1 1 0;
+    min-width: 180px;
+}
+
+.att-bulk-panel {
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
+}
+
+.att-bulk-controls {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.att-bulk-label {
+    display: block;
+    color: var(--text-faint);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.att-bulk-status {
+    flex: 0 0 160px;
+    width: 160px;
+    min-width: 140px;
+    height: 33px;
+    padding: 0 24px 0 10px;
+    font-size: .8125rem;
     white-space: nowrap;
     flex-shrink: 0;
 }
 
-.att-mark-all-label {
-    font-size: .76rem;
+.att-bulk-apply {
+    min-height: 36px;
+    flex-shrink: 0;
 }
 
-@media (max-width: 399.98px) {
-    .att-mark-all-label {
-        display: none;
+@media (max-width: 575.98px) {
+    .att-log-form-header {
+        margin-bottom: 10px;
     }
+    .att-log-form .att-date-bulk-row {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+    .att-log-form .att-date-field {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+    .att-log-form .att-bulk-panel {
+        flex: 0 0 auto;
+        width: auto;
+    }
+    .att-log-form .att-bulk-controls > .att-status-select {
+        flex: 0 0 126px;
+        width: 126px;
+        min-width: 120px;
+    }
+    .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
+        padding-right: 8px;
+        padding-left: 8px;
+        font-size: .75rem;
+    }
+    .att-log-form .att-bulk-apply {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+}
+
+.att-status-select {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.att-status-select > select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.att-status-select-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    height: 33px;
+    padding: 0 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--input-radius);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: .8125rem;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.att-status-select-trigger::after {
+    content: "";
+    flex: 0 0 auto;
+    width: .45em;
+    height: .45em;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    opacity: .65;
+    transform: translateY(-2px) rotate(45deg);
+}
+
+.att-status-select-trigger:hover,
+.att-status-select-trigger:focus-visible,
+.att-status-select-trigger[aria-expanded="true"] {
+    border-color: rgba(var(--accent), .45);
+    outline: none;
+}
+
+.att-status-select-trigger:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.att-status-select-menu {
+    position: fixed;
+    z-index: var(--layer-popover);
+    display: grid;
+    gap: 2px;
+    max-width: calc(100vw - 16px);
+    max-height: min(240px, calc(100vh - 16px));
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.att-status-select-menu[hidden] {
+    display: none;
+}
+
+.att-status-select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    min-height: 34px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: .8125rem;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.att-status-select-option:hover,
+.att-status-select-option:focus-visible {
+    background: var(--surface-2);
+    outline: none;
+}
+
+.att-status-select-option.is-selected {
+    background: rgba(var(--accent), .1);
+    color: rgb(var(--accent));
+}
+
+.att-status-select-option.is-selected::after {
+    content: "\2713";
+    color: rgb(var(--accent));
+}
+
+.att-status-select-option.is-placeholder {
+    color: var(--text-faint);
+}
+
+.att-status-select-option:disabled {
+    cursor: default;
+}
+
+.att-bulk-controls > .att-status-select {
+    flex: 0 0 160px;
+    width: 160px;
+    min-width: 140px;
+}
+
+.att-log-form .att-subject-row > .att-status-select {
+    width: 118px;
+    min-width: 0;
 }
 
 /* ---- Mode Toggle Switch ---- */
@@ -2244,9 +2640,8 @@ Consecutive Absence Alerts, Export, Skeleton States
 /* ---- Heatmap ---- */
 
 .att-heatmap-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
+    width: 100%;
+    min-width: 0;
 }
 
 .att-heatmap-filter {
@@ -2261,32 +2656,30 @@ Consecutive Absence Alerts, Export, Skeleton States
     }
 }
 
-/* Heatmap grid — mathematically consistent layout */
-
-:root {
-    --hm-cell: 14px;
-    --hm-gap: 3px;
-}
-
 .att-heatmap-grid-wrap {
-    display: flex;
-    align-items: flex-start;
+    --hm-cell: 20px;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
     gap: 4px;
-    min-width: max-content;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
 }
-
-/* Day labels column: one label per row, sizes must match cell exactly */
 
 .att-heatmap-day-labels {
     display: grid;
-    grid-template-rows: repeat(7, var(--hm-cell));
-    gap: var(--hm-gap);
+    grid-template-rows: 16px repeat(7, var(--hm-cell));
+    gap: 4px;
     flex-shrink: 0;
-    align-self: flex-start;
+    align-self: start;
+}
+
+.att-heatmap-month-spacer {
+    height: 16px;
 }
 
 .att-heatmap-day-lbl {
-    width: var(--hm-cell);
+    width: 14px;
     height: var(--hm-cell);
     font-size: .54rem;
     color: var(--text-faint);
@@ -2296,31 +2689,51 @@ Consecutive Absence Alerts, Export, Skeleton States
     font-weight: 700;
 }
 
-/* Weeks area: one column per week */
-
-.att-heatmap-weeks {
-    display: flex;
-    gap: var(--hm-gap);
-    align-items: flex-start;
+.att-heatmap-week-viewport {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Each week column: 7 cells stacked vertically */
+.att-heatmap-months,
+.att-heatmap-weeks {
+    display: grid;
+    grid-template-columns: repeat(var(--hm-week-count), var(--hm-cell));
+    column-gap: 4px;
+}
+
+.att-heatmap-months {
+    height: 16px;
+    margin-bottom: 4px;
+}
+
+.att-heatmap-month-label {
+    min-width: 0;
+    overflow: visible;
+    color: var(--text-faint);
+    font-size: .62rem;
+    line-height: 16px;
+    white-space: nowrap;
+}
 
 .att-heatmap-col {
     display: grid;
     grid-template-rows: repeat(7, var(--hm-cell));
-    gap: var(--hm-gap);
+    gap: 4px;
+    min-width: 0;
 }
 
-/* Heatmap cells */
-
 .att-hm-cell {
+    display: block;
     width: var(--hm-cell);
     height: var(--hm-cell);
     border-radius: 3px;
     cursor: pointer;
     transition: transform .1s, opacity .1s;
     outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .att-hm-cell:focus-visible {
@@ -2336,11 +2749,22 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-hm-empty {
-    background: transparent;
-    cursor: default;
+    background: color-mix(in srgb, var(--text) 5%, var(--surface-2));
 }
 
-.att-hm-empty:hover {
+.att-hm-dimmed {
+    opacity: .32;
+    cursor: default;
+    pointer-events: none;
+}
+
+.att-hm-today {
+    outline: 1.5px solid rgb(var(--accent));
+    outline-offset: 1px;
+}
+
+.att-hm-empty:hover,
+.att-hm-dimmed:hover {
     transform: none;
 }
 
@@ -2366,20 +2790,6 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-hm-noclasses {
     background: rgba(139,92,246,.35);
-}
-
-@media (max-width: 575.98px) {
-    :root {
-        --hm-cell: 12px;
-        --hm-gap: 2px;
-    }
-}
-
-@media (max-width: 375.98px) {
-    :root {
-        --hm-cell: 10px;
-        --hm-gap: 2px;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2423,7 +2833,8 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-legend-wrap {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: flex-start;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
@@ -2451,9 +2862,10 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-hm-legend-items {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-left: 4px;
+    margin-left: 0;
 }
 
 .att-hm-li {
@@ -2477,14 +2889,14 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-tooltip {
     position: fixed;
     z-index: 9999;
-    background: rgba(15,20,40,.97);
-    border: 1px solid rgba(255,255,255,.15);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 4px;
     padding: 8px 12px;
     font-size: .75rem;
     pointer-events: none;
     max-width: 220px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.4);
+    box-shadow: var(--shadow);
     opacity: 0;
     transition: opacity .12s;
 }
@@ -2499,6 +2911,11 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-hm-tt-subject {
     color: var(--text-soft);
     font-size: .7rem;
+}
+
+.att-hm-tt-entry {
+    display: flex;
+    gap: 4px;
     margin-bottom: 2px;
 }
 
@@ -2688,44 +3105,6 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-rate-bar {
     transition: width .5s ease, background .3s ease;
-}
-
-/* ---- Mark All Present Modal ---- */
-
-.att-map-section {
-    margin-bottom: 10px;
-}
-
-.att-map-section:last-child {
-    margin-bottom: 0;
-}
-
-.att-map-section-title {
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--text-faint);
-    margin-bottom: 6px;
-}
-
-.att-map-sub-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: .82rem;
-    padding: 3px 0;
-}
-
-.att-map-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.att-map-warn .att-map-section-title {
-    color: var(--warning);
 }
 
 /* ---- Online chip (legacy, keep compatible) ---- */
@@ -3083,4 +3462,107 @@ END ATTENDANCE v4
 
 .att-heatmap-head .att-heatmap-dropdown {
     flex-shrink: 0;
+}
+
+@media (hover: none) {
+    .att-hm-cell:hover,
+    .att-hm-cell:focus {
+        transform: none;
+    }
+}
+
+/* Mixed-status day: pie-style cell */
+.att-hm-mixed-dot {
+    background: conic-gradient(rgba(251,113,133,.8) 0 33%, rgba(96,165,250,.8) 33% 66%, rgba(52,211,153,.75) 66% 100%);
+    border-radius: 2px;
+}
+
+/* Heatmap polish: room for outlines/scrollbar, tidy legend */
+.att-heatmap-week-viewport {
+    padding: 2px 2px 8px;
+    scrollbar-width: thin;
+}
+
+.att-heatmap-legend {
+    margin-top: 12px;
+}
+
+.att-hm-legend-wrap,
+.att-hm-legend-items {
+    gap: 8px 12px;
+}
+
+.att-hm-li {
+    gap: 5px;
+    font-size: .68rem;
+}
+
+.att-hm-li-dot {
+    width: 10px;
+    height: 10px;
+}
+
+.att-hm-legend-cell {
+    width: 10px !important;
+    height: 10px !important;
+    max-width: none !important;
+    border-radius: 2px;
+    outline-offset: 1px;
+}
+
+/* Legend: balanced 4 + 4 grid on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-wrap {
+        display: block;
+    }
+    .att-hm-legend-items {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px 6px;
+    }
+    .att-hm-li {
+        min-width: 0;
+        font-size: .64rem;
+        gap: 4px;
+    }
+}
+
+/* Legend: centered on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: center;
+        column-gap: 14px;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .att-hm-legend-items {
+        column-gap: 8px;
+    }
+}
+
+/* Legend: keep the equal 4 + 4 spacing, center each item in its column */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        justify-content: stretch;
+        column-gap: 6px;
+    }
+    .att-hm-li {
+        justify-content: center;
+    }
+}
+
+/* Legend: columns aligned (dots line up top/bottom), spread evenly across the width */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: space-between;
+        column-gap: 8px;
+        padding: 0 4px;
+    }
+    .att-hm-li {
+        justify-content: flex-start;
+    }
 }

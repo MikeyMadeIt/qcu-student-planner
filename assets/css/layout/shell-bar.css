@@ -1,21 +1,42 @@
 /* Top bar: brand on the left; profile circle + sidebar toggle on the right.
    Clicking the profile circle reveals the theme switch and account links. */
 
+/* position: fixed instead of sticky — deliberately.
+   A sticky element can only stay "stuck" while its own containing block
+   (.main-content) still has room below it; since .shell-bar is itself the
+   first child of that same box, the box necessarily runs out right as you
+   hit the very end of the page, and at that exact point the header stops being
+   stuck and scrolls away with the rest of the content — which is exactly
+   the "nawawala pag sinagad ang scroll" behavior being reported, and it's
+   standard sticky behavior, not a rendering bug, so no sticky-side tweak
+   can fix it. Taking the header out of that box entirely with position:
+   fixed removes the possibility altogether: it is pinned to the viewport,
+   full stop, regardless of scroll position or direction. main-content's
+   padding-top below reserves the space it used to occupy in normal flow. */
 .shell-bar {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: var(--layer-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
     min-height: var(--shell-bar-height);
-    margin: 0 calc(var(--content-padding-x) * -1) var(--page-gap);
     padding: var(--space-3) var(--content-padding-x);
     background: var(--nav-bg);
-    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
 }
+
+/* Desktop: the sidebar is a permanent column, not an off-canvas drawer, so
+   the fixed bar starts after it instead of running under it. */
+@media (min-width: 992px) {
+    .shell-bar {
+        left: var(--sidebar-width);
+    }
+}
+
 
 .shell-bar-left {
     display: flex;
@@ -50,7 +71,7 @@
 .shell-bar-right {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     margin-left: auto;
     flex: 0 0 auto;
 }
@@ -61,7 +82,8 @@
     flex: 0 0 auto;
 }
 
-/* Notification / inbox icon buttons — simple, restrained, same footprint as the sidebar toggle. */
+/* Notification / inbox icon buttons — outlined box at rest (like GitHub's
+   search/inbox icons), same footprint as the sidebar toggle. */
 .header-panel-wrap {
     position: relative;
 }
@@ -71,13 +93,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--menu-btn-size);
-    height: var(--menu-btn-size);
-    border: 1px solid transparent;
+    width: 1.85rem;
+    height: 1.85rem;
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-soft);
-    font-size: 1.3rem;
+    font-size: 0.95rem;
     transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -128,6 +150,15 @@
     display: none;
 }
 
+/* Row list inside either popup — same vertical rhythm whether it's holding
+   plain .header-panel-item rows (notifications) or .msg-list-compact rows
+   (inbox), so swapping between the two feels like the same component. */
+.header-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .header-panel-title {
     padding: var(--space-2) var(--space-3);
     font-size: 0.7rem;
@@ -137,11 +168,20 @@
     color: var(--text-faint);
 }
 
+/* Shared row rhythm for both popups: the notification panel renders plain
+   .header-panel-item rows and the inbox panel renders .msg-list-compact
+   .msg-row rows (see message-row.css) — two different components that used
+   to carry different padding, so their icon/text start position and row
+   height never lined up when the two popups were compared side by side.
+   Pinning both to the same left/vertical padding and minimum height here
+   (and giving message-row.css's compact variant the matching rule) keeps
+   the two popups visually interchangeable regardless of theme. */
 .header-panel-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    min-height: 2.75rem;
+    padding: 0.5rem var(--space-3);
     border-radius: var(--radius-sm);
     color: var(--text);
     text-decoration: none;
@@ -182,7 +222,6 @@
     flex: 0 0 auto;
     width: 7px;
     height: 7px;
-    margin-top: 6px;
     border-radius: 50%;
     background: rgb(var(--accent));
 }
@@ -686,7 +725,6 @@
 
     .shell-bar {
         gap: var(--space-3);
-        margin-bottom: var(--space-4);
     }
 }
 
@@ -697,10 +735,9 @@
     }
 
     .shell-bar-right {
-        gap: 2px;
+        gap: var(--space-2);
     }
 
-    .shell-icon-btn,
     .shell-menu-btn,
     .profile-trigger-circle,
     .profile-trigger.profile-trigger-circle {
@@ -709,7 +746,9 @@
     }
 
     .shell-icon-btn {
-        font-size: 1.15rem;
+        width: 1.7rem;
+        height: 1.7rem;
+        font-size: 0.88rem;
     }
 
     .shell-page-title {
