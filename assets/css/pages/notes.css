@@ -2097,3 +2097,12 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     border-color: rgba(var(--accent), .45);
     background: rgba(var(--accent), .12);
 }
+
+/* Safety net: never show stray inline colours/backgrounds injected by the browser while formatting */
+.note-editor-ta [style] {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+}

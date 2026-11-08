@@ -2657,6 +2657,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 }
 
 .att-heatmap-grid-wrap {
+    --hm-cell: 20px;
     display: grid;
     grid-template-columns: 14px minmax(0, 1fr);
     gap: 4px;
@@ -2667,7 +2668,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-heatmap-day-labels {
     display: grid;
-    grid-template-rows: 16px repeat(7, auto);
+    grid-template-rows: 16px repeat(7, var(--hm-cell));
     gap: 4px;
     flex-shrink: 0;
     align-self: start;
@@ -2679,7 +2680,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-heatmap-day-lbl {
     width: 14px;
-    aspect-ratio: 1 / 1;
+    height: var(--hm-cell);
     font-size: .54rem;
     color: var(--text-faint);
     display: flex;
@@ -2699,7 +2700,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 .att-heatmap-months,
 .att-heatmap-weeks {
     display: grid;
-    grid-template-columns: repeat(var(--hm-week-count), minmax(12px, 1fr));
+    grid-template-columns: repeat(var(--hm-week-count), var(--hm-cell));
     column-gap: 4px;
 }
 
@@ -2710,6 +2711,7 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-heatmap-month-label {
     min-width: 0;
+    overflow: visible;
     color: var(--text-faint);
     font-size: .62rem;
     line-height: 16px;
@@ -2718,20 +2720,20 @@ Consecutive Absence Alerts, Export, Skeleton States
 
 .att-heatmap-col {
     display: grid;
-    grid-template-rows: repeat(7, auto);
+    grid-template-rows: repeat(7, var(--hm-cell));
     gap: 4px;
     min-width: 0;
 }
 
 .att-hm-cell {
     display: block;
-    width: 100%;
-    max-width: 28px;
-    aspect-ratio: 1 / 1;
+    width: var(--hm-cell);
+    height: var(--hm-cell);
     border-radius: 3px;
     cursor: pointer;
     transition: transform .1s, opacity .1s;
     outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .att-hm-cell:focus-visible {
@@ -3460,4 +3462,107 @@ END ATTENDANCE v4
 
 .att-heatmap-head .att-heatmap-dropdown {
     flex-shrink: 0;
+}
+
+@media (hover: none) {
+    .att-hm-cell:hover,
+    .att-hm-cell:focus {
+        transform: none;
+    }
+}
+
+/* Mixed-status day: pie-style cell */
+.att-hm-mixed-dot {
+    background: conic-gradient(rgba(251,113,133,.8) 0 33%, rgba(96,165,250,.8) 33% 66%, rgba(52,211,153,.75) 66% 100%);
+    border-radius: 2px;
+}
+
+/* Heatmap polish: room for outlines/scrollbar, tidy legend */
+.att-heatmap-week-viewport {
+    padding: 2px 2px 8px;
+    scrollbar-width: thin;
+}
+
+.att-heatmap-legend {
+    margin-top: 12px;
+}
+
+.att-hm-legend-wrap,
+.att-hm-legend-items {
+    gap: 8px 12px;
+}
+
+.att-hm-li {
+    gap: 5px;
+    font-size: .68rem;
+}
+
+.att-hm-li-dot {
+    width: 10px;
+    height: 10px;
+}
+
+.att-hm-legend-cell {
+    width: 10px !important;
+    height: 10px !important;
+    max-width: none !important;
+    border-radius: 2px;
+    outline-offset: 1px;
+}
+
+/* Legend: balanced 4 + 4 grid on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-wrap {
+        display: block;
+    }
+    .att-hm-legend-items {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px 6px;
+    }
+    .att-hm-li {
+        min-width: 0;
+        font-size: .64rem;
+        gap: 4px;
+    }
+}
+
+/* Legend: centered on phones */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: center;
+        column-gap: 14px;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .att-hm-legend-items {
+        column-gap: 8px;
+    }
+}
+
+/* Legend: keep the equal 4 + 4 spacing, center each item in its column */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        justify-content: stretch;
+        column-gap: 6px;
+    }
+    .att-hm-li {
+        justify-content: center;
+    }
+}
+
+/* Legend: columns aligned (dots line up top/bottom), spread evenly across the width */
+@media (max-width: 575.98px) {
+    .att-hm-legend-items {
+        grid-template-columns: repeat(4, max-content);
+        justify-content: space-between;
+        column-gap: 8px;
+        padding: 0 4px;
+    }
+    .att-hm-li {
+        justify-content: flex-start;
+    }
 }
