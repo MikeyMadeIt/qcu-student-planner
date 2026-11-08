@@ -18,8 +18,11 @@
     overflow-x: hidden;
     overflow-y: hidden;
     border-right: 1px solid var(--border);
+    /* backdrop-filter removed: --nav-bg is always a fully opaque solid color,
+       so the blur was invisible, and the same Chrome sticky+backdrop-filter
+       bug fixed on .shell-bar (see shell-bar.css) applies to this sticky
+       sidebar too. */
     background: var(--nav-bg);
-    backdrop-filter: blur(18px);
     z-index: 40;
 }
 
