@@ -756,7 +756,7 @@ function restoreNoteEditorSelection(editor) {
 
 function serializeNoteInline(node, blockSeparator) {
     if (node.nodeType === 3)
-        return node.nodeValue.replace(/([\\`*_{}\[\]()])/g, '\\$1');
+        return node.nodeValue.replace(/\u00a0/g, ' ').replace(/([\\`*_{}\[\]()])/g, '\\$1');
     if (node.nodeType !== 1)
         return '';
     var tag = node.tagName.toLowerCase();
@@ -801,6 +801,58 @@ function isNoteChecklistChecked(checkbox) {
     return !!(checkbox && (checkbox.checked || checkbox.getAttribute('checked') !== null));
 }
 
+function serializeNoteListItemText(item, checkbox) {
+    var out = '';
+    Array.prototype.forEach.call(item.childNodes, function (child) {
+        if (child === checkbox)
+            return;
+        if (child.nodeType === 1) {
+            var childTag = child.tagName.toLowerCase();
+            if (childTag === 'ul' || childTag === 'ol' || (childTag === 'input' && child.type === 'checkbox'))
+                return;
+        }
+        var piece = serializeNoteInline(child, ' ');
+        if (!piece)
+            return;
+        var isBlock = child.nodeType === 1 && /^(P|DIV)$/.test(child.tagName);
+        if (isBlock && out && !/\s$/.test(out))
+            out += ' ';
+        out += piece;
+    });
+    return out.replace(/\s*\n\s*/g, ' ').trim();
+}
+
+/* Serialises a <ul>/<ol> to Markdown lines. Nested lists are flattened so the
+   markers are never lost (the renderer only supports one list level). */
+function serializeNoteList(list, lines) {
+    lines = lines || [];
+    var tag = list.tagName.toLowerCase();
+    var isChecklist = list.classList.contains('md-checklist');
+    var number = tag === 'ol' ? (Number(list.getAttribute('start')) || 1) : 1;
+    Array.prototype.forEach.call(list.children, function (item) {
+        if (item.tagName.toLowerCase() !== 'li')
+            return;
+        var checkbox = null;
+        Array.prototype.forEach.call(item.children, function (child) {
+            if (!checkbox && child.tagName.toLowerCase() === 'input' && child.type === 'checkbox')
+                checkbox = child;
+        });
+        var text = serializeNoteListItemText(item, checkbox);
+        if (isChecklist)
+            lines.push('- [' + (isNoteChecklistChecked(checkbox) ? 'x' : ' ') + '] ' + text);
+        else if (tag === 'ol')
+            lines.push((number++) + '. ' + text);
+        else
+            lines.push('- ' + text);
+        Array.prototype.forEach.call(item.children, function (child) {
+            var childTag = child.tagName.toLowerCase();
+            if (childTag === 'ul' || childTag === 'ol')
+                serializeNoteList(child, lines);
+        });
+    });
+    return lines;
+}
+
 function serializeNoteBlock(node) {
     if (node.nodeType !== 1)
         return node.nodeType === 3 ? node.nodeValue.trim() : '';
@@ -811,17 +863,8 @@ function serializeNoteBlock(node) {
     }
     if (tag === 'pre')
         return '```\n' + node.textContent.replace(/\n+$/, '') + '\n```';
-    if (tag === 'ul' || tag === 'ol') {
-        var items = Array.prototype.filter.call(node.children, function (child) { return child.tagName.toLowerCase() === 'li'; });
-        return items.map(function (item, index) {
-            var checkbox = item.querySelector('input[type="checkbox"]');
-            var text = serializeNoteChildren(item, ' ', checkbox).trim();
-            if (node.classList.contains('md-checklist'))
-                return '- [' + (isNoteChecklistChecked(checkbox) ? 'x' : ' ') + '] ' + text;
-            var start = tag === 'ol' ? Number(node.getAttribute('start')) || 1 : 1;
-            return (tag === 'ol' ? (start + index) + '. ' : '- ') + text;
-        }).join('\n');
-    }
+    if (tag === 'ul' || tag === 'ol')
+        return serializeNoteList(node).join('\n');
     if (tag === 'p' || tag === 'div')
         return serializeNoteChildren(node, '\n').trim();
     return serializeNoteInline(node).trim();
@@ -836,15 +879,38 @@ function serializeNoteEditor(editor) {
             inlineNodes = [];
         }
     }
-    Array.prototype.forEach.call(editor.childNodes, function (node) {
-        var isBlock = node.nodeType === 1 && /^(P|DIV|H[1-6]|UL|OL|PRE)$/.test(node.tagName);
-        if (isBlock) {
-            flushInline();
-            blocks.push(serializeNoteBlock(node));
-        } else {
-            inlineNodes.push(node);
-        }
-    });
+    function walk(parent) {
+        Array.prototype.forEach.call(parent.childNodes, function (node) {
+            var isElement = node.nodeType === 1;
+            if (isElement && /^(UL|OL)$/.test(node.tagName)) {
+                flushInline();
+                blocks.push(serializeNoteList(node).join('\n'));
+            } else if (isElement && /^(H[1-6]|PRE)$/.test(node.tagName)) {
+                flushInline();
+                blocks.push(serializeNoteBlock(node));
+            } else if (isElement && /^(P|DIV)$/.test(node.tagName)) {
+                flushInline();
+                // Browsers often leave a list nested inside a <div>/<p>; walk into it
+                // so the list keeps its "1." / "-" markers.
+                var hasList = Array.prototype.some.call(node.childNodes, function (child) {
+                    return child.nodeType === 1 && /^(UL|OL|DIV|P)$/.test(child.tagName) && (/^(UL|OL)$/.test(child.tagName) || childHasList(child));
+                });
+                if (hasList)
+                    walk(node);
+                else
+                    blocks.push(serializeNoteBlock(node));
+                flushInline();
+            } else {
+                inlineNodes.push(node);
+            }
+        });
+    }
+    function childHasList(node) {
+        return Array.prototype.some.call(node.childNodes, function (child) {
+            return child.nodeType === 1 && (/^(UL|OL)$/.test(child.tagName) || childHasList(child));
+        });
+    }
+    walk(editor);
     flushInline();
     return blocks.filter(Boolean).join('\n\n').replace(/\n{3,}/g, '\n\n');
 }
@@ -894,7 +960,13 @@ function wireNoteEditor(editor) {
     editor.addEventListener('focus', function () { saveNoteEditorSelection(editor); });
     editor.addEventListener('keyup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
     editor.addEventListener('mouseup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
-    editor.addEventListener('input', function () { saveNoteEditorSelection(editor); updateNotePreview(); updateNoteToolbarState(editor); });
+    editor.addEventListener('input', function (event) {
+        if (event && event.inputType === 'insertText' && (event.data === ' ' || event.data === '\u00a0'))
+            maybeAutoNoteList(editor);
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        updateNoteToolbarState(editor);
+    });
     editor.addEventListener('change', function (event) {
         if (event.target.matches('.md-checklist-input')) {
             updateNoteChecklistInput(event.target);
@@ -1071,44 +1143,271 @@ function removeChecklistFormatting(list) {
     });
 }
 
+/* ── List toggling ──
+   Lists are built/removed directly in the DOM instead of through
+   document.execCommand('insertOrderedList' …). execCommand splits lists, nests
+   them and copies inline styles when it is clicked repeatedly, which is what
+   corrupted notes when the list buttons were spammed. */
+
+function getNoteListKind(list) {
+    return list.classList.contains('md-checklist') ? 'check' : list.tagName.toLowerCase();
+}
+
+function getNoteEditorUnits(editor) {
+    var units = [];
+    var run = null;
+    Array.prototype.forEach.call(editor.childNodes, function (node) {
+        var isBlock = node.nodeType === 1 && /^(P|DIV|H[1-6]|UL|OL|PRE)$/.test(node.tagName);
+        if (isBlock) {
+            run = null;
+            units.push({ node: node, block: true });
+            return;
+        }
+        if (node.nodeType === 3 && !node.nodeValue.trim() && !run)
+            return;
+        if (!run) {
+            run = { nodes: [], block: false };
+            units.push(run);
+        }
+        run.nodes.push(node);
+    });
+    return units;
+}
+
+function noteUnitNodes(unit) {
+    return unit.block ? [unit.node] : unit.nodes;
+}
+
+function selectNoteUnits(units, range) {
+    if (!range)
+        return [];
+    var selected = units.filter(function (unit) {
+        return noteUnitNodes(unit).some(function (node) {
+            try { return range.intersectsNode(node); } catch (e) { return false; }
+        });
+    });
+    if (!range.collapsed && selected.length > 1) {
+        var lastNodes = noteUnitNodes(selected[selected.length - 1]);
+        var inLast = function (container) {
+            return lastNodes.some(function (node) { return node === container || node.contains(container); });
+        };
+        // Triple-click ends at offset 0 of the next block; don't include it.
+        if (range.endOffset === 0 && inLast(range.endContainer) && !inLast(range.startContainer))
+            selected.pop();
+    }
+    return selected;
+}
+
+function noteUnitToLines(unit) {
+    var source = unit.block ? Array.prototype.slice.call(unit.node.childNodes) : unit.nodes.slice();
+    var lines = [document.createDocumentFragment()];
+    source.forEach(function (node) {
+        if (node.nodeType === 1 && node.tagName === 'BR') {
+            lines.push(document.createDocumentFragment());
+            return;
+        }
+        lines[lines.length - 1].appendChild(node);
+    });
+    while (lines.length > 1 && !lines[lines.length - 1].textContent.trim())
+        lines.pop();
+    return lines;
+}
+
+/* Drops a literal "- " / "1. " the user typed by hand so it doesn't end up
+   as "1. - item" once the line becomes a real list item. */
+function stripNoteListMarker(fragment) {
+    var first = fragment.firstChild;
+    if (first && first.nodeType === 3) {
+        first.nodeValue = first.nodeValue.replace(/^[\s\u00a0]*(?:[-*]|\d+[.)])[\s\u00a0]+/, '');
+        if (!first.nodeValue)
+            first.parentNode.removeChild(first);
+    }
+}
+
+function makeNoteListItem(fragment) {
+    var item = document.createElement('li');
+    item.appendChild(fragment);
+    if (!item.textContent.trim() && !item.querySelector('br'))
+        item.appendChild(document.createElement('br'));
+    return item;
+}
+
+function lastNoteTextNode(node) {
+    if (node.nodeType === 3)
+        return node;
+    for (var i = node.childNodes.length - 1; i >= 0; i--) {
+        var found = lastNoteTextNode(node.childNodes[i]);
+        if (found)
+            return found;
+    }
+    return null;
+}
+
+function placeNoteCaretAtEnd(node) {
+    var selection = window.getSelection();
+    if (!selection || !node)
+        return;
+    var range = document.createRange();
+    var textNode = lastNoteTextNode(node);
+    if (textNode)
+        range.setStart(textNode, textNode.nodeValue.length);
+    else
+        range.setStart(node, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function toggleNoteList(kind, forcedUnits) {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return null;
+    var range = null;
+    if (!forcedUnits) {
+        restoreNoteEditorSelection(editor);
+        var selection = window.getSelection();
+        range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+    }
+    var units = getNoteEditorUnits(editor);
+    if (!units.length) {
+        var seed = document.createElement('p');
+        seed.className = 'md-p';
+        seed.appendChild(document.createElement('br'));
+        editor.appendChild(seed);
+        units = [{ node: seed, block: true }];
+    }
+    var selected = forcedUnits || selectNoteUnits(units, range);
+    if (!selected.length)
+        selected = [units[units.length - 1]];
+
+    var isList = function (unit) { return unit.block && /^(UL|OL)$/.test(unit.node.tagName); };
+    var allTarget = selected.every(function (unit) { return isList(unit) && getNoteListKind(unit.node) === kind; });
+    var caretTarget = null;
+    var resultList = null;
+
+    if (allTarget) {
+        // Toggle OFF: turn each list item back into a normal paragraph.
+        selected.forEach(function (unit) {
+            var list = unit.node;
+            removeChecklistFormatting(list);
+            var fragment = document.createDocumentFragment();
+            Array.prototype.forEach.call(Array.prototype.slice.call(list.children), function (item) {
+                if (item.tagName.toLowerCase() !== 'li')
+                    return;
+                var paragraph = document.createElement('p');
+                paragraph.className = 'md-p';
+                var nested = [];
+                Array.prototype.slice.call(item.childNodes).forEach(function (child) {
+                    if (child.nodeType === 1 && /^(UL|OL)$/.test(child.tagName))
+                        nested.push(child);
+                    else
+                        paragraph.appendChild(child);
+                });
+                if (!paragraph.textContent.trim() && !paragraph.querySelector('br'))
+                    paragraph.appendChild(document.createElement('br'));
+                fragment.appendChild(paragraph);
+                nested.forEach(function (child) { fragment.appendChild(child); });
+                caretTarget = paragraph;
+            });
+            list.parentNode.replaceChild(fragment, list);
+        });
+    } else {
+        // Toggle ON / switch type: one list per contiguous run of blocks.
+        var runs = [];
+        var lastIndex = -2;
+        selected.forEach(function (unit) {
+            if (unit.block && /^(H[1-6]|PRE)$/.test(unit.node.tagName))
+                return;
+            var index = units.indexOf(unit);
+            if (!runs.length || index !== lastIndex + 1)
+                runs.push([]);
+            runs[runs.length - 1].push(unit);
+            lastIndex = index;
+        });
+        runs.forEach(function (run) {
+            var list = document.createElement(kind === 'ol' ? 'ol' : 'ul');
+            var anchor = noteUnitNodes(run[0])[0];
+            anchor.parentNode.insertBefore(list, anchor);
+            run.forEach(function (unit) {
+                if (isList(unit)) {
+                    if (getNoteListKind(unit.node) === 'check')
+                        removeChecklistFormatting(unit.node);
+                    Array.prototype.slice.call(unit.node.children).forEach(function (item) {
+                        if (item.tagName.toLowerCase() === 'li')
+                            list.appendChild(item);
+                    });
+                    unit.node.parentNode.removeChild(unit.node);
+                } else {
+                    noteUnitToLines(unit).forEach(function (fragment) {
+                        stripNoteListMarker(fragment);
+                        list.appendChild(makeNoteListItem(fragment));
+                    });
+                    if (unit.block)
+                        unit.node.parentNode.removeChild(unit.node);
+                }
+            });
+            if (kind === 'check')
+                convertChecklistList(list);
+            resultList = list;
+            caretTarget = list.lastElementChild || list;
+        });
+    }
+    placeNoteCaretAtEnd(caretTarget);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    updateNoteToolbarState(editor);
+    return resultList;
+}
+
+/* Typing "- ", "* " or "1. " at the start of an empty line starts a real list. */
+function maybeAutoNoteList(editor) {
+    var selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !selection.isCollapsed)
+        return false;
+    var node = selection.anchorNode;
+    if (!node || node === editor || !editor.contains(node))
+        return false;
+    while (node.parentNode && node.parentNode !== editor)
+        node = node.parentNode;
+    var text;
+    if (node.nodeType === 3)
+        text = node.nodeValue;
+    else if (node.nodeType === 1 && /^(P|DIV)$/.test(node.tagName))
+        text = node.textContent;
+    else
+        return false;
+    var match = text.match(/^(\d+)[.)][\s\u00a0]$|^[-*][\s\u00a0]$/);
+    if (!match)
+        return false;
+    var block = node;
+    if (node.nodeType === 3) {
+        block = document.createElement('p');
+        block.className = 'md-p';
+        node.parentNode.insertBefore(block, node);
+        block.appendChild(node);
+    }
+    while (block.firstChild)
+        block.removeChild(block.firstChild);
+    block.appendChild(document.createElement('br'));
+    var list = toggleNoteList(match[1] ? 'ol' : 'ul', [{ node: block, block: true }]);
+    if (list && match[1] && Number(match[1]) > 1)
+        list.setAttribute('start', match[1]);
+    return true;
+}
+
 function mdInsertBlock(text) {
     var editor = document.getElementById('nContent');
     if (!editor)
         return;
-    restoreNoteEditorSelection(editor);
     if (text.startsWith('```')) {
+        restoreNoteEditorSelection(editor);
         var block = getNoteEditorBlock(editor);
         document.execCommand('formatBlock', false, block && block.tagName === 'PRE' ? 'P' : 'PRE');
-    } else if (text.startsWith('- [ ]')) {
-        var listItem = getNoteEditorBlock(editor);
-        var currentList = listItem && listItem.closest('ul,ol');
-        if (currentList && currentList.classList.contains('md-checklist')) {
-            removeChecklistFormatting(currentList);
-            document.execCommand('insertUnorderedList', false, null);
-        } else {
-            document.execCommand('insertUnorderedList', false, null);
-            var selection = window.getSelection();
-            var node = selection && selection.anchorNode;
-            if (node && node.nodeType === 3)
-                node = node.parentElement;
-            var li = node && node.closest('li');
-            var list = li && li.closest('ul');
-            if (list)
-                convertChecklistList(list);
-        }
-    } else {
-        var activeBlock = getNoteEditorBlock(editor);
-        var activeList = activeBlock && activeBlock.closest('ul,ol');
-        if (activeList && activeList.classList.contains('md-checklist')) {
-            removeChecklistFormatting(activeList);
-            if (text.startsWith('1.'))
-                document.execCommand('insertOrderedList', false, null);
-        } else {
-            document.execCommand(text.startsWith('1.') ? 'insertOrderedList' : 'insertUnorderedList', false, null);
-        }
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        return;
     }
-    saveNoteEditorSelection(editor);
-    updateNotePreview();
+    toggleNoteList(text.startsWith('- [ ]') ? 'check' : text.startsWith('1.') ? 'ol' : 'ul');
 }
 
 /* ── Tag management for modal ── */
