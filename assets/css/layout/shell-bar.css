@@ -128,6 +128,15 @@
     display: none;
 }
 
+/* Row list inside either popup — same vertical rhythm whether it's holding
+   plain .header-panel-item rows (notifications) or .msg-list-compact rows
+   (inbox), so swapping between the two feels like the same component. */
+.header-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .header-panel-title {
     padding: var(--space-2) var(--space-3);
     font-size: 0.7rem;
@@ -137,11 +146,20 @@
     color: var(--text-faint);
 }
 
+/* Shared row rhythm for both popups: the notification panel renders plain
+   .header-panel-item rows and the inbox panel renders .msg-list-compact
+   .msg-row rows (see message-row.css) — two different components that used
+   to carry different padding, so their icon/text start position and row
+   height never lined up when the two popups were compared side by side.
+   Pinning both to the same left/vertical padding and minimum height here
+   (and giving message-row.css's compact variant the matching rule) keeps
+   the two popups visually interchangeable regardless of theme. */
 .header-panel-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    min-height: 2.75rem;
+    padding: 0.5rem var(--space-3);
     border-radius: var(--radius-sm);
     color: var(--text);
     text-decoration: none;
@@ -182,7 +200,6 @@
     flex: 0 0 auto;
     width: 7px;
     height: 7px;
-    margin-top: 6px;
     border-radius: 50%;
     background: rgb(var(--accent));
 }
