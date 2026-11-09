@@ -222,6 +222,34 @@
     margin: 0 !important;
 }
 
+.sem-overview > .d-flex {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+}
+
+.sem-overview > .d-flex > div:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.sem-overview > .d-flex > .text-end {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 399.98px) {
+    .sem-label {
+        font-size: .95rem;
+    }
+    .sem-meta {
+        font-size: .68rem;
+        gap: 5px;
+    }
+    .sem-overview > .d-flex > .text-end > div:last-child {
+        font-size: .58rem !important;
+    }
+}
+
 .sem-pct-label {
     font-family: var(--font-mono);
     font-weight: 700;
