@@ -45,6 +45,14 @@
       <button type="submit" class="btn btn-accent mt-2" id="afmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Flashcards</button>
     </form>
 
+    <!-- SAVED DECKS (shown only alongside the creation form) -->
+    <section class="mt-4 fade-in" id="afmHistorySection" aria-labelledby="afmHistoryHeading">
+      <h2 class="h6 mb-2" id="afmHistoryHeading"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Your saved decks</h2>
+      <div id="afmHistory" aria-live="polite">
+        <div class="text-faint" style="font-size:.85rem">Loading your saved decks…</div>
+      </div>
+    </section>
+
     <!-- LOADING -->
     <div class="glass card-pad fade-in ai-state" id="afmLoadingState" hidden>
       <i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i>
