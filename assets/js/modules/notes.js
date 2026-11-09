@@ -1085,6 +1085,93 @@ function updateNoteToolbarState(editor) {
     }
 }
 
+/* Enter inside a checklist item: the browser would clone the <li> without its
+   checkbox, so the new item is built by hand. */
+function createNoteChecklistItem() {
+    var item = document.createElement('li');
+    item.className = 'md-checklist-item';
+    var checkbox = document.createElement('input');
+    checkbox.className = 'md-checklist-input';
+    checkbox.type = 'checkbox';
+    checkbox.setAttribute('contenteditable', 'false');
+    checkbox.setAttribute('aria-label', 'Mark checklist item complete');
+    var text = document.createElement('span');
+    text.className = 'md-cl-text';
+    item.appendChild(checkbox);
+    item.appendChild(text);
+    return item;
+}
+
+function splitNoteChecklistItem(editor) {
+    var selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !selection.isCollapsed)
+        return false;
+    var item = getNoteEditorListItem(editor);
+    if (!item || !item.classList.contains('md-checklist-item'))
+        return false;
+    var span = null;
+    Array.prototype.forEach.call(item.children, function (child) {
+        if (child.classList && child.classList.contains('md-cl-text'))
+            span = child;
+    });
+    if (!span)
+        return false;
+    var range = selection.getRangeAt(0);
+    if (!span.contains(range.startContainer))
+        return false;
+    var list = item.parentElement;
+    if (!span.textContent.replace(/[\u200b\s]/g, '')) {
+        // empty item: step out one level, or leave the list at the end
+        if (list.parentElement && list.parentElement.tagName === 'LI') {
+            outdentNoteListItem(item);
+            return true;
+        }
+        if (item.nextElementSibling && item.nextElementSibling.tagName === 'LI')
+            return false;
+        var paragraph = document.createElement('p');
+        paragraph.className = 'md-p';
+        paragraph.appendChild(document.createElement('br'));
+        list.parentNode.insertBefore(paragraph, list.nextSibling);
+        item.remove();
+        if (!list.children.length)
+            list.remove();
+        placeNoteCaretAtEnd(paragraph);
+        return true;
+    }
+    var tail = document.createRange();
+    tail.setStart(range.startContainer, range.startOffset);
+    tail.setEnd(span, span.childNodes.length);
+    var fragment = tail.extractContents();
+    var next = createNoteChecklistItem();
+    var nextText = next.querySelector('.md-cl-text');
+    nextText.appendChild(fragment);
+    if (!nextText.textContent)
+        nextText.appendChild(document.createElement('br'));
+    if (!span.firstChild)
+        span.appendChild(document.createElement('br'));
+    item.parentNode.insertBefore(next, item.nextSibling);
+    var caret = document.createRange();
+    caret.setStart(nextText, 0);
+    caret.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(caret);
+    return true;
+}
+
+/* Select-all + Delete can leave an empty list shell behind that swallows
+   shortcuts like "# " — reset it to a clean paragraph. */
+function resetEmptyNoteEditor(editor, event) {
+    if (!event || !/^delete/.test(event.inputType || ''))
+        return;
+    if (editor.textContent.replace(/[\u200b\s]/g, '') || editor.querySelector('img,hr,pre,input'))
+        return;
+    var plain = editor.children.length === 1 && editor.firstElementChild.tagName === 'P' && editor.firstElementChild.className === 'md-p';
+    if (plain)
+        return;
+    editor.innerHTML = '<p class="md-p"><br></p>';
+    placeNoteCaretAtEnd(editor.firstElementChild);
+}
+
 function wireNoteEditor(editor) {
     if (!editor || editor.dataset.formattingWired)
         return;
@@ -1097,13 +1184,7 @@ function wireNoteEditor(editor) {
     editor.addEventListener('keyup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
     editor.addEventListener('mouseup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
     editor.addEventListener('input', function (event) {
-        if (event && event.inputType === 'insertText' && (event.data === ' ' || event.data === '\u00a0'))
-            maybeAutoNoteList(editor);
-        saveNoteEditorSelection(editor);
-        updateNotePreview();
-        updateNoteToolbarState(editor);
-    });
-    editor.addEventListener('input', function (event) {
+        resetEmptyNoteEditor(editor, event);
         if (event && event.inputType === 'insertText' && (event.data === ' ' || event.data === '\u00a0'))
             maybeAutoNoteList(editor);
         saveNoteEditorSelection(editor);
@@ -1127,6 +1208,14 @@ function wireNoteEditor(editor) {
                 return;
             }
         }
+        
+                if (event.key === 'Enter' && !event.shiftKey && splitNoteChecklistItem(editor)) {
+            event.preventDefault();
+            saveNoteEditorSelection(editor);
+            updateNotePreview();
+            return;
+        }
+        
         if (event.key === 'Enter' && !event.shiftKey && exitNoteQuoteOnEmptyLine(editor)) {
             event.preventDefault();
             return;
@@ -1405,6 +1494,11 @@ function placeNoteCaretAtEnd(node) {
     var selection = window.getSelection();
     if (!selection || !node)
         return;
+        if (node.classList && node.classList.contains('md-checklist-item')) {
+        var itemText = node.querySelector(':scope > .md-cl-text');
+        if (itemText)
+            node = itemText;
+    }
     var range = document.createRange();
     var textNode = lastNoteTextNode(node);
     if (textNode)
