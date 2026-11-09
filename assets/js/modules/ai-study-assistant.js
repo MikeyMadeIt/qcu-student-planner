@@ -1,6 +1,8 @@
 /* ============================================================
    AI STUDY ASSISTANT
-   Conversation-style page session (not persisted to a database).
+   Conversation-style chat. Each finished turn (question + reply)
+   is saved to Supabase through services/ai-chat-store.js so past
+   conversations can be reopened and continued.
    The frontend sends recent prior turns as `history` on every
    request since the backend does not remember earlier messages
    on its own. AI output is rendered through a small safe
@@ -8,8 +10,10 @@
    never through unsafe innerHTML of untrusted text. ============================================================ */
 
 let asaAttachment = null;
-let asaMessages = [];   /* [{role:'user'|'assistant', content, file?}] — this page session only */
+let asaMessages = [];   /* [{role:'user'|'assistant', content, fileName?}] */
 let asaBusy = false;
+let asaConvId = null;   /* saved conversation id, once the first turn is persisted */
+let asaSaveChain = Promise.resolve(); /* serializes saves so one chat never creates two conversations */
 
 /* Keep only the last N turns as context sent to the backend, to bound payload size. */
 const ASA_HISTORY_LIMIT = 12;
@@ -63,8 +67,9 @@ function initAiStudyAssistant() {
         }
     });
 
-    asaSafeBind('asaClearBtn', 'click', asaClearConversation);
+    asaSafeBind('asaClearBtn', 'click', asaNewChat);
     asaRenderEmptyState();
+    asaLoadHistory();
 }
 
 function asaSetBusy(busy) {
@@ -131,12 +136,103 @@ async function asaSend() {
 
         asaMessages.push({ role: 'assistant', content: replyText });
         asaRenderMessages();
+        asaPersistTurn(userTurn, replyText);
     } catch (error) {
         asaShowTyping(false);
         asaShowError('Could not reach the AI service. Please try again.');
     } finally {
         asaSetBusy(false);
     }
+}
+
+/* ---------- Persistence (Supabase) ---------- */
+
+async function asaStore() { return (await import('../services/ai-chat-store.js')).AiChatStore; }
+
+/* Saves the finished turn. Runs on a chain so rapid turns are saved in order
+   and the first one finishes creating the conversation before the next reuses its id. */
+function asaPersistTurn(userTurn, replyText) {
+    const title = (asaMessages.find(m => m.role === 'user')?.content || 'New chat').slice(0, 60);
+    asaSaveChain = asaSaveChain.then(async () => {
+        try {
+            const store = await asaStore();
+            asaConvId = await store.saveTurn(asaConvId, {
+                title,
+                userContent: userTurn.content,
+                userFileName: userTurn.fileName,
+                assistantContent: replyText,
+            });
+            asaLoadHistory();
+        } catch (error) {
+            console.warn('AI Study Assistant: could not save conversation', error);
+            Toast.show("Reply received, but the conversation couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+        }
+    });
+}
+
+async function asaLoadHistory() {
+    const host = asaEl('asaHistory');
+    if (!host) return;
+    try {
+        const list = await (await asaStore()).listConversations();
+        const count = asaEl('asaHistoryCount');
+        if (count) count.textContent = list.length ? `(${list.length})` : '';
+        host.innerHTML = list.length ? list.map(c => `
+          <div class="asa-history-item d-flex align-items-center gap-2 py-1 ${c.id === asaConvId ? 'fw-bold' : ''}">
+            <button type="button" class="btn btn-ghost btn-sm flex-grow-1 text-start text-truncate" onclick="asaOpenSaved('${c.id}')" title="${escHtml(c.title)}">
+              <i class="bi bi-chat-left-text me-1" aria-hidden="true"></i>${escHtml(c.title)}
+              <span class="text-faint ms-1" style="font-size:.72rem">${escHtml(new Date(c.updated_at).toLocaleDateString())}</span>
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="asaDeleteSaved('${c.id}')" aria-label="Delete conversation"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+          </div>`).join('')
+          : '<div class="text-faint" style="font-size:.85rem">No saved conversations yet.</div>';
+    } catch (error) {
+        console.warn('AI Study Assistant: could not load history', error);
+        host.innerHTML = '<div class="text-faint" style="font-size:.85rem">Couldn\'t load your conversations. ' + escHtml(error.message || '') + '</div>';
+    }
+}
+
+async function asaOpenSaved(id) {
+    if (asaBusy) return;
+    try {
+        await asaSaveChain; /* let any in-flight save finish first */
+        const conv = await (await asaStore()).getConversation(id);
+        asaMessages = conv.messages;
+        asaConvId = conv.id;
+        asaHideError();
+        asaRenderMessages();
+        asaLoadHistory();
+    } catch (error) {
+        Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+    }
+}
+
+function asaDeleteSaved(id) {
+    confirmAction({
+        title: 'Delete conversation?', message: 'This conversation will be permanently removed.',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        async onConfirm() {
+            try {
+                await asaSaveChain;
+                await (await asaStore()).deleteConversation(id);
+                Toast.show('Conversation deleted');
+                if (id === asaConvId) asaNewChat();
+                asaLoadHistory();
+            } catch (error) {
+                Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+            }
+        }
+    });
+}
+
+/* Starts a fresh chat. Saved conversations stay in the list. */
+function asaNewChat() {
+    if (asaBusy) return;
+    asaMessages = [];
+    asaConvId = null;
+    asaHideError();
+    asaRenderEmptyState();
+    asaLoadHistory();
 }
 
 /* The "ai-study" backend returns the assistant's reply as a plain string in
@@ -165,22 +261,6 @@ function asaHideError() {
     asaEl('asaErrorBanner').hidden = true;
 }
 
-function asaClearConversation() {
-    if (!asaMessages.length) return;
-    confirmAction({
-        title: 'Clear conversation?',
-        message: 'This clears the current session only. It cannot be undone.',
-        confirmLabel: 'Clear',
-        danger: true,
-        icon: 'bi-trash3-fill',
-        onConfirm: () => {
-            asaMessages = [];
-            asaHideError();
-            asaRenderEmptyState();
-        },
-    });
-}
-
 function asaRenderEmptyState() {
     const log = asaEl('asaChatLog');
     log.innerHTML = '';
@@ -197,8 +277,8 @@ function asaScrollToBottom() {
     log.scrollTop = log.scrollHeight;
 }
 
-/* Rebuilds the whole log from asaMessages. Simple and safe for a page-session-only
-   chat of this size; every piece of text goes through safe DOM construction. */
+/* Rebuilds the whole log from asaMessages. Simple and safe for a chat of this
+   size; every piece of text goes through safe DOM construction. */
 function asaRenderMessages() {
     const log = asaEl('asaChatLog');
     log.innerHTML = '';
