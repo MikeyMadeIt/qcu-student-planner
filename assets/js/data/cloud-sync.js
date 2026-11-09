@@ -37,6 +37,13 @@
         migration) — a small localStorage-side map remembers which
         semester each cloud record belongs to, so multi-semester
         filtering keeps working without needing a real semester_id.
+     4. Settings (theme/accent/notifications/display prefs) and
+        Pomodoro stats follow the same single-row-per-user "jsonb blob"
+        pattern already used for cancelled_occurrences: the whole
+        object is upserted into user_settings.settings / pomodoro_stats.stats
+        keyed by user_id, diffed by a last-pushed-JSON cache rather than
+        a field-by-field diff (there's only one row, so there's nothing
+        to diff against other rows).
    ============================================================ */
 
 (function () {
@@ -535,6 +542,11 @@
     };
     // AJ-08: cancelled occurrences snapshot (not diffed per-row; whole-blob replace)
     let _lastCancelledJson = '[]';
+    // Settings (theme/accent/notifications/display prefs) and Pomodoro stats
+    // are kept as a single-row-per-user jsonb blob each, same shape as
+    // cancelled_occurrences above (user_settings.settings / pomodoro_stats.stats).
+    let _lastSettingsJson = null;
+    let _lastPomoJson = null;
 
     /* ---------- hydrate (pull) ---------- */
 
@@ -572,7 +584,7 @@
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes] = await Promise.all([
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes, settingsRes, pomoRes] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -589,11 +601,21 @@
                 // MAJ-11: real per-semester rows (client_id not null excludes the
                 // one legacy placeholder row used only to satisfy grades/syllabus FKs)
                 supabase.from('semesters').select('*').eq('user_id', userId).not('client_id', 'is', null).order('created_at', { ascending: true }),
+                // Theme/accent/notification/display prefs, single row per user.
+                supabase.from('user_settings').select('settings').eq('user_id', userId).maybeSingle(),
+                // Pomodoro session stats, single row per user.
+                supabase.from('pomodoro_stats').select('stats').eq('user_id', userId).maybeSingle(),
             ]);
 
             const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, sylRes, coRes, semRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
+            // user_settings / pomodoro_stats are best-effort: a missing table or a
+            // schema mismatch on a feature this report added should never block the
+            // rest of the planner (subjects/tasks/etc.) from loading, so their
+            // errors are only logged, not thrown here.
+            if (settingsRes && settingsRes.error) console.warn('Cloud sync (settings) failed', settingsRes.error);
+            if (pomoRes && pomoRes.error) console.warn('Cloud sync (pomodoro) failed', pomoRes.error);
 
             const checklistByTask = {};
             (clRes.data || []).forEach(c => {
@@ -673,6 +695,23 @@
             if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
                 DB.saveCancelledOccurrences(coRes.data.occurrences);
                 _lastCancelledJson = JSON.stringify(coRes.data.occurrences);
+            }
+
+            // Hydrate settings (theme/accent/notifications/display prefs) from
+            // user_settings. Merge onto the local record rather than replacing it
+            // outright, so a brand-new row on the server (or one missing a field
+            // added to the app after it was first created) never erases a field
+            // the student already has set locally.
+            if (settingsRes && settingsRes.data && settingsRes.data.settings && typeof settingsRes.data.settings === 'object') {
+                const merged = { ...DB.getSettings(), ...settingsRes.data.settings };
+                DB.set('settings', merged);
+                _lastSettingsJson = JSON.stringify(settingsRes.data.settings);
+            }
+
+            // Hydrate Pomodoro stats the same way.
+            if (pomoRes && pomoRes.data && pomoRes.data.stats && typeof pomoRes.data.stats === 'object') {
+                DB.set('pomodoro', pomoRes.data.stats);
+                _lastPomoJson = JSON.stringify(pomoRes.data.stats);
             }
 
             last.subjects = new Map(serverSubjects.map(s => [s.id, true]));
@@ -919,6 +958,49 @@
                 "Couldn't save cancelled class occurrences to the server. Please check your connection.",
                 'high'
             );
+        }
+    }
+
+    /* Same single-row-per-user upsert pattern as pushCancelledOccurrences, for
+       user_settings (theme/accent/notifications/display prefs). Best-effort:
+       logs and surfaces a toast on failure but never throws, since a settings
+       sync hiccup must not block the rest of the app. */
+    async function pushSettings(settings) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const json = JSON.stringify(settings);
+        if (json === _lastSettingsJson) return;
+        try {
+            const supabase = await getClient();
+            const { error } = await supabase.from('user_settings').upsert(
+                { user_id: userId, settings, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+            );
+            if (error) throw error;
+            _lastSettingsJson = json;
+        } catch (err) {
+            console.warn('Cloud sync (settings) failed', err);
+            toast("Couldn't save your settings to the server. Please check your connection.", 'high');
+        }
+    }
+
+    /* Same pattern, for pomodoro_stats. */
+    async function pushPomo(stats) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const json = JSON.stringify(stats);
+        if (json === _lastPomoJson) return;
+        try {
+            const supabase = await getClient();
+            const { error } = await supabase.from('pomodoro_stats').upsert(
+                { user_id: userId, stats, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+            );
+            if (error) throw error;
+            _lastPomoJson = json;
+        } catch (err) {
+            console.warn('Cloud sync (pomodoro) failed', err);
+            toast("Couldn't save your Pomodoro stats to the server. Please check your connection.", 'high');
         }
     }
 
@@ -1203,6 +1285,22 @@
         trackPush(pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []));
         return r;
     };
+    // Settings (Settings page: profile/theme/accent/notifications/display) and
+    // Pomodoro stats (Pomodoro timer widget) now sync to user_settings /
+    // pomodoro_stats the same way every other feature does here -- the local
+    // write happens first so the UI never waits on the network.
+    const _saveSettings = DB.saveSettings.bind(DB);
+    DB.saveSettings = function (s) {
+        const r = _saveSettings(s);
+        trackPush(pushSettings({ ...s }));
+        return r;
+    };
+    const _savePomo = DB.savePomo.bind(DB);
+    DB.savePomo = function (p) {
+        const r = _savePomo(p);
+        trackPush(pushPomo({ ...p }));
+        return r;
+    };
 
     /* ---------- public: boot + ready gate ---------- */
 
@@ -1247,6 +1345,8 @@
             supabase.from('syllabus_courses').delete().eq('user_id', userId),
             // AJ-08: wipe cancelled occurrences blob
             supabase.from('cancelled_occurrences').delete().eq('user_id', userId),
+            supabase.from('user_settings').delete().eq('user_id', userId),
+            supabase.from('pomodoro_stats').delete().eq('user_id', userId),
             // MAJ-11: wipe the real semester rows too (but leave the one
             // placeholder row with client_id = null alone -- it's reused below).
             supabase.from('semesters').delete().eq('user_id', userId).not('client_id', 'is', null),
@@ -1254,6 +1354,8 @@
         try { localStorage.removeItem(DIRTY_SEM_KEY); localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
         Object.keys(last).forEach(k => last[k] = new Map());
         _lastCancelledJson = '[]';
+        _lastSettingsJson = null;
+        _lastPomoJson = null;
         try {
             localStorage.removeItem(MAP_KEY);
             localStorage.removeItem(SERVER_SEM_KEY);
@@ -1289,6 +1391,8 @@
         pushSemesters(DB.getSemesters());
         // AJ-08: also sync cancelled occurrences on import
         pushCancelledOccurrences(DB.getCancelledOccurrences());
+        pushSettings(DB.getSettings());
+        pushPomo(DB.getPomo());
         return r;
     };
 })();
