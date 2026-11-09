@@ -352,6 +352,20 @@ function renderTodaySchedule() {
     // MIN-04: Exclude cancelled occurrences so suspended classes don't appear on the dashboard.
     // DB.getCancelledOccurrences() is the same data source isOccurrenceCancelled() uses in schedule.js.
     var todayStr = todayKey();
+    if (!isDateInSemester(todayStr)) {
+        var activeSemester = DB.getActiveSemester();
+        if (activeSemester && activeSemester.startDate && todayStr < activeSemester.startDate) {
+            var semesterStart = new Date(activeSemester.startDate + 'T00:00:00');
+            var classesBegin = !isNaN(semesterStart.getTime())
+                ? 'Classes begin ' + semesterStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                : '';
+            wrap.innerHTML = dashEmpty('bi-calendar-x', "Semester hasn't started yet", classesBegin);
+        }
+        else {
+            wrap.innerHTML = dashEmpty('bi-calendar-x', 'Semester has ended', '');
+        }
+        return;
+    }
     var list = DB.getSubjects()
         .filter(function (s) {
             if (!(s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;

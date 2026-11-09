@@ -1103,6 +1103,13 @@ function wireNoteEditor(editor) {
         updateNotePreview();
         updateNoteToolbarState(editor);
     });
+    editor.addEventListener('input', function (event) {
+        if (event && event.inputType === 'insertText' && (event.data === ' ' || event.data === '\u00a0'))
+            maybeAutoNoteList(editor);
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        updateNoteToolbarState(editor);
+    });
     editor.addEventListener('change', function (event) {
         if (event.target.matches('.md-checklist-input')) {
             updateNoteChecklistInput(event.target);

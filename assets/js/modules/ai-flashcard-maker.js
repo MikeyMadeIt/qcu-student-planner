@@ -1,8 +1,9 @@
 /* ============================================================
    AI FLASHCARD MAKER
    Creation form -> validated flashcard set -> flip/shuffle/
-   navigate UI. Nothing is saved to a database; the set lives
-   only in page memory. ============================================================ */
+   navigate UI. Generated decks are saved to Supabase through
+   services/ai-flashcard-store.js (protected by RLS).
+   ============================================================ */
 
 let afmAttachment = null;
 let afmSet = null;       /* { title, cards: [{front, back}] } */
@@ -10,6 +11,8 @@ let afmOrder = [];       /* indices into afmSet.cards, shuffle-able */
 let afmIndex = 0;
 let afmFlipped = false;
 let afmBusy = false;
+let afmDeckId = null;      /* saved deck id, once persisted */
+let afmSavePromise = null; /* resolves when the deck row exists */
 
 function afmEl(id) { return document.getElementById(id); }
 
@@ -58,6 +61,8 @@ function initAiFlashcardMaker() {
     afmSafeBind('afmCard', 'keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); afmFlip(); }
     });
+
+    afmLoadHistory();
 }
 
 function afmSetBusy(busy) {
@@ -111,6 +116,10 @@ async function afmGenerate() {
         }
 
         afmSet = validated;
+        afmPersistDeck(validated, {
+            topic: topic || (notes ? notes.slice(0, 120) : ''),
+            fileName: file ? file.name : null,
+        });
         afmOrder = afmSet.cards.map((_, i) => i);
         afmIndex = 0;
         afmFlipped = false;
@@ -121,6 +130,70 @@ async function afmGenerate() {
     } finally {
         afmSetBusy(false);
     }
+}
+
+/* ---------- Persistence (Supabase) ---------- */
+
+async function afmStore() { return (await import('../services/ai-flashcard-store.js')).AiFlashcardStore; }
+
+function afmPersistDeck(set, meta) {
+    afmDeckId = null;
+    afmSavePromise = (async () => {
+        try {
+            const store = await afmStore();
+            afmDeckId = await store.saveDeck(set, meta);
+            afmLoadHistory();
+        } catch (error) {
+            console.warn('AI Flashcard Maker: could not save deck', error);
+            Toast.show("Flashcards generated, but they couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+        }
+    })();
+}
+
+async function afmLoadHistory() {
+    const host = afmEl('afmHistory');
+    if (!host) return;
+    try {
+        const list = await (await afmStore()).listDecks();
+        host.innerHTML = list.length ? list.map(d => `
+          <div class="glass card-pad mb-2 d-flex align-items-center gap-2">
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-bold">${escHtml(d.title)}</div>
+              <div class="text-faint" style="font-size:.78rem">
+                ${d.card_count} card${d.card_count === 1 ? '' : 's'}${d.topic ? ' · ' + escHtml(d.topic) : ''}
+              </div>
+            </div>
+            <button type="button" class="btn btn-accent btn-sm" onclick="afmOpenSaved('${d.id}')">Open</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="afmDeleteSaved('${d.id}')" aria-label="Delete deck"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+          </div>`).join('')
+          : '<div class="text-faint" style="font-size:.85rem">No saved decks yet.</div>';
+    } catch (error) {
+        console.warn('AI Flashcard Maker: could not load history', error);
+        host.innerHTML = '<div class="text-faint" style="font-size:.85rem">Couldn\'t load your saved decks. ' + escHtml(error.message || '') + '</div>';
+    }
+}
+
+async function afmOpenSaved(id) {
+    try {
+        const deck = await (await afmStore()).getDeck(id);
+        afmSet = deck; afmDeckId = id; afmSavePromise = Promise.resolve();
+        afmOrder = deck.cards.map((_, i) => i);
+        afmIndex = 0; afmFlipped = false;
+        afmRenderCard(); afmShowView('cards');
+    } catch (error) {
+        Toast.show("Couldn't open that deck: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+    }
+}
+
+function afmDeleteSaved(id) {
+    confirmAction({
+        title: 'Delete deck?', message: 'This flashcard deck will be permanently removed.',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        async onConfirm() {
+            try { await (await afmStore()).deleteDeck(id); Toast.show('Deck deleted'); afmLoadHistory(); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill'); }
+        }
+    });
 }
 
 function afmValidateSet(data) {
@@ -143,6 +216,8 @@ function afmValidateSet(data) {
 
 function afmShowView(view) {
     afmEl('afmForm').hidden = view !== 'form';
+    const history = afmEl('afmHistorySection');
+    if (history) history.hidden = view !== 'form';
     afmEl('afmLoadingState').hidden = view !== 'loading';
     afmEl('afmErrorState').hidden = view !== 'error';
     afmEl('afmCardsPanel').hidden = view !== 'cards';
@@ -155,10 +230,13 @@ function afmShowError(message) {
 
 function afmReset() {
     afmSet = null;
+    afmDeckId = null;
+    afmSavePromise = null;
     afmOrder = [];
     afmIndex = 0;
     afmFlipped = false;
     afmShowView('form');
+    afmLoadHistory();
 }
 
 function afmRestart() {

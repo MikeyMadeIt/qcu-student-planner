@@ -222,6 +222,34 @@
     margin: 0 !important;
 }
 
+.sem-overview > .d-flex {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+}
+
+.sem-overview > .d-flex > div:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.sem-overview > .d-flex > .text-end {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 399.98px) {
+    .sem-label {
+        font-size: .95rem;
+    }
+    .sem-meta {
+        font-size: .68rem;
+        gap: 5px;
+    }
+    .sem-overview > .d-flex > .text-end > div:last-child {
+        font-size: .58rem !important;
+    }
+}
+
 .sem-pct-label {
     font-family: var(--font-mono);
     font-weight: 700;
@@ -426,6 +454,14 @@
     justify-content: space-evenly;
     flex: 1;
     min-height: 120px;
+}
+
+.dash-attendance-note {
+    margin-top: var(--space-3);
+    color: var(--text-faint);
+    font-size: .68rem;
+    line-height: 1.4;
+    text-align: center;
 }
 
 .att-legend-row {
@@ -910,7 +946,7 @@
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (pointer: fine) {
     .dashboard-page {
         display: flex;
         flex-direction: column;

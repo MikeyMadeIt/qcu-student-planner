@@ -264,10 +264,10 @@ function highlightTheme(theme) {
 }
 
 function renderAccentPicker(current) {
-    const accents = { blue: '#2457D6', violet: '#5F4CBD', indigo: '#3B4FA6', teal: '#10747D', emerald: '#1B805E', olive: '#6B7A1F', ochre: '#A66B0F', rust: '#B8511F', crimson: '#B22828', rose: '#BD3353', maroon: '#7A2B3D', slate: '#4A5568', graphite: '#373D4A', steel: '#3E6680' };
+    const accents = ['blue', 'violet', 'indigo', 'teal', 'emerald', 'olive', 'ochre', 'rust', 'crimson', 'rose', 'maroon', 'slate', 'graphite', 'steel'];
     const wrap = document.getElementById('accentPicker');
-    wrap.innerHTML = Object.entries(accents).map(([k, c]) => `
-    <button onclick="chooseAccent('${k}')" data-accent-swatch="${k}" aria-label="${k} accent color" aria-pressed="${k === current}" class="accent-swatch-btn" style="background:${c}"></button>`).join('');
+    wrap.innerHTML = accents.map(accent => `
+    <button onclick="chooseAccent('${accent}')" data-accent="${accent}" data-accent-swatch="${accent}" aria-label="${accent} accent color" aria-pressed="${accent === current}" class="accent-swatch-btn" style="background:rgb(var(--accent))"></button>`).join('');
 }
 
 function chooseAccent(a) {

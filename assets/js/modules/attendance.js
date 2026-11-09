@@ -1,6 +1,6 @@
-﻿/* ============================================================
+/* ============================================================
    ATTENDANCE.JS — Enhanced v4
-   Features: Heatmap, Mark All Present, Consecutive Absence
+   Features: Heatmap, Bulk Attendance, Consecutive Absence
    Warnings, Export CSV/PDF, Skeleton states, Mode toggle,
    Absence limit progress bars, Mobile-first layout.
    ============================================================ */
@@ -8,7 +8,165 @@
 const DEFAULT_ABSENCE_LIMIT = 3;
 /* ---- Helpers ---- */
 
-function escapeAttHtml(s) { return escHtml(s); }
+function escapeAttHtml(s) {
+    // Escape quotes too, so values are safe inside HTML attributes (data-*, aria-label, value)
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function createAttendanceStatusSelect(select) {
+    if (!select || select.dataset.attStatusSelectBound)
+        return;
+    select.dataset.attStatusSelectBound = 'true';
+    select.dataset.native = 'true';
+    select.tabIndex = -1;
+    select.setAttribute('aria-hidden', 'true');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'att-status-select';
+    const trigger = document.createElement('button');
+    const menu = document.createElement('div');
+    const menuId = `${select.id || 'att-status'}-options-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    let isOpen = false;
+    let activeIndex = Math.max(0, select.selectedIndex);
+
+    trigger.type = 'button';
+    trigger.className = 'att-status-select-trigger';
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', menuId);
+    trigger.setAttribute('aria-label', select.getAttribute('aria-label') || 'Choose status');
+    menu.id = menuId;
+    menu.className = 'att-status-select-menu';
+    menu.setAttribute('role', 'listbox');
+    menu.setAttribute('aria-label', `${select.getAttribute('aria-label') || 'Status'} options`);
+    menu.hidden = true;
+
+    const renderOptions = () => {
+        activeIndex = Math.max(0, select.selectedIndex);
+        menu.innerHTML = [...select.options].map((option, index) => {
+            const selected = option.value === select.value;
+            const disabled = option.disabled || (!option.value && !!select.value);
+            return `<button type="button" class="att-status-select-option${selected ? ' is-selected' : ''}${!option.value ? ' is-placeholder' : ''}" role="option" aria-selected="${selected}" ${disabled ? 'disabled' : ''} data-index="${index}" data-value="${escapeAttHtml(option.value)}">${escapeAttHtml(option.textContent)}</button>`;
+        }).join('');
+        const selectedOption = select.options[select.selectedIndex];
+        trigger.textContent = selectedOption ? selectedOption.textContent : '';
+        trigger.setAttribute('aria-valuetext', trigger.textContent);
+    };
+
+    const placeMenu = () => {
+        if (!isOpen)
+            return;
+        const rect = trigger.getBoundingClientRect();
+        const margin = 8;
+        const width = Math.min(Math.max(rect.width, 140), window.innerWidth - margin * 2);
+        menu.style.width = `${width}px`;
+        menu.style.minWidth = `${Math.min(140, width)}px`;
+        const height = menu.offsetHeight;
+        const below = window.innerHeight - rect.bottom;
+        const top = below >= height + 6 || below >= rect.top
+            ? rect.bottom + 4
+            : Math.max(margin, rect.top - height - 4);
+        menu.style.left = `${Math.min(Math.max(rect.left, margin), window.innerWidth - width - margin)}px`;
+        menu.style.top = `${top}px`;
+    };
+    const close = ({ returnFocus = false } = {}) => {
+        if (!isOpen)
+            return;
+        isOpen = false;
+        menu.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        menu.remove();
+        document.removeEventListener('pointerdown', handleOutsidePointerDown);
+        window.removeEventListener('resize', placeMenu);
+        window.removeEventListener('scroll', placeMenu, true);
+        if (returnFocus)
+            trigger.focus();
+    };
+    select._attStatusSelectClose = close;
+    const focusOption = index => {
+        const options = [...menu.querySelectorAll('[role="option"]:not(:disabled)')];
+        if (!options.length)
+            return;
+        const option = options[Math.max(0, Math.min(index, options.length - 1))];
+        activeIndex = Number(option.dataset.index);
+        options.forEach(item => item.tabIndex = item === option ? 0 : -1);
+        option.focus({ preventScroll: true });
+    };
+    const open = (direction = 1) => {
+        if (isOpen)
+            return;
+        renderOptions();
+        document.body.appendChild(menu);
+        isOpen = true;
+        menu.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        placeMenu();
+        document.addEventListener('pointerdown', handleOutsidePointerDown);
+        window.addEventListener('resize', placeMenu);
+        window.addEventListener('scroll', placeMenu, true);
+        const enabledOptions = [...menu.querySelectorAll('[role="option"]:not(:disabled)')];
+        let selectedIndex = enabledOptions.findIndex(option => option.dataset.value === select.value);
+        if (selectedIndex < 0)
+            selectedIndex = direction < 0 ? enabledOptions.length - 1 : 0;
+        focusOption(selectedIndex);
+    };
+    const handleOutsidePointerDown = event => {
+        if (!wrapper.contains(event.target) && !menu.contains(event.target))
+            close();
+    };
+    const choose = option => {
+        if (!option || option.disabled)
+            return;
+        select.value = option.dataset.value;
+        renderOptions();
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        close({ returnFocus: true });
+    };
+
+    select.parentNode.insertBefore(wrapper, select);
+    wrapper.append(select, trigger);
+    document.body.appendChild(menu);
+    trigger.addEventListener('click', () => isOpen ? close() : open());
+    trigger.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+            event.preventDefault();
+            open(1);
+        }
+        else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            open(-1);
+        }
+        else if (event.key === 'Escape') {
+            close({ returnFocus: true });
+        }
+    });
+    menu.addEventListener('click', event => {
+        const option = event.target.closest('[role="option"]');
+        if (option)
+            choose(option);
+    });
+    menu.addEventListener('keydown', event => {
+        const options = [...menu.querySelectorAll('[role="option"]:not(:disabled)')];
+        const index = options.indexOf(event.target);
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close({ returnFocus: true });
+        }
+        else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            focusOption(index + (event.key === 'ArrowDown' ? 1 : -1));
+        }
+        else if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            choose(event.target);
+        }
+    });
+    select.addEventListener('change', renderOptions);
+    renderOptions();
+}
 
 function formatDisplayDate(ymd) {
     if (!ymd)
@@ -49,35 +207,40 @@ function setDefaultAbsenceLimit(limit) {
     DB.saveSettings(settings);
 }
 
-/* ---- Mode Toggle ---- */
-
-function toggleAttMode() {
-    const cb = document.getElementById('attOnline');
-    const btn = document.getElementById('attModeToggle');
-    const label = document.getElementById('attModeLabel');
-    if (!cb || !btn)
-        return;
-    cb.checked = !cb.checked;
-    const online = cb.checked;
-    btn.setAttribute('aria-checked', online ? 'true' : 'false');
-    btn.classList.toggle('is-online', online);
-    if (label)
-        label.textContent = online ? 'Online' : 'Offline';
-}
-
 /* ---- Init ---- */
 
+function setupAttendanceResponsiveAbsenceLimits() {
+    const card = document.getElementById('absenceLimitsCard');
+    const mobileSlot = document.getElementById('absenceLimitsMobileSlot');
+    const desktopColumn = document.querySelector('.att-overall-rate-column');
+    if (!card || !mobileSlot || !desktopColumn)
+        return;
+
+    const mobileLayout = window.matchMedia('(max-width: 767.98px)');
+    const moveCard = () => {
+        (mobileLayout.matches ? mobileSlot : desktopColumn).appendChild(card);
+    };
+    moveCard();
+    mobileLayout.addEventListener('change', moveCard);
+}
+
 function initAttendance() {
+    setupAttendanceResponsiveAbsenceLimits();
     const semId = DB.getActiveSemesterId();
     const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const subSel = document.getElementById('attSubject');
-    if (subSel) {
-        subSel.innerHTML = subs.length
-            ? subs.map(s => `<option value="${s.id}">${escapeAttHtml(s.code)}</option>`).join('')
-            : '<option value="">No subjects</option>';
-    }
     const attDate = document.getElementById('attDate');
-    if (attDate) attDate.value = todayKey();
+    if (attDate) {
+        updateAttendanceDateBounds();
+        attDate.value = todayKey();
+        if (!attDate.dataset.attendanceDateBound) {
+            attDate.dataset.attendanceDateBound = 'true';
+            attDate.addEventListener('change', renderAttendanceSubjectList);
+        }
+    }
+    setupAttendanceBulkControl();
+    setupAttendanceSubjectList();
+    setupAttendanceSemesterRefresh();
+    renderAttendanceSubjectList();
     // Populate heatmap subject filter
     const heatmapFilter = document.getElementById('heatmapSubjectFilter');
     if (heatmapFilter) {
@@ -129,43 +292,323 @@ function chooseHeatmapSubject(id) {
 /* ---- Log Attendance ---- */
 
 function logAttendance() {
-    const subjectId = document.getElementById('attSubject').value;
     const date = document.getElementById('attDate').value;
-    const status = document.getElementById('attStatus').value;
-    const online = document.getElementById('attOnline').checked;
     const notes = (document.getElementById('attNotes')?.value || '').trim();
-    if (!subjectId || !date) {
-        Toast.show('Select a subject and date', 'high', 'bi-exclamation-triangle');
+    const notesInput = document.getElementById('attNotes');
+    const notesChanged = notesInput?.dataset.attendanceNotesChanged === 'true';
+    const root = document.getElementById('attSubjectList');
+    const selected = root ? [...root.querySelectorAll('.att-subject-row')].filter(row => row.querySelector('.att-subject-check')?.checked).map(row => ({
+        subjectId: row.dataset.subjectId,
+        status: row.querySelector('.att-subject-status').value,
+        online: row.querySelector('.att-subject-online-check').checked
+    })) : [];
+    if (!date || !selected.length) {
+        Toast.show('Select a date and at least one subject', 'high', 'bi-exclamation-triangle');
         return;
     }
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
-    const existing = records.find(r => r.subjectId === subjectId && r.date === date);
-    if (existing) {
-        existing.status = status;
-        existing.online = online;
-        existing.notes = notes;
+    const subs = DB.getSubjects();
+    const changes = selected.map(item => {
+        const existing = records.find(r => r.subjectId === item.subjectId && r.date === date);
+        return {
+            ...item,
+            existing,
+            notes: existing && !notesChanged ? (existing.notes || '') : notes
+        };
+    });
+    const replacements = changes.filter(item => item.existing && (
+        item.existing.status !== item.status ||
+        !!item.existing.online !== item.online ||
+        (item.existing.notes || '') !== item.notes
+    ));
+    const additions = changes.filter(item => !item.existing);
+    if (!replacements.length && !additions.length) {
+        Toast.show('Attendance is already up to date');
+        return;
+    }
+    const saveSelected = () => {
+        const latestRecords = DB.getAttendance();
+        for (const item of changes) {
+            const existing = latestRecords.find(r => r.subjectId === item.subjectId && r.date === date);
+            if (existing) {
+                existing.status = item.status;
+                existing.online = item.online;
+                existing.notes = item.notes;
+            }
+            else {
+                latestRecords.push({
+                    id: DB.uid(),
+                    subjectId: item.subjectId,
+                    date,
+                    status: item.status,
+                    online: item.online,
+                    notes: item.notes,
+                    semesterId: semId
+                });
+            }
+        }
+        DB.saveAttendance(latestRecords);
+        if (notesInput)
+            notesInput.dataset.attendanceNotesChanged = 'false';
+        Toast.show(`Attendance logged for ${selected.length} subject${selected.length === 1 ? '' : 's'}`);
+        renderAttendanceAll();
+    };
+    if (replacements.length) {
+        const names = replacements.map(item => {
+            const subject = subs.find(s => s.id === item.subjectId);
+            return subject ? subject.code : item.subjectId;
+        });
+        confirmAction({
+            title: replacements.length === 1 ? 'Replace attendance record?' : 'Replace attendance records?',
+            message: `A record already exists for ${names.join(', ')} on ${formatDisplayDate(date)}. Replace ${replacements.length === 1 ? 'it' : 'them'}?`,
+            confirmLabel: 'Replace',
+            icon: 'bi-arrow-repeat',
+            onConfirm: saveSelected
+        });
     }
     else {
-        records.push({ id: DB.uid(), subjectId, date, status, online, notes, semesterId: semId });
+        saveSelected();
     }
-    DB.saveAttendance(records);
-    // Reset mode toggle
-    const cb = document.getElementById('attOnline');
-    const btn = document.getElementById('attModeToggle');
-    const label = document.getElementById('attModeLabel');
-    if (cb) {
-        cb.checked = false;
+}
+
+const ATTENDANCE_STATUSES = [
+    { value: 'Present', label: 'Present' },
+    { value: 'Late', label: 'Late' },
+    { value: 'Excused', label: 'Excused' },
+    { value: 'Absent', label: 'Absent' },
+    { value: 'No Classes', label: 'No Class' }
+];
+
+function getAttendanceSubjectsForDate(date) {
+    if (!date)
+        return [];
+    const dateObj = new Date(`${date}T00:00:00`);
+    if (isNaN(dateObj.getTime()))
+        return [];
+    const dow = DAY_NAMES[dateObj.getDay()].slice(0, 3).toLowerCase();
+    const semId = DB.getActiveSemesterId();
+    return DB.getSubjects()
+        .filter(s => s.semesterId === semId && !s.archived && Array.isArray(s.days) &&
+            s.days.some(day => String(day).slice(0, 3).toLowerCase() === dow))
+        .sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
+}
+
+function isAttendanceDateBeforeSemesterStart(date) {
+    const semester = DB.getActiveSemester();
+    if (!date || !semester || !semester.startDate)
+        return false;
+    const dateObj = new Date(`${date}T00:00:00`);
+    const startDate = new Date(`${semester.startDate}T00:00:00`);
+    if (isNaN(dateObj.getTime()) || isNaN(startDate.getTime()))
+        return false;
+    return ymdLocal(dateObj) < ymdLocal(startDate);
+}
+
+function updateAttendanceDateBounds() {
+    const dateInput = document.getElementById('attDate');
+    if (!dateInput)
+        return;
+    const semester = DB.getActiveSemester();
+    dateInput.min = semester?.startDate || '';
+    dateInput.max = semester?.endDate || '';
+}
+
+function setupAttendanceSemesterRefresh() {
+    if (window._attendanceSemesterRefreshBound)
+        return;
+    window._attendanceSemesterRefreshBound = true;
+    window.addEventListener('storage', event => {
+        if (event.key === DB_KEYS.semesters || event.key === DB_KEYS.activeSemesterId) {
+            updateAttendanceDateBounds();
+            renderAttendanceSubjectList();
+        }
+    });
+    window.addEventListener('planner:cloud-synced', () => {
+        updateAttendanceDateBounds();
+        renderAttendanceSubjectList();
+    });
+}
+
+function setupAttendanceSubjectList() {
+    const root = document.getElementById('attSubjectList');
+    if (!root || root.dataset.attendanceListBound)
+        return;
+    root.dataset.attendanceListBound = 'true';
+    const notesInput = document.getElementById('attNotes');
+    if (notesInput && !notesInput.dataset.attendanceNotesBound) {
+        notesInput.dataset.attendanceNotesBound = 'true';
+        notesInput.dataset.attendanceNotesChanged = 'false';
+        notesInput.addEventListener('input', () => {
+            notesInput.dataset.attendanceNotesChanged = 'true';
+        });
     }
-    if (btn) {
-        btn.classList.remove('is-online');
-        btn.setAttribute('aria-checked', 'false');
+    root.addEventListener('change', event => {
+        updateAttendanceLogButton();
+    });
+    root.addEventListener('click', event => {
+        const button = event.target.closest('.att-subject-mode-toggle');
+        if (!button)
+            return;
+        const checkbox = button.querySelector('.att-subject-online-check');
+        const label = button.querySelector('.att-subject-mode-label');
+        if (!checkbox || !label)
+            return;
+        checkbox.checked = !checkbox.checked;
+        button.classList.toggle('is-online', checkbox.checked);
+        button.setAttribute('aria-pressed', checkbox.checked ? 'true' : 'false');
+        label.textContent = checkbox.checked ? 'Online' : 'Offline';
+    });
+}
+
+function setupAttendanceBulkControl() {
+    const statusSelect = document.getElementById('attBulkStatus');
+    const applyButton = document.getElementById('attBulkApply');
+    if (!statusSelect || !applyButton || applyButton.dataset.attendanceBulkBound)
+        return;
+    createAttendanceStatusSelect(statusSelect);
+    applyButton.dataset.attendanceBulkBound = 'true';
+    statusSelect.addEventListener('change', updateAttendanceBulkControl);
+    updateAttendanceBulkControl();
+}
+
+function updateAttendanceBulkControl() {
+    const statusSelect = document.getElementById('attBulkStatus');
+    const applyButton = document.getElementById('attBulkApply');
+    const root = document.getElementById('attSubjectList');
+    if (!statusSelect || !applyButton || !root)
+        return;
+    applyButton.disabled = !statusSelect.value || !root.querySelector('.att-subject-row');
+}
+
+function applyBulkAttendanceStatus() {
+    const date = document.getElementById('attDate')?.value || '';
+    const status = document.getElementById('attBulkStatus')?.value || '';
+    const root = document.getElementById('attSubjectList');
+    if (!date || !ATTENDANCE_STATUSES.some(option => option.value === status) || !root)
+        return;
+    const subjects = [...root.querySelectorAll('.att-subject-row')].map(row => ({
+        subjectId: row.dataset.subjectId
+    }));
+    if (!subjects.length)
+        return;
+    const records = DB.getAttendance();
+    const existing = subjects.map(subject => ({
+        ...subject,
+        record: records.find(record => record.subjectId === subject.subjectId && record.date === date)
+    })).filter(subject => subject.record);
+    const overwriteCount = existing.filter(subject => subject.record.status !== status).length;
+    const newCount = subjects.length - existing.length;
+    const message = `Set ${subjects.length} scheduled subject${subjects.length === 1 ? '' : 's'} on ${formatDisplayDate(date)} to ${status === 'No Classes' ? 'No Class' : status}? ${overwriteCount} existing record${overwriteCount === 1 ? '' : 's'} will have ${overwriteCount === 1 ? 'its' : 'their'} status overwritten; ${newCount} new record${newCount === 1 ? '' : 's'} will be created.`;
+    confirmAction({
+        title: 'Apply bulk attendance?',
+        message,
+        confirmLabel: 'Apply',
+        icon: 'bi-check2-all',
+        onConfirm() {
+            const latestRecords = DB.getAttendance();
+            for (const subject of subjects) {
+                const record = latestRecords.find(item => item.subjectId === subject.subjectId && item.date === date);
+                if (record) {
+                    record.status = status;
+                }
+                else {
+                    latestRecords.push({
+                        id: DB.uid(),
+                        subjectId: subject.subjectId,
+                        date,
+                        status,
+                        online: false,
+                        notes: (document.getElementById('attNotes')?.value || '').trim(),
+                        semesterId: DB.getActiveSemesterId()
+                    });
+                }
+            }
+            DB.saveAttendance(latestRecords);
+            const bulkStatusSelect = document.getElementById('attBulkStatus');
+            if (bulkStatusSelect) {
+                bulkStatusSelect.value = '';
+                bulkStatusSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            renderAttendanceSubjectList();
+            updateAttendanceBulkControl();
+            Toast.show(`Set ${subjects.length} subject${subjects.length === 1 ? '' : 's'} to ${status === 'No Classes' ? 'No Class' : status}`);
+            renderAttendanceAll();
+        }
+    });
+}
+
+function renderAttendanceSubjectList() {
+    const root = document.getElementById('attSubjectList');
+    if (!root)
+        return;
+    root.querySelectorAll('.att-subject-status').forEach(select => select._attStatusSelectClose?.());
+    const date = document.getElementById('attDate')?.value || '';
+    if (isAttendanceDateBeforeSemesterStart(date)) {
+        const startDate = DB.getActiveSemester().startDate;
+        root.innerHTML = `<div class="att-subject-empty text-faint">Semester hasn't started yet. Classes begin ${escapeAttHtml(formatDisplayDate(startDate))}.</div>`;
+        updateAttendanceLogButton();
+        updateAttendanceBulkControl();
+        return;
     }
-    if (label) {
-        label.textContent = 'Offline';
+    const subjects = getAttendanceSubjectsForDate(date);
+    if (!subjects.length) {
+        root.innerHTML = '<div class="att-subject-empty text-faint"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i>No classes scheduled on this day</div>';
+        updateAttendanceLogButton();
+        updateAttendanceBulkControl();
+        return;
     }
-    Toast.show('Attendance logged');
-    renderAttendanceAll();
+    const records = DB.getAttendance();
+    root.innerHTML = `
+      <div class="att-subject-list-heading">
+        <span class="att-form-label mb-0">Classes for ${DAY_NAMES[new Date(`${date}T00:00:00`).getDay()]}</span>
+      </div>
+      <div class="att-subject-rows">
+        ${subjects.map(subject => {
+            const existing = records.find(record => record.subjectId === subject.id && record.date === date);
+            const currentStatus = existing && ATTENDANCE_STATUSES.some(status => status.value === existing.status)
+                ? existing.status
+                : 'Present';
+            const description = subject.desc || subject.description || subject.name || '';
+            const time = subject.start || subject.end
+                ? `${fmtTime(subject.start)}${subject.start && subject.end ? '–' : ''}${fmtTime(subject.end)}`
+                : 'Time not set';
+            return `
+              <div class="att-subject-row" data-subject-id="${escapeAttHtml(subject.id)}">
+                <label class="att-subject-select">
+                  <input class="form-check-input att-subject-check" type="checkbox" checked aria-label="Log ${escapeAttHtml(subject.code)}">
+                  <span class="att-subject-info">
+                    <span class="att-subject-code">${escapeAttHtml(subject.code)}</span>
+                    <span class="att-subject-meta${description ? ' has-description' : ''}">
+                      ${description ? `<span class="att-subject-description">${escapeAttHtml(description)}</span>` : ''}
+                      <span class="att-subject-time"><i class="bi bi-clock me-1" aria-hidden="true"></i>${escapeAttHtml(time)}</span>
+                    </span>
+                  </span>
+                </label>
+                <div class="att-subject-controls">
+                  <select class="form-select form-select-sm att-subject-status" data-native aria-label="${escapeAttHtml(subject.code)} attendance status">
+                    ${ATTENDANCE_STATUSES.map(status => `<option value="${escapeAttHtml(status.value)}" ${currentStatus === status.value ? 'selected' : ''}>${status.label}</option>`).join('')}
+                  </select>
+                  <button type="button" class="att-mode-toggle att-subject-mode-toggle ${existing?.online ? 'is-online' : ''}" aria-pressed="${existing?.online ? 'true' : 'false'}" aria-label="${escapeAttHtml(subject.code)} online mode toggle">
+                    <span class="att-mode-track"><span class="att-mode-thumb"></span></span>
+                    <span class="att-mode-label att-subject-mode-label">${existing?.online ? 'Online' : 'Offline'}</span>
+                    <input type="checkbox" class="att-hidden-check att-subject-online-check" ${existing?.online ? 'checked' : ''} tabindex="-1" aria-hidden="true">
+                  </button>
+                </div>
+              </div>`;
+        }).join('')}
+      </div>`;
+    root.querySelectorAll('.att-subject-status').forEach(createAttendanceStatusSelect);
+    updateAttendanceLogButton();
+    updateAttendanceBulkControl();
+}
+
+function updateAttendanceLogButton() {
+    const root = document.getElementById('attSubjectList');
+    const button = document.getElementById('attLogButton');
+    if (!root || !button)
+        return;
+    button.disabled = !root.querySelector('.att-subject-row .att-subject-check:checked');
 }
 
 /* ---- Render all ---- */
@@ -290,6 +733,8 @@ function renderConsecutiveAbsenceAlerts() {
 
 /* ---- Heatmap ---- */
 
+let _hmResizeFrame = 0;
+
 function renderHeatmap() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
@@ -297,49 +742,55 @@ function renderHeatmap() {
     const legend = document.getElementById('heatmapLegend');
     if (!wrap)
         return;
+    if (!window._attendanceHeatmapResizeBound) {
+        window._attendanceHeatmapResizeBound = true;
+        window.addEventListener('resize', () => {
+            cancelAnimationFrame(_hmResizeFrame);
+            _hmResizeFrame = requestAnimationFrame(renderHeatmap);
+        }, { passive: true });
+    }
     const records = DB.getAttendance().filter(r => r.semesterId === semId);
     const filterSubId = document.getElementById('heatmapSubjectFilter')?.value || '';
     const filteredRecords = filterSubId ? records.filter(r => r.subjectId === filterSubId) : records;
-    // Build date range from semester
-    let startDate = sem && sem.startDate ? new Date(sem.startDate + 'T00:00:00') : null;
-    let endDate = sem && sem.endDate ? new Date(sem.endDate + 'T00:00:00') : null;
-    // If no semester dates, derive from records
-    if (filteredRecords.length) {
-        const sortedDates = [...filteredRecords].sort((a, b) => a.date.localeCompare(b.date));
-        if (!startDate)
-            startDate = new Date(sortedDates[0].date + 'T00:00:00');
-        if (!endDate)
-            endDate = new Date(sortedDates[sortedDates.length - 1].date + 'T00:00:00');
-    }
-    if (!startDate || !endDate || !filteredRecords.length) {
-        wrap.innerHTML = `<div class="att-heatmap-empty">
-      <i class="bi bi-grid-3x3-gap"></i>
-      <div>No attendance history yet</div>
-      <div class="att-heatmap-empty-sub">Your attendance activity will appear here once you start logging.</div>
-    </div>`;
-        if (legend)
-            legend.innerHTML = '';
-        return;
-    }
-    // Clamp end to today if in future
+    const toLocalYMD = d => d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    const parseDate = ymd => {
+        if (!ymd)
+            return null;
+        const date = new Date(`${ymd}T00:00:00`);
+        return isNaN(date.getTime()) ? null : date;
+    };
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (endDate > today)
-        endDate = today;
-    // Build a lookup: date -> best status (first non-NoClasses wins, else NoClasses)
+    const todayYmd = toLocalYMD(today);
+    let startDate = parseDate(sem?.startDate);
+    let endDate = parseDate(sem?.endDate);
+    const hasSemesterRange = !!(sem && startDate && endDate && startDate <= endDate);
+    if (!hasSemesterRange) {
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - ((startDate.getDay() + 6) % 7) - 19 * 7);
+        endDate = new Date(today);
+    }
+    const startYmd = toLocalYMD(startDate);
+    const endYmd = toLocalYMD(hasSemesterRange ? endDate : today);
     const subs = DB.getSubjects();
-    const dateMap = {}; // date -> { status, subjects: [...], online }
+    const subjectById = new Map(subs.map(subject => [subject.id, subject]));
+    const dateMap = {};
     for (const r of filteredRecords) {
         if (!dateMap[r.date]) {
-            dateMap[r.date] = { statuses: [], subjects: [], notes: [] };
+            dateMap[r.date] = { statuses: [], subjects: [], notes: [], entries: [] };
         }
-        const sub = subs.find(s => s.id === r.subjectId);
+        const sub = subjectById.get(r.subjectId);
         dateMap[r.date].statuses.push(r.status);
         dateMap[r.date].subjects.push(sub ? sub.code : 'Unknown');
         dateMap[r.date].notes.push(r.notes || '');
         dateMap[r.date].online = dateMap[r.date].online || r.online;
+        dateMap[r.date].entries.push({
+            subject: sub ? sub.code : 'Unknown',
+            status: r.status
+        });
     }
-    // Determine primary status for a date (worst-case: Absent > Late > Excused > NoClasses > Present)
     function primaryStatus(statuses) {
         if (statuses.includes('Absent'))
             return 'Absent';
@@ -353,114 +804,147 @@ function renderHeatmap() {
             return 'Present';
         return 'Present';
     }
-    // Local date formatter — avoids UTC offset shifting the date (toISOString is UTC)
-    function toLocalYMD(d) {
-        return d.getFullYear() + '-' +
-            String(d.getMonth() + 1).padStart(2, '0') + '-' +
-            String(d.getDate()).padStart(2, '0');
+    const startWeek = new Date(startDate);
+    startWeek.setDate(startWeek.getDate() - ((startWeek.getDay() + 6) % 7));
+    const endWeek = new Date(hasSemesterRange ? endDate : today);
+    endWeek.setDate(endWeek.getDate() - ((endWeek.getDay() + 6) % 7));
+    const rangeWeeks = [];
+    const weekStart = new Date(startWeek);
+    while (weekStart <= endWeek) {
+        rangeWeeks.push(new Date(weekStart));
+        weekStart.setDate(weekStart.getDate() + 7);
     }
-    // Build week grid starting from Monday of startDate's week
-    const gridStart = new Date(startDate);
-    const dow = gridStart.getDay(); // 0=Sun
-    gridStart.setDate(gridStart.getDate() - (dow === 0 ? 6 : dow - 1)); // go to Monday
+    const availableWidth = Math.max(0, wrap.clientWidth - 18);
+    const weeksToFill = Math.ceil((availableWidth + 4) / 32);
+    const displayWeekCount = Math.max(rangeWeeks.length, weeksToFill);
+    const hmGap = 4;
+    const hmCell = Math.max(12, Math.min(28, Math.floor((availableWidth - (displayWeekCount - 1) * hmGap) / displayWeekCount)));
+    const gridWidth = displayWeekCount * hmCell + Math.max(0, displayWeekCount - 1) * hmGap;
     const weeks = [];
-    let cur = new Date(gridStart);
-    while (cur <= endDate) {
+    for (let weekIndex = 0; weekIndex < displayWeekCount; weekIndex++) {
+        const monday = new Date(rangeWeeks[weekIndex] || rangeWeeks[rangeWeeks.length - 1]);
+        if (weekIndex >= rangeWeeks.length)
+            monday.setDate(monday.getDate() + (weekIndex - rangeWeeks.length + 1) * 7);
         const week = [];
+        let monthLabel = '';
         for (let i = 0; i < 7; i++) {
+            const cur = new Date(monday);
+            cur.setDate(cur.getDate() + i);
             const ymd = toLocalYMD(cur);
-            const inRange = cur >= startDate && cur <= endDate;
+            const inRange = !hasSemesterRange || ymd >= startYmd && ymd <= endYmd;
             const data = dateMap[ymd];
+            if (!monthLabel && cur.getDate() === 1) {
+                monthLabel = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(cur);
+            }
             week.push({
                 ymd,
                 inRange,
                 status: data ? primaryStatus(data.statuses) : null,
+                statuses: data ? data.statuses : [],
                 subjects: data ? data.subjects : [],
-                notes: data ? data.notes.filter(Boolean) : [],
-                online: data ? data.online : false,
-                isWeekend: cur.getDay() === 0 || cur.getDay() === 6
+                entries: data ? data.entries : [],
+                isToday: ymd === todayYmd,
+                isFuture: ymd > todayYmd
             });
-            cur.setDate(cur.getDate() + 1);
         }
-        weeks.push(week);
+        weeks.push({ days: week, monthLabel });
     }
-    // Render
     const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    let html = `<div class="att-heatmap-grid-wrap">
-    <div class="att-heatmap-day-labels">`;
+    const gridStyle = `--hm-week-count:${displayWeekCount};--hm-cell:${hmCell}px;width:${gridWidth}px`;
+    let html = `<div class="att-heatmap-grid-wrap" style="--hm-cell:${hmCell}px">
+    <div class="att-heatmap-day-labels"><div class="att-heatmap-month-spacer" aria-hidden="true"></div>`;
     for (const l of dayLabels) {
         html += `<div class="att-heatmap-day-lbl">${l}</div>`;
     }
-    html += `</div><div class="att-heatmap-weeks">`;
+    html += `</div><div class="att-heatmap-week-viewport"><div class="att-heatmap-months" style="${gridStyle}" aria-hidden="true">`;
     for (const week of weeks) {
-        html += `<div class="att-heatmap-col">`;
-        for (const cell of week) {
+        html += `<div class="att-heatmap-month-label">${escapeAttHtml(week.monthLabel)}</div>`;
+    }
+    html += `</div><div class="att-heatmap-weeks" style="${gridStyle}" role="grid" aria-label="Attendance by day">`;
+    const statusClasses = {
+        'Present': 'att-hm-present',
+        'Late': 'att-hm-late',
+        'Excused': 'att-hm-excused',
+        'Absent': 'att-hm-absent',
+        'No Classes': 'att-hm-noclasses'
+    };
+    for (const week of weeks) {
+        html += `<div class="att-heatmap-col" role="row">`;
+        for (const cell of week.days) {
             let cls = 'att-hm-cell';
-            let ariaLabel = '';
-            if (!cell.inRange || cell.isWeekend && !cell.status) {
-                cls += ' att-hm-empty';
-                ariaLabel = cell.ymd;
+            const dimmed = !cell.inRange || cell.isFuture;
+            if (cell.status)
+                cls += ` ${statusClasses[cell.status] || 'att-hm-none'}`;
+            else
+                cls += ' att-hm-none att-hm-empty';
+            let mixedStyle = '';
+            if (cell.status) {
+                // Several subjects with different statuses -> pie-style cell, one slice per status (sized by count)
+                const order = ['Absent', 'Late', 'Excused', 'Present', 'No Classes'];
+                const colors = { 'Absent': 'rgba(251,113,133,.8)', 'Late': 'rgba(180,83,9,.85)', 'Excused': 'rgba(96,165,250,.8)', 'Present': 'rgba(52,211,153,.75)', 'No Classes': 'rgba(139,92,246,.55)' };
+                const counts = order.map(st => ({ st, n: cell.statuses.filter(x => x === st).length })).filter(x => x.n > 0);
+                if (counts.length > 1) {
+                    const total = counts.reduce((sum, x) => sum + x.n, 0);
+                    let acc = 0;
+                    const stops = counts.map(x => {
+                        const from = acc / total * 100;
+                        acc += x.n;
+                        return `${colors[x.st]} ${from.toFixed(2)}% ${(acc / total * 100).toFixed(2)}%`;
+                    });
+                    mixedStyle = ` style="background:conic-gradient(${stops.join(',')})"`;
+                    cls += ' att-hm-mixed';
+                }
             }
-            else if (!cell.status) {
-                cls += ' att-hm-none';
-                ariaLabel = `${cell.ymd}: No record`;
-            }
-            else {
-                const sc = {
-                    'Present': 'att-hm-present',
-                    'Late': 'att-hm-late',
-                    'Excused': 'att-hm-excused',
-                    'Absent': 'att-hm-absent',
-                    'No Classes': 'att-hm-noclasses'
-                }[cell.status] || 'att-hm-none';
-                cls += ' ' + sc;
-                ariaLabel = `${cell.ymd}: ${cell.status}${cell.subjects.length ? ' — ' + cell.subjects.join(', ') : ''}`;
-            }
-            // Tooltip data attributes
-            const subjectsStr = cell.subjects.join(', ') || '—';
-            const notesStr = cell.notes.join(' / ') || '';
-            const modeStr = cell.online ? 'Online' : cell.subjects.length ? 'Offline' : '';
-            html += `<div class="${cls}"
-        role="gridcell"
-        tabindex="0"
+            if (dimmed)
+                cls += ' att-hm-dimmed';
+            if (cell.isToday)
+                cls += ' att-hm-today';
+            const tooltipEntries = cell.entries.map(entry => `${entry.subject} · ${entry.status}`).join(', ');
+            const ariaLabel = `${cell.ymd}: ${tooltipEntries || 'No records'}${dimmed ? ', unavailable' : ''}`;
+            const handlers = dimmed ? '' : `tabindex="0"
+        onmouseenter="if(!hmIsTouch())showHmTooltip(event,this)"
+        onmouseleave="if(!hmIsTouch())hideHmTooltip()"
+        onfocus="if(!hmIsTouch())showHmTooltip(event,this)"
+        onblur="if(!hmIsTouch())hideHmTooltip()"
+        onclick="showHmTooltipMobile(event,this)"`;
+            html += `<div class="${cls}"${mixedStyle} role="gridcell" ${handlers}${dimmed ? ' tabindex="-1" aria-disabled="true"' : ''}
         aria-label="${escapeAttHtml(ariaLabel)}"
         data-hm-date="${cell.ymd}"
-        data-hm-status="${escapeAttHtml(cell.status || '')}"
-        data-hm-subjects="${escapeAttHtml(subjectsStr)}"
-        data-hm-notes="${escapeAttHtml(notesStr)}"
-        data-hm-mode="${escapeAttHtml(modeStr)}"
-        onmouseenter="showHmTooltip(event,this)"
-        onmouseleave="hideHmTooltip()"
-        onfocus="showHmTooltip(event,this)"
-        onblur="hideHmTooltip()"
-        onclick="showHmTooltipMobile(event,this)"
+        data-hm-records="${escapeAttHtml(JSON.stringify(cell.entries))}"
       ></div>`;
         }
         html += `</div>`;
     }
     html += `</div></div>`;
     wrap.innerHTML = html;
-    // Legend
+    // Apply sizes inline so the layout is correct even if an older cached stylesheet is loaded
+    const hmPx = hmCell + 'px';
+    wrap.querySelectorAll('.att-hm-cell').forEach(el => { el.style.width = hmPx; el.style.height = hmPx; el.style.maxWidth = 'none'; el.style.aspectRatio = 'auto'; });
+    wrap.querySelectorAll('.att-heatmap-day-lbl').forEach(el => { el.style.height = hmPx; el.style.aspectRatio = 'auto'; });
+    wrap.querySelectorAll('.att-heatmap-day-labels').forEach(el => { el.style.gridTemplateRows = `16px repeat(7, ${hmPx})`; });
+    wrap.querySelectorAll('.att-heatmap-col').forEach(el => { el.style.gridTemplateRows = `repeat(7, ${hmPx})`; });
+    wrap.querySelectorAll('.att-heatmap-months, .att-heatmap-weeks').forEach(el => { el.style.gridTemplateColumns = `repeat(${displayWeekCount}, ${hmPx})`; });
+    const currentMonday = new Date(today);
+    currentMonday.setDate(currentMonday.getDate() - ((currentMonday.getDay() + 6) % 7));
+    const currentWeekYmd = toLocalYMD(currentMonday);
+    let currentWeekIndex = weeks.findIndex(week => week.days[0].ymd === currentWeekYmd);
+    if (currentWeekIndex < 0)
+        currentWeekIndex = currentWeekYmd < weeks[0].days[0].ymd ? 0 : weeks.length - 1;
+    const viewport = wrap.querySelector('.att-heatmap-week-viewport');
+    const currentWeek = wrap.querySelectorAll('.att-heatmap-col')[currentWeekIndex];
+    if (viewport && currentWeek)
+        viewport.scrollLeft = Math.max(0, currentWeek.getBoundingClientRect().left - viewport.getBoundingClientRect().left);
     if (legend) {
-        legend.innerHTML = `<div class="att-hm-legend-wrap">
-      <span class="att-hm-legend-label">Less</span>
-      <div class="att-hm-legend-cells">
-        <div class="att-hm-cell att-hm-none att-hm-legend-cell" title="No record"></div>
-        <div class="att-hm-cell att-hm-present att-hm-legend-cell" title="Present"></div>
-        <div class="att-hm-cell att-hm-late att-hm-legend-cell" title="Late"></div>
-        <div class="att-hm-cell att-hm-excused att-hm-legend-cell" title="Excused"></div>
-        <div class="att-hm-cell att-hm-absent att-hm-legend-cell" title="Absent"></div>
-        <div class="att-hm-cell att-hm-noclasses att-hm-legend-cell" title="No Classes"></div>
-      </div>
-      <span class="att-hm-legend-label">More</span>
-      <div class="att-hm-legend-items">
+        legend.innerHTML = `<div class="att-hm-legend-wrap"><div class="att-hm-legend-items">
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-present"></span>Present</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-late"></span>Late</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-excused"></span>Excused</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-absent"></span>Absent</span>
         <span class="att-hm-li"><span class="att-hm-li-dot att-hm-noclasses"></span>No Class</span>
-      </div>
-    </div>`;
+        <span class="att-hm-li"><span class="att-hm-li-dot att-hm-mixed-dot"></span>Mixed</span>
+        <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-legend-cell"></span>No record</span>
+        <span class="att-hm-li"><span class="att-hm-cell att-hm-none att-hm-today att-hm-legend-cell"></span>Today</span>
+      </div></div>`;
     }
 }
 
@@ -469,40 +953,44 @@ let _hmTooltipEl = null;
 let _hmTooltipTimer = null;
 
 function showHmTooltip(evt, cell) {
-    clearTimeout(_hmTooltipTimer);
     hideHmTooltip();
     const date = cell.dataset.hmDate;
-    const status = cell.dataset.hmStatus;
-    const subjects = cell.dataset.hmSubjects;
-    const notes = cell.dataset.hmNotes;
-    const mode = cell.dataset.hmMode;
     if (!date || date === 'undefined')
         return;
-    if (!status && !subjects)
-        return;
+    const entries = JSON.parse(cell.dataset.hmRecords || '[]');
+    const dateLabel = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    }).format(new Date(`${date}T00:00:00`));
+    const statusClasses = {
+        'Present': 'att-hm-tt-present',
+        'Late': 'att-hm-tt-late',
+        'Excused': 'att-hm-tt-excused',
+        'Absent': 'att-hm-tt-absent',
+        'No Classes': 'att-hm-tt-noclasses'
+    };
     const tip = document.createElement('div');
     tip.className = 'att-hm-tooltip';
-    tip.innerHTML = `<div class="att-hm-tt-date">${formatDisplayDate(date)}</div>` +
-        (subjects && subjects !== '—' ? `<div class="att-hm-tt-subject">${escapeAttHtml(subjects)}</div>` : '') +
-        (status ? `<div class="att-hm-tt-status att-hm-tt-${(status || '').toLowerCase().replace(/\s/g, '')}">${escapeAttHtml(status)}</div>` : '') +
-        (mode ? `<div class="att-hm-tt-mode">${escapeAttHtml(mode)}</div>` : '') +
-        (notes ? `<div class="att-hm-tt-notes"><i class="bi bi-chat-left-text-fill"></i> ${escapeAttHtml(notes)}</div>` : '');
+    tip.innerHTML = `<div class="att-hm-tt-date">${escapeAttHtml(dateLabel)}</div>` +
+        (entries.length ? entries.map(entry => `<div class="att-hm-tt-entry"><span class="att-hm-tt-subject">${escapeAttHtml(entry.subject)}</span><span class="att-hm-tt-status ${statusClasses[entry.status] || ''}">· ${escapeAttHtml(entry.status)}</span></div>`).join('') :
+            '<div class="att-hm-tt-subject">No records</div>');
     document.body.appendChild(tip);
     _hmTooltipEl = tip;
     positionHmTooltip(evt, tip);
 }
 
 function positionHmTooltip(evt, tip) {
-    const rect = evt.target.getBoundingClientRect();
+    // tooltip is position:fixed, so use viewport coordinates only (no scroll offsets)
+    const target = evt.currentTarget && evt.currentTarget.getBoundingClientRect ? evt.currentTarget : evt.target;
+    const rect = target.getBoundingClientRect();
     const tRect = tip.getBoundingClientRect();
-    let top = rect.top + window.scrollY - tRect.height - 8;
-    let left = rect.left + window.scrollX + rect.width / 2 - tRect.width / 2;
-    if (top < 8)
-        top = rect.bottom + window.scrollY + 8;
-    if (left < 8)
-        left = 8;
-    if (left + tRect.width > window.innerWidth - 8)
-        left = window.innerWidth - tRect.width - 8;
+    const margin = 8;
+    let top = rect.top - tRect.height - margin;
+    let left = rect.left + rect.width / 2 - tRect.width / 2;
+    if (top < margin)
+        top = rect.bottom + margin;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tRect.width - margin));
     tip.style.top = top + 'px';
     tip.style.left = left + 'px';
     tip.style.opacity = '1';
@@ -515,16 +1003,34 @@ function hideHmTooltip() {
     }
 }
 
+function hmIsTouch() {
+    return window.matchMedia('(hover: none)').matches;
+}
+
 function showHmTooltipMobile(evt, cell) {
-    // On touch, toggle tooltip
-    if (window.matchMedia('(hover:none)').matches) {
-        if (_hmTooltipEl) {
+    // On touch screens: tap a cell to show its tooltip, tap it again to hide.
+    if (!hmIsTouch())
+        return;
+    const sameCell = _hmTooltipEl && _hmTooltipEl._hmCell === cell;
+    clearTimeout(_hmTooltipTimer);
+    hideHmTooltip();
+    if (sameCell)
+        return;
+    evt.currentTarget = cell;
+    showHmTooltip({ currentTarget: cell, target: cell }, cell);
+    if (_hmTooltipEl)
+        _hmTooltipEl._hmCell = cell;
+    _hmTooltipTimer = setTimeout(hideHmTooltip, 4000);
+}
+
+// Tap anywhere else (or scroll) closes the tooltip on touch screens
+if (!window._hmTooltipGlobalBound) {
+    window._hmTooltipGlobalBound = true;
+    document.addEventListener('click', e => {
+        if (_hmTooltipEl && !e.target.closest('.att-hm-cell'))
             hideHmTooltip();
-            return;
-        }
-        showHmTooltip(evt, cell);
-        _hmTooltipTimer = setTimeout(hideHmTooltip, 3000);
-    }
+    });
+    window.addEventListener('scroll', () => { if (hmIsTouch()) hideHmTooltip(); }, { passive: true });
 }
 
 /* ---- Absence Warnings (compact summary on page) ---- */
@@ -804,104 +1310,6 @@ function deleteAttendance(id) {
             renderAttendanceAll();
         }
     });
-}
-
-/* ---- Mark All Present Today ---- */
-let _markAllPendingSubjects = [];
-
-function markAllPresentToday() {
-    const semId = DB.getActiveSemesterId();
-    const today = todayKey();
-    const todayDate = new Date(today + 'T00:00:00');
-    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][todayDate.getDay()];
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
-    // Filter: subjects with class today (based on their days array)
-    const todaySubjects = subs.filter(s => {
-        if (!s.days || !s.days.length)
-            return false;
-        return s.days.some(d => d === dow || d.startsWith(dow.slice(0, 3)));
-    });
-    // If no schedule info, include all subjects (fallback)
-    const scheduledSubs = todaySubjects.length > 0 ? todaySubjects : subs;
-    const body = document.getElementById('markAllPresentBody');
-    const confirmBtn = document.getElementById('markAllConfirmBtn');
-    if (!scheduledSubs.length) {
-        if (body)
-            body.innerHTML = `<div class="text-faint text-center py-3"><i class="bi bi-calendar-x me-2"></i>No classes scheduled today.</div>`;
-        if (confirmBtn)
-            confirmBtn.style.display = 'none';
-        new bootstrap.Modal(document.getElementById('markAllPresentModal')).show();
-        return;
-    }
-    // Check which ones already have records
-    const toCreate = [];
-    const alreadyPresent = [];
-    const existingOther = [];
-    for (const s of scheduledSubs) {
-        const existing = records.find(r => r.subjectId === s.id && r.date === today);
-        if (!existing) {
-            toCreate.push(s);
-        }
-        else if (existing.status === 'Present') {
-            alreadyPresent.push(s);
-        }
-        else {
-            existingOther.push({ s, existing });
-        }
-    }
-    _markAllPendingSubjects = toCreate;
-    let html = '';
-    if (toCreate.length) {
-        html += `<div class="att-map-section"><div class="att-map-section-title">${toCreate.length} class${toCreate.length !== 1 ? 'es' : ''} will be marked Present:</div>`;
-        html += toCreate.map(s => `<div class="att-map-sub-row"><span class="att-map-dot" style="background:${s.color}"></span>${escapeAttHtml(s.code)}</div>`).join('');
-        html += `</div>`;
-    }
-    if (alreadyPresent.length) {
-        html += `<div class="att-map-section att-map-skip"><div class="att-map-section-title text-faint">Already marked Present (skipped):</div>`;
-        html += alreadyPresent.map(s => `<div class="att-map-sub-row text-faint"><span class="att-map-dot" style="background:${s.color}"></span>${escapeAttHtml(s.code)}</div>`).join('');
-        html += `</div>`;
-    }
-    if (existingOther.length) {
-        html += `<div class="att-map-section att-map-warn"><div class="att-map-section-title"><i class="bi bi-exclamation-circle me-1"></i>Existing records kept unchanged:</div>`;
-        html += existingOther.map(({ s, existing }) => `<div class="att-map-sub-row"><span class="att-map-dot" style="background:${s.color}"></span>${escapeAttHtml(s.code)} <span class="text-faint">(${existing.status})</span></div>`).join('');
-        html += `</div>`;
-    }
-    if (!toCreate.length) {
-        html = `<div class="text-faint text-center py-2"><i class="bi bi-check2-all me-2"></i>All scheduled subjects already have records today.</div>` + html;
-        if (confirmBtn)
-            confirmBtn.style.display = 'none';
-    }
-    else {
-        if (confirmBtn)
-            confirmBtn.style.display = '';
-    }
-    if (body)
-        body.innerHTML = html;
-    new bootstrap.Modal(document.getElementById('markAllPresentModal')).show();
-}
-
-function confirmMarkAllPresent() {
-    if (!_markAllPendingSubjects.length)
-        return;
-    const semId = DB.getActiveSemesterId();
-    const today = todayKey();
-    const records = DB.getAttendance();
-    let added = 0;
-    for (const s of _markAllPendingSubjects) {
-        const already = records.find(r => r.subjectId === s.id && r.date === today);
-        if (!already) {
-            records.push({ id: DB.uid(), subjectId: s.id, date: today, status: 'Present', online: false, notes: '', semesterId: semId });
-            added++;
-        }
-    }
-    DB.saveAttendance(records);
-    _markAllPendingSubjects = [];
-    const modal = bootstrap.Modal.getInstance(document.getElementById('markAllPresentModal'));
-    if (modal)
-        modal.hide();
-    Toast.show(`Marked ${added} class${added !== 1 ? 'es' : ''} as Present`);
-    renderAttendanceAll();
 }
 
 /* ---- Export CSV ---- */
