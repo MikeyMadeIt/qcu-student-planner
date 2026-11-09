@@ -1099,8 +1099,9 @@ function openScheduleModal(id, presetDay) {
             </label>`).join('')}
         </div>
       </div>
-      <div class="col-md-6"><label>Start Time</label><input type="time" class="form-control" id="csStart" value="${s ? s.start : '08:00'}"></div>
-      <div class="col-md-6"><label>End Time</label><input type="time" class="form-control" id="csEnd" value="${s ? s.end : '09:00'}"></div>
+      <div class="col-md-6">${TimeField.html({ id: 'csStart', label: 'Start Time', value: s ? s.start : '08:00', placeholder: '9:00 AM', required: true })}</div>
+      <div class="col-md-6">${TimeField.html({ id: 'csEnd', label: 'End Time', value: s ? s.end : '09:00', placeholder: '10:30 AM', required: true, after: 'csStart' })}</div>
+      <div class="col-12"><p class="sch-time-hint mb-0" data-start="csStart" data-end="csEnd" aria-live="polite"></p></div>
       <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}"></div>
       <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}"></div>
       <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}"></div>
@@ -1119,6 +1120,8 @@ function openScheduleModal(id, presetDay) {
       <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
+
+    TimeField.init(body);
     new bootstrap.Modal(document.getElementById('calSubjectModal')).show();
 }
 
@@ -1138,6 +1141,7 @@ function saveScheduleEntry() {
         Toast.show('Subject code is required', 'high', 'bi-exclamation-triangle');
         return;
     }
+    if (!TimeField.validate(['csStart', 'csEnd'])) return;
     const days = [...document.querySelectorAll('.cs-day-check:checked')].map(c => c.value);
     const semId = DB.getActiveSemesterId();
     const data = {
@@ -1198,13 +1202,15 @@ function openTaskModal(id, presetDate) {
       <div class="col-md-4"><label>Category</label><select class="form-select" id="ctCategory">${['Homework', 'Project', 'Quiz', 'Exam', 'Personal', 'Organization'].map(c => `<option ${t && t.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
       <div class="col-md-4"><label>Priority</label><select class="form-select" id="ctPriority">${['low', 'medium', 'high'].map(p => `<option value="${p}" ${t && t.priority === p ? 'selected' : (!t && p === 'medium' ? 'selected' : '')}>${p[0].toUpperCase() + p.slice(1)}</option>`).join('')}</select></div>
       <div class="col-md-4"><label>Due Date</label><input type="date" class="form-control" id="ctDueDate" value="${t ? t.dueDate : (presetDate || todayKey())}"></div>
-      <div class="col-md-4"><label>Due Time</label><input type="time" class="form-control" id="ctDueTime" value="${t ? t.dueTime : '23:59'}"></div>
+      <div class="col-md-4">${TimeField.html({ id: 'ctDueTime', label: 'Due Time', value: t ? (t.dueTime || '23:59') : '23:59', placeholder: '11:59 PM', fallback: '23:59' })}</div>
       <div class="col-md-4"><label>Status</label><select class="form-select" id="ctStatus">${['not-started', 'in-progress', 'completed'].map(s => `<option value="${s}" ${t && t.status === s ? 'selected' : ''}>${s.replace('-', ' ')}</option>`).join('')}</select></div>
     </div>
     <div class="d-flex gap-2 mt-3">
       <button class="btn btn-accent flex-grow-1" onclick="saveCalTask()"><i class="bi bi-check2 me-1"></i>${t ? 'Update' : 'Save'} Task</button>
       ${t ? `<button class="btn btn-ghost" onclick="deleteCalTask('${t.id}')" aria-label="Delete task"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
+
+    TimeField.init(body);
     new bootstrap.Modal(document.getElementById('calTaskModal')).show();
 }
 
@@ -1214,6 +1220,7 @@ function saveCalTask() {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
         return;
     }
+    if (!TimeField.validate(['ctDueTime'])) return;
     const data = {
         title, description: document.getElementById('ctDesc').value.trim(),
         subjectId: document.getElementById('ctSubject').value || null,
@@ -1275,14 +1282,17 @@ function openCalEventModal(id, presetDate) {
         </select>
       </div>
       <div class="col-md-6"><label>Date</label><input type="date" class="form-control" id="ceDate" value="${existing ? existing.date : (presetDate || todayKey())}"></div>
-      <div class="col-md-6"><label>Start Time</label><input type="time" class="form-control" id="ceStart" value="${existing ? existing.startTime : '08:00'}"></div>
-      <div class="col-md-6"><label>End Time</label><input type="time" class="form-control" id="ceEnd" value="${existing ? existing.endTime : '09:00'}"></div>
+      <div class="col-md-6">${TimeField.html({ id: 'ceStart', label: 'Start Time', value: existing ? existing.startTime : '08:00', placeholder: '8:00 AM' })}</div>
+      <div class="col-md-6">${TimeField.html({ id: 'ceEnd', label: 'End Time', value: existing ? existing.endTime : '09:00', placeholder: '9:00 AM', after: 'ceStart' })}</div>
+      <div class="col-12"><p class="sch-time-hint mb-0" data-start="ceStart" data-end="ceEnd" aria-live="polite"></p></div>
       <div class="col-12"><label>Description (optional)</label><textarea class="form-control" id="ceDesc" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.description || '') : ''}</textarea></div>
     </div>
     <div class="d-flex gap-2 mt-3">
       <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1"></i>${existing ? 'Update' : 'Save'} Event</button>
       ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
+
+    TimeField.init(body);
     new bootstrap.Modal(document.getElementById('calEventModal')).show();
 }
 
@@ -1296,6 +1306,7 @@ function saveCalEvent() {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
         return;
     }
+    if (!TimeField.validate(['ceStart', 'ceEnd'])) return;
     const date = document.getElementById('ceDate').value;
     if (!date) {
         Toast.show('Please select a date', 'high', 'bi-exclamation-triangle');
