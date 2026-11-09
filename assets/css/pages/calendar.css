@@ -1110,6 +1110,27 @@ CALENDAR v3 — Advanced Scheduling & UI
     white-space: nowrap;
 }
 
+/* Time field inline errors / notes (matches Schedule page) */
+.modal-body .sch-subject-error {
+  margin: .35rem 0 0;
+  font-size: .75rem;
+  line-height: 1.35;
+  font-weight: 400;
+  color: #fb7185;
+}
+.modal-body .sch-subject-error[hidden] { display: none; }
+
+.modal-body .sch-time-hint {
+  margin: .4rem 0 0;
+  font-size: .75rem;
+  line-height: 1.35;
+  font-weight: 400;
+  color: var(--text-faint);
+}
+.modal-body .sch-time-hint[hidden] { display: none; }
+
+.modal-body .sch-subject-required { color: #fb7185; }
+
 /* Mobile week timetable adaptations */
 
 @media (max-width: 575px) {
