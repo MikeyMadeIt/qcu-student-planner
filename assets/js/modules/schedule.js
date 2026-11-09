@@ -1274,28 +1274,367 @@ function showSubjectDetail(id) {
     new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
+/* ── Time field: typed input + dropdown picker ── */
+
+const TIME_MENU_FIRST = 5 * 60;       // 5:00 AM
+const TIME_MENU_LAST = 23 * 60 + 45;  // 11:45 PM
+const TIME_MENU_STEP = 15;
+const TIME_ORDER_MSG = 'End time must be later than start time';
+const _timeAssumed = { Start: false, End: false };
+const _timeActive = { Start: null, End: null };
+const _timeNavigated = { Start: false, End: false };
+
+function timeValueToMins(v) {
+    const m = /^(\d{2}):(\d{2})/.exec(v || '');
+    return m ? (+m[1]) * 60 + (+m[2]) : null;
+}
+
+function formatTime12(v) {
+    const mins = timeValueToMins(v);
+    if (mins == null)
+        return '';
+    const h = Math.floor(mins / 60), mi = mins % 60;
+    return `${h % 12 || 12}:${String(mi).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+}
+
+function formatClassLength(mins) {
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return [h ? `${h} hr` : '', m ? `${m} min` : ''].filter(Boolean).join(' ');
+}
+
+/* Returns { empty } | { error } | { value:'HH:MM', assumed:boolean } */
+function parseTimeText(raw, afterMins) {
+    let s = String(raw == null ? '' : raw).trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!s)
+        return { empty: true };
+    if (s === 'noon')
+        return { value: '12:00' };
+    const unreadable = { error: "Couldn't read that time. Try 9:30 AM or 14:30, or pick from the list." };
+    let mer = null;
+    const mm = s.match(/\s*([ap])\.?\s*m?\.?\s*$/);
+    if (mm) {
+        mer = mm[1] === 'a' ? 'am' : 'pm';
+        s = s.slice(0, mm.index).trim();
+    }
+    let hStr, miStr, m;
+    if ((m = s.match(/^(\d{1,2})\s*[:.h]\s*(\d{2})$/)) || (m = s.match(/^(\d{1,2})\s+(\d{2})$/))) {
+        hStr = m[1];
+        miStr = m[2];
+    }
+    else if ((m = s.match(/^(\d{3,4})$/))) {
+        hStr = m[1].slice(0, -2);
+        miStr = m[1].slice(-2);
+    }
+    else if ((m = s.match(/^(\d{1,2})$/))) {
+        hStr = m[1];
+        miStr = '00';
+    }
+    else
+        return unreadable;
+
+    let h = +hStr;
+    const mi = +miStr;
+    if (mi > 59)
+        return { error: 'Minutes must be between 00 and 59. Or pick from the list.' };
+    let assumed = false;
+    if (mer) {
+        if (h >= 13 && h <= 23) { /* 24-hour hour typed with a stray am/pm: trust the 24-hour hour */ }
+        else if (h < 1 || h > 12)
+            return { error: 'With AM/PM, use an hour from 1 to 12.' };
+        else if (mer === 'am')
+            h = h === 12 ? 0 : h;
+        else
+            h = h === 12 ? 12 : h + 12;
+    }
+    else {
+        if (h > 23)
+            return { error: 'Hours go from 0 to 23 (or 1 to 12 with AM/PM).' };
+        const explicit24 = h === 0 || h >= 13 || (hStr.length === 2 && hStr[0] === '0');
+        if (!explicit24) {
+            assumed = true;
+            if (h >= 1 && h <= 6)
+                h += 12; // 7-11 stay AM, 12 stays noon, 1-6 -> PM
+        }
+    }
+    let mins = h * 60 + mi;
+    if (assumed && afterMins != null && mins <= afterMins && mins + 720 > afterMins && mins + 720 < 1440)
+        mins += 720;
+    return { value: fromMins(mins), assumed };
+}
+
+function buildTimeFieldHtml(key, label, value, placeholder) {
+    const v = timeValueToMins(value) != null ? String(value).slice(0, 5) : '';
+    return `<div class="sch-time-col">
+      <label class="form-label" style="font-size:.82rem" for="sub${key}Text">${label} <span class="sch-subject-required" aria-hidden="true">*</span></label>
+      <div class="sch-time-field" data-time-key="${key}">
+        <input type="text" class="form-control sch-time-input" id="sub${key}Text" value="${v ? formatTime12(v) : ''}" placeholder="${placeholder}" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="sub${key}Menu" aria-invalid="false" aria-describedby="sub${key}Error">
+        <button type="button" class="sch-time-btn" id="sub${key}Btn" aria-label="Pick ${label.toLowerCase()} from list" aria-haspopup="listbox"><i class="bi bi-clock" aria-hidden="true"></i></button>
+        <input type="hidden" id="sub${key}" value="${v}">
+        <div class="sch-time-menu" id="sub${key}Menu" role="listbox" aria-label="${label} options" hidden></div>
+      </div>
+      <p class="sch-subject-error" id="sub${key}Error" hidden></p>
+    </div>`;
+}
+
+function timeEls(key) {
+    return {
+        field: document.querySelector(`.sch-time-field[data-time-key="${key}"]`),
+        text: document.getElementById(`sub${key}Text`),
+        hidden: document.getElementById(`sub${key}`),
+        btn: document.getElementById(`sub${key}Btn`),
+        menu: document.getElementById(`sub${key}Menu`),
+        err: document.getElementById(`sub${key}Error`)
+    };
+}
+
+function setTimeError(key, msg) {
+    const el = timeEls(key);
+    el.err.textContent = msg || '';
+    el.err.hidden = !msg;
+    el.text.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    el.field.classList.toggle('has-error', !!msg);
+}
+
+function validateTimeOrder() {
+    const s = timeValueToMins(document.getElementById('subStart').value);
+    const e = timeValueToMins(document.getElementById('subEnd').value);
+    const endEl = timeEls('End');
+    if (s != null && e != null)
+        setTimeError('End', e <= s ? TIME_ORDER_MSG : '');
+    else if (endEl.err.textContent === TIME_ORDER_MSG)
+        setTimeError('End', '');
+}
+
+function refreshTimeHint() {
+    const hint = document.getElementById('subTimeHint');
+    if (!hint)
+        return;
+    const s = timeValueToMins(document.getElementById('subStart').value);
+    const e = timeValueToMins(document.getElementById('subEnd').value);
+    const notes = [];
+    ['Start', 'End'].forEach(k => {
+        const v = document.getElementById('sub' + k).value;
+        if (_timeAssumed[k] && v)
+            notes.push(`${k} read as ${formatTime12(v)}. Add "am" or "pm" to change.`);
+    });
+    const parts = [];
+    if (s != null && e != null && e > s)
+        parts.push(`<i class="bi bi-hourglass-split" aria-hidden="true"></i> ${formatClassLength(e - s)}`);
+    if (notes.length)
+        parts.push(notes.join(' '));
+    hint.innerHTML = parts.length
+        ? parts.join(' · ')
+        : 'Type a time (9:30 AM, 930, 14:30) or tap the clock to pick.';
+}
+
+/* Parse whatever is typed, write the clean text + the canonical HH:MM hidden value. */
+function commitTimeField(key) {
+    const el = timeEls(key);
+    if (!el.text)
+        return;
+    const attempted = document.getElementById('subjectModal').dataset.timeValidationAttempted === 'true';
+    const raw = el.text.value;
+    if (!raw.trim()) {
+        el.hidden.value = '';
+        _timeAssumed[key] = false;
+        setTimeError(key, attempted ? `${key} time is required` : '');
+    }
+    else {
+        const after = key === 'End' ? timeValueToMins(document.getElementById('subStart').value) : null;
+        const r = parseTimeText(raw, after);
+        if (r.error) {
+            el.hidden.value = '';
+            _timeAssumed[key] = false;
+            setTimeError(key, r.error);
+        }
+        else {
+            el.hidden.value = r.value;
+            el.text.value = formatTime12(r.value);
+            _timeAssumed[key] = !!r.assumed;
+            setTimeError(key, '');
+        }
+    }
+    validateTimeOrder();
+    refreshTimeHint();
+}
+
+function setTimeValue(key, value) {
+    const el = timeEls(key);
+    el.hidden.value = value;
+    el.text.value = formatTime12(value);
+    _timeAssumed[key] = false;
+    setTimeError(key, '');
+    validateTimeOrder();
+    refreshTimeHint();
+}
+
+function setActiveTimeOption(key, opt, center) {
+    const el = timeEls(key);
+    if (_timeActive[key])
+        _timeActive[key].classList.remove('is-active');
+    _timeActive[key] = opt;
+    if (!opt) {
+        el.text.removeAttribute('aria-activedescendant');
+        return;
+    }
+    opt.classList.add('is-active');
+    el.text.setAttribute('aria-activedescendant', opt.id);
+    const menu = el.menu;
+    const top = opt.offsetTop, h = menu.clientHeight;
+    if (center)
+        menu.scrollTop = top - h / 2 + opt.offsetHeight / 2;
+    else if (top < menu.scrollTop)
+        menu.scrollTop = top;
+    else if (top + opt.offsetHeight > menu.scrollTop + h)
+        menu.scrollTop = top + opt.offsetHeight - h;
+}
+
+function openTimeMenu(key) {
+    closeAllTimeMenus(key);
+    const el = timeEls(key);
+    if (!el.menu.hidden)
+        return;
+    const current = el.hidden.value;
+    const startMins = key === 'End' ? timeValueToMins(document.getElementById('subStart').value) : null;
+    const first = startMins != null ? (Math.floor(startMins / TIME_MENU_STEP) + 1) * TIME_MENU_STEP : TIME_MENU_FIRST;
+    const times = [];
+    for (let m = first; m <= TIME_MENU_LAST; m += TIME_MENU_STEP)
+        times.push(m);
+    const curMins = timeValueToMins(current);
+    if (curMins != null && !times.includes(curMins) && (startMins == null || curMins > startMins)) {
+        times.push(curMins);
+        times.sort((a, b) => a - b);
+    }
+    if (!times.length)
+        return;
+    el.menu.innerHTML = times.map(m => {
+        const v = fromMins(m);
+        const dur = startMins != null ? `<span class="sch-time-opt-dur">${formatClassLength(m - startMins)}</span>` : '';
+        return `<div class="sch-time-opt" role="option" id="sub${key}Opt-${v.replace(':', '')}" data-value="${v}" aria-selected="${v === current}">${formatTime12(v)}${dur}</div>`;
+    }).join('');
+    el.menu.hidden = false;
+    el.text.setAttribute('aria-expanded', 'true');
+    _timeNavigated[key] = false;
+
+    // Open upward when there isn't room below
+    el.menu.classList.remove('is-up');
+    const fr = el.field.getBoundingClientRect();
+    const br = (el.field.closest('.modal-body') || document.body).getBoundingClientRect();
+    const below = Math.min(br.bottom, window.innerHeight) - fr.bottom;
+    const above = fr.top - Math.max(br.top, 0);
+    el.menu.classList.toggle('is-up', below < 240 && above > below);
+
+    // Pre-select: current value, else a sensible default (8:00 AM, or Start + 1.5 hr)
+    const target = curMins != null && times.includes(curMins) ? curMins
+        : (startMins != null ? startMins + 90 : 8 * 60);
+    const nearest = times.reduce((b, m) => Math.abs(m - target) < Math.abs(b - target) ? m : b, times[0]);
+    setActiveTimeOption(key, el.menu.querySelector(`[data-value="${fromMins(nearest)}"]`), true);
+}
+
+function closeTimeMenu(key) {
+    const el = timeEls(key);
+    if (!el.menu)
+        return;
+    el.menu.hidden = true;
+    el.text.setAttribute('aria-expanded', 'false');
+    el.text.removeAttribute('aria-activedescendant');
+    _timeActive[key] = null;
+}
+
+function closeAllTimeMenus(exceptKey) {
+    ['Start', 'End'].forEach(k => {
+        if (k !== exceptKey && document.getElementById(`sub${k}Menu`))
+            closeTimeMenu(k);
+    });
+}
+
+function initSubjectTimeFields() {
+    _timeAssumed.Start = _timeAssumed.End = false;
+    ['Start', 'End'].forEach(key => {
+        const el = timeEls(key);
+        el.text.addEventListener('focus', () => setTimeout(() => el.text.select(), 0));
+        el.text.addEventListener('input', () => {
+            setTimeError(key, '');
+            _timeNavigated[key] = false;
+            if (!el.menu.hidden) { // keep the list in step with what's being typed
+                const after = key === 'End' ? timeValueToMins(document.getElementById('subStart').value) : null;
+                const r = parseTimeText(el.text.value, after);
+                const opt = r.value && el.menu.querySelector(`[data-value="${r.value}"]`);
+                if (opt)
+                    setActiveTimeOption(key, opt, true);
+            }
+        });
+        el.text.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (el.menu.hidden) {
+                    commitTimeField(key);
+                    openTimeMenu(key);
+                    return;
+                }
+                const opts = [...el.menu.querySelectorAll('.sch-time-opt')];
+                const idx = opts.indexOf(_timeActive[key]);
+                const next = Math.max(0, Math.min(opts.length - 1, idx + (e.key === 'ArrowDown' ? 1 : -1)));
+                _timeNavigated[key] = true;
+                setActiveTimeOption(key, opts[next], false);
+            }
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!el.menu.hidden && _timeNavigated[key] && _timeActive[key])
+                    setTimeValue(key, _timeActive[key].dataset.value);
+                else
+                    commitTimeField(key);
+                closeTimeMenu(key);
+                if (window.matchMedia('(hover: none)').matches)
+                    el.text.blur(); // dismiss the on-screen keyboard
+            }
+            else if (e.key === 'Escape' && !el.menu.hidden) {
+                e.stopPropagation(); // close the list, not the whole modal
+                closeTimeMenu(key);
+            }
+        });
+        el.field.addEventListener('focusout', e => {
+            if (!el.field.contains(e.relatedTarget)) {
+                commitTimeField(key);
+                closeTimeMenu(key);
+            }
+        });
+        el.btn.addEventListener('click', () => {
+            if (!el.menu.hidden) {
+                closeTimeMenu(key);
+                return;
+            }
+            commitTimeField(key);
+            openTimeMenu(key);
+        });
+        el.menu.addEventListener('mousedown', e => e.preventDefault()); // keep focus where it is
+        el.menu.addEventListener('click', e => {
+            const opt = e.target.closest('.sch-time-opt');
+            if (!opt)
+                return;
+            setTimeValue(key, opt.dataset.value);
+            closeTimeMenu(key);
+        });
+    });
+    if (!window._schTimeGlobalBound) {
+        window._schTimeGlobalBound = true;
+        document.addEventListener('pointerdown', e => {
+            if (!e.target.closest('.sch-time-field') && document.getElementById('subStartMenu'))
+                closeAllTimeMenus();
+        });
+    }
+}
+
 /* ── CRUD ── */
 
 function updateSubjectTimeValidation() {
-  const startInput = document.getElementById('subStart');
-  const endInput = document.getElementById('subEnd');
-  const startError = document.getElementById('subStartError');
-  const endError = document.getElementById('subEndError');
-  const startInvalid = !startInput.value;
-  const endMissing = !endInput.value;
-  const toMinutes = value => {
-    const [hours, minutes] = value.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-  const endOrderInvalid = !startInvalid && !endMissing && toMinutes(endInput.value) <= toMinutes(startInput.value);
-  const endInvalid = endMissing || endOrderInvalid;
-
-  startInput.setAttribute('aria-invalid', startInvalid ? 'true' : 'false');
-  startError.hidden = !startInvalid;
-  endInput.setAttribute('aria-invalid', endInvalid ? 'true' : 'false');
-  endError.textContent = endMissing ? 'End time is required' : 'End time must be later than start time';
-  endError.hidden = !endInvalid;
-  return { startInvalid, endInvalid };
+    commitTimeField('Start');
+    commitTimeField('End');
+    const bad = k => {
+        const el = timeEls(k);
+        return !el.hidden.value || !el.err.hidden;
+    };
+    return { startInvalid: bad('Start'), endInvalid: bad('End') };
 }
 
 function openSubjectModal(id) {
@@ -1326,9 +1665,13 @@ function openSubjectModal(id) {
         </div>
         <p class="sch-subject-error" id="subDaysError" hidden>Select at least one day</p>
       </div>
-      <div class="col-6"><label class="form-label" style="font-size:.82rem">Start Time <span class="sch-subject-required" aria-hidden="true">*</span></label><input type="time" class="form-control sch-subject-time" id="subStart" value="${s ? s.start || '' : ''}" aria-label="Start Time" aria-invalid="false" aria-describedby="subStartError"><p class="sch-subject-error" id="subStartError" hidden>Start time is required</p></div>
-      <div class="col-6"><label class="form-label" style="font-size:.82rem">End Time <span class="sch-subject-required" aria-hidden="true">*</span></label><input type="time" class="form-control sch-subject-time" id="subEnd" value="${s ? s.end || '' : ''}" aria-label="End Time" aria-invalid="false" aria-describedby="subEndError"><p class="sch-subject-error" id="subEndError" hidden></p></div>
-      <div class="col-12">
+        <div class="col-12">
+        <div class="sch-time-row">
+          ${buildTimeFieldHtml('Start', 'Start time', s ? s.start : '', '9:00 AM')}
+          ${buildTimeFieldHtml('End', 'End time', s ? s.end : '', '10:30 AM')}
+        </div>
+        <p class="sch-time-hint" id="subTimeHint" aria-live="polite"></p>
+      </div>
         <div class="form-check form-switch mb-1">
           <input class="form-check-input" type="checkbox" id="subOnline" ${isOnline ? 'checked' : ''} aria-label="Online class">
           <label class="form-check-label" for="subOnline" style="font-size:.82rem"><i class="bi bi-wifi me-1" aria-hidden="true"></i>Online Class</label>
@@ -1376,35 +1719,13 @@ function openSubjectModal(id) {
         daysError.hidden = true;
       }
     });
-    const openTimePicker = event => {
-      const input = event.currentTarget;
-      if (typeof input.showPicker !== 'function')
-        return;
-      try {
-        input.showPicker();
-      }
-      catch { }
-    };
-    ['#subStart', '#subEnd'].forEach(selector => {
-      const input = body.querySelector(selector);
-      input.addEventListener('click', openTimePicker);
-      input.addEventListener('focus', openTimePicker);
-      ['input', 'change'].forEach(eventName => {
-        input.addEventListener(eventName, () => {
-          if (document.getElementById('subjectModal').dataset.timeValidationAttempted === 'true')
-            updateSubjectTimeValidation();
-        });
-      });
-    });
+
     const subjectModal = document.getElementById('subjectModal');
     subjectModal.dataset.timeValidationAttempted = 'false';
+    initSubjectTimeFields();
+    refreshTimeHint();
     subjectModal.addEventListener('hidden.bs.modal', () => {
-      body.querySelector('#subStart').value = '';
-      body.querySelector('#subEnd').value = '';
-      body.querySelector('#subStart').setAttribute('aria-invalid', 'false');
-      body.querySelector('#subEnd').setAttribute('aria-invalid', 'false');
-      body.querySelector('#subStartError').hidden = true;
-      body.querySelector('#subEndError').hidden = true;
+      closeAllTimeMenus();
       subjectModal.dataset.timeValidationAttempted = 'false';
     }, { once: true });
     new bootstrap.Modal(document.getElementById('subjectModal')).show();
@@ -1445,9 +1766,9 @@ function saveSubject() {
         else if (daysInvalid)
             daysGroup.querySelector('.day-check').focus();
         else if (timeInvalid.startInvalid)
-            startInput.focus();
+            document.getElementById('subStartText').focus();
         else
-            endInput.focus();
+            document.getElementById('subEndText').focus();
         return;
     }
     const start = startInput.value;
