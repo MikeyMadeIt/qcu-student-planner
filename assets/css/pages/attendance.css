@@ -3665,6 +3665,16 @@ END ATTENDANCE v4
     align-items: flex-end;
 }
 
+.att-edit-error {
+  font-size: .8rem;
+  padding: .5rem .75rem;
+  border-radius: 8px;
+  color: #fb7185;
+  background: rgba(251, 113, 133, .12);
+  border: 1px solid rgba(251, 113, 133, .35);
+}
+.att-edit-btn:hover { color: rgb(var(--accent, 36, 87, 214)); }
+
 /* Small phones: stay side by side, just tighten widths so the date fits */
 @media (max-width: 479.98px) {
     .att-log-form #attDate {

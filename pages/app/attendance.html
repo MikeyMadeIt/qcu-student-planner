@@ -147,6 +147,54 @@
   </main>
 </div>
 
+<!-- Edit Attendance Modal -->
+<div class="modal fade" id="attEditModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="attEditTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="attEditTitle"><i class="bi bi-pencil-square me-2"></i>Edit Attendance</h5>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="attEditForm" novalidate>
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-12 col-sm-6">
+              <label class="att-form-label" for="attEditSubject">Subject</label>
+              <select class="form-select form-select-sm" id="attEditSubject" data-native></select>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="att-form-label" for="attEditDate">Date</label>
+              <input type="date" class="form-control form-control-sm" id="attEditDate">
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="att-form-label" for="attEditStatus">Status</label>
+              <select class="form-select form-select-sm" id="attEditStatus" data-native></select>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="att-form-label d-block" for="attEditOnline">Mode</label>
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" role="switch" id="attEditOnline">
+                <label class="form-check-label" for="attEditOnline" id="attEditOnlineLabel">Offline</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="att-form-label" for="attEditNotes">Notes <span class="text-faint">(optional)</span></label>
+              <input type="text" class="form-control form-control-sm" id="attEditNotes" placeholder="Optional note…">
+            </div>
+            <div class="col-12">
+              <div id="attEditError" class="att-edit-error" role="alert" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent btn-sm"><i class="bi bi-check2 me-1"></i>Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Absence Limit Modal -->
 <div class="modal fade" id="absenceLimitModal" tabindex="-1" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
