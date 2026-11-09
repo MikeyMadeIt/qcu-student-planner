@@ -240,6 +240,7 @@ function initAttendance() {
     setupAttendanceBulkControl();
     setupAttendanceSubjectList();
     setupAttendanceSemesterRefresh();
+    setupAttendanceEditModal();
     renderAttendanceSubjectList();
     // Populate heatmap subject filter
     const heatmapFilter = document.getElementById('heatmapSubjectFilter');
@@ -1220,8 +1221,12 @@ function renderSubjectBreakdown() {
 
 /* ---- Attendance Log — table layout, paginated ---- */
 const ATT_LOG_PAGE_SIZE = 10;
+let _attLogShowAll = false;
 
 function renderLog(showAll) {
+    if (showAll === true)
+        _attLogShowAll = true;
+    showAll = _attLogShowAll;
     const semId = DB.getActiveSemesterId();
     const subs = DB.getSubjects();
     const records = [...DB.getAttendance().filter(r => r.semesterId === semId)]
@@ -1255,10 +1260,11 @@ function renderLog(showAll) {
       <td class="att-tbl-date">${dateFormatted}</td>
       <td class="att-tbl-course" title="${s ? escapeAttHtml(s.code) : 'Unknown'}">${s ? escapeAttHtml(s.code) : '—'}</td>
       <td class="att-tbl-status"><span class="att-status-badge ${statusClass}">${statusDisplay}${onlinePill}</span></td>
-      <td class="att-tbl-actions">
+        <td class="att-tbl-actions">
         ${hasNotes
-            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNote(event,'${escapeAttJs(r.notes)}','${r.date}','${s ? escapeAttJs(s.code) : 'Unknown'}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text-fill"></i></button>`
+            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text-fill"></i></button>`
             : ''}
+        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square"></i></button>
         <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3"></i></button>
       </td>
     </tr>`;
@@ -1295,6 +1301,14 @@ function showAttNote(event, notes, date, subjectCode) {
     new bootstrap.Modal(document.getElementById('attNotesModal')).show();
 }
 
+function showAttNoteById(event, id) {
+    const rec = DB.getAttendance().find(r => r.id === id);
+    if (!rec)
+        return;
+    const s = DB.getSubject(rec.subjectId);
+    showAttNote(event, rec.notes || '', rec.date, s ? s.code : 'Unknown');
+}
+
 /* ---- Delete ---- */
 
 function deleteAttendance(id) {
@@ -1310,6 +1324,175 @@ function deleteAttendance(id) {
             renderAttendanceAll();
         }
     });
+}
+
+/* ---- Edit Attendance ---- */
+
+let _attEditId = null;
+
+function setupAttendanceEditModal() {
+    const form = document.getElementById('attEditForm');
+    if (!form || form.dataset.attEditBound)
+        return;
+    form.dataset.attEditBound = 'true';
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+        saveAttendanceEdit();
+    });
+    const online = document.getElementById('attEditOnline');
+    const label = document.getElementById('attEditOnlineLabel');
+    online.addEventListener('change', () => {
+        label.textContent = online.checked ? 'Online' : 'Offline';
+    });
+}
+
+// `draft` (optional) restores unsaved values if the user cancels the confirmation.
+function openAttendanceEdit(id, draft) {
+    const rec = DB.getAttendance().find(r => r.id === id);
+    if (!rec) {
+        Toast.show('Record not found', 'high', 'bi-exclamation-triangle');
+        return;
+    }
+    _attEditId = id;
+    const semId = DB.getActiveSemesterId();
+    const sem = DB.getActiveSemester();
+    const values = draft || {
+        subjectId: rec.subjectId,
+        date: rec.date,
+        status: rec.status,
+        online: !!rec.online,
+        notes: rec.notes || ''
+    };
+
+    // Active-semester subjects, plus the record's current subject even if archived
+    const subjects = DB.getSubjects().filter(s =>
+        (s.semesterId === semId && !s.archived) || s.id === rec.subjectId);
+    const subjectSel = document.getElementById('attEditSubject');
+    subjectSel.innerHTML = subjects.map(s =>
+        `<option value="${escapeAttHtml(s.id)}">${escapeAttHtml(s.code)}${s.archived ? ' (archived)' : ''}</option>`).join('');
+    subjectSel.value = values.subjectId;
+
+    const dateInput = document.getElementById('attEditDate');
+    dateInput.min = sem?.startDate || '';
+    dateInput.max = sem?.endDate || '';
+    dateInput.value = values.date;
+
+    const statusSel = document.getElementById('attEditStatus');
+    statusSel.innerHTML = ATTENDANCE_STATUSES.map(st =>
+        `<option value="${escapeAttHtml(st.value)}">${escapeAttHtml(st.label)}</option>`).join('');
+    statusSel.value = ATTENDANCE_STATUSES.some(st => st.value === values.status) ? values.status : 'Present';
+
+    const online = document.getElementById('attEditOnline');
+    online.checked = !!values.online;
+    document.getElementById('attEditOnlineLabel').textContent = online.checked ? 'Online' : 'Offline';
+
+    document.getElementById('attEditNotes').value = values.notes || '';
+    document.getElementById('attEditError').hidden = true;
+
+    const modalEl = document.getElementById('attEditModal');
+    (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+}
+
+function saveAttendanceEdit() {
+    const errBox = document.getElementById('attEditError');
+    const fail = msg => {
+        errBox.textContent = msg;
+        errBox.hidden = false;
+    };
+    errBox.hidden = true;
+
+    const records = DB.getAttendance();
+    const rec = records.find(r => r.id === _attEditId);
+    if (!rec) {
+        fail('This record no longer exists.');
+        return;
+    }
+    const next = {
+        subjectId: document.getElementById('attEditSubject').value,
+        date: document.getElementById('attEditDate').value,
+        status: document.getElementById('attEditStatus').value,
+        online: document.getElementById('attEditOnline').checked,
+        notes: document.getElementById('attEditNotes').value.trim()
+    };
+
+    // ---- validation ----
+    if (!next.subjectId)
+        return fail('Choose a subject.');
+    if (!next.date || isNaN(new Date(`${next.date}T00:00:00`).getTime()))
+        return fail('Choose a valid date.');
+    if (!ATTENDANCE_STATUSES.some(st => st.value === next.status))
+        return fail('Choose a status.');
+
+    const sem = DB.getActiveSemester();
+    if (sem && next.date !== rec.date) {
+        const before = sem.startDate && next.date < sem.startDate;
+        const after = sem.endDate && next.date > sem.endDate;
+        if (before || after)
+            return fail(`Date must be within the semester (${formatDisplayDate(sem.startDate)} – ${formatDisplayDate(sem.endDate)}).`);
+    }
+
+    const subjects = DB.getSubjects();
+    const codeOf = id => (subjects.find(s => s.id === id) || {}).code || 'Unknown';
+    const clash = records.find(r => r.id !== rec.id && r.subjectId === next.subjectId && r.date === next.date);
+    if (clash)
+        return fail(`${codeOf(next.subjectId)} already has a record on ${formatDisplayDate(next.date)}. Edit or delete that one instead.`);
+
+    // ---- what changed ----
+    const statusLabel = v => v === 'No Classes' ? 'No Class' : v;
+    const changes = [];
+    if (rec.subjectId !== next.subjectId)
+        changes.push(`Subject: ${codeOf(rec.subjectId)} → ${codeOf(next.subjectId)}`);
+    if (rec.date !== next.date)
+        changes.push(`Date: ${formatDisplayDate(rec.date)} → ${formatDisplayDate(next.date)}`);
+    if (rec.status !== next.status)
+        changes.push(`Status: ${statusLabel(rec.status)} → ${statusLabel(next.status)}`);
+    if (!!rec.online !== next.online)
+        changes.push(`Mode: ${rec.online ? 'Online' : 'Offline'} → ${next.online ? 'Online' : 'Offline'}`);
+    if ((rec.notes || '') !== next.notes)
+        changes.push('Notes updated');
+
+    const modalEl = document.getElementById('attEditModal');
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    if (!changes.length) {
+        modal.hide();
+        Toast.show('No changes to save');
+        return;
+    }
+
+    // Close the edit modal first so the confirm dialog never stacks behind it.
+    const id = rec.id;
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        confirmAction({
+            title: 'Save changes?',
+            message: `Update this attendance record: ${changes.join('; ')}.`,
+            confirmLabel: 'Save',
+            icon: 'bi-pencil-square',
+            onConfirm: () => applyAttendanceEdit(id, next),
+            onCancel: () => openAttendanceEdit(id, next) // ignored if confirmAction has no onCancel
+        });
+    }, { once: true });
+    modal.hide();
+}
+
+function applyAttendanceEdit(id, next) {
+    const latest = DB.getAttendance();
+    const rec = latest.find(r => r.id === id);
+    if (!rec) {
+        Toast.show('Record not found', 'high', 'bi-exclamation-triangle');
+        return;
+    }
+    const subject = DB.getSubject(next.subjectId);
+    rec.subjectId = next.subjectId;
+    rec.date = next.date;
+    rec.status = next.status;
+    rec.online = next.online;
+    rec.notes = next.notes;
+    if (subject && subject.semesterId)
+        rec.semesterId = subject.semesterId;
+    DB.saveAttendance(latest); // cloud-sync diffs by id, marks dirty, upserts
+    Toast.show('Attendance updated');
+    renderAttendanceSubjectList(); // the log form pre-fills from existing records
+    renderAttendanceAll();
 }
 
 /* ---- Export CSV ---- */

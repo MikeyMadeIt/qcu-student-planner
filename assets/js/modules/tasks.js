@@ -1336,6 +1336,182 @@ function teHrsMins(te) {
     return { hrs: Math.floor(te / 60), mins: te % 60 };
 }
 
+/* ── Time fields (combobox dropdown, same look as Schedule) ── */
+
+var TK_EST_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240, 360, 480];
+
+
+function tkFmtDuration(mins) {
+    var h = Math.floor(mins / 60), m = mins % 60;
+    return h > 0 ? h + 'h' + (m ? ' ' + m + 'm' : '') : m + 'm';
+}
+
+// Returns minutes, null (empty) or NaN (invalid)
+function tkParseDuration(str) {
+    var s = String(str || '').toLowerCase().trim();
+    if (!s) return null;
+    var m = s.match(/^(\d+):(\d{1,2})$/);
+    var total;
+    if (m) {
+        total = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+    } else {
+        m = s.match(/^(?:(\d+(?:\.\d+)?)\s*h(?:rs?|ours?)?)?\s*(?:(\d+)\s*(?:m(?:in(?:s|utes?)?)?)?)?$/);
+        if (!m || (!m[1] && !m[2])) return NaN;
+        total = Math.round((parseFloat(m[1]) || 0) * 60 + (parseInt(m[2], 10) || 0));
+    }
+    return (total > 0 && total <= 5999) ? total : NaN;
+}
+
+function tkTimeFieldHtml(key, id, placeholder, label) {
+    return '<div class="sch-time-field" data-time-key="' + key + '">' +
+        '<input type="text" class="form-control sch-time-input" id="' + id + '" autocomplete="off" placeholder="' + placeholder + '" ' +
+        'role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="' + id + 'Menu">' +
+        '<button type="button" class="sch-time-btn" tabindex="-1" aria-label="' + label + '"><i class="bi bi-clock"></i></button>' +
+        '<div class="sch-time-menu" id="' + id + 'Menu" role="listbox" hidden></div></div>' +
+        '<p class="sch-subject-error" id="' + id + 'Error" hidden></p>';
+}
+
+/* cfg: { options:[n], value:n|null, format(n), sub(n), parse(str), allowEmpty, fallback } */
+function tkInitTimeField(field, cfg) {
+    var input = field.querySelector('.sch-time-input');
+    var btn = field.querySelector('.sch-time-btn');
+    var menu = field.querySelector('.sch-time-menu');
+    var active = -1;
+    var errEl = document.getElementById(input.id + 'Error');
+
+    function setError(msg) {
+    if (errEl) { errEl.textContent = msg || ''; errEl.hidden = !msg; }
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    field.classList.toggle('has-error', !!msg);
+}
+
+    function show(v) { input.value = v == null ? '' : cfg.format(v); }
+    function setValue(v) { field._tkValue = v; setError(''); show(v); }
+    function isOpen() { return !menu.hidden; }
+
+    function render() {
+        menu.innerHTML = cfg.options.map(function (o, i) {
+            var sub = cfg.sub ? cfg.sub(o) : '';
+            return '<div class="sch-time-opt" role="option" data-i="' + i + '" aria-selected="' + (o === field._tkValue) + '">' +
+                '<span>' + escHtml(cfg.format(o)) + '</span>' +
+                (sub ? '<span class="sch-time-opt-dur">' + escHtml(sub) + '</span>' : '') + '</div>';
+        }).join('');
+    }
+
+    function setActive(i, scroll) {
+        var opts = menu.querySelectorAll('.sch-time-opt');
+        if (!opts.length) return;
+        active = Math.max(0, Math.min(opts.length - 1, i));
+        opts.forEach(function (el, idx) { el.classList.toggle('is-active', idx === active); });
+        var el = opts[active];
+        if (scroll === 'center') menu.scrollTop = el.offsetTop - menu.clientHeight / 2 + el.offsetHeight / 2;
+        else if (el.offsetTop < menu.scrollTop) menu.scrollTop = el.offsetTop;
+        else if (el.offsetTop + el.offsetHeight > menu.scrollTop + menu.clientHeight)
+            menu.scrollTop = el.offsetTop + el.offsetHeight - menu.clientHeight;
+    }
+
+    function place() {
+        menu.classList.remove('is-up');
+        var host = field.closest('.modal-body') || document.documentElement;
+        var f = field.getBoundingClientRect(), b = host.getBoundingClientRect();
+        var below = Math.min(b.bottom, window.innerHeight) - f.bottom;
+        var above = f.top - Math.max(b.top, 0);
+        if (below < 236 && above > below) menu.classList.add('is-up');
+    }
+
+    function open() {
+        if (isOpen()) return;
+        render();
+        menu.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        place();
+        var cur = field._tkValue, best = 0, bestDiff = Infinity;
+        cfg.options.forEach(function (o, i) {
+            var d = cur == null ? Math.abs(o - cfg.fallback) : Math.abs(o - cur);
+            if (d < bestDiff) { bestDiff = d; best = i; }
+        });
+        setActive(best, 'center');
+    }
+
+    function close() {
+        menu.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+        active = -1;
+    }
+
+    function choose(i) {
+        setValue(cfg.options[i]);
+        close();
+    }
+
+    function commit() {
+        var r = cfg.parse(input.value);
+        if (typeof r === 'number' && isNaN(r)) {
+            setError(cfg.error || 'Invalid value');
+            return false;
+        }
+        if (r == null && !cfg.allowEmpty) r = cfg.fallback;
+        setValue(r);
+        return true;
+    }
+
+    field._tkCommit = commit;
+    setValue(cfg.value);
+
+    btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    btn.addEventListener('click', function () {
+        input.focus();
+        if (isOpen()) close(); else open();
+    });
+    input.addEventListener('click', function () { if (!isOpen()) open(); });
+    input.addEventListener('input', function () { setError('') });
+    input.addEventListener('blur', function () { commit(); close(); });
+    menu.addEventListener('mousedown', function (e) {
+        e.preventDefault(); // keep focus in the input
+        var opt = e.target.closest('.sch-time-opt');
+        if (opt) choose(parseInt(opt.dataset.i, 10));
+    });
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!isOpen()) { open(); return; }
+            setActive(active + (e.key === 'ArrowDown' ? 1 : -1));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isOpen() && active >= 0) choose(active);
+            else commit();
+        } else if (e.key === 'Escape' && isOpen()) {
+            e.preventDefault();
+            e.stopPropagation(); // don't close the whole modal
+            close();
+        }
+    });
+}
+
+function tkInitTaskTimeFields(t) {
+    TimeField.init(document.getElementById('taskModalBody'));
+    var est = document.querySelector('.sch-time-field[data-time-key="Est"]');
+    if (due) tkInitTimeField(due, {
+        options: TK_DUE_OPTIONS,
+        value: tkHHMMToMins(t ? t.dueTime : '23:59'),
+        fallback: 1439,
+        allowEmpty: false,
+        format: tkFmtClock,
+        parse: tkParseClock,
+        sub: function (o) { return o === 0 ? 'Midnight' : o === 720 ? 'Noon' : o === 1439 ? 'End of day' : ''; }
+    });
+    if (est) tkInitTimeField(est, {
+        options: TK_EST_OPTIONS,
+        value: t && t.timeEstimate ? t.timeEstimate : null,
+        fallback: 60,
+        allowEmpty: true,
+        format: tkFmtDuration,
+        parse: tkParseDuration,
+        error: "Couldn't read that estimate. Try 45m, 1h 30m or 90, or pick from the list.",
+        sub: function (o) { return o + ' min'; }
+    });
+}
+
 /* ── Add/Edit Modal ── */
 
 function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
@@ -1385,9 +1561,11 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
             '<div class="col-6 col-md-4"><label class="form-label">Priority</label><select class="form-select" id="tPriority">' +
             PRIORITIES.map(function (p) { return '<option value="' + p + '" ' + (t && t.priority === p ? 'selected' : '') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>'; }).join('') + '</select></div>' +
             '<div class="col-6 col-md-4"><label class="form-label">Due Date</label><input type="date" class="form-control" id="tDueDate" value="' + (t ? t.dueDate : todayKey()) + '"></div>' +
-            '<div class="col-6 col-md-4"><label class="form-label">Due Time</label><input type="time" class="form-control" id="tDueTime" value="' + (t ? (t.dueTime || '23:59') : '23:59') + '"></div>' +
+            '<div class="col-6 col-md-4">' + TimeField.html({ id: 'tDueTime', label: 'Due Time', labelClass: 'form-label',
+            value: t ? (t.dueTime || '23:59') : '23:59', placeholder: '11:59 PM', fallback: '23:59' }) + '</div>' +
             '<div class="col-6 col-md-4"><label class="form-label">Repeat</label><select class="form-select" id="tRepeat" onchange="updateRepeatHint(this)">' + repeatOptions + '</select>' + repeatDescHtml + '</div>' +
-            '<div class="col-12"><label class="form-label">Time Estimate <span class="text-faint" style="font-weight:400;font-size:.8em">(how long will this take?)</span></label>' +
+            '<div class="col-6 col-md-4"><label class="form-label" for="tEst">Time Estimate</label>' +
+            tkTimeFieldHtml('Est', 'tEst', 'e.g. 1h 30m', 'Choose time estimate') + '</div>' +
             '<div class="tk-time-est-row">' +
             '<input type="number" class="form-control tk-te-input" id="tTeHrs" min="0" max="99" placeholder="0" value="' + (te.hrs > 0 ? te.hrs : '') + '"><span class="tk-te-unit">hr</span>' +
             '<input type="number" class="form-control tk-te-input" id="tTeMins" min="0" max="59" step="5" placeholder="0" value="' + (te.mins > 0 ? te.mins : '') + '"><span class="tk-te-unit">min</span>' +
@@ -1401,7 +1579,9 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
             createdNote + parentNote +
             '</div>' +
             '<button class="btn btn-accent w-100 mt-3" onclick="saveTask()">' +
-            '<i class="bi bi-check2 me-1"></i>' + (t ? 'Update Task' : 'Save Task') + '</button>';
+            '<i class="bi bi-check2 me-1"></i>' + (t ? 'Update Task' : 'Save Task') + '</button>'; 
+
+    tkInitTaskTimeFields(t);
     new bootstrap.Modal(document.getElementById('taskModal')).show();
 }
 
@@ -1435,6 +1615,14 @@ function saveTask() {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
         return;
     }
+    if (!TimeField.validate(['tDueTime'])) return;
+    var estField = document.querySelector('.sch-time-field[data-time-key="Est"]');
+    if (estField && !estField._tkCommit()) {
+        estField.querySelector('.sch-time-input').focus();
+        return;
+    }
+    var timeEstimate = estField ? (estField._tkValue || null) : null;
+    var timeEstimate = estField ? (estField._tkValue || null) : null;
     var checklist = Array.from(document.querySelectorAll('.tk-modal-cl-row')).map(function (row) {
         return { done: row.querySelector('input[type=checkbox]').checked, text: row.querySelector('input[type=text]').value.trim() };
     }).filter(function (c) { return c.text; });
@@ -1444,9 +1632,6 @@ function saveTask() {
     var repeatEl = document.getElementById('tRepeat');
     var scoreEl = document.getElementById('tScore');
     var remarksEl = document.getElementById('tRemarks');
-    var teHrsEl = document.getElementById('tTeHrs');
-    var teMinsEl = document.getElementById('tTeMins');
-    var timeEstimate = parseTimeEstimate(teHrsEl ? teHrsEl.value : 0, teMinsEl ? teMinsEl.value : 0);
     var data = {
         title: title,
         description: document.getElementById('tDesc').value.trim(),
@@ -1454,7 +1639,7 @@ function saveTask() {
         category: document.getElementById('tCategory').value,
         priority: document.getElementById('tPriority').value,
         dueDate: document.getElementById('tDueDate').value,
-        dueTime: document.getElementById('tDueTime').value,
+        dueTime: TimeField.get('tDueTime') || '23:59',
         checklist: checklist,
         repeat: repeatEl ? repeatEl.value : 'none',
         syllabusWeekId: syllabusWeekIdEl ? (syllabusWeekIdEl.value || null) : null,

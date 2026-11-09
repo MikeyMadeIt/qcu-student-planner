@@ -59,6 +59,14 @@
       <button type="submit" class="btn btn-accent mt-2" id="aqmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Quiz</button>
     </form>
 
+    <!-- SAVED QUIZZES (shown only alongside the creation form) -->
+    <section class="mt-4 fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
+      <h2 class="h6 mb-2" id="aqmHistoryHeading"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Your saved quizzes</h2>
+      <div id="aqmHistory" aria-live="polite">
+        <div class="text-faint" style="font-size:.85rem">Loading your saved quizzes…</div>
+      </div>
+    </section>
+
     <!-- LOADING -->
     <div class="glass card-pad fade-in ai-state" id="aqmLoadingState" hidden>
       <i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i>
