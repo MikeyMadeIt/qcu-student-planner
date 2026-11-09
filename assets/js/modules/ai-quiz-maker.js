@@ -12,6 +12,8 @@ let aqmIndex = 0;         /* current question index while taking the quiz */
 let aqmAnswers = [];      /* selected option index per question, or null */
 let aqmSubmitted = false;
 let aqmBusy = false;
+let aqmQuizId = null;      /* saved quiz id, once persisted */
+let aqmSavePromise = null; /* resolves when the quiz row exists */
 
 function aqmEl(id) { return document.getElementById(id); }
 
@@ -66,6 +68,8 @@ function initAiQuizMaker() {
     aqmSafeBind('aqmPrevBtn', 'click', () => aqmGoTo(aqmIndex - 1));
     aqmSafeBind('aqmNextBtn', 'click', () => aqmGoTo(aqmIndex + 1));
     aqmSafeBind('aqmSubmitBtn', 'click', aqmSubmitQuiz);
+
+    aqmLoadHistory();
 }
 
 function aqmSetBusy(busy) {
@@ -125,6 +129,11 @@ async function aqmGenerate() {
         }
 
         aqmQuiz = validated;
+        aqmPersistQuiz(validated, {
+            topic: topic || (notes ? notes.slice(0, 120) : ''),
+            difficulty: aqmEl('aqmDifficulty').value,
+            fileName: file ? file.name : null,
+        });
         aqmAnswers = new Array(validated.questions.length).fill(null);
         aqmIndex = 0;
         aqmSubmitted = false;
@@ -197,6 +206,7 @@ function aqmValidateQuiz(data) {
 
 function aqmShowView(view) {
     aqmEl('aqmForm').hidden = view !== 'form';
+    aqmEl('aqmHistorySection').hidden = view !== 'form';
     aqmEl('aqmLoadingState').hidden = view !== 'loading';
     aqmEl('aqmErrorState').hidden = view !== 'error';
     aqmEl('aqmQuizCard').hidden = view !== 'quiz';
@@ -214,6 +224,8 @@ function aqmReset() {
     aqmIndex = 0;
     aqmSubmitted = false;
     aqmShowView('form');
+    aqmQuizId = null; 
+    aqmSavePromise = null;
 }
 
 function aqmRetake() {
@@ -292,6 +304,9 @@ function aqmSubmitQuiz() {
     aqmSubmitted = true;
     aqmRenderQuestion();
     aqmShowResults();
+    const total = aqmQuiz.questions.length;
+    const correct = aqmQuiz.questions.filter((q, i) => aqmAnswers[i] === q.correctIndex).length;
+    aqmPersistAttempt(correct, total, Math.round((correct / total) * 100));
 }
 
 function aqmShowResults() {
@@ -320,6 +335,81 @@ function aqmShowResults() {
     }).join('');
 
     aqmShowView('results');
+}
+
+async function aqmStore() { return (await import('../services/ai-quiz-store.js')).AiQuizStore; }
+
+function aqmPersistQuiz(quiz, meta) {
+    aqmQuizId = null;
+    aqmSavePromise = (async () => {
+        try {
+            const store = await aqmStore();
+            aqmQuizId = await store.saveQuiz(quiz, meta);
+            aqmLoadHistory();
+        } catch (error) {
+            console.warn('AI Quiz Maker: could not save quiz', error);
+            Toast.show("Quiz generated, but it couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+        }
+    })();
+}
+
+async function aqmPersistAttempt(correct, total, percent) {
+    try {
+        await aqmSavePromise;            /* make sure the quiz row exists first */
+        if (!aqmQuizId) return;
+        const store = await aqmStore();
+        await store.saveAttempt(aqmQuizId, { correct, total, percent, answers: aqmAnswers.slice() });
+        aqmLoadHistory();
+    } catch (error) {
+        console.warn('AI Quiz Maker: could not save attempt', error);
+        Toast.show("Your score couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+    }
+}
+
+async function aqmLoadHistory() {
+    const host = aqmEl('aqmHistory');
+    if (!host) return;
+    try {
+        const list = await (await aqmStore()).listQuizzes();
+        host.innerHTML = list.length ? list.map(q => `
+          <div class="glass card-pad mb-2 d-flex align-items-center gap-2">
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-bold">${escHtml(q.title)}</div>
+              <div class="text-faint" style="font-size:.78rem">
+                ${q.question_count} questions · ${q.attempts} attempt${q.attempts === 1 ? '' : 's'}
+                ${q.bestPercent !== null ? ' · best ' + q.bestPercent + '%' : ''}
+              </div>
+            </div>
+            <button class="btn btn-accent btn-sm" onclick="aqmOpenSaved('${q.id}')">Open</button>
+            <button class="btn btn-ghost btn-sm" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete quiz"><i class="bi bi-trash3"></i></button>
+          </div>`).join('')
+          : '<div class="text-faint" style="font-size:.85rem">No saved quizzes yet.</div>';
+    } catch (error) {
+        host.innerHTML = '<div class="text-faint">Couldn\'t load your saved quizzes.</div>';
+    }
+}
+
+async function aqmOpenSaved(id) {
+    try {
+        const quiz = await (await aqmStore()).getQuiz(id);
+        aqmQuiz = quiz; aqmQuizId = id; aqmSavePromise = Promise.resolve();
+        aqmAnswers = new Array(quiz.questions.length).fill(null);
+        aqmIndex = 0; aqmSubmitted = false;
+        aqmRenderQuestion(); aqmShowView('quiz');
+    } catch (error) {
+        Toast.show("Couldn't open that quiz: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+    }
+}
+
+function aqmDeleteSaved(id) {
+    confirmAction({
+        title: 'Delete quiz?', message: 'This quiz and its scores will be permanently removed.',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        async onConfirm() {
+            try { await (await aqmStore()).deleteQuiz(id); Toast.show('Quiz deleted'); aqmLoadHistory(); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill'); }
+        }
+    });
 }
 
 /* "View results" link available from the last question after submitting. */
