@@ -338,19 +338,31 @@ function getFilteredNotes() {
 
 /* ── Word count + reading time ── */
 
-function calcWordCount(content) {
-    if (!content)
-        return 0;
-    var text = content
-        .replace(/```[\s\S]*?```/g, ' ')
-        .replace(/`[^`]+`/g, ' ')
+/* Plain text of a markdown note (no symbols), used for word counts and card excerpts. */
+function mdToPlainText(content, codeText) {
+    var escaped = [];
+    return String(content || '')
+        .replace(/\\([\\`*_{}\[\]()#+.!>~-])/g, function (match, character) {
+            escaped.push(character);
+            return '\u0002' + (escaped.length - 1) + '\u0002';
+        })
+        .replace(/```[\s\S]*?```/g, codeText)
+        .replace(/`[^`]+`/g, codeText)
+        .replace(/^[ \t]{0,3}>[ \t]?/gm, '')
         .replace(/^#{1,6}\s+/gm, '')
-        .replace(/[*_~`>]/g, '')
+        .replace(/^[ \t]*[-*+][ \t]+\[[ xX]\][ \t]*/gm, '')
+        .replace(/^[ \t]*[-*+][ \t]+/gm, '')
+        .replace(/^[ \t]*\d+[.)][ \t]+/gm, '')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/^[-*] \[[ x]\] /gm, '')
-        .replace(/^[-*+] /gm, '')
-        .replace(/^\d+\. /gm, '')
+        .replace(/(\*\*\*|\*\*|\*)(\S(?:[^\n]*?\S)?)\1/g, '$2')
+        .replace(/~~(\S(?:[^\n]*?\S)?)~~/g, '$1')
+        .replace(/(^|[^\w])_(\S(?:[^_\n]*?\S)?)_(?!\w)/g, '$1$2')
+        .replace(/\u0002(\d+)\u0002/g, function (match, i) { return escaped[Number(i)]; })
         .trim();
+}
+
+function calcWordCount(content) {
+    var text = mdToPlainText(content, ' ');
     if (!text)
         return 0;
     return text.split(/\s+/).filter(function (w) { return w.length > 0; }).length;
@@ -364,16 +376,7 @@ function calcReadingTime(words) {
 /* ── Card preview (short excerpt) ── */
 
 function mdCardPreview(content) {
-    var text = (content || '')
-        .replace(/```[\s\S]*?```/g, '[code]')
-        .replace(/`[^`]+`/g, '[code]')
-        .replace(/\*\*(.+?)\*\*/g, '$1')
-        .replace(/\*(.+?)\*/g, '$1')
-        .replace(/^#{1,6}\s+/gm, '')
-        .replace(/^- \[[ x]\] /gm, '')
-        .replace(/^[-*] /gm, '')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .trim();
+    var text = mdToPlainText(content, '[code]');
     return escapeHtml(text.slice(0, 140)) + (text.length > 140 ? '…' : '');
 }
 
@@ -565,35 +568,42 @@ function renderMarkdown(src, noteId, forEditor) {
     var lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
     var output = [];
     var paragraph = [];
+    var LIST_LINE = /^([ \t]*)([-*+]|\d+[.)])(?:[ \t]+(.*))?$/;
+
+    /* Emphasis markers only count when they hug the text (no space just inside),
+       so "2 * 3 * 4" and snake_case_names stay plain text. */
+    function emphasis(html) {
+        return html.replace(/\*\*\*(\S(?:[^\n]*?\S)?)\*\*\*/g, '<strong><em>$1</em></strong>')
+            .replace(/\*\*(\S(?:[^\n]*?\S)?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(\S(?:[^*\n]*?\S)?)\*/g, '<em>$1</em>')
+            .replace(/(^|[^\w])_(\S(?:[^_\n]*?\S)?)_(?!\w)/g, '$1<em>$2</em>')
+            .replace(/~~(\S(?:[^\n]*?\S)?)~~/g, '<del>$1</del>');
+    }
 
     function inline(text) {
         var code = [];
         var escaped = [];
-        var html = escapeHtml(text).replace(/\\([\\`*_{}\[\]()#+.!>-])/g, function (match, character) {
-            var token = '\u0002' + escaped.length + '\u0002';
+        var links = [];
+        var html = escapeHtml(text).replace(/\\([\\`*_{}\[\]()#+.!>~-])/g, function (match, character) {
             escaped.push(character);
-            return token;
+            return '\u0002' + (escaped.length - 1) + '\u0002';
         }).replace(/`([^`]+)`/g, function (match, content) {
-            var token = '\u0001' + code.length + '\u0001';
             code.push('<code class="md-inline-code">' + content + '</code>');
-            return token;
+            return '\u0001' + (code.length - 1) + '\u0001';
+        }).replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
+            href = href.trim();
+            if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href))
+                return label;
+            links.push({ label: label, href: href.replace(/"/g, '%22') });
+            return '\u0003' + (links.length - 1) + '\u0003';
         });
-        html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
-            .replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>')
-            .replace(/~~(.+?)~~/g, '<del>$1</del>')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
-                if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href))
-                    return label;
-                return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
-            });
-        code.forEach(function (fragment, index) {
-            html = html.replace('\u0001' + index + '\u0001', fragment);
+        html = emphasis(html);
+        html = html.replace(/\u0003(\d+)\u0003/g, function (match, i) {
+            var link = links[Number(i)];
+            return '<a href="' + link.href + '" target="_blank" rel="noopener noreferrer">' + emphasis(link.label) + '</a>';
         });
-        escaped.forEach(function (character, index) {
-            html = html.replace('\u0002' + index + '\u0002', escapeHtml(character));
-        });
+        html = html.replace(/\u0001(\d+)\u0001/g, function (match, i) { return code[Number(i)]; });
+        html = html.replace(/\u0002(\d+)\u0002/g, function (match, i) { return escapeHtml(escaped[Number(i)]); });
         return html;
     }
 
@@ -604,13 +614,74 @@ function renderMarkdown(src, noteId, forEditor) {
         }
     }
 
+    function parseListLine(line, lineIndex) {
+        var m = line.replace(/\t/g, '    ').match(LIST_LINE);
+        if (!m)
+            return null;
+        var item = { indent: m[1].length, text: m[3] || '', lineIndex: lineIndex, kind: 'ul', num: 1, checked: false };
+        if (/^\d/.test(m[2])) {
+            item.kind = 'ol';
+            item.num = Number(m[2].replace(/\D/g, ''));
+        } else {
+            var check = item.text.match(/^\[([ xX])\](?:\s+(.*))?$/);
+            if (check) {
+                item.kind = 'check';
+                item.checked = check[1].toLowerCase() === 'x';
+                item.text = check[2] || '';
+            }
+        }
+        return item;
+    }
+
+    /* Builds (possibly nested) <ul>/<ol> markup from a run of list lines. */
+    function listHtml(items) {
+        var stack = [];
+        items.forEach(function (item) {
+            while (stack.length && stack[stack.length - 1] > item.indent)
+                stack.pop();
+            if (!stack.length || stack[stack.length - 1] < item.indent)
+                stack.push(item.indent);
+            item.level = stack.length - 1;
+        });
+        var pos = 0;
+        function itemHtml(item, nested) {
+            var content = inline(item.text) || (forEditor ? '<br>' : '');
+            if (item.kind === 'check') {
+                var cls = 'md-checklist-item' + (item.checked ? ' md-checked' : '');
+                var textCls = 'md-cl-text' + (item.checked ? ' md-cl-done' : '');
+                if (forEditor)
+                    return '<li class="' + cls + '"><input class="md-checklist-input" type="checkbox" contenteditable="false"' + (item.checked ? ' checked' : '') + ' aria-label="' + (item.checked ? 'Mark checklist item incomplete' : 'Mark checklist item complete') + '"><span class="' + textCls + '">' + content + '</span>' + nested + '</li>';
+                var click = noteId ? ' onclick="event.stopPropagation();toggleNoteChecklistItem(\'' + escapeHtml(noteId) + '\', this, ' + item.checked + ', ' + item.lineIndex + ')"' : '';
+                return '<li class="' + cls + '"' + click + '><span class="md-cl-box' + (item.checked ? ' md-cl-checked' : '') + '" aria-hidden="true"></span><span class="' + textCls + '">' + content + '</span>' + nested + '</li>';
+            }
+            return '<li' + (item.kind === 'ul' ? ' class="md-li"' : '') + '>' + content + nested + '</li>';
+        }
+        function build(level) {
+            var first = items[pos];
+            var kind = first.kind;
+            var html = '';
+            while (pos < items.length && items[pos].level >= level && items[pos].kind === kind) {
+                var item = items[pos++];
+                var nested = '';
+                while (pos < items.length && items[pos].level > level)
+                    nested += build(level + 1);
+                html += itemHtml(item, nested);
+            }
+            if (kind === 'ol')
+                return '<ol' + (first.num === 1 ? '' : ' start="' + first.num + '"') + '>' + html + '</ol>';
+            return '<ul class="md-ul' + (kind === 'check' ? ' md-checklist' : '') + '">' + html + '</ul>';
+        }
+        var out = '';
+        while (pos < items.length)
+            out += build(0);
+        return out;
+    }
+
     for (var index = 0; index < lines.length;) {
         var line = lines[index];
         var fence = line.match(/^\s*```/);
         var heading = line.match(/^(#{1,3})\s+(.+)$/);
-        var checklist = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
-        var ordered = line.match(/^\s*(\d+)[.)]\s+(.*)$/);
-        var bullet = line.match(/^\s*[-*]\s+(.*)$/);
+        var quote = line.match(/^ {0,3}>[ \t]?(.*)$/);
 
         if (!line.trim()) {
             flushParagraph();
@@ -635,51 +706,30 @@ function renderMarkdown(src, noteId, forEditor) {
             index++;
             continue;
         }
-        if (checklist) {
+        if (quote) {
             flushParagraph();
-            var checklistItems = [];
+            var quoteLines = [];
             while (index < lines.length) {
-                var checkItem = lines[index].match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
-                if (!checkItem)
+                var quoteLine = lines[index].match(/^ {0,3}>[ \t]?(.*)$/);
+                if (!quoteLine)
                     break;
-                var checked = checkItem[1].toLowerCase() === 'x';
-                var click = noteId ? ' onclick="toggleNoteChecklistItem(\'' + escapeHtml(noteId) + '\', this, ' + checked + ', ' + index + ')"' : '';
-                var checklistContent = inline(checkItem[2]);
-                if (forEditor) {
-                    checklistItems.push('<li class="md-checklist-item' + (checked ? ' md-checked' : '') + '"><input class="md-checklist-input" type="checkbox" contenteditable="false"' + (checked ? ' checked' : '') + ' aria-label="' + (checked ? 'Mark checklist item incomplete' : 'Mark checklist item complete') + '"><span class="md-cl-text' + (checked ? ' md-cl-done' : '') + '">' + checklistContent + '</span></li>');
-                } else {
-                    checklistItems.push('<li class="md-checklist-item' + (checked ? ' md-checked' : '') + '"' + click + '><span class="md-cl-box' + (checked ? ' md-cl-checked' : '') + '" aria-hidden="true"></span><span class="md-cl-text' + (checked ? ' md-cl-done' : '') + '">' + checklistContent + '</span></li>');
-                }
+                quoteLines.push(quoteLine[1]);
                 index++;
             }
-            output.push('<ul class="md-ul md-checklist">' + checklistItems.join('') + '</ul>');
+            output.push('<blockquote class="md-quote">' + quoteLines.map(inline).join('<br>') + '</blockquote>');
             continue;
         }
-        if (ordered) {
+        if (parseListLine(line, index)) {
             flushParagraph();
-            var orderedItems = [];
-            var listStart = Number(ordered[1]);
+            var listItems = [];
             while (index < lines.length) {
-                var orderedItem = lines[index].match(/^\s*(\d+)[.)]\s+(.*)$/);
-                if (!orderedItem)
+                var listItem = parseListLine(lines[index], index);
+                if (!listItem)
                     break;
-                orderedItems.push('<li>' + inline(orderedItem[2]) + '</li>');
+                listItems.push(listItem);
                 index++;
             }
-            output.push('<ol' + (listStart === 1 ? '' : ' start="' + listStart + '"') + '>' + orderedItems.join('') + '</ol>');
-            continue;
-        }
-        if (bullet) {
-            flushParagraph();
-            var bulletItems = [];
-            while (index < lines.length) {
-                var bulletItem = lines[index].match(/^\s*[-*]\s+(.*)$/);
-                if (!bulletItem || /^\[[ xX]\]\s+/.test(bulletItem[1]))
-                    break;
-                bulletItems.push('<li class="md-li">' + inline(bulletItem[1]) + '</li>');
-                index++;
-            }
-            output.push('<ul class="md-ul">' + bulletItems.join('') + '</ul>');
+            output.push(listHtml(listItems));
             continue;
         }
         paragraph.push(line);
@@ -697,7 +747,7 @@ function toggleNoteChecklistItem(noteId, el, currentlyChecked, sourceLineIndex) 
     var changed = false;
     var lines = n.content.split('\n');
     n.content = lines.map(function (line, index) {
-        var item = line.match(/^([-*])\s+\[([ xX])\]\s+(.*)$/);
+        var item = line.match(/^(\s*[-*+])\s+\[([ xX])\]\s*(.*)$/);
         var matchesTarget = Number.isInteger(sourceLineIndex)
             ? index === sourceLineIndex
             : item && (el.querySelector('.md-cl-text') || {}).textContent === item[3];
@@ -736,6 +786,11 @@ function saveNoteEditorSelection(editor) {
 }
 
 function restoreNoteEditorSelection(editor) {
+    /* Already focused with a live selection: leave it alone. Re-applying the saved range would
+       discard the browser's pending style (so Bold -> Italic pressed back to back lost the first toggle). */
+    var live = window.getSelection();
+    if (document.activeElement === editor && live && live.rangeCount && editor.contains(live.anchorNode))
+        return true;
     if (!ntEditorSelection || ntEditorSelection.editor !== editor) {
         editor.focus();
         var fallbackSelection = window.getSelection();
@@ -754,9 +809,34 @@ function restoreNoteEditorSelection(editor) {
     return true;
 }
 
+/* Characters that would be read back as formatting are backslash-escaped, so what the
+   user typed is exactly what they see after saving and reopening. */
+function escapeNoteText(text) {
+    return text.replace(/[\\`*\[\]]/g, '\\$&')
+        .replace(/~~/g, '\\~\\~')
+        .replace(/_/g, function (match, offset, whole) {
+            return /\w/.test(whole.charAt(offset - 1)) && /\w/.test(whole.charAt(offset + 1)) ? '_' : '\\_';
+        });
+}
+
+/* A line that merely starts like markdown ("# x", "> x", "- x", "1. x") must not turn into a heading/quote/list. */
+function escapeNoteLineStarts(text) {
+    return text.split('\n').map(function (line) {
+        return line.replace(/^(\s*)(#{1,3}(?=\s)|>|[-+](?=\s)|(\d+)(?=[.)]\s))/, function (match, space, token, digits) {
+            return digits ? space + digits + '\\' : space + '\\' + token;
+        });
+    }).join('\n');
+}
+
+/* Keeps spaces outside the markers: "bold " becomes "**bold** ", never "**bold **". */
+function wrapNoteMarks(marker, content) {
+    var parts = content.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    return parts[2] ? parts[1] + marker + parts[2] + marker + parts[3] : content;
+}
+
 function serializeNoteInline(node, blockSeparator) {
     if (node.nodeType === 3)
-        return node.nodeValue.replace(/([\\`*_{}\[\]()])/g, '\\$1');
+        return escapeNoteText(node.nodeValue.replace(/\u00a0/g, ' '));
     if (node.nodeType !== 1)
         return '';
     var tag = node.tagName.toLowerCase();
@@ -766,12 +846,22 @@ function serializeNoteInline(node, blockSeparator) {
         return '';
     var childSeparator = blockSeparator || (tag === 'li' ? ' ' : '\n');
     var content = serializeNoteChildren(node, childSeparator);
+    if (tag === 'span' && node.style) {
+        var weight = node.style.fontWeight;
+        if (weight === 'bold' || Number(weight) >= 600)
+            content = wrapNoteMarks('**', content);
+        if (node.style.fontStyle === 'italic')
+            content = wrapNoteMarks('*', content);
+        if (/line-through/.test(node.style.textDecoration || node.style.textDecorationLine || ''))
+            content = wrapNoteMarks('~~', content);
+        return content;
+    }
     if (tag === 'strong' || tag === 'b')
-        return '**' + content + '**';
+        return wrapNoteMarks('**', content);
     if (tag === 'em' || tag === 'i')
-        return '*' + content + '*';
+        return wrapNoteMarks('*', content);
     if (tag === 'del' || tag === 's' || tag === 'strike')
-        return '~~' + content + '~~';
+        return wrapNoteMarks('~~', content);
     if (tag === 'code')
         return '`' + content.replace(/`/g, '\\`') + '`';
     if (tag === 'a') {
@@ -801,30 +891,116 @@ function isNoteChecklistChecked(checkbox) {
     return !!(checkbox && (checkbox.checked || checkbox.getAttribute('checked') !== null));
 }
 
+function serializeNoteListItemText(item, checkbox) {
+    var out = '';
+    Array.prototype.forEach.call(item.childNodes, function (child) {
+        if (child === checkbox)
+            return;
+        if (child.nodeType === 1) {
+            var childTag = child.tagName.toLowerCase();
+            if (childTag === 'ul' || childTag === 'ol' || (childTag === 'input' && child.type === 'checkbox'))
+                return;
+        }
+        var piece = serializeNoteInline(child, ' ');
+        if (!piece)
+            return;
+        var isBlock = child.nodeType === 1 && /^(P|DIV)$/.test(child.tagName);
+        if (isBlock && out && !/\s$/.test(out))
+            out += ' ';
+        out += piece;
+    });
+    return out.replace(/\s*\n\s*/g, ' ').trim();
+}
+
+/* Serialises a <ul>/<ol> to Markdown lines. Nested lists are flattened so the
+   markers are never lost (the renderer only supports one list level). */
+function serializeNoteList(list, lines, depth) {
+    lines = lines || [];
+    depth = depth || 0;
+    var indent = new Array(depth + 1).join('  ');
+    var tag = list.tagName.toLowerCase();
+    var isChecklist = list.classList.contains('md-checklist');
+    var number = tag === 'ol' ? (Number(list.getAttribute('start')) || 1) : 1;
+    Array.prototype.forEach.call(list.children, function (item) {
+        if (/^(ul|ol)$/i.test(item.tagName)) {
+            serializeNoteList(item, lines, depth + 1);
+            return;
+        }
+        if (item.tagName.toLowerCase() !== 'li')
+            return;
+        var checkbox = null;
+        Array.prototype.forEach.call(item.children, function (child) {
+            if (!checkbox && child.tagName.toLowerCase() === 'input' && child.type === 'checkbox')
+                checkbox = child;
+        });
+        var text = serializeNoteListItemText(item, checkbox);
+        if (isChecklist)
+            lines.push(indent + '- [' + (isNoteChecklistChecked(checkbox) ? 'x' : ' ') + '] ' + text);
+        else if (tag === 'ol')
+            lines.push(indent + (number++) + '. ' + text);
+        else
+            lines.push(indent + '- ' + text);
+        Array.prototype.forEach.call(item.children, function (child) {
+            var childTag = child.tagName.toLowerCase();
+            if (childTag === 'ul' || childTag === 'ol')
+                serializeNoteList(child, lines, depth + 1);
+        });
+    });
+    return lines;
+}
+
+/* Code blocks: keep line breaks whether the browser stored them as "\n",
+   <br>, or one <div> per line. textContent alone drops the last two. */
+function serializeNoteCode(node) {
+    var out = '';
+    Array.prototype.forEach.call(node.childNodes, function (child) {
+        if (child.nodeType === 3) {
+            out += child.nodeValue;
+            return;
+        }
+        if (child.nodeType !== 1)
+            return;
+        var tag = child.tagName.toLowerCase();
+        if (tag === 'br') {
+            out += '\n';
+            return;
+        }
+        var inner = serializeNoteCode(child);
+        if (tag === 'div' || tag === 'p') {
+            if (out && !/\n$/.test(out))
+                out += '\n';
+            out += inner;
+        } else {
+            out += inner;
+        }
+    });
+    return out;
+}
+
 function serializeNoteBlock(node) {
     if (node.nodeType !== 1)
         return node.nodeType === 3 ? node.nodeValue.trim() : '';
     var tag = node.tagName.toLowerCase();
     if (/^h[1-6]$/.test(tag)) {
-        var headingLevel = Math.max(1, Math.min(3, Number(tag.slice(1)) - 3));
-        return new Array(headingLevel + 1).join('#') + ' ' + serializeNoteInline(node).trim();
-    }
+    var headingLevel = Math.max(1, Math.min(3, Number(tag.slice(1)) - 3));
+    var headingText = serializeNoteInline(node).trim();
+    if (!headingText)
+        return '';
+    return new Array(headingLevel + 1).join('#') + ' ' + headingText;
+}
     if (tag === 'pre')
-        return '```\n' + node.textContent.replace(/\n+$/, '') + '\n```';
-    if (tag === 'ul' || tag === 'ol') {
-        var items = Array.prototype.filter.call(node.children, function (child) { return child.tagName.toLowerCase() === 'li'; });
-        return items.map(function (item, index) {
-            var checkbox = item.querySelector('input[type="checkbox"]');
-            var text = serializeNoteChildren(item, ' ', checkbox).trim();
-            if (node.classList.contains('md-checklist'))
-                return '- [' + (isNoteChecklistChecked(checkbox) ? 'x' : ' ') + '] ' + text;
-            var start = tag === 'ol' ? Number(node.getAttribute('start')) || 1 : 1;
-            return (tag === 'ol' ? (start + index) + '. ' : '- ') + text;
+        return '```\n' + serializeNoteCode(node).replace(/\n+$/, '') + '\n```';
+    if (tag === 'ul' || tag === 'ol')
+        return serializeNoteList(node).join('\n');
+    if (tag === 'blockquote') {
+        var quoted = serializeNoteChildren(node, '\n').replace(/^\s*\n|\n\s*$/g, '');
+        return escapeNoteLineStarts(quoted).split('\n').map(function (quoteLine) {
+            return ('> ' + quoteLine).replace(/\s+$/, '');
         }).join('\n');
     }
     if (tag === 'p' || tag === 'div')
-        return serializeNoteChildren(node, '\n').trim();
-    return serializeNoteInline(node).trim();
+        return escapeNoteLineStarts(serializeNoteChildren(node, '\n').trim());
+    return escapeNoteLineStarts(serializeNoteInline(node).trim());
 }
 
 function serializeNoteEditor(editor) {
@@ -832,21 +1008,47 @@ function serializeNoteEditor(editor) {
     var inlineNodes = [];
     function flushInline() {
         if (inlineNodes.length) {
-            blocks.push(inlineNodes.map(serializeNoteInline).join('').trim());
+            blocks.push(escapeNoteLineStarts(inlineNodes.map(serializeNoteInline).join('').trim()));
             inlineNodes = [];
         }
     }
-    Array.prototype.forEach.call(editor.childNodes, function (node) {
-        var isBlock = node.nodeType === 1 && /^(P|DIV|H[1-6]|UL|OL|PRE)$/.test(node.tagName);
-        if (isBlock) {
-            flushInline();
-            blocks.push(serializeNoteBlock(node));
-        } else {
-            inlineNodes.push(node);
-        }
-    });
+    function walk(parent) {
+        Array.prototype.forEach.call(parent.childNodes, function (node) {
+            var isElement = node.nodeType === 1;
+            if (isElement && /^(UL|OL)$/.test(node.tagName)) {
+                flushInline();
+                blocks.push(serializeNoteList(node).join('\n'));
+            } else if (isElement && /^(H[1-6]|PRE|BLOCKQUOTE)$/.test(node.tagName)) {
+                flushInline();
+                blocks.push(serializeNoteBlock(node));
+            } else if (isElement && /^(P|DIV)$/.test(node.tagName)) {
+                flushInline();
+                // Browsers often leave a list nested inside a <div>/<p>; walk into it
+                // so the list keeps its "1." / "-" markers.
+                var hasList = Array.prototype.some.call(node.childNodes, function (child) {
+                    return child.nodeType === 1 && /^(UL|OL|DIV|P)$/.test(child.tagName) && (/^(UL|OL)$/.test(child.tagName) || childHasList(child));
+                });
+                if (hasList)
+                    walk(node);
+                else
+                    blocks.push(serializeNoteBlock(node));
+                flushInline();
+            } else {
+                inlineNodes.push(node);
+            }
+        });
+    }
+    function childHasList(node) {
+        return Array.prototype.some.call(node.childNodes, function (child) {
+            return child.nodeType === 1 && (/^(UL|OL)$/.test(child.tagName) || childHasList(child));
+        });
+    }
+    walk(editor);
     flushInline();
-    return blocks.filter(Boolean).join('\n\n').replace(/\n{3,}/g, '\n\n');
+    var out = blocks.filter(Boolean).join('\n\n');
+        return out.split(/(```[\s\S]*?```)/g).map(function (part, i) {
+    return i % 2 ? part : part.replace(/\n{3,}/g, '\n\n');
+        }).join('');
 }
 
 function getNoteEditorBlock(editor) {
@@ -855,7 +1057,7 @@ function getNoteEditorBlock(editor) {
     if (node && node.nodeType === 3)
         node = node.parentElement;
     while (node && node !== editor) {
-        if (/^(P|DIV|H[1-6]|LI|PRE)$/.test(node.tagName))
+        if (/^(P|DIV|H[1-6]|LI|PRE|BLOCKQUOTE)$/.test(node.tagName))
             return node;
         node = node.parentElement;
     }
@@ -894,13 +1096,34 @@ function wireNoteEditor(editor) {
     editor.addEventListener('focus', function () { saveNoteEditorSelection(editor); });
     editor.addEventListener('keyup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
     editor.addEventListener('mouseup', function () { saveNoteEditorSelection(editor); updateNoteToolbarState(editor); });
-    editor.addEventListener('input', function () { saveNoteEditorSelection(editor); updateNotePreview(); updateNoteToolbarState(editor); });
+    editor.addEventListener('input', function (event) {
+        if (event && event.inputType === 'insertText' && (event.data === ' ' || event.data === '\u00a0'))
+            maybeAutoNoteList(editor);
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        updateNoteToolbarState(editor);
+    });
     editor.addEventListener('change', function (event) {
         if (event.target.matches('.md-checklist-input')) {
             updateNoteChecklistInput(event.target);
         }
     });
     editor.addEventListener('keydown', function (event) {
+        if (event.key === 'Tab' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            var tabItem = getNoteEditorListItem(editor);
+            if (tabItem) {
+                event.preventDefault();
+                if (event.shiftKey)
+                    outdentNoteListItem(tabItem);
+                else
+                    indentNoteListItem(tabItem);
+                return;
+            }
+        }
+        if (event.key === 'Enter' && !event.shiftKey && exitNoteQuoteOnEmptyLine(editor)) {
+            event.preventDefault();
+            return;
+        }
         if (!(event.ctrlKey || event.metaKey) || event.altKey)
             return;
         var key = event.key.toLowerCase();
@@ -1071,44 +1294,473 @@ function removeChecklistFormatting(list) {
     });
 }
 
-function mdInsertBlock(text) {
+/* ── List toggling ──
+   Lists are built/removed directly in the DOM instead of through
+   document.execCommand('insertOrderedList' …). execCommand splits lists, nests
+   them and copies inline styles when it is clicked repeatedly, which is what
+   corrupted notes when the list buttons were spammed. */
+
+function getNoteListKind(list) {
+    return list.classList.contains('md-checklist') ? 'check' : list.tagName.toLowerCase();
+}
+
+function getNoteEditorUnits(editor) {
+    var units = [];
+    var run = null;
+    Array.prototype.forEach.call(editor.childNodes, function (node) {
+        var isBlock = node.nodeType === 1 && /^(P|DIV|H[1-6]|UL|OL|PRE|BLOCKQUOTE)$/.test(node.tagName);
+        if (isBlock) {
+            run = null;
+            units.push({ node: node, block: true });
+            return;
+        }
+        if (node.nodeType === 3 && !node.nodeValue.trim() && !run)
+            return;
+        if (!run) {
+            run = { nodes: [], block: false };
+            units.push(run);
+        }
+        run.nodes.push(node);
+    });
+    return units;
+}
+
+function noteUnitNodes(unit) {
+    return unit.block ? [unit.node] : unit.nodes;
+}
+
+function selectNoteUnits(units, range) {
+    if (!range)
+        return [];
+    var selected = units.filter(function (unit) {
+        return noteUnitNodes(unit).some(function (node) {
+            try { return range.intersectsNode(node); } catch (e) { return false; }
+        });
+    });
+    if (!range.collapsed && selected.length > 1) {
+        var lastNodes = noteUnitNodes(selected[selected.length - 1]);
+        var inLast = function (container) {
+            return lastNodes.some(function (node) { return node === container || node.contains(container); });
+        };
+        // Triple-click ends at offset 0 of the next block; don't include it.
+        if (range.endOffset === 0 && inLast(range.endContainer) && !inLast(range.startContainer))
+            selected.pop();
+    }
+    return selected;
+}
+
+function noteUnitToLines(unit) {
+    var source = unit.block ? Array.prototype.slice.call(unit.node.childNodes) : unit.nodes.slice();
+    var lines = [document.createDocumentFragment()];
+    source.forEach(function (node) {
+        if (node.nodeType === 1 && node.tagName === 'BR') {
+            lines.push(document.createDocumentFragment());
+            return;
+        }
+        lines[lines.length - 1].appendChild(node);
+    });
+    while (lines.length > 1 && !lines[lines.length - 1].textContent.trim())
+        lines.pop();
+    return lines;
+}
+
+/* Drops a literal "- " / "1. " the user typed by hand so it doesn't end up
+   as "1. - item" once the line becomes a real list item. */
+function stripNoteListMarker(fragment) {
+    var first = fragment.firstChild;
+    if (first && first.nodeType === 3) {
+        first.nodeValue = first.nodeValue.replace(/^[\s\u00a0]*(?:[-*]|\d+[.)])[\s\u00a0]+/, '');
+        if (!first.nodeValue)
+            first.parentNode.removeChild(first);
+    }
+}
+
+function makeNoteListItem(fragment) {
+    var item = document.createElement('li');
+    item.appendChild(fragment);
+    if (!item.textContent.trim() && !item.querySelector('br'))
+        item.appendChild(document.createElement('br'));
+    return item;
+}
+
+function lastNoteTextNode(node) {
+    if (node.nodeType === 3)
+        return node;
+    for (var i = node.childNodes.length - 1; i >= 0; i--) {
+        var found = lastNoteTextNode(node.childNodes[i]);
+        if (found)
+            return found;
+    }
+    return null;
+}
+
+function placeNoteCaretAtEnd(node) {
+    var selection = window.getSelection();
+    if (!selection || !node)
+        return;
+    var range = document.createRange();
+    var textNode = lastNoteTextNode(node);
+    if (textNode)
+        range.setStart(textNode, textNode.nodeValue.length);
+    else
+        range.setStart(node, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function toggleNoteList(kind, forcedUnits) {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return null;
+    var range = null;
+    if (!forcedUnits) {
+        restoreNoteEditorSelection(editor);
+        var selection = window.getSelection();
+        range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+    }
+    var units = getNoteEditorUnits(editor);
+    if (!units.length) {
+        var seed = document.createElement('p');
+        seed.className = 'md-p';
+        seed.appendChild(document.createElement('br'));
+        editor.appendChild(seed);
+        units = [{ node: seed, block: true }];
+    }
+    var selected = forcedUnits || selectNoteUnits(units, range);
+    if (!selected.length)
+        selected = [units[units.length - 1]];
+
+    var isList = function (unit) { return unit.block && /^(UL|OL)$/.test(unit.node.tagName); };
+    var allTarget = selected.every(function (unit) { return isList(unit) && getNoteListKind(unit.node) === kind; });
+    var caretTarget = null;
+    var resultList = null;
+
+    if (allTarget) {
+        // Toggle OFF: turn each list item back into a normal paragraph.
+        selected.forEach(function (unit) {
+            var list = unit.node;
+            removeChecklistFormatting(list);
+            var fragment = document.createDocumentFragment();
+            Array.prototype.forEach.call(Array.prototype.slice.call(list.children), function (item) {
+                if (item.tagName.toLowerCase() !== 'li')
+                    return;
+                var paragraph = document.createElement('p');
+                paragraph.className = 'md-p';
+                var nested = [];
+                Array.prototype.slice.call(item.childNodes).forEach(function (child) {
+                    if (child.nodeType === 1 && /^(UL|OL)$/.test(child.tagName))
+                        nested.push(child);
+                    else
+                        paragraph.appendChild(child);
+                });
+                if (!paragraph.textContent.trim() && !paragraph.querySelector('br'))
+                    paragraph.appendChild(document.createElement('br'));
+                fragment.appendChild(paragraph);
+                nested.forEach(function (child) { fragment.appendChild(child); });
+                caretTarget = paragraph;
+            });
+            list.parentNode.replaceChild(fragment, list);
+        });
+    } else {
+        // Toggle ON / switch type: one list per contiguous run of blocks.
+        var runs = [];
+        var lastIndex = -2;
+        selected.forEach(function (unit) {
+            if (unit.block && /^(H[1-6]|PRE)$/.test(unit.node.tagName))
+                return;
+            var index = units.indexOf(unit);
+            if (!runs.length || index !== lastIndex + 1)
+                runs.push([]);
+            runs[runs.length - 1].push(unit);
+            lastIndex = index;
+        });
+        runs.forEach(function (run) {
+            var list = document.createElement(kind === 'ol' ? 'ol' : 'ul');
+            var anchor = noteUnitNodes(run[0])[0];
+            anchor.parentNode.insertBefore(list, anchor);
+            run.forEach(function (unit) {
+                if (isList(unit)) {
+                    if (getNoteListKind(unit.node) === 'check')
+                        removeChecklistFormatting(unit.node);
+                    Array.prototype.slice.call(unit.node.children).forEach(function (item) {
+                        if (item.tagName.toLowerCase() === 'li')
+                            list.appendChild(item);
+                    });
+                    unit.node.parentNode.removeChild(unit.node);
+                } else {
+                    noteUnitToLines(unit).forEach(function (fragment) {
+                        stripNoteListMarker(fragment);
+                        list.appendChild(makeNoteListItem(fragment));
+                    });
+                    if (unit.block)
+                        unit.node.parentNode.removeChild(unit.node);
+                }
+            });
+            if (kind === 'check')
+                convertChecklistList(list);
+            resultList = list;
+            caretTarget = list.lastElementChild || list;
+        });
+    }
+    placeNoteCaretAtEnd(caretTarget);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    updateNoteToolbarState(editor);
+    return resultList;
+}
+
+/* ── Nested lists (Tab / Shift+Tab, or the indent buttons on phones) ── */
+
+function getNoteEditorListItem(editor) {
+    var selection = window.getSelection();
+    var node = selection && selection.anchorNode;
+    if (node && node.nodeType === 3)
+        node = node.parentElement;
+    while (node && node !== editor) {
+        if (node.tagName === 'LI')
+            return node;
+        node = node.parentElement;
+    }
+    return null;
+}
+
+function indentNoteListItem(item) {
+    var editor = document.getElementById('nContent');
+    var previous = item && item.previousElementSibling;
+    if (!previous || previous.tagName !== 'LI')
+        return false;
+    var list = item.parentElement;
+    var nested = previous.lastElementChild;
+    if (!nested || nested.tagName !== list.tagName) {
+        nested = document.createElement(list.tagName);
+        nested.className = list.className;
+        previous.appendChild(nested);
+    }
+    nested.appendChild(item);
+    placeNoteCaretAtEnd(item);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    return true;
+}
+
+function outdentNoteListItem(item) {
+    var editor = document.getElementById('nContent');
+    var list = item && item.parentElement;
+    var parentItem = list && list.parentElement;
+    if (!parentItem || parentItem.tagName !== 'LI')
+        return false;
+    var following = [];
+    for (var sibling = item.nextElementSibling; sibling; sibling = sibling.nextElementSibling)
+        following.push(sibling);
+    if (following.length) {
+        var carry = document.createElement(list.tagName);
+        carry.className = list.className;
+        following.forEach(function (node) { carry.appendChild(node); });
+        item.appendChild(carry);
+    }
+    parentItem.parentElement.insertBefore(item, parentItem.nextSibling);
+    if (!list.children.length)
+        list.remove();
+    placeNoteCaretAtEnd(item);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    return true;
+}
+
+function mdChangeIndent(direction) {
     var editor = document.getElementById('nContent');
     if (!editor)
         return;
     restoreNoteEditorSelection(editor);
-    if (text.startsWith('```')) {
-        var block = getNoteEditorBlock(editor);
-        document.execCommand('formatBlock', false, block && block.tagName === 'PRE' ? 'P' : 'PRE');
-    } else if (text.startsWith('- [ ]')) {
-        var listItem = getNoteEditorBlock(editor);
-        var currentList = listItem && listItem.closest('ul,ol');
-        if (currentList && currentList.classList.contains('md-checklist')) {
-            removeChecklistFormatting(currentList);
-            document.execCommand('insertUnorderedList', false, null);
-        } else {
-            document.execCommand('insertUnorderedList', false, null);
-            var selection = window.getSelection();
-            var node = selection && selection.anchorNode;
-            if (node && node.nodeType === 3)
-                node = node.parentElement;
-            var li = node && node.closest('li');
-            var list = li && li.closest('ul');
-            if (list)
-                convertChecklistList(list);
-        }
-    } else {
-        var activeBlock = getNoteEditorBlock(editor);
-        var activeList = activeBlock && activeBlock.closest('ul,ol');
-        if (activeList && activeList.classList.contains('md-checklist')) {
-            removeChecklistFormatting(activeList);
-            if (text.startsWith('1.'))
-                document.execCommand('insertOrderedList', false, null);
-        } else {
-            document.execCommand(text.startsWith('1.') ? 'insertOrderedList' : 'insertUnorderedList', false, null);
-        }
+    var item = getNoteEditorListItem(editor);
+    if (!item) {
+        Toast.show('Place the cursor in a list item first', 'warning');
+        return;
     }
+    if (direction < 0)
+        outdentNoteListItem(item);
+    else
+        indentNoteListItem(item);
+}
+
+/* ── Block quotes ── */
+
+function mdToggleQuote() {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return;
+    restoreNoteEditorSelection(editor);
+    var selection = window.getSelection();
+    var range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+    var units = getNoteEditorUnits(editor);
+    var selected = selectNoteUnits(units, range);
+    if (!selected.length && units.length)
+        selected = [units[units.length - 1]];
+    var isQuote = function (unit) { return unit.block && unit.node.tagName === 'BLOCKQUOTE'; };
+    var caretTarget = null;
+    if (selected.length && selected.every(isQuote)) {
+        selected.forEach(function (unit) {
+            var fragment = document.createDocumentFragment();
+            noteUnitToLines(unit).forEach(function (line) {
+                var paragraph = document.createElement('p');
+                paragraph.className = 'md-p';
+                paragraph.appendChild(line);
+                if (!paragraph.textContent.trim())
+                    paragraph.appendChild(document.createElement('br'));
+                fragment.appendChild(paragraph);
+                caretTarget = paragraph;
+            });
+            unit.node.parentNode.replaceChild(fragment, unit.node);
+        });
+    } else {
+        var quote = document.createElement('blockquote');
+        quote.className = 'md-quote';
+        var eligible = selected.filter(function (unit) {
+            return !(unit.block && /^(H[1-6]|PRE|UL|OL)$/.test(unit.node.tagName));
+        });
+        if (!eligible.length) {
+            eligible = [];
+            var seed = document.createElement('p');
+            seed.className = 'md-p';
+            seed.appendChild(document.createElement('br'));
+            editor.appendChild(seed);
+            eligible.push({ node: seed, block: true });
+        }
+        noteUnitNodes(eligible[0])[0].parentNode.insertBefore(quote, noteUnitNodes(eligible[0])[0]);
+        eligible.forEach(function (unit, i) {
+            if (isQuote(unit)) {
+                while (unit.node.firstChild)
+                    quote.appendChild(unit.node.firstChild);
+                unit.node.remove();
+                return;
+            }
+            if (quote.childNodes.length)
+                quote.appendChild(document.createElement('br'));
+            noteUnitToLines(unit).forEach(function (line, j) {
+                if (j)
+                    quote.appendChild(document.createElement('br'));
+                quote.appendChild(line);
+            });
+            if (unit.block)
+                unit.node.remove();
+        });
+        if (!quote.textContent.trim() && !quote.querySelector('br'))
+            quote.appendChild(document.createElement('br'));
+        caretTarget = quote;
+    }
+    placeNoteCaretAtEnd(caretTarget);
     saveNoteEditorSelection(editor);
     updateNotePreview();
+    updateNoteToolbarState(editor);
+}
+
+/* Enter inside a quote adds a new line to the SAME quote; Enter on an empty line leaves the quote
+   (like Google Docs / Notion). Without this the browser splits it into separate quotes. */
+function exitNoteQuoteOnEmptyLine(editor) {
+    var selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !selection.isCollapsed)
+        return false;
+    var node = selection.anchorNode;
+    if (node && node.nodeType === 3)
+        node = node.parentElement;
+    var quote = node && node.closest ? node.closest('blockquote') : null;
+    if (!quote || !editor.contains(quote))
+        return false;
+    var range = selection.getRangeAt(0);
+    var container = range.startContainer;
+    var offset = range.startOffset;
+    var lineEmpty;
+    if (container.nodeType === 3) {
+        var previous = container.previousSibling;
+        lineEmpty = !container.nodeValue.slice(0, offset).trim() && (!previous || previous.nodeName === 'BR');
+    } else {
+        var before = container.childNodes[offset - 1];
+        lineEmpty = !before || before.nodeName === 'BR';
+    }
+    var tail = document.createRange();
+    tail.selectNodeContents(quote);
+    tail.setStart(range.endContainer, range.endOffset);
+    var atEnd = !tail.toString().trim();
+    if (!(lineEmpty && atEnd)) {
+        document.execCommand('insertLineBreak');
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        return true;
+    }
+    while (quote.lastChild && (quote.lastChild.nodeName === 'BR' || (quote.lastChild.nodeType === 3 && !quote.lastChild.nodeValue.trim())))
+        quote.removeChild(quote.lastChild);
+    var paragraph = document.createElement('p');
+    paragraph.className = 'md-p';
+    paragraph.appendChild(document.createElement('br'));
+    if (!quote.textContent.trim())
+        quote.parentNode.replaceChild(paragraph, quote);
+    else
+        quote.parentNode.insertBefore(paragraph, quote.nextSibling);
+    placeNoteCaretAtEnd(paragraph);
+    saveNoteEditorSelection(editor);
+    updateNotePreview();
+    return true;
+}
+
+/* Typing "- ", "* ", "1. ", "> " or "# " at the start of an empty line starts a real list, quote or heading. */
+function maybeAutoNoteList(editor) {
+    var selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !selection.isCollapsed)
+        return false;
+    var node = selection.anchorNode;
+    if (!node || node === editor || !editor.contains(node))
+        return false;
+    while (node.parentNode && node.parentNode !== editor)
+        node = node.parentNode;
+    var text;
+    if (node.nodeType === 3)
+        text = node.nodeValue;
+    else if (node.nodeType === 1 && /^(P|DIV)$/.test(node.tagName))
+        text = node.textContent;
+    else
+        return false;
+    var match = text.match(/^(\d+)[.)][\s\u00a0]$|^[-*][\s\u00a0]$/);
+    var shortcut = text.match(/^(#{1,3}|>)[\s\u00a0]$/);
+    if (!match && !shortcut)
+        return false;
+    var block = node;
+    if (node.nodeType === 3) {
+        block = document.createElement('p');
+        block.className = 'md-p';
+        node.parentNode.insertBefore(block, node);
+        block.appendChild(node);
+    }
+    while (block.firstChild)
+        block.removeChild(block.firstChild);
+    block.appendChild(document.createElement('br'));
+    if (shortcut) {
+        var converted = document.createElement(shortcut[1] === '>' ? 'blockquote' : 'h' + (shortcut[1].length + 3));
+        converted.className = shortcut[1] === '>' ? 'md-quote' : 'md-h';
+        converted.appendChild(document.createElement('br'));
+        block.parentNode.replaceChild(converted, block);
+        placeNoteCaretAtEnd(converted);
+        return true;
+    }
+    var list = toggleNoteList(match[1] ? 'ol' : 'ul', [{ node: block, block: true }]);
+    if (list && match[1] && Number(match[1]) > 1)
+        list.setAttribute('start', match[1]);
+    return true;
+}
+
+function mdInsertBlock(text) {
+    var editor = document.getElementById('nContent');
+    if (!editor)
+        return;
+    if (text.startsWith('```')) {
+        restoreNoteEditorSelection(editor);
+        var block = getNoteEditorBlock(editor);
+        document.execCommand('formatBlock', false, block && block.tagName === 'PRE' ? 'P' : 'PRE');
+        saveNoteEditorSelection(editor);
+        updateNotePreview();
+        return;
+    }
+    toggleNoteList(text.startsWith('- [ ]') ? 'check' : text.startsWith('1.') ? 'ol' : 'ul');
 }
 
 /* ── Tag management for modal ── */
@@ -1273,6 +1925,10 @@ function openNoteModal(id) {
             '<button type="button" class="note-md-btn" onclick="mdInsertLink()" title="Link" aria-label="Link"><i class="bi bi-link-45deg"></i></button>' +
             '<button type="button" class="note-md-btn" data-format="code" onclick="mdToggleInline(\'`\')" title="Inline code" aria-label="Inline code" aria-pressed="false"><i class="bi bi-code"></i></button>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'```\\n\\n```\')" title="Code block" aria-label="Code block"><i class="bi bi-code-slash"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdToggleQuote()" title="Quote" aria-label="Quote"><i class="bi bi-quote"></i></button>' +
+            '<div class="nt-tb-sep"></div>' +
+            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(-1)" title="Outdent list item (Shift+Tab)" aria-label="Outdent list item"><i class="bi bi-text-indent-right"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(1)" title="Indent list item (Tab)" aria-label="Indent list item"><i class="bi bi-text-indent-left"></i></button>' +
             '</div>' +
             '<div id="noteTabWritePane">' +
             '<div class="form-control note-editor-ta" id="nContent" data-markdown="' + escapeHtml(n ? n.content || '' : '') + '" data-placeholder="Write your note here…" aria-label="Note content"></div>' +
@@ -1441,13 +2097,15 @@ function exportNotePdf(id) {
         '.meta-row{display:contents}.meta-row dt{color:#666}.meta-row dd{margin:0;overflow-wrap:anywhere}' +
         '.divider{border:none;border-top:1px solid #d5d8e0;margin:0 0 18pt}' +
         '.md-h{font-weight:700;margin:1em 0 .35em;padding-bottom:3pt;border-bottom:1px solid #e8e8f0;color:#1a1a2e;break-after:avoid}' +
-        'h4.md-h{font-size:1.1rem}h5.md-h{font-size:.96rem}h6.md-h{font-size:.88rem}' +
+        'h4.md-h{font-size:1.5em}h5.md-h{font-size:1.25em}h6.md-h{font-size:1.08em}' +
         '.md-p{margin:0 0 .75em;white-space:normal}' +
         '.md-ul,ol{margin:0 0 .75em;padding-left:1.5em}' +
         '.md-li,ol li{margin:0 0 3pt;break-inside:avoid}' +
         '.md-inline-code{background:#f0f0f8;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:.9em;overflow-wrap:anywhere}' +
         '.md-code-block{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow:hidden;background:#f5f5fa;border:1px solid #ddd;border-radius:4px;padding:10pt;margin:.75em 0;font-family:monospace;font-size:9pt;line-height:1.5}' +
         '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
+        '.md-quote{margin:.6em 0 .8em;padding:6pt 12pt;border-left:3pt solid #2548a8;background:#f3f5fc;break-inside:avoid}' +
+        '.md-ul .md-ul,.md-ul ol,ol .md-ul,ol ol{margin:2pt 0}.md-checklist-item{flex-wrap:wrap}.md-checklist-item>ul,.md-checklist-item>ol{flex:1 1 100%}' +
         'a{color:#2548a8;overflow-wrap:anywhere}' +
         '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{max-width:none}pre,li{break-inside:avoid}}' +
         '</style></head><body>' +
