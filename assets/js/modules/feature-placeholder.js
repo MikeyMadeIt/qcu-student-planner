@@ -1,9 +1,4 @@
-/* Shared "not yet implemented" card for student sidebar items that don't have a
-   real feature behind them yet — the four "Soon" items (Announcements, AI
-   Summarizer, AI Reviewer, Legal & Policies) and any AI Tools entry (AI Quiz
-   Maker, AI Flashcard Maker, AI Study Assistant) that isn't built yet either.
-   One reusable renderer instead of duplicating this card's markup on every page.
-   Classic script (like core/layout.js) so plain <script> pages can call it inline. */
+// Shared "not yet implemented" card for student sidebar items that don't have a
 function initFeaturePlaceholder(config) {
     const mount = document.querySelector('[data-feature-placeholder]');
     if (!mount || !config) return;
@@ -19,9 +14,6 @@ function initFeaturePlaceholder(config) {
         </button>`;
     const closeBtn = mount.querySelector('[data-feature-close]');
     closeBtn.addEventListener('click', () => {
-        /* Prefer the browser's own history so this always lands back on whatever
-           page the person actually came from; fall back to the dashboard only
-           when there's nowhere to go back to (e.g. opened in a new tab). */
         if (history.length > 1)
             history.back();
         else

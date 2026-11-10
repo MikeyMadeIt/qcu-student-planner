@@ -1,8 +1,6 @@
-/* Attendance statistics (pure logic, no DOM) */
-/* ---- Consecutive Absence Detection ---- */
+// Attendance statistics (pure logic, no DOM)
 
 function getConsecutiveAbsences(subjectId, records) {
-    // Get all absence/attendance records for this subject, sorted ascending
     const subRecs = records
         .filter(r => r.subjectId === subjectId && r.status !== 'No Classes')
         .sort((a, b) => a.date.localeCompare(b.date));
@@ -22,10 +20,9 @@ function getConsecutiveAbsences(subjectId, records) {
 }
 
 function getCurrentConsecutiveAbsences(subjectId, records) {
-    // Current trailing streak (most recent consecutive absences)
     const subRecs = records
         .filter(r => r.subjectId === subjectId && r.status !== 'No Classes')
-        .sort((a, b) => b.date.localeCompare(a.date)); // descending
+        .sort((a, b) => b.date.localeCompare(a.date));
     let streak = 0;
     for (const r of subRecs) {
         if (r.status === 'Absent')

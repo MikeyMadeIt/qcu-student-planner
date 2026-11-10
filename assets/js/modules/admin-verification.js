@@ -1,17 +1,11 @@
-/* Admin Pending Approvals page (ES module). All data and actions go through
-   AdminService, which only ever calls the real Supabase tables/RPC -- nothing
-   here is sample data. This page always retrieves account_status = 'pending'
-   rows only; there is no status filter to widen that. */
+// Admin Pending Approvals page (ES module). All data and actions go through
 
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
 import { APP_CONFIG } from '../core/config.js';
 import { escHtml, formatDate, mountAdminTopbar, renderError, renderAccountDetail } from './admin-shared.js';
 
-/* Visual-only hint: Supabase has no way to restrict Google sign-in to a particular email
-   format, so every Google (and password) sign-up still lands here as 'pending' and a human
-   makes the final call. This just flags, for the reviewer, whether the email looks like the
-   university's lastname.firstname.middlename@gmail.com pattern. */
+// Visual-only hint: Supabase has no way to restrict Google sign-in to a particular email
 function emailFormatBadge(email) {
     if (!email) return '';
     const matches = APP_CONFIG.studentEmailPattern.test(email.trim());
