@@ -19,53 +19,66 @@
   <main class="main-content">
     <div class="topbar"><div><h1 class="page-title">AI Quiz Maker</h1><p class="page-sub">Turn your study materials into a practice quiz.</p></div></div>
 
-    <!-- CREATION FORM -->
-    <form class="glass card-pad fade-in" id="aqmForm" novalidate>
-      <div class="ai-field">
-        <label for="aqmTopic">Topic or subject</label>
-        <input type="text" class="form-control" id="aqmTopic" placeholder="e.g. Photosynthesis, Philippine History, Data Structures" maxlength="150">
-      </div>
-      <div class="ai-field">
-        <label for="aqmNotes">Instructions or study notes <span class="text-soft fw-normal">(optional)</span></label>
-        <textarea class="form-control" id="aqmNotes" rows="4" placeholder="Paste notes, or describe what the quiz should focus on…" maxlength="6000"></textarea>
-      </div>
-      <div class="ai-field">
-        <label for="aqmFileInput">Attach a PDF or image <span class="text-soft fw-normal">(optional)</span></label>
-        <input type="file" id="aqmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
-        <div class="ai-attach">
-          <span class="ai-attach-empty" id="aqmFileEmpty"><i class="bi bi-paperclip" aria-hidden="true"></i>No file attached</span>
-          <span class="ai-file-info" id="aqmFileInfo" hidden></span>
-          <div class="ai-attach-actions">
-            <button type="button" class="btn-ghost" id="aqmAttachBtn"><i class="bi bi-upload" aria-hidden="true"></i> Attach file</button>
-            <button type="button" class="btn-ghost" id="aqmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    <!-- CREATION FORM + HISTORY (two-column on desktop, stacked on mobile) -->
+    <div class="aqm-layout">
+      <form class="glass card-pad fade-in" id="aqmForm" novalidate>
+        <div class="ai-field">
+          <label for="aqmTopic">Topic or subject</label>
+          <input type="text" class="form-control" id="aqmTopic" placeholder="e.g. Photosynthesis, Philippine History, Data Structures" maxlength="150">
+        </div>
+        <div class="ai-field">
+          <label for="aqmNotes">Instructions or study notes <span class="text-soft fw-normal">(optional)</span></label>
+          <textarea class="form-control" id="aqmNotes" rows="4" placeholder="Paste notes, or describe what the quiz should focus on…" maxlength="6000"></textarea>
+        </div>
+
+        <div class="ai-field">
+          <label id="aqmFileLabel">Attach a PDF or image <span class="text-soft fw-normal">(optional)</span></label>
+          <input type="file" id="aqmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
+          <div class="aqm-dropzone" id="aqmDropzone" tabindex="0" role="button" aria-labelledby="aqmFileLabel" aria-describedby="aqmDropzoneHint">
+            <div class="aqm-dropzone-empty" id="aqmFileEmpty">
+              <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+              <div class="aqm-dropzone-copy">
+                <span class="aqm-dropzone-title"><strong>Click to upload</strong> or drag and drop</span>
+                <span class="aqm-dropzone-hint" id="aqmDropzoneHint">PDF, JPG, or PNG — up to 8 MB</span>
+              </div>
+            </div>
+            <div class="ai-file-info aqm-dropzone-file" id="aqmFileInfo" hidden>
+              <!-- filled in by initAiFileAttachment -->
+              <button type="button" class="btn-icon btn-sm aqm-file-remove" id="aqmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </div>
           </div>
         </div>
-        <p class="text-soft mt-1 mb-0" style="font-size:.75rem">PDF, JPG, or PNG — up to 8 MB.</p>
-      </div>
-      <div class="ai-field-row">
-        <div class="ai-field mb-0">
-          <label for="aqmQuestionCount">Number of questions: <span id="aqmQuestionCountLabel">10</span></label>
-          <input type="range" class="form-range" id="aqmQuestionCount" min="1" max="20" value="10">
-        </div>
-        <div class="ai-field mb-0">
-          <label for="aqmDifficulty">Difficulty</label>
-          <select class="form-select" id="aqmDifficulty">
-            <option value="easy">Easy</option>
-            <option value="medium" selected>Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-accent mt-2" id="aqmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Quiz</button>
-    </form>
 
-    <!-- SAVED QUIZZES (shown only alongside the creation form) -->
-    <section class="mt-4 fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
-      <h2 class="h6 mb-2" id="aqmHistoryHeading"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Your saved quizzes</h2>
-      <div id="aqmHistory" aria-live="polite">
-        <div class="text-faint" style="font-size:.85rem">Loading your saved quizzes…</div>
-      </div>
-    </section>
+        <div class="ai-field-row">
+          <div class="ai-field mb-0">
+            <div class="aqm-range-head">
+              <label for="aqmQuestionCount" class="mb-0">Number of questions</label>
+              <span class="aqm-range-value" id="aqmQuestionCountLabel">10</span>
+            </div>
+            <input type="range" class="aqm-range" id="aqmQuestionCount" min="1" max="20" step="1" value="10">
+          </div>
+          <div class="ai-field mb-0">
+            <label id="aqmDifficultyLabel">Difficulty</label>
+            <div class="aqm-pills" id="aqmDifficultyGroup" role="radiogroup" aria-labelledby="aqmDifficultyLabel">
+              <button type="button" class="aqm-pill" data-value="easy" role="radio" aria-checked="false">Easy</button>
+              <button type="button" class="aqm-pill is-selected" data-value="medium" role="radio" aria-checked="true">Medium</button>
+              <button type="button" class="aqm-pill" data-value="hard" role="radio" aria-checked="false">Hard</button>
+            </div>
+            <input type="hidden" id="aqmDifficulty" value="medium">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-accent w-100 aqm-generate-btn" id="aqmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Quiz</button>
+      </form>
+
+      <!-- SAVED QUIZZES -->
+      <section class="aqm-history fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
+        <h2 class="aqm-history-heading" id="aqmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved quizzes</span></h2>
+        <div class="aqm-history-list" id="aqmHistory" aria-live="polite">
+          <div class="text-faint" style="font-size:.85rem">Loading your saved quizzes…</div>
+        </div>
+      </section>
+    </div>
 
     <!-- LOADING -->
     <div class="glass card-pad fade-in ai-state" id="aqmLoadingState" hidden>
@@ -81,7 +94,7 @@
     </div>
 
     <!-- QUIZ TAKING -->
-    <div class="glass card-pad fade-in" id="aqmQuizCard" hidden>
+    <div class="glass card-pad fade-in aqm-stage" id="aqmQuizCard" hidden>
       <h2 class="h5 mb-3" id="aqmQuizTitle"></h2>
       <div class="ai-quiz-progress"><span id="aqmProgressLabel"></span></div>
       <div class="ai-progress-bar"><div class="ai-progress-bar-fill" id="aqmProgressFill"></div></div>
@@ -97,7 +110,7 @@
     </div>
 
     <!-- RESULTS -->
-    <div class="glass card-pad fade-in" id="aqmResultsCard" hidden>
+    <div class="glass card-pad fade-in aqm-stage" id="aqmResultsCard" hidden>
       <div class="text-center">
         <div class="ai-score-ring" id="aqmScoreRing"><div class="ai-score-ring-inner"><strong id="aqmScorePercent">0%</strong><span id="aqmScoreFraction">0 / 0</span></div></div>
         <h2 class="h5">Quiz complete!</h2>
