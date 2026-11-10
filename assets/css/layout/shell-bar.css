@@ -1,18 +1,6 @@
-/* Top bar: brand on the left; profile circle + sidebar toggle on the right.
-   Clicking the profile circle reveals the theme switch and account links. */
+/* Top bar: brand on the left; profile circle + sidebar toggle on the right. */
 
-/* position: fixed instead of sticky — deliberately.
-   A sticky element can only stay "stuck" while its own containing block
-   (.main-content) still has room below it; since .shell-bar is itself the
-   first child of that same box, the box necessarily runs out right as you
-   hit the very end of the page, and at that exact point the header stops being
-   stuck and scrolls away with the rest of the content — which is exactly
-   the "nawawala pag sinagad ang scroll" behavior being reported, and it's
-   standard sticky behavior, not a rendering bug, so no sticky-side tweak
-   can fix it. Taking the header out of that box entirely with position:
-   fixed removes the possibility altogether: it is pinned to the viewport,
-   full stop, regardless of scroll position or direction. main-content's
-   padding-top below reserves the space it used to occupy in normal flow. */
+/* position: fixed instead of sticky — deliberately. */
 .shell-bar {
     position: fixed;
     top: 0;
@@ -29,14 +17,11 @@
     border-bottom: 1px solid var(--border);
 }
 
-/* Desktop: the sidebar is a permanent column, not an off-canvas drawer, so
-   the fixed bar starts after it instead of running under it. */
 @media (min-width: 992px) {
     .shell-bar {
         left: var(--sidebar-width);
     }
 }
-
 
 .shell-bar-left {
     display: flex;
@@ -60,8 +45,6 @@
     min-width: 0;
 }
 
-/* The sidebar toggle only exists to open/close the mobile drawer — the desktop sidebar is
-   always visible, so this control is hidden at desktop widths. */
 @media (min-width: 992px) {
     .shell-bar-left [data-sidebar-toggle] {
         display: none;
@@ -76,14 +59,12 @@
     flex: 0 0 auto;
 }
 
-/* Every control on the right (notification/inbox icons, profile avatar) keeps its own
-   fixed footprint — none of them may shrink when a long page title squeezes the bar. */
+/* Every control on the right (notification/inbox icons, profile avatar) keeps its own */
 .shell-bar-right > * {
     flex: 0 0 auto;
 }
 
-/* Notification / inbox icon buttons — outlined box at rest (like GitHub's
-   search/inbox icons), same footprint as the sidebar toggle. */
+/* Notification / inbox icon buttons — outlined box at rest (like GitHub's */
 .header-panel-wrap {
     position: relative;
 }
@@ -150,9 +131,7 @@
     display: none;
 }
 
-/* Row list inside either popup — same vertical rhythm whether it's holding
-   plain .header-panel-item rows (notifications) or .msg-list-compact rows
-   (inbox), so swapping between the two feels like the same component. */
+/* Row list inside either popup — same vertical rhythm whether it's holding */
 .header-panel-body {
     display: flex;
     flex-direction: column;
@@ -168,14 +147,7 @@
     color: var(--text-faint);
 }
 
-/* Shared row rhythm for both popups: the notification panel renders plain
-   .header-panel-item rows and the inbox panel renders .msg-list-compact
-   .msg-row rows (see message-row.css) — two different components that used
-   to carry different padding, so their icon/text start position and row
-   height never lined up when the two popups were compared side by side.
-   Pinning both to the same left/vertical padding and minimum height here
-   (and giving message-row.css's compact variant the matching rule) keeps
-   the two popups visually interchangeable regardless of theme. */
+/* Shared row rhythm for both popups: the notification panel renders plain */
 .header-panel-item {
     display: flex;
     align-items: center;
@@ -293,7 +265,7 @@
     color: var(--text-faint);
 }
 
-/* ---------- Topbar controls: theme switch + sidebar toggle, grouped on the right ---------- */
+/* Topbar controls: theme switch + sidebar toggle, grouped on the right */
 
 .topbar-controls {
     display: flex;
@@ -398,12 +370,7 @@
     border-color: var(--border);
 }
 
-/* The avatar-only trigger (student header avatar, admin header avatar) must stay a
-   perfect circle on hover/focus too. .profile-trigger's own asymmetric padding
-   (sized for the name+caret variant) was winning the cascade over
-   .profile-trigger-circle's padding:0/fixed size, since both are single-class
-   selectors — this combined, higher-specificity selector makes the circle variant
-   reliably square regardless of file order. */
+/* The avatar-only trigger (student header avatar, admin header avatar) must stay a */
 .profile-trigger.profile-trigger-circle {
     padding: 0;
     width: 2.5rem;
@@ -433,9 +400,7 @@
     object-fit: cover;
 }
 
-/* object-fit on .profile-avatar itself only affects the element if it IS an
-   image; when a Google account photo is injected as a child <img> (see
-   setAvatarPhoto in layout.js) it needs its own sizing to fill the circle. */
+/* object-fit on .profile-avatar itself only affects the element if it IS an */
 .profile-avatar img {
     display: block;
     width: 100%;
@@ -466,26 +431,16 @@
     display: none;
 }
 
-/* The sidebar footer's three-dot menu reuses .profile-panel's look, but is
-   appended to <body> and positioned with fixed coordinates in JS (see
-   ensureSidebarProfileMenu in layout.js) instead of being anchored inside
-   .sidebar, which clips absolutely-positioned descendants via overflow:hidden. */
+/* The sidebar footer's three-dot menu reuses .profile-panel's look, but is */
 .sidebar-profile-panel {
     position: fixed;
     top: auto;
     right: auto;
     width: min(14rem, calc(100vw - 2rem));
-    /* Must outrank the mobile nav-drawer overlay (--layer-nav-drawer), since the
-       drawer footer's three-dot trigger lives inside that overlay on mobile — a
-       plain .profile-panel z-index would render this panel underneath it,
-       invisibly, even though it's "open". */
     z-index: var(--layer-drawer-popover);
 }
 
-/* Current-semester info card (header avatar popup), above the theme selector.
-   The wrapper is now always rendered (see layout.js refreshShellSemesterCard)
-   so it can be refreshed after cloud sync completes -- :empty keeps it from
-   taking up visible padding when there's no active semester to show yet. */
+/* Current-semester info card (header avatar popup), above the theme selector. */
 .profile-panel-section-semester {
     padding: var(--space-2) 0;
 }
@@ -547,8 +502,7 @@
     font-size: 0.72rem;
 }
 
-/* Logout row, shared by the header popup and the sidebar footer menu — same
-   native-button reset as the admin profile panel's logout control. */
+/* Logout row, shared by the header popup and the sidebar footer menu — same */
 .profile-item-btn {
     width: 100%;
     border: 0;
@@ -579,15 +533,10 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-3);
-    /* Without this the name/email column (a flex item) refuses to shrink
-       below its text's intrinsic width, so a long value pushes the popup
-       wider instead of truncating. */
     min-width: 0;
 }
 
-/* Name + email column: fixed to the space left by the avatar, never grows
-   the popup. Each line truncates independently so a long name doesn't
-   shrink the email's own space, and vice versa. */
+/* Name + email column: fixed to the space left by the avatar, never grows */
 .profile-panel-id {
     min-width: 0;
     max-width: 100%;

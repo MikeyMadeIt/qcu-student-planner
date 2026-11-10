@@ -1,15 +1,4 @@
 -- Creates the pending `profiles` row at the moment a new Supabase Auth user is
--- created, reading full_name/course/year_level/section/school straight off the
--- signup metadata (auth.users.raw_user_meta_data) instead of a follow-up RPC call.
---
--- This matters because a follow-up RPC call only works if the browser already
--- has an authenticated session, and Supabase does NOT issue a session at signUp()
--- time when "Confirm email" is enabled -- it only issues one after the user
--- clicks the confirmation link and logs in. Reading from signup metadata avoids
--- that race entirely: the row (with all submitted details) is created atomically
--- with the auth user, regardless of the project's email-confirmation setting.
---
--- Run this once in the Supabase SQL editor (or via `supabase db push`).
 
 create or replace function public.handle_new_user()
 returns trigger

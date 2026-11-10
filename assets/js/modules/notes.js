@@ -1,11 +1,5 @@
-/* ============================================================
-   NOTES.JS — v3 Comprehensive Update
-   Features: bulk-select, tags, templates, PDF export, masonry,
-             note preview modal, edit button, tag input fix,
-             word count, reading time, compact metadata
-   ============================================================ */
+// NOTES.JS — v3 Comprehensive Update
 
-/* ── State ── */
 let favFilterOn = false;
 let noteLinkFilter = 'all';
 let noteLinkSubId = '';
@@ -14,7 +8,6 @@ let ntSelectMode = false;
 let ntSelected = new Set();
 let ntTagFilter = '';
 var ntEditorSelection = null;
-/* ── Templates ── */
 const NOTE_TEMPLATES = {
     blank: { label: 'Blank Note', icon: 'bi-file-earmark', content: '' },
     lecture: {
@@ -34,7 +27,7 @@ const NOTE_TEMPLATES = {
     }
 };
 
-/* ── Init ── */
+// Init
 
 function initNotes() {
     renderNotes();
@@ -66,8 +59,6 @@ function initNotes() {
     populateNoteLinkFilters();
     ['noteCatFilter', 'noteLinkFilterSel'].forEach(ntSyncDropdown);
 }
-
-/* ── Filter dropdowns (popup menus driven by the hidden selects) ── */
 
 var NT_DD = {
     noteCatFilter: { allLabel: 'Categories', icon: 'bi-tags', optIcons: { '': 'bi-grid', Homework: 'bi-pencil', Lecture: 'bi-mortarboard', Project: 'bi-kanban', Personal: 'bi-person', Organization: 'bi-folder2', Ideas: 'bi-lightbulb' } },
@@ -130,7 +121,7 @@ function populateNoteLinkFilters() {
     ntSyncDropdown('noteTaskFilterSel');
 }
 
-/* ── Favorites filter ── */
+// Favorites filter
 
 function toggleFavFilter() {
     favFilterOn = !favFilterOn;
@@ -175,7 +166,7 @@ function clearNoteFilters() {
     renderNotes();
 }
 
-/* ── Select mode ── */
+// Select mode
 
 function enterSelectMode() {
     ntSelectMode = true;
@@ -227,7 +218,7 @@ function selectAllVisible() {
     renderNotes();
 }
 
-/* ── Bulk toolbar ── */
+// Bulk toolbar
 
 function renderNtBulkToolbar() {
     var existing = document.getElementById('ntBulkToolbar');
@@ -257,7 +248,7 @@ function renderNtBulkToolbar() {
         grid.parentNode.insertBefore(wrap, grid);
 }
 
-/* ── Bulk actions ── */
+// Bulk actions
 
 function bulkFavoriteNotes(setFav) {
     var notes = DB.getNotes();
@@ -292,7 +283,7 @@ function bulkDeleteNotes() {
     });
 }
 
-/* ── Filtering ── */
+// Filtering
 
 function getFilteredNotes() {
     var q = (document.getElementById('noteSearch') || {}).value || '';
@@ -336,9 +327,7 @@ function getFilteredNotes() {
     return list;
 }
 
-/* ── Word count + reading time ── */
-
-/* Plain text of a markdown note (no symbols), used for word counts and card excerpts. */
+// Plain text of a markdown note (no symbols), used for word counts and card excerpts.
 function mdToPlainText(content, codeText) {
     var escaped = [];
     return String(content || '')
@@ -373,14 +362,14 @@ function calcReadingTime(words) {
     return mins + ' min read';
 }
 
-/* ── Card preview (short excerpt) ── */
+// Card preview (short excerpt)
 
 function mdCardPreview(content) {
     var text = mdToPlainText(content, '[code]');
     return escapeHtml(text.slice(0, 140)) + (text.length > 140 ? '…' : '');
 }
 
-/* ── Render notes grid (masonry) ── */
+// Render notes grid (masonry)
 
 function renderNotes() {
     populateNoteLinkFilters();
@@ -405,12 +394,10 @@ function renderNotes() {
         var taskBroken = n.taskId && !task;
         var isSelected = ntSelected.has(n.id);
         var tags = n.tags || [];
-        // Word count
         var wc = calcWordCount(n.content);
         var wcHtml = '<span class="nt-card-wc">' + (wc > 0 ? wc.toLocaleString() + ' words · ' + calcReadingTime(wc) : 'Empty note') + '</span>';
         var preview = mdCardPreview(n.content);
         var date = new Date(n.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        // Bottom meta row: subject code · task · tags (all inline)
         var bottomMeta = '';
         var bottomParts = [];
         if (sub)
@@ -451,10 +438,8 @@ function renderNotes() {
             '</div>' +
             '</div></div>';
     }).join('');
-    // Attach card-body / preview-text click → open preview
     wrap.querySelectorAll('.note-card').forEach(function (card) {
         card.addEventListener('click', function (e) {
-            // Only trigger if clicking the card body or preview text (not buttons/chips)
             var isButton = e.target.closest('button') || e.target.closest('.nt-card-action-box') || e.target.closest('.nt-select-check');
             var isInteractive = e.target.closest('.nt-card-actions') || e.target.closest('.nt-card-cat-pill');
             if (isButton || isInteractive)
@@ -470,7 +455,7 @@ function renderNotes() {
     });
 }
 
-/* ── Toggle favorite ── */
+// Toggle favorite
 
 function toggleFavorite(id) {
     var notes = DB.getNotes();
@@ -482,7 +467,7 @@ function toggleFavorite(id) {
     renderNotes();
 }
 
-/* ── Note Preview Modal ── */
+// Note Preview Modal
 
 function openNotePreview(id) {
     var notes = DB.getNotes();
@@ -541,7 +526,6 @@ function openNotePreview(id) {
             '</div>';
     document.body.appendChild(overlay);
     requestAnimationFrame(function () { overlay.classList.add('open'); });
-    // Trap focus / close on Escape
     overlay.addEventListener('keydown', function (e) {
         if (e.key === 'Escape')
             closeNotePreview();
@@ -562,7 +546,7 @@ function closeNotePreview() {
         overlay.parentNode.removeChild(overlay); }, 280);
 }
 
-/* ── Markdown renderer (unchanged + checklist toggling) ── */
+// Markdown renderer (unchanged + checklist toggling)
 
 function renderMarkdown(src, noteId, forEditor) {
     var lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
@@ -570,8 +554,7 @@ function renderMarkdown(src, noteId, forEditor) {
     var paragraph = [];
     var LIST_LINE = /^([ \t]*)([-*+]|\d+[.)])(?:[ \t]+(.*))?$/;
 
-    /* Emphasis markers only count when they hug the text (no space just inside),
-       so "2 * 3 * 4" and snake_case_names stay plain text. */
+    // Emphasis markers only count when they hug the text (no space just inside),
     function emphasis(html) {
         return html.replace(/\*\*\*(\S(?:[^\n]*?\S)?)\*\*\*/g, '<strong><em>$1</em></strong>')
             .replace(/\*\*(\S(?:[^\n]*?\S)?)\*\*/g, '<strong>$1</strong>')
@@ -774,7 +757,7 @@ function toggleNoteChecklistItem(noteId, el, currentlyChecked, sourceLineIndex) 
     }
 }
 
-/* ── Markdown toolbar ── */
+// Markdown toolbar
 
 function saveNoteEditorSelection(editor) {
     if (!editor)
@@ -786,8 +769,6 @@ function saveNoteEditorSelection(editor) {
 }
 
 function restoreNoteEditorSelection(editor) {
-    /* Already focused with a live selection: leave it alone. Re-applying the saved range would
-       discard the browser's pending style (so Bold -> Italic pressed back to back lost the first toggle). */
     var live = window.getSelection();
     if (document.activeElement === editor && live && live.rangeCount && editor.contains(live.anchorNode))
         return true;
@@ -809,8 +790,7 @@ function restoreNoteEditorSelection(editor) {
     return true;
 }
 
-/* Characters that would be read back as formatting are backslash-escaped, so what the
-   user typed is exactly what they see after saving and reopening. */
+// Characters that would be read back as formatting are backslash-escaped, so what the
 function escapeNoteText(text) {
     return text.replace(/[\\`*\[\]]/g, '\\$&')
         .replace(/~~/g, '\\~\\~')

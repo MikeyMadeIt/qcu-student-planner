@@ -1,25 +1,4 @@
-/* ============================================================
-   Shared AI backend client (ES module).
-
-   Talks to the deployed Supabase Edge Function "ai-study" on
-   behalf of all three AI Tools pages (Quiz Maker, Flashcard
-   Maker, AI Study Assistant). Uses the project's existing
-   Supabase client/session — no new credentials, nothing secret
-   in frontend code. The Gemini API key lives only in Supabase
-   Secrets on the server side and is never touched here.
-
-   Request shape (sent as the Edge Function's JSON body):
-     { feature: 'quiz'|'flashcards'|'assistant', prompt, questionCount?,
-       difficulty?, file?: { name, mimeType, data } }
-
-   Response shape (what the function returns):
-     { success: true, feature, result }  — result's shape depends on feature
-     { success: false, error: '...' }    — or a non-2xx HTTP status
-
-   supabase.functions.invoke() automatically attaches the current
-   session's access token as the Authorization header (same
-   mechanism already used by admin-service.js's "admin-delete-account"
-   call) — no header is built by hand here. ============================================================ */
+// Shared AI backend client (ES module).
 
 import { getSupabase } from '../core/supabase-client.js';
 
@@ -41,17 +20,7 @@ function timeoutAfter(ms) {
     });
 }
 
-/**
- * Calls the "ai-study" Edge Function.
- *
- * @param {Object} params
- * @param {'quiz'|'flashcards'|'assistant'} params.feature
- * @param {string} params.prompt - already trimmed to the backend's prompt limit.
- * @param {number} [params.questionCount] - quiz only, 1-20.
- * @param {'easy'|'medium'|'hard'} [params.difficulty] - quiz only.
- * @param {{base64:string, mimeType:string, fileName:string, fileSize:number}} [params.file] - optional attachment.
- * @returns {Promise<{ok:true, data:any} | {ok:false, message:string}>}
- */
+// Calls the "ai-study" Edge Function.
 async function callAiBackend({ feature, prompt, questionCount, difficulty, file }) {
     let supabase;
     try {
@@ -119,8 +88,7 @@ async function callAiBackend({ feature, prompt, questionCount, difficulty, file 
     return ok(data.result);
 }
 
-/* Turns a supabase-js FunctionsError into a short, student-facing message —
-   never surfaces stack traces or raw server internals. */
+// Turns a supabase-js FunctionsError into a short, student-facing message —
 async function describeInvokeError(error) {
     const status = error && error.context && error.context.status;
 
@@ -169,9 +137,6 @@ export const AiService = {
         });
     },
 
-    /* The backend takes a single "prompt", not a history array, so the running
-       conversation context is folded into the prompt text here — trimmed to
-       the backend's character limit, dropping the oldest turns first. */
     sendStudyAssistantMessage({ message, history, file }) {
         const prompt = buildAssistantPrompt(message, history);
         return callAiBackend({ feature: 'assistant', prompt, file });
@@ -186,10 +151,7 @@ function buildPromptFromTopicAndNotes(topic, notes, file) {
     return parts.join('\n\n');
 }
 
-/* Builds "<trimmed prior turns>\n\nStudent: <message>" and trims from the
-   oldest turn forward until it fits AI_PROMPT_CHAR_LIMIT, always keeping the
-   newest message intact. Returns just the current message if even that
-   doesn't fit alongside any context. */
+// Builds "<trimmed prior turns>\n\nStudent: <message>" and trims from the
 function buildAssistantPrompt(message, history) {
     const currentLine = `Student: ${(message || '').trim()}`;
     const reserve = AI_PROMPT_CHAR_LIMIT - currentLine.length - 64; /* headroom for framing text */
@@ -198,7 +160,6 @@ function buildAssistantPrompt(message, history) {
     const turns = Array.isArray(history) ? history : [];
     const lines = [];
     let used = 0;
-    /* walk from most-recent to oldest, keep what fits, then restore order */
     for (let i = turns.length - 1; i >= 0; i--) {
         const turn = turns[i];
         if (!turn || typeof turn.content !== 'string') continue;

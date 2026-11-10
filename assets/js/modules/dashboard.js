@@ -1,6 +1,4 @@
-﻿/* ============================================================
-   DASHBOARD.JS — Enhanced Command Center
-   ============================================================ */
+﻿// DASHBOARD.JS — Enhanced Command Center
 
 function initDashboard() {
     renderSemesterOverview();
@@ -9,13 +7,10 @@ function initDashboard() {
     renderAttendanceDonut();
     renderTodaySchedule();
     renderUpcomingTasks();
-    // Refresh schedule every minute
     setInterval(renderTodaySchedule, 60000);
 }
 
-/* ============================================================
-   1. SEMESTER OVERVIEW
-   ============================================================ */
+// 1. SEMESTER OVERVIEW
 
 function renderSemesterOverview() {
     const sem = DB.getActiveSemester();
@@ -31,13 +26,10 @@ function renderSemesterOverview() {
     const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
     const pct = totalMs > 0 ? Math.round(elapsedMs / totalMs * 100) : 0;
     const totalWeeks = sem.totalWeeks || 15;
-    // MIN-03: guard pre-semester state — Math.max(1,...) previously forced Week 1 even before the
-    // semester started. Now weekNum is 0 when now < start so we can show "Not started yet".
     const weekNum = now < start ? 0 : Math.min(totalWeeks, Math.ceil((now - start) / 604800000));
     const weeksLeft = Math.max(0, totalWeeks - weekNum);
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
-        // MIN-03: Render 'Not started yet' when weekNum === 0 (before semester start date).
         wiEl.innerHTML = weekNum === 0
             ? '<i class="bi bi-calendar3-week me-1"></i>Not started yet'
             : '<i class="bi bi-calendar3-week me-1"></i>Week ' + weekNum + ' of ' + totalWeeks;
@@ -60,9 +52,7 @@ function renderSemesterOverview() {
     }, 120);
 }
 
-/* ============================================================
-   2. STAT CARDS
-   ============================================================ */
+// 2. STAT CARDS
 
 function computeSyllabusCoverage(semId) {
     var courses = DB.getSyllabusCourses().filter(function (c) { return c.semesterId === semId; });
@@ -158,10 +148,6 @@ function animateCountUp(id, from, to, duration, fmt) {
     }
     requestAnimationFrame(step);
 }
-
-/* ============================================================
-   3. GRADE PERFORMANCE
-   ============================================================ */
 
 var GRADE_TABLE_DASH = [
     { point: 1.00, min: 99 }, { point: 1.25, min: 96 }, { point: 1.50, min: 93 },
@@ -269,9 +255,7 @@ function renderGradePerformance() {
     }, 180);
 }
 
-/* ============================================================
-   4. ATTENDANCE DONUT
-   ============================================================ */
+// 4. ATTENDANCE DONUT
 
 function computeAttendanceRate(semId) {
     var records = DB.getAttendance().filter(function (r) { return r.semesterId === semId && r.status !== 'No Classes'; });
@@ -296,7 +280,6 @@ function renderAttendanceDonut() {
     var pctEl = document.getElementById('donutPct');
     if (pctEl)
         pctEl.textContent = pctNum !== null ? pctNum + '%' : '\u2013';
-    // Keep the legend scannable; the donut center carries the overall rate.
     var presEl = document.getElementById('attPresent');
     if (presEl)
         presEl.textContent = counts.Present;
@@ -309,7 +292,7 @@ function renderAttendanceDonut() {
     var absEl = document.getElementById('attAbsent');
     if (absEl)
         absEl.textContent = counts.Absent;
-    var circ = 314.16; // 2 * PI * 50
+    var circ = 314.16;
     var order = [
         { id: 'donutPresent', count: counts.Present },
         { id: 'donutLate', count: counts.Late },
@@ -339,9 +322,7 @@ function renderAttendanceDonut() {
     });
 }
 
-/* ============================================================
-   5. TODAY'S SCHEDULE
-   ============================================================ */
+// 5. TODAY'S SCHEDULE
 
 function renderTodaySchedule() {
     var wrap = document.getElementById('dashTodaySchedule');
@@ -349,8 +330,6 @@ function renderTodaySchedule() {
         return;
     var semId = DB.getActiveSemesterId();
     var dayName = DAY_NAMES[new Date().getDay()];
-    // MIN-04: Exclude cancelled occurrences so suspended classes don't appear on the dashboard.
-    // DB.getCancelledOccurrences() is the same data source isOccurrenceCancelled() uses in schedule.js.
     var todayStr = todayKey();
     if (!isDateInSemester(todayStr)) {
         var activeSemester = DB.getActiveSemester();
@@ -404,9 +383,7 @@ function renderTodaySchedule() {
     }).join('');
 }
 
-/* ============================================================
-   6. UPCOMING TASKS
-   ============================================================ */
+// 6. UPCOMING TASKS
 
 function renderUpcomingTasks() {
     var wrap = document.getElementById('dashUpcomingTasks');
@@ -415,12 +392,10 @@ function renderUpcomingTasks() {
     var semId = DB.getActiveSemesterId();
     var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
     var today = todayKey();
-    // Overdue tasks (show up to 2)
     var overdueTasks = DB.getTasks()
         .filter(function (t) { return t.semesterId === semId && t.status !== 'completed' && t.dueDate < today; })
         .sort(function (a, b) { return b.dueDate.localeCompare(a.dueDate); })
         .slice(0, 2);
-    // Upcoming tasks (after today)
     var upcomingTasks = DB.getTasks()
         .filter(function (t) { return t.semesterId === semId && t.status !== 'completed' && t.dueDate > today; })
         .sort(function (a, b) { return (a.dueDate + (a.dueTime || '')).localeCompare(b.dueDate + (b.dueTime || '')); })
@@ -478,9 +453,7 @@ function taskCatIcon(cat) {
     return map[cat] || 'bi-check2-square';
 }
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
+// HELPERS
 
 function dashEmpty(icon, title, sub) {
     return '<div class="dash-empty">' +

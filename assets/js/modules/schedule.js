@@ -1,12 +1,7 @@
-/* ============================================================
-   SCHEDULE.JS — Advanced Academic Command Center
-   ============================================================ */
+// SCHEDULE.JS — Advanced Academic Command Center
 
-/* ── State ── */
 let schedView = 'day';
 let showArchived = false;
-/* Timetable zoom: fixed steps. 100% = 52px per hour; every step maps to a whole-pixel
-   hour height (26 / 39 / 52 / 65 / 78) so blocks and grid lines always agree. */
 const TT_ZOOM_LEVELS = [50, 75, 100, 125, 150];
 const TT_BASE_HOUR_PX = 52;
 let ttZoomPct = 100;
@@ -16,7 +11,7 @@ let _weekOffset = 0;
 let _tickTimer = null;
 let _pinchStartDist = 0;
 let _pinchStartZoom = 100;
-/* ── Helpers ── */
+// Helpers
 
 function esc(s) { return escHtml(s); }
 
@@ -39,9 +34,8 @@ function sameDay(a, b) { return isoDate(a) === isoDate(b); }
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-/* ── Cancellation helpers ── */
 
-/* AJ-08: Route through DB so cloud-sync.js can intercept saves/hydrate. */
+// AJ-08: Route through DB so cloud-sync.js can intercept saves/hydrate.
 function getCancelledOccurrences() {
     return DB.getCancelledOccurrences();
 }
@@ -74,7 +68,7 @@ function restoreOccurrence(subjectId, dateStr) {
     saveCancelledOccurrences(arr);
 }
 
-/* ── Attendance helpers ── */
+// Attendance helpers
 
 function getAttendanceRecord(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
@@ -94,7 +88,7 @@ function logQuickAttendance(subjectId, dateStr, status) {
     DB.saveAttendance(records);
 }
 
-/* ── Grade helpers ── */
+// Grade helpers
 
 function getSubjectGradeAvg(subjectId) {
     const grades = DB.getGrades();
@@ -137,13 +131,13 @@ function getSubjectAttendanceRate(subjectId) {
     return Math.round(present / records.length * 100);
 }
 
-/* ── Init ── */
+// Init
 
 function initSchedule() {
     const params = new URLSearchParams(location.search);
     if (params.get('new') === '1')
         openSubjectModal();
-    setSchedView('day'); // sets initial view and syncs buttons
+    setSchedView('day');
     renderNav();
     renderAllViews();
     startTick();
@@ -156,14 +150,14 @@ function initSchedule() {
     });
 }
 
-/* ── Tick ── */
+// Tick
 
 function startTick() {
     clearInterval(_tickTimer);
     _tickTimer = setInterval(() => { renderNextCard(); renderDaySummary(); }, 30000);
 }
 
-/* ── View switching ── */
+// View switching
 
 function setSchedView(v) {
     schedView = v;
@@ -174,8 +168,6 @@ function setSchedView(v) {
     document.getElementById('schTasksPanel').classList.toggle('d-none', v !== 'day');
     renderAllViews();
 }
-
-/* ── View picker (icon button + anchored dropdown, à la the Add-task menu) ── */
 
 const SCHED_VIEWS = [
     { id: 'day', label: 'Day', icon: 'bi-calendar-day', desc: 'Classes for the selected day' },
@@ -213,7 +205,7 @@ function chooseView(v) {
     setSchedView(v);
 }
 
-/* ── Week / day navigation ── */
+// Week / day navigation
 
 function shiftWeek(dir) {
     _weekOffset += dir;
@@ -243,7 +235,7 @@ function selectDay(d) {
     renderAllViews();
 }
 
-/* ── Navigation bar render ── */
+// Navigation bar render
 
 function renderNav() {
     const ws = weekStart(_selectedDate);
@@ -263,7 +255,6 @@ function renderNav() {
         const dayName = DAY_SHORT[d.getDay()];
         const dateStr = isoDate(d);
         const inSemester = isDateInSemester(d);
-        // No has-classes dots — removed per requirement #5
         return `<button class="sch-day-btn ${isSel ? 'selected' : ''} ${isToday ? 'today' : ''}" style="${inSemester ? '' : 'opacity:.45'}" onclick="selectDay(new Date('${dateStr}T00:00:00'))" aria-label="${DAY_LONG[d.getDay()]} ${d.getDate()}${inSemester ? '' : ', outside semester'}" aria-pressed="${isSel ? 'true' : 'false'}">
       <span class="sch-day-name">${dayName.toUpperCase()}</span>
       <span class="sch-day-num">${d.getDate()}</span>
@@ -271,7 +262,7 @@ function renderNav() {
     }).join('');
 }
 
-/* ── Get subjects for a day ── */
+// Get subjects for a day
 
 function getSubjectsForDay(date) {
     const semId = DB.getActiveSemesterId();
@@ -302,14 +293,14 @@ function getSemesterEmptyState(date) {
     return null;
 }
 
-/* ── All semester subjects ── */
+// All semester subjects
 
 function getSemesterSubjects() {
     const semId = DB.getActiveSemesterId();
     return DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
 }
 
-/* ── Tasks helpers ── */
+// Tasks helpers
 
 function getTasksDueToday(subjectId) {
     const today = isoDate(new Date());
@@ -323,7 +314,7 @@ function getAllTasksDueToday() {
     return DB.getTasks().filter(t => t.semesterId === semId && t.dueDate === today);
 }
 
-/* ── Next/current class logic (skips cancelled) ── */
+// Next/current class logic (skips cancelled)
 
 function getNextOrCurrentClass(date) {
     const dateStr = isoDate(date);
@@ -340,7 +331,7 @@ function getNextOrCurrentClass(date) {
     return null;
 }
 
-/* ── Conflict detection ── */
+// Conflict detection
 
 function detectConflicts(classes) {
     const conflicts = [];
@@ -363,7 +354,7 @@ function detectConflicts(classes) {
     return conflicts;
 }
 
-/* ── Detect conflicts for all days (for week view) ── */
+// Detect conflicts for all days (for week view)
 
 function detectAllWeekConflicts() {
     const semId = DB.getActiveSemesterId();
@@ -377,7 +368,7 @@ function detectAllWeekConflicts() {
     return conflictSubjectIds;
 }
 
-/* ── Check conflict for save (returns array of conflicting subjects) ── */
+// Check conflict for save (returns array of conflicting subjects)
 
 function checkSaveConflict(data, excludeId) {
     const semId = DB.getActiveSemesterId();
@@ -398,7 +389,7 @@ function checkSaveConflict(data, excludeId) {
     return conflicts;
 }
 
-/* ── Free time blocks ── */
+// Free time blocks
 
 function buildTimeline(classes) {
     const MIN_FREE = 15;
@@ -416,7 +407,7 @@ function buildTimeline(classes) {
     return items;
 }
 
-/* ── Render all views ── */
+// Render all views
 
 function renderAllViews() {
     renderNextCard();
@@ -430,7 +421,7 @@ function renderAllViews() {
         renderListView();
 }
 
-/* ── Next / Current class card (improved) ── */
+// Next / Current class card (improved)
 
 function renderNextCard() {
     const host = document.getElementById('schNextCard');
@@ -518,7 +509,7 @@ function renderNextCard() {
     }
 }
 
-/* ── Build location string ── */
+// Build location string
 
 function buildLocation(s) {
     if (s.online)
@@ -531,7 +522,7 @@ function buildLocation(s) {
     return parts.join(' · ') || (s.room || s.building || '');
 }
 
-/* ── Attendance button builder ── */
+// Attendance button builder
 
 function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal') {
     const isSmall = size === 'small';
@@ -546,7 +537,7 @@ function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal')
     return `<button class="${btnClass}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" aria-label="Log attendance for this class"><i class="bi bi-person-check" aria-hidden="true"></i> Attendance</button>`;
 }
 
-/* ── Attendance icon button (compact, for card header) ── */
+// Attendance icon button (compact, for card header)
 
 function buildAttendanceIconBtn(subjectId, dateStr, existingStatus) {
     if (existingStatus && existingStatus !== 'No Classes') {
@@ -559,13 +550,12 @@ function buildAttendanceIconBtn(subjectId, dateStr, existingStatus) {
     return `<button class="btn-icon sched-icon-btn" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Log attendance" aria-label="Log attendance"><i class="bi bi-person-check" aria-hidden="true"></i></button>`;
 }
 
-/* ── Quick Attendance Modal ── */
+// Quick Attendance Modal
 
 function openQuickAttModal(subjectId, dateStr) {
     const s = DB.getSubject(subjectId);
     if (!s)
         return;
-    // Check if this occurrence is cancelled — don't allow logging for cancelled classes
     if (isOccurrenceCancelled(subjectId, dateStr)) {
         Toast.show('This class was cancelled — attendance not applicable', 'high', 'bi-ban');
         return;
@@ -664,7 +654,7 @@ function clearQuickAtt(subjectId, dateStr) {
     renderAllViews();
 }
 
-/* ── Cancel Occurrence Modal ── */
+// Cancel Occurrence Modal
 
 function openCancelModal(subjectId, dateStr) {
     const s = DB.getSubject(subjectId);
@@ -740,7 +730,6 @@ function doCancel() {
     const subjectId = document.getElementById('cancelSubjectId').value;
     const dateStr = document.getElementById('cancelDate').value;
     const reason = (document.getElementById('cancelReason')?.value || '').trim();
-    // Mark attendance as No Classes
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
     const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId);
@@ -759,7 +748,6 @@ function doCancel() {
 }
 
 function doRestoreOccurrence(subjectId, dateStr) {
-    // Remove No Classes attendance record
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId && r.status === 'No Classes'));
     DB.saveAttendance(records);
@@ -771,7 +759,7 @@ function doRestoreOccurrence(subjectId, dateStr) {
     renderAllViews();
 }
 
-/* ── Day view: summary + timeline ── */
+// Day view: summary + timeline
 
 function renderDaySummary() {
     const host = document.getElementById('schDayView');
@@ -848,7 +836,6 @@ function renderDaySummary() {
             const attRecord = isToday ? getAttendanceRecord(s.id, dateStr) : null;
             const attStatus = attRecord ? attRecord.status : null;
             const isConflict = activeClasses.length && conflicts.some(c => c.a.id === s.id || c.b.id === s.id);
-            // Day view: only Edit and Cancel buttons (Info removed — #10)
             return `<div class="sch-tl-item ${isNow ? 'is-now' : ''} ${isPast ? 'is-past' : ''} ${cancelled ? 'is-cancelled' : ''}" id="schTl-${s.id}" role="listitem">
         <div class="sch-tl-left" aria-hidden="true">
           <div class="sch-tl-time">${fmtTime(s.start)}</div>
@@ -888,7 +875,7 @@ function renderDaySummary() {
     host.innerHTML = summaryHtml + conflictHtml + timelineHtml;
 }
 
-/* ── Today's tasks panel ── */
+// Today's tasks panel
 
 function renderTasksPanel() {
     const host = document.getElementById('schTasksPanel');
@@ -914,7 +901,7 @@ function renderTasksPanel() {
   </div>`;
 }
 
-/* ── Weekly timetable ── */
+// Weekly timetable
 
 function setTtZoom(pct) {
     if (!TT_ZOOM_LEVELS.includes(pct))
@@ -994,9 +981,6 @@ function renderTimetable() {
         }
         dayClasses.forEach(s => {
             const cancelled = isOccurrenceCancelled(s.id, dateStr);
-            // Position purely from minutes so the block's top/bottom sit exactly on its
-            // start/end time lines at every zoom level (no fixed minimum that would
-            // stretch a short class past its end time).
             const sh = toMins(s.start) / 60, eh = toMins(s.end) / 60;
             const top = (sh - startHour) * ttHourHeight;
             const height = Math.max(2, (eh - sh) * ttHourHeight);
@@ -1029,7 +1013,7 @@ function renderTimetable() {
     wrap.innerHTML = html;
 }
 
-/* ── Timetable popup (info only, no action buttons) ── */
+// Timetable popup (info only, no action buttons)
 
 function showTimetablePopup(subjectId, dateStr) {
     const s = DB.getSubject(subjectId);
@@ -1120,7 +1104,7 @@ function computeOverlaps(classes) {
     return map;
 }
 
-/* ── Subject list view (improved) ── */
+// Subject list view (improved)
 
 function renderListView() {
     const wrap = document.getElementById('schSubjectList');
@@ -1203,22 +1187,19 @@ function renderListView() {
     }).join('');
 }
 
-/* ── Attendance from Subject list view ── */
+// Attendance from Subject list view
 
 function openAttendanceForSubject(subjectId) {
     const s = DB.getSubject(subjectId);
     if (!s)
         return;
     const today = isoDate(new Date());
-    // Check if today is a class day for this subject
     const todayDayName = DAY_SHORT[new Date().getDay()];
     const isClassDay = s.days && s.days.includes(todayDayName);
-    // Check if cancelled
     if (isClassDay && isOccurrenceCancelled(subjectId, today)) {
         Toast.show("Today's class was cancelled — attendance not applicable", 'high', 'bi-ban');
         return;
     }
-    // Use today's date for attendance
     openQuickAttModal(subjectId, today);
 }
 
@@ -1228,7 +1209,7 @@ function toggleArchivedView() {
     renderListView();
 }
 
-/* ── Subject detail modal (timetable card popup replacement kept separate) ── */
+// Subject detail modal (timetable card popup replacement kept separate)
 
 function showSubjectDetail(id) {
     const s = DB.getSubject(id);
@@ -1274,10 +1255,8 @@ function showSubjectDetail(id) {
     new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
-/* ── Time field: typed input + dropdown picker ── */
-
-const TIME_MENU_FIRST = 5 * 60;       // 5:00 AM
-const TIME_MENU_LAST = 23 * 60 + 45;  // 11:45 PM
+const TIME_MENU_FIRST = 5 * 60;
+const TIME_MENU_LAST = 23 * 60 + 45;
 const TIME_MENU_STEP = 15;
 const TIME_ORDER_MSG = 'End time must be later than start time';
 const _timeAssumed = { Start: false, End: false };
@@ -1302,7 +1281,7 @@ function formatClassLength(mins) {
     return [h ? `${h} hr` : '', m ? `${m} min` : ''].filter(Boolean).join(' ');
 }
 
-/* Returns { empty } | { error } | { value:'HH:MM', assumed:boolean } */
+// Returns { empty } | { error } | { value:'HH:MM', assumed:boolean }
 function parseTimeText(raw, afterMins) {
     let s = String(raw == null ? '' : raw).trim().toLowerCase().replace(/\s+/g, ' ');
     if (!s)
@@ -1353,7 +1332,7 @@ function parseTimeText(raw, afterMins) {
         if (!explicit24) {
             assumed = true;
             if (h >= 1 && h <= 6)
-                h += 12; // 7-11 stay AM, 12 stays noon, 1-6 -> PM
+                h += 12;
         }
     }
     let mins = h * 60 + mi;
@@ -1427,7 +1406,7 @@ function refreshTimeHint() {
         : 'Type a time (9:30 AM, 930, 14:30) or tap the clock to pick.';
 }
 
-/* Parse whatever is typed, write the clean text + the canonical HH:MM hidden value. */
+// Parse whatever is typed, write the clean text + the canonical HH:MM hidden value.
 function commitTimeField(key) {
     const el = timeEls(key);
     if (!el.text)
@@ -1516,7 +1495,6 @@ function openTimeMenu(key) {
     el.text.setAttribute('aria-expanded', 'true');
     _timeNavigated[key] = false;
 
-    // Open upward when there isn't room below
     el.menu.classList.remove('is-up');
     const fr = el.field.getBoundingClientRect();
     const br = (el.field.closest('.modal-body') || document.body).getBoundingClientRect();
@@ -1524,7 +1502,6 @@ function openTimeMenu(key) {
     const above = fr.top - Math.max(br.top, 0);
     el.menu.classList.toggle('is-up', below < 240 && above > below);
 
-    // Pre-select: current value, else a sensible default (8:00 AM, or Start + 1.5 hr)
     const target = curMins != null && times.includes(curMins) ? curMins
         : (startMins != null ? startMins + 90 : 8 * 60);
     const nearest = times.reduce((b, m) => Math.abs(m - target) < Math.abs(b - target) ? m : b, times[0]);
@@ -1556,7 +1533,7 @@ function initSubjectTimeFields() {
         el.text.addEventListener('input', () => {
             setTimeError(key, '');
             _timeNavigated[key] = false;
-            if (!el.menu.hidden) { // keep the list in step with what's being typed
+            if (!el.menu.hidden) {
                 const after = key === 'End' ? timeValueToMins(document.getElementById('subStart').value) : null;
                 const r = parseTimeText(el.text.value, after);
                 const opt = r.value && el.menu.querySelector(`[data-value="${r.value}"]`);
@@ -1586,10 +1563,10 @@ function initSubjectTimeFields() {
                     commitTimeField(key);
                 closeTimeMenu(key);
                 if (window.matchMedia('(hover: none)').matches)
-                    el.text.blur(); // dismiss the on-screen keyboard
+                    el.text.blur();
             }
             else if (e.key === 'Escape' && !el.menu.hidden) {
-                e.stopPropagation(); // close the list, not the whole modal
+                e.stopPropagation();
                 closeTimeMenu(key);
             }
         });
@@ -1607,7 +1584,7 @@ function initSubjectTimeFields() {
             commitTimeField(key);
             openTimeMenu(key);
         });
-        el.menu.addEventListener('mousedown', e => e.preventDefault()); // keep focus where it is
+        el.menu.addEventListener('mousedown', e => e.preventDefault());
         el.menu.addEventListener('click', e => {
             const opt = e.target.closest('.sch-time-opt');
             if (!opt)
@@ -1625,7 +1602,7 @@ function initSubjectTimeFields() {
     }
 }
 
-/* ── CRUD ── */
+// CRUD
 
 function updateSubjectTimeValidation() {
     commitTimeField('Start');
@@ -1694,7 +1671,6 @@ function openSubjectModal(id) {
       <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
-    // Toggle physical fields based on online checkbox
     const onlineCheck = body.querySelector('#subOnline');
     function togglePhysical() {
         const isOn = onlineCheck.checked;
@@ -1793,7 +1769,6 @@ function saveSubject() {
         semesterId: sem ? sem.id : DB.getActiveSemesterId(),
         archived: false,
     };
-    // Conflict check
     const conflicts = checkSaveConflict(data, id || null);
     const warnEl = document.getElementById('subConflictWarning');
     if (conflicts.length) {
@@ -1812,7 +1787,6 @@ function saveSubject() {
     }
     else
         subjects.push({ id: DB.uid(), ...data });
-    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
     if (DB.saveSubjects(subjects) === false) {
         Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
@@ -1831,7 +1805,6 @@ function deleteSubject(id) {
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
         confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
         onConfirm() {
-            // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
             if (DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)) === false) {
                 Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
                 return;
@@ -1848,7 +1821,6 @@ function duplicateSubject(id) {
     if (!s)
         return;
     subjects.push({ ...s, id: DB.uid(), code: s.code + ' (copy)' });
-    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
     if (DB.saveSubjects(subjects) === false) {
         Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
@@ -1863,7 +1835,6 @@ function archiveSubject(id) {
     if (!s)
         return;
     s.archived = !s.archived;
-    // DB.saveSubjects() returns false when the localStorage write fails (storage full/blocked).
     if (DB.saveSubjects(subjects) === false) {
         Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         return;
@@ -1872,7 +1843,7 @@ function archiveSubject(id) {
     renderAllViews();
 }
 
-/* ── Pinch-to-zoom for timetable ── */
+// Pinch-to-zoom for timetable
 
 function setupPinchZoom() {
     const el = document.getElementById('schTimetableView');
@@ -1892,7 +1863,6 @@ function setupPinchZoom() {
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             const dist = Math.sqrt(dx * dx + dy * dy);
             const scale = dist / (_pinchStartDist || 1);
-            // Snap to the nearest fixed step (50/75/100/125/150%)
             if (setTtZoom(_pinchStartZoom * scale))
                 renderTimetable();
         }

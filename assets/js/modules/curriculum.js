@@ -1,10 +1,4 @@
-/* ============================================================
-   CURRICULUM.JS: per-program curriculum shown as a single-page PDF viewer
-   Keys must match the program codes in assets/data/registration-options.json.
-   file: null means the curriculum PDF is not available yet.
-   Preview uses PDF.js (loaded in curriculum.html). Phones that can't
-   render the preview still get the Download and Open buttons.
-   ============================================================ */
+// CURRICULUM.JS: per-program curriculum shown as a single-page PDF viewer
 
 const CURRICULA = {
     'BSA':       { title: 'Bachelor of Science in Accountancy', version: 'AY 2025-2026', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bsa.pdf' },
@@ -16,7 +10,6 @@ const CURRICULA = {
     'BSCS':      { title: 'Bachelor of Science in Computer Science', version: 'AY 2023-2024', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/bscs.pdf' },
     'BECEd':     { title: 'Bachelor of Early Childhood Education', version: 'BECEd-2022', file: 'https://pjafmgabajqqozdxhzvz.supabase.co/storage/v1/object/public/curriculum/becd.pdf' },
 
-    /* No curriculum PDF yet */
     'BSMA':      { title: 'Bachelor of Science in Management Accounting', version: '', file: null },
     'BSCpE':     { title: 'Bachelor of Science in Computer Engineering', version: '', file: null },
 };
@@ -137,7 +130,6 @@ function bindCurControls() {
         drawCurPage();
     });
 
-    /* Swipe left/right to change page, only when not zoomed in */
     const stage = curEl('curStage');
     let startX = null;
     stage.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
@@ -225,7 +217,6 @@ function updateCurControls() {
     curEl('curZoomIn').disabled = curState.zoom >= CUR_ZOOM_MAX;
 }
 
-/* Redraw at the new width when the screen rotates or resizes */
 window.addEventListener('resize', () => {
     clearTimeout(curState.resizeTimer);
     curState.resizeTimer = setTimeout(() => {

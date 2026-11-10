@@ -1,14 +1,7 @@
-/* Data access for the registration dropdown options (ES module).
-   Today this reads a static JSON file (assets/data/registration-options.json). A future backend
-   can replace the fetch call. If the fetch fails for any reason (network error, bad status, a
-   relative fetch() blocked under file:// or a different base path, malformed JSON, ...), we fall
-   back to an embedded copy of the same data below so the registration form always has options to
-   show, instead of leaving the user stuck on a broken step. */
+// Data access for the registration dropdown options (ES module).
 
 import { APP_CONFIG } from '../core/config.js';
 
-/* Keep this in sync with assets/data/registration-options.json. Shape matches exactly what
-   populateOptions() in register-wizard.js expects: { campuses, yearLevels, colleges }. */
 const FALLBACK_OPTIONS = {
     campuses: [
         'San Bartolome',

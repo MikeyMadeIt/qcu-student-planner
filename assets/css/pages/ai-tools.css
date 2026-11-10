@@ -1,7 +1,4 @@
-/* ---------- SHARED AI TOOLS STYLES ----------
-   Quiz Maker, Flashcard Maker, AI Study Assistant.
-   Built entirely from existing design tokens (variables.css) —
-   no new colors introduced. */
+/* SHARED AI TOOLS STYLES */
 
 .ai-grid {
     display: grid;
@@ -20,16 +17,14 @@
     margin-bottom: .4rem;
 }
 
-/* Stacked at every width — including the two-column desktop layout, where
-   the Quiz Maker's "number of questions" slider and difficulty pills read
-   more cleanly one above the other than squeezed into a single narrow row. */
+/* Stacked at every width — including the two-column desktop layout, where */
 .ai-field-row {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
 }
 
-/* ---- File attachment control (shared) ---- */
+/* File attachment control (shared) */
 .ai-attach {
     border: 1px dashed var(--border);
     border-radius: var(--radius-md);
@@ -80,7 +75,7 @@
     gap: .5rem;
 }
 
-/* ---- Loading / error / empty states (shared) ---- */
+/* Loading / error / empty states (shared) */
 .ai-state {
     text-align: center;
     padding: 2.5rem 1rem;
@@ -111,7 +106,7 @@
     to { transform: rotate(360deg); }
 }
 
-/* ---- Quiz taking ---- */
+/* Quiz taking */
 .ai-quiz-progress {
     display: flex;
     align-items: center;
@@ -228,7 +223,7 @@
     gap: .75rem;
 }
 
-/* ---- Quiz results ---- */
+/* Quiz results */
 .ai-score-ring {
     width: 7rem;
     height: 7rem;
@@ -276,7 +271,7 @@
     align-items: flex-start;
 }
 
-/* ---- Flashcards ---- */
+/* Flashcards */
 .ai-flashcard-stage {
     display: flex;
     flex-direction: column;
@@ -340,7 +335,7 @@
     gap: .75rem;
 }
 
-/* ---- Study assistant (chat) ---- */
+/* Study assistant (chat) */
 .ai-chat-shell {
     display: flex;
     flex-direction: column;
@@ -465,28 +460,14 @@
     30% { transform: translateY(-4px); opacity: 1; }
 }
 
-/* ============================================================
-   AI QUIZ MAKER — page-specific layout
-   (classes prefixed "aqm-" originated on this page but are now the
-   shared two-column AI-tool layout: AI Flashcard Maker reuses them
-   directly instead of duplicating the layout/upload/history rules.
-   Nothing above this point is touched, so the Study Assistant is
-   unaffected.) ============================================================ */
-
-/* ---- Two-column desktop layout: a comfortably-sized form next to a
-   scannable history list, instead of either stretching edge-to-edge. ---- */
+/* Two-column desktop layout: a comfortably-sized form next to a */
 .aqm-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--page-gap);
-    /* Mobile: each card hugs its own content — the history card should
-       only grow as tall as the quizzes actually in it. */
     align-items: start;
 }
 
-/* .aqm-layout replaces the old flat .glass + section pair, so it needs its
-   own top-margin rule mirroring the shared "stacked .glass/section" rhythm
-   in components/cards.css. */
 .main-content > .aqm-layout + .glass,
 .main-content > .aqm-layout + section {
     margin-top: var(--page-gap);
@@ -494,20 +475,12 @@
 
 @media (min-width: 992px) {
     .aqm-layout {
-        /* Equal-width columns so the form and the history list read as a
-           matching pair of cards, not a wide form next to a narrow strip. */
         grid-template-columns: 1fr 1fr;
-        /* Desktop: both cards match the height of the taller one, instead
-           of the history card trailing off short. */
         align-items: stretch;
     }
 
     .aqm-history {
         height: 100%;
-        /* The grid row is sized by the taller column (usually the form).
-           Without a cap here, a long list of saved quizzes would instead
-           grow the row — and the form card with it — so the list scrolls
-           inside the fixed card height instead. */
         min-height: 0;
     }
 
@@ -523,7 +496,7 @@
     margin-inline: auto;
 }
 
-/* ---- File upload dropzone ---- */
+/* File upload dropzone */
 .aqm-dropzone {
     position: relative;
     width: 100%;
@@ -564,10 +537,6 @@
     text-align: left;
 }
 
-/* Our own classes set display:flex at the same specificity the browser's
-   default [hidden]{display:none} uses, and author rules always win that
-   tie — so toggling the "hidden" attribute alone wouldn't hide these.
-   Restate it explicitly for both toggled pieces of the dropzone. */
 .aqm-dropzone-empty[hidden],
 .aqm-dropzone-file[hidden] {
     display: none;
@@ -626,7 +595,7 @@
     }
 }
 
-/* ---- Number-of-questions slider ---- */
+/* Number-of-questions slider */
 .aqm-range-head {
     display: flex;
     align-items: baseline;
@@ -708,8 +677,7 @@
     box-shadow: 0 0 0 1px rgb(var(--accent)), var(--focus-ring);
 }
 
-/* ---- Difficulty pill group: three equal, independent pills (not one
-   bordered rectangle with segments inside it). ---- */
+/* Difficulty pill group: three equal, independent pills (not one */
 .aqm-pills {
     display: flex;
     gap: .5rem;
@@ -748,11 +716,7 @@
     margin-top: 1.5rem;
 }
 
-/* ---- Saved-quiz history ---- */
-
-/* The card itself is a column so the list below the heading can flex to
-   fill the card's height on desktop (where .aqm-history gets height:100%
-   to match the form card) while staying auto-height on mobile. */
+/* The card itself is a column so the list below the heading can flex to */
 .aqm-history {
     display: flex;
     flex-direction: column;
@@ -783,9 +747,7 @@
     gap: .6rem;
 }
 
-/* Loading / empty / error states — centered, so on desktop (where the
-   card is stretched to match the form's height) they sit in the middle
-   of the card instead of pinned to the top. */
+/* Loading / empty / error states — centered, so on desktop (where the */
 .aqm-history-empty {
     flex: 1 1 auto;
     display: flex;
@@ -841,9 +803,6 @@
     font-weight: 700;
     font-size: .86rem;
     line-height: 1.3;
-    /* Single line with an ellipsis — defined here directly (not only via
-       Bootstrap's .text-truncate) so a long title can never force the
-       card taller. */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -865,16 +824,14 @@
     flex-shrink: 0;
 }
 
-/* Smaller than the default .btn-icon.btn-sm glyph size so a row of two
-   icon buttons stays visually light next to a compact history card. */
+/* Smaller than the default .btn-icon.btn-sm glyph size so a row of two */
 .aqm-history-card-actions .btn-icon {
     width: 1.85rem;
     height: 1.85rem;
     font-size: .85rem;
 }
 
-/* Delete reads as a distinct, danger-tinted action rather than a second
-   "Open"-looking button. */
+/* Delete reads as a distinct, danger-tinted action rather than a second */
 .aqm-history-card-actions .aqm-danger {
     color: var(--danger);
     background: rgba(214, 67, 60, .08);

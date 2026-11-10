@@ -1,7 +1,4 @@
-/* ============================================================
-PHASE 1 ADDITIONS
-============================================================ */
-/* Semester manager (moved from settings.html <style> block) */
+/* PHASE 1 ADDITIONS */
 
 .sem-year-group {
 }
@@ -85,8 +82,6 @@ PHASE 1 ADDITIONS
     white-space: nowrap;
 }
 
-/* Mobile-friendly semester items */
-
 @media (max-width: 430px) {
     .sem-item {
         padding: 8px 10px;
@@ -162,7 +157,7 @@ textarea:focus-visible {
     z-index: 200;
 }
 
-/* ── app.js dynamic elements ── */
+/* app.js dynamic elements */
 
 .confirm-icon-wrap {
     width: 54px;
@@ -215,8 +210,7 @@ textarea:focus-visible {
     transition: box-shadow .15s;
 }
 
-/* ── Dashboard (moved from index.html <style> block) ── */
-/* ---- shared shell bar (theme switch + account menu) ---- */
+/* Dashboard (moved from index.html <style> block) */
 
 .dropdown-menu {
     background: var(--elevated);

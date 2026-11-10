@@ -1,10 +1,4 @@
-/* ============================================================
-   AI QUIZ MAKER
-   Creation form -> validated quiz structure -> interactive
-   quiz-taking UI with scoring, review and retake.
-   Classic script; loads AiService via a dynamic import since
-   this file is not itself a module. Nothing here is saved to a
-   database — the generated quiz lives only in page memory. ============================================================ */
+// AI QUIZ MAKER
 
 let aqmAttachment = null; /* { getFile, clear } from initAiFileAttachment */
 let aqmQuiz = null;       /* validated quiz object currently loaded */
@@ -17,10 +11,7 @@ let aqmSavePromise = null; /* resolves when the quiz row exists */
 
 function aqmEl(id) { return document.getElementById(id); }
 
-/* Binds one listener defensively: a missing element or any other setup error
-   is logged instead of thrown, so one bad lookup can never again silently
-   stop the rest of this page's controls (including the Generate button)
-   from being wired up. */
+// Binds one listener defensively: a missing element or any other setup error
 function aqmSafeBind(id, event, handler) {
     try {
         const el = aqmEl(id);
@@ -32,8 +23,6 @@ function aqmSafeBind(id, event, handler) {
 }
 
 function initAiQuizMaker() {
-    /* The Generate form's submit handler is bound first and on its own, so it
-       can never be skipped because something else below it failed to set up. */
     aqmSafeBind('aqmForm', 'submit', event => {
         event.preventDefault();
         aqmGenerate();
@@ -79,9 +68,7 @@ function initAiQuizMaker() {
     aqmLoadHistory();
 }
 
-/* Three-way "Easy / Medium / Hard" pill group. Keeps the hidden #aqmDifficulty
-   input (read by aqmGenerate) in sync and behaves like a radio group for
-   keyboard and screen-reader users. */
+// Three-way "Easy / Medium / Hard" pill group. Keeps the hidden #aqmDifficulty
 function aqmInitDifficultyPills() {
     const group = aqmEl('aqmDifficultyGroup');
     const hiddenInput = aqmEl('aqmDifficulty');
@@ -186,13 +173,7 @@ async function aqmGenerate() {
     }
 }
 
-/* Defensively validates the AI's response shape so a malformed reply never
-   crashes the page. The real "ai-study" backend returns each question as
-   { question, A, B, C, D, correctAnswer: "A"|"B"|"C"|"D", explanation } —
-   this also tolerates a choices[]/correctIndex shape or a lettered object
-   under "choices", in case the model's output format drifts slightly.
-   Returns a normalized { title, questions:[{question,choices,correctIndex,
-   explanation}] } object, or null if nothing usable could be recovered. */
+// Defensively validates the AI's response shape so a malformed reply never
 function aqmValidateQuiz(data) {
     if (!data || typeof data !== 'object') return null;
     const title = typeof data.title === 'string' && data.title.trim() ? data.title.trim() : 'Your Quiz';
@@ -206,7 +187,6 @@ function aqmValidateQuiz(data) {
         const questionText = typeof q.question === 'string' ? q.question.trim() : '';
         if (!questionText) continue;
 
-        /* Pull the four choices from whichever shape is present. */
         let choices = [];
         if (letters.every(l => typeof q[l] === 'string' && q[l].trim())) {
             choices = letters.map(l => q[l].trim());
@@ -431,9 +411,7 @@ async function aqmLoadHistory() {
     }
 }
 
-/* Shared markup for the history list's loading / empty / error states —
-   centered icon + message, filling the card the same way whether it's
-   waiting, has nothing to show, or failed to load. */
+// Shared markup for the history list's loading / empty / error states —
 function aqmHistoryEmptyMarkup(icon, title, subtext) {
     return `<div class="aqm-history-empty">
         <i class="bi ${icon}" aria-hidden="true"></i>
@@ -465,7 +443,6 @@ function aqmDeleteSaved(id) {
     });
 }
 
-/* "View results" link available from the last question after submitting. */
 document.addEventListener('click', event => {
     if (event.target.closest && event.target.closest('#aqmViewResultsBtn'))
         aqmShowResults();

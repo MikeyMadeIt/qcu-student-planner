@@ -16,12 +16,10 @@ function formatTime(value) {
 let currentPage = 1;
 let isSending = false;
 
-/* Selected recipient IDs for the 'selected' / 'single' scopes, keyed by student id
-   so toggling a checkbox is an O(1) Map operation regardless of list size. */
 let selectedStudents = new Map();
 let allStudentsCache = [];
 
-/* ---------- Message history (list) ---------- */
+// Message history (list)
 
 async function loadRows() {
     const body = document.getElementById('admBody');
@@ -91,7 +89,7 @@ async function loadRows() {
     if (nextBtn) nextBtn.addEventListener('click', () => { currentPage += 1; loadRows(); });
 }
 
-/* ---------- View details ---------- */
+// View details
 
 async function viewMessage(id) {
     const bodyEl = document.getElementById('msgDetailBody');
@@ -165,12 +163,11 @@ function onRowAction(e) {
         if (btn.dataset.act === 'archive') archiveMessage(id, btn.dataset.subject || 'this message');
         return;
     }
-    // Clicking anywhere else on the row (Gmail-style) opens the message.
     const row = e.target.closest('.msg-row');
     if (row) viewMessage(row.dataset.id);
 }
 
-/* ---------- Compose: recipient picker ---------- */
+// Compose: recipient picker
 
 function renderRecipientList(students) {
     const list = document.getElementById('cmRecipientList');
@@ -225,7 +222,7 @@ function onScopeChange() {
     if (scope !== 'all') loadStudentsForPicker(document.getElementById('cmRecipientSearch').value);
 }
 
-/* ---------- Compose: send ---------- */
+// Compose: send
 
 function resetComposeForm() {
     document.getElementById('composeForm').reset();
@@ -302,7 +299,7 @@ async function onComposeSubmit(e) {
     loadRows();
 }
 
-/* ---------- Filters ---------- */
+// Filters
 
 function wireFilters() {
     let searchTimer = null;
