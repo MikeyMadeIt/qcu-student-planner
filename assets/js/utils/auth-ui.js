@@ -1,4 +1,4 @@
-/* Small DOM helpers shared by every authentication page (ES module). */
+// Small DOM helpers shared by every authentication page (ES module).
 
 import { normalizeText, normalizeEmail } from './sanitize.js';
 import { PASSWORD_RULES } from './validation.js';

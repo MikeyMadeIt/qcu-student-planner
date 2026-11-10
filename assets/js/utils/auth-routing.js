@@ -1,8 +1,4 @@
-/* Single source of truth for "where does this signed-in user land" (ES module).
-   Both the password login form (auth-forms.js) and the Google OAuth callback
-   (auth-callback.js) call this, so the account_status gate behaves identically
-   no matter how the session was created -- a pending/rejected/suspended account
-   must never reach an app page regardless of sign-in method. */
+// Single source of truth for "where does this signed-in user land" (ES module).
 
 export function resolveLandingRoute({ role, accountStatus, rejectionReason, needsProfileDetails }) {
     if (accountStatus === 'approved' && role === 'admin') {
@@ -24,8 +20,7 @@ export function resolveLandingRoute({ role, accountStatus, rejectionReason, need
     return { type: 'blocked', message: 'Your account has been suspended. Contact an administrator for help.' };
 }
 
-/* An academic-details step is still owed when any of the fields our own registration
-   form collects (and Google never supplies) are missing. */
+// An academic-details step is still owed when any of the fields our own registration
 export function needsProfileDetails(profile) {
     if (!profile) return false;
     return !profile.course || !profile.year_level || !profile.school;

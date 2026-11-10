@@ -1,6 +1,4 @@
-/* Shared constants for Admin Inbox / Student Inbox / Support Tickets (ES module).
-   Used by both admin-side and student-side pages so labels, category options and
-   status options can never drift apart between the two. */
+// Shared constants for Admin Inbox / Student Inbox / Support Tickets (ES module).
 
 export const MESSAGE_CATEGORY_LABELS = {
     announcement: 'Announcement',

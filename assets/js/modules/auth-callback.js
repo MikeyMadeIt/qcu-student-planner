@@ -1,7 +1,4 @@
-/* pages/auth/callback.html entry point (ES module). This is the one place a Google OAuth
-   sign-in gets routed from -- Supabase already created a live session by the time the browser
-   lands here, so the "manual approval, not automatic sign-in" requirement is enforced right
-   here, using the same resolveLandingRoute() logic the password login form uses. */
+// pages/auth/callback.html entry point (ES module). This is the one place a Google OAuth
 
 import { AuthService } from '../services/auth-service.js';
 import { resolveLandingRoute, needsProfileDetails } from '../utils/auth-routing.js';
@@ -31,9 +28,6 @@ function readOAuthError() {
 }
 
 async function loadProfileWithRetry() {
-    /* First-ever sign-in: handle_new_user() creates the pending profiles row via a DB trigger
-       on auth.users insert. It is effectively instant, but give it a couple of short retries
-       rather than failing outright on an unlucky race. */
     let result = await AuthService.getCurrentProfile();
     let attempts = 0;
 
@@ -81,8 +75,6 @@ async function handleCallback() {
         return;
     }
 
-    /* Rejected/suspended: a session technically exists, but this account is not allowed in --
-       sign it back out immediately so nothing lingers in the browser. */
     await AuthService.signOut();
     showFailure(destination.message);
 }

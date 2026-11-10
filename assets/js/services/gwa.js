@@ -1,4 +1,4 @@
-/* GWA and grade calculations (pure logic, no DOM). Philippine 1.00–5.00 scale. */
+// GWA and grade calculations (pure logic, no DOM). Philippine 1.00–5.00 scale.
 const GRADE_TABLE = [
     { point: 1.00, min: 96.50, max: 100, label: 'Excellent' },
     { point: 1.25, min: 92.50, max: 96.49, label: 'Very Good' },
@@ -30,7 +30,7 @@ function gwaLabel(point) {
     return row ? row.label : '—';
 }
 
-/* ---- Grade math ---- */
+// Grade math
 
 function assessmentPct(a) {
     if (a.score === null || a.totalItems === null || a.totalItems === 0)
@@ -59,15 +59,8 @@ function computeSubjectFinalPct(components) {
     if (!scored.length)
         return null;
     const weightedSum = scored.reduce((s, c) => s + componentWeightedScore(c), 0);
-    /* MAJ-04: normalise by the sum of weights that actually have scores so the
-       result stays on a 0-100 scale even when the total weight != 100%.  When
-       all weights sum to exactly 100 this is a no-op (division by 1). */
     const scoredWeight = scored.reduce((s, c) => s + (+c.weight || 0), 0);
     const totalWeight  = sumWeights(components);
-    /* Use the proportion of the full declared weight that the scored components
-       cover.  This prevents over- or under-inflation when weights sum to != 100
-       while still producing a correct partial grade when some components are
-       not yet entered. */
     const divisor = totalWeight > 0 ? scoredWeight / totalWeight : 1;
     return divisor > 0 ? weightedSum / divisor : null;
 }

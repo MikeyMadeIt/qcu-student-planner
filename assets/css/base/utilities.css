@@ -86,8 +86,6 @@
     }
 }
 
-/* reduced motion */
-
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: .001s !important;
@@ -133,10 +131,6 @@
     }
 }
 
-/* ============================================================
-PREFERS-REDUCED-MOTION
-============================================================ */
-
 @media (prefers-reduced-motion: reduce) {
     .grade-trend-svg,
     .att-absence-row,
@@ -151,8 +145,6 @@ PREFERS-REDUCED-MOTION
         transition: none !important;
     }
 }
-
-/* ---- user display preferences (set by core/theme.js) ---- */
 
 [data-motion="reduced"] *,
 [data-motion="reduced"] *::before,

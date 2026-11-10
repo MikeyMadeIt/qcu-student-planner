@@ -1,30 +1,6 @@
 -- PHASE 5: Admin Inbox (one-way admin -> student messaging) and the student
--- Report tab's Support Tickets backend.
---
--- Two independent features, two independent schemas:
---   A. admin_messages / admin_message_recipients -- an administrator composes
---      ONE message and sends it to one, several, or all approved students.
---      Students can read it and toggle it read/unread. They can never reply,
---      edit it, or message each other through this table. There is no
---      "incoming" direction for students at all.
---   B. support_tickets / support_ticket_notes -- a student submits a report
---      about an issue. Only an admin can change its status or add an
---      internal note. There is no reply/conversation thread in this phase.
---
--- Every write (send a message, mark read/unread, submit a report, change a
--- ticket's status, add a note) goes through a SECURITY DEFINER function that
--- re-checks is_admin()/auth.uid() itself -- exactly the same pattern already
--- used by set_account_status() and admin_delete_rejected_account() in
--- 0002/0006. No table below grants INSERT/UPDATE/DELETE to the `authenticated`
--- role directly, so the frontend cannot write to them except through these
--- functions, and RLS stays the real boundary (never a frontend-only check).
---
--- Run this once in the Supabase SQL editor (or via `supabase db push`), after
--- 0001-0007. Safe to re-run (create-if-not-exists / create-or-replace throughout).
 
--- =============================================================================
 -- A. ADMIN INBOX
--- =============================================================================
 
 create table if not exists public.admin_messages (
     id uuid primary key default gen_random_uuid(),
@@ -68,7 +44,6 @@ alter table public.admin_messages enable row level security;
 alter table public.admin_message_recipients enable row level security;
 
 -- Admins see every message; a student sees a message only if they are one of
--- its recipients AND it has not been archived.
 drop policy if exists admin_messages_select on public.admin_messages;
 create policy admin_messages_select on public.admin_messages
     for select to authenticated using (
@@ -83,23 +58,13 @@ create policy admin_messages_select on public.admin_messages
     );
 
 -- A student may only ever see their own recipient row; admins see all (needed
--- for the admin message-detail recipient/read-status view).
 drop policy if exists admin_message_recipients_select on public.admin_message_recipients;
 create policy admin_message_recipients_select on public.admin_message_recipients
     for select to authenticated using (
         student_id = (select auth.uid()) or (select public.is_admin())
     );
 
--- Intentionally no insert/update/delete policy on either table for any client
--- role -- every write goes through the functions below, which run as the
--- table owner and therefore bypass RLS (identical to admin_audit_log's model).
-
--- -----------------------------------------------------------------------------
 -- admin_send_message(): the only way a message + its recipient rows are ever
--- created. Runs as one transaction (the whole function body), so a message is
--- either fully created with every recipient row or not created at all -- never
--- a message with a partial recipient list.
--- -----------------------------------------------------------------------------
 create or replace function public.admin_send_message(
     p_subject text,
     p_body text,
@@ -139,10 +104,6 @@ begin
         raise exception 'Invalid recipient scope: %', p_recipient_scope using errcode = '22023';
     end if;
 
-    -- The recipient audience is always re-derived from `profiles` here, never
-    -- trusted from the client beyond *which* student IDs were requested --
-    -- so a tampered request can never reach a pending/rejected/suspended
-    -- account, and 'all' can never be spoofed into something narrower/wider.
     if p_recipient_scope = 'all' then
         select array_agg(id) into v_recipient_ids
           from public.profiles
@@ -192,11 +153,7 @@ $$;
 
 grant execute on function public.admin_send_message(text, text, text, text, uuid[]) to authenticated;
 
--- -----------------------------------------------------------------------------
 -- admin_archive_message(): soft-delete. Recipient rows (and their read state)
--- are preserved for audit purposes and for the admin's own message history;
--- the message is simply hidden from the student-facing select policy above.
--- -----------------------------------------------------------------------------
 create or replace function public.admin_archive_message(p_message_id uuid)
 returns void
 language plpgsql
@@ -225,11 +182,7 @@ $$;
 
 grant execute on function public.admin_archive_message(uuid) to authenticated;
 
--- -----------------------------------------------------------------------------
 -- set_message_read_status(): the only way a recipient row's read state
--- changes. A student can only ever touch their own row (student_id =
--- auth.uid() in the WHERE clause), and only this one column.
--- -----------------------------------------------------------------------------
 create or replace function public.set_message_read_status(p_message_id uuid, p_is_read boolean)
 returns void
 language plpgsql
@@ -254,9 +207,7 @@ $$;
 
 grant execute on function public.set_message_read_status(uuid, boolean) to authenticated;
 
--- =============================================================================
 -- B. STUDENT SUPPORT TICKETS (Report tab)
--- =============================================================================
 
 create sequence if not exists public.support_ticket_ref_seq;
 
@@ -306,20 +257,12 @@ create policy support_tickets_select on public.support_tickets
         student_id = (select auth.uid()) or (select public.is_admin())
     );
 
--- Internal notes: admin-only, in both directions -- a student must never be
--- able to read (or write) these, even for their own ticket.
+-- Internal notes: admin-only, in both directions a student must never be
 drop policy if exists support_ticket_notes_select on public.support_ticket_notes;
 create policy support_ticket_notes_select on public.support_ticket_notes
     for select to authenticated using ((select public.is_admin()));
 
--- Intentionally no insert/update/delete policy for any client role -- all
--- writes go through the functions below.
-
--- -----------------------------------------------------------------------------
 -- submit_support_report(): the only way a ticket is created. Always writes
--- student_id = auth.uid() server-side, so a student can never file a report
--- under another account's identity no matter what the client sends.
--- -----------------------------------------------------------------------------
 create or replace function public.submit_support_report(
     p_category text,
     p_subject text,
@@ -367,9 +310,7 @@ $$;
 
 grant execute on function public.submit_support_report(text, text, text) to authenticated;
 
--- -----------------------------------------------------------------------------
 -- admin_set_ticket_status(): the only way a ticket's status changes.
--- -----------------------------------------------------------------------------
 create or replace function public.admin_set_ticket_status(
     p_ticket_id uuid,
     p_new_status text,
@@ -415,9 +356,7 @@ $$;
 
 grant execute on function public.admin_set_ticket_status(uuid, text, text) to authenticated;
 
--- -----------------------------------------------------------------------------
 -- admin_add_ticket_note(): add an internal note without changing status.
--- -----------------------------------------------------------------------------
 create or replace function public.admin_add_ticket_note(p_ticket_id uuid, p_note text)
 returns void
 language plpgsql

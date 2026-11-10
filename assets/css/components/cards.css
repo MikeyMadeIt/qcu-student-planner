@@ -1,4 +1,4 @@
-/* ---------- CARD (Swiss editorial: flat surface, border-led, no blur/lift) ---------- */
+/* CARD (Swiss editorial: flat surface, border-led, no blur/lift) */
 
 .glass {
     background: var(--surface);
@@ -44,8 +44,7 @@
     border-color: rgb(var(--accent));
 }
 
-/* Editorial section heading: small accent rule + label, used to open every
-   major block (dashboard sections, card groups, list headers). */
+/* Editorial section heading: small accent rule + label, used to open every */
 .section-title {
     display: flex;
     align-items: center;
@@ -67,11 +66,6 @@
     font-size: 0.88rem;
 }
 
-/* ---------- Shared vertical rhythm ---------- */
-/* One gap value between stacked cards/sections on every page, so a page
-   that stacks several .glass blocks (or any "section"-level wrapper)
-   gets identical breathing room without each page inventing its own
-   margin-bottom value. */
 .main-content > .glass + .glass,
 .main-content > .glass + section,
 .main-content > section + .glass,
@@ -80,10 +74,7 @@
     margin-top: var(--page-gap);
 }
 
-/* ---------- Upcoming-feature placeholder (student sidebar items not built yet) ----------
-   Shown on student pages whose sidebar entry is marked "Soon" (or any AI tool that
-   isn't implemented yet) instead of a blank or broken page. Mirrors the admin side's
-   .adm-placeholder look so both read as the same pattern. See feature-placeholder.js. */
+/* Upcoming-feature placeholder (student sidebar items not built yet) */
 .feature-placeholder {
     text-align: center;
     padding: var(--space-6) var(--space-4);

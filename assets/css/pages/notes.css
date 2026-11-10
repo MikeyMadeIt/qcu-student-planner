@@ -16,10 +16,7 @@
     color: var(--warning);
 }
 
-/* ============================================================
-NOTES v2 — Editor toolbar, preview, checklist, badges
-============================================================ */
-/* ── Note card redesign ── */
+/* NOTES v2 — Editor toolbar, preview, checklist, badges */
 
 .note-card {
     border-radius: 5px;
@@ -119,7 +116,7 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     gap: 6px;
 }
 
-/* ── Note Modal editor ── */
+/* Note Modal editor */
 
 .note-editor-tabs {
     display: flex;
@@ -288,7 +285,7 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     overflow-x: auto;
 }
 
-/* ── Markdown rendered output ── */
+/* Markdown rendered output */
 
 .md-p {
     margin: 0 0 .5em;
@@ -377,8 +374,6 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     color: var(--text-faint);
 }
 
-/* Block quotes (editor, preview, full note view, PDF) */
-
 .md-quote,
 .note-editor-ta blockquote {
     margin: .5em 0 .7em;
@@ -390,8 +385,6 @@ NOTES v2 — Editor toolbar, preview, checklist, badges
     font-style: italic;
     overflow-wrap: anywhere;
 }
-
-/* Nested lists */
 
 .md-ul .md-ul,
 .md-ul ol,
@@ -423,8 +416,6 @@ ol ol,
     list-style: revert;
     padding-left: 2.2em;
 }
-
-/* Mobile note editor */
 
 @media (max-width: 575.98px) {
     .note-md-toolbar {
@@ -462,8 +453,6 @@ ol ol,
     }
 }
 
-/* prefers-reduced-motion */
-
 @media (prefers-reduced-motion: reduce) {
     .tk-card,
     .note-card,
@@ -475,10 +464,7 @@ ol ol,
     }
 }
 
-/* ============================================================
-NOTES — Redesigned header, controls, and card improvements
-============================================================ */
-/* ── Notes page header ── */
+/* NOTES — Redesigned header, controls, and card improvements */
 
 .nt-header {
     display: flex;
@@ -500,7 +486,7 @@ NOTES — Redesigned header, controls, and card improvements
     align-self: flex-start;
 }
 
-/* ── Notes controls panel ── */
+/* Notes controls panel */
 
 .nt-controls {
     margin-bottom: var(--page-gap);
@@ -582,7 +568,7 @@ NOTES — Redesigned header, controls, and card improvements
     min-width: 120px;
 }
 
-/* ── Note card header improvements ── */
+/* Note card header improvements */
 
 .note-card-title-wrap {
     display: flex;
@@ -592,7 +578,7 @@ NOTES — Redesigned header, controls, and card improvements
     min-width: 0;
     overflow: hidden;
 }
-/* ── Favorite button redesign ── */
+/* Favorite button redesign */
 
 .note-fav-btn {
     background: none;
@@ -636,8 +622,6 @@ NOTES — Redesigned header, controls, and card improvements
     white-space: nowrap;
 }
 
-/* Mobile notes layout */
-
 @media (max-width: 575.98px) {
     /* Same header pattern as Tasks: title block, then a full-width action. */
     .nt-header {
@@ -672,12 +656,7 @@ NOTES — Redesigned header, controls, and card improvements
     }
 }
 
-/* ============================================================
-NOTES v3 — Comprehensive overhaul
-Masonry grid, bulk-select, tags, preview modal, PDF export,
-templates, compact metadata, card interactions
-============================================================ */
-/* ── Responsive notes grid ── */
+/* NOTES v3 — Comprehensive overhaul */
 
 .nt-masonry-grid {
     display: grid;
@@ -715,7 +694,7 @@ templates, compact metadata, card interactions
     margin-top: var(--space-2);
 }
 
-/* ── Select mode: card selected state ── */
+/* Select mode: card selected state */
 
 .nt-note-selected .note-card {
     border: 1.5px solid rgba(var(--accent), .55) !important;
@@ -723,7 +702,7 @@ templates, compact metadata, card interactions
     background: rgba(var(--accent), .04) !important;
 }
 
-/* ── Select checkbox on card ── */
+/* Select checkbox on card */
 
 .nt-select-check {
     position: absolute;
@@ -762,7 +741,7 @@ templates, compact metadata, card interactions
     position: relative;
 }
 
-/* ── Card header actions (Fav + Edit) ── */
+/* Card header actions (Fav + Edit) */
 
 .nt-card-actions {
     display: flex;
@@ -797,7 +776,7 @@ templates, compact metadata, card interactions
     pointer-events: none;
 }
 
-/* ── Card metadata ── */
+/* Card metadata */
 
 .nt-card-meta {
     display: flex;
@@ -822,7 +801,7 @@ templates, compact metadata, card interactions
     letter-spacing: .01em;
 }
 
-/* ── Tag chips ── */
+/* Tag chips */
 
 .nt-card-tags {
     display: flex;
@@ -857,7 +836,7 @@ templates, compact metadata, card interactions
     flex-shrink: 0;
 }
 
-/* ── Subject / Task links on card ── */
+/* Subject / Task links on card */
 
 .nt-card-links {
     display: flex;
@@ -903,7 +882,7 @@ templates, compact metadata, card interactions
     flex-shrink: 0;
 }
 
-/* ── Word count on card ── */
+/* Word count on card */
 
 .nt-card-wc {
     font-size: .65rem;
@@ -911,7 +890,7 @@ templates, compact metadata, card interactions
     white-space: nowrap;
 }
 
-/* ── Controls: second row with filters + select ── */
+/* Controls: second row with filters + select */
 
 .nt-controls-row2 {
     display: flex;
@@ -934,7 +913,7 @@ templates, compact metadata, card interactions
     flex-shrink: 0;
 }
 
-/* ── Select button ── */
+/* Select button */
 
 .nt-select-btn {
     display: flex;
@@ -953,7 +932,7 @@ templates, compact metadata, card interactions
     font-size: .82rem;
 }
 
-/* ── Select-all button ── */
+/* Select-all button */
 
 .nt-select-all-btn {
     display: flex;
@@ -991,7 +970,7 @@ templates, compact metadata, card interactions
     background: rgba(var(--accent), .14) !important;
 }
 
-/* ── Bulk toolbar ── */
+/* Bulk toolbar */
 
 .nt-bulk-toolbar {
     display: flex;
@@ -1084,7 +1063,7 @@ templates, compact metadata, card interactions
     flex-shrink: 0;
 }
 
-/* ── Tag input in modal ── */
+/* Tag input in modal */
 
 .nt-tags-input-wrap {
     display: flex;
@@ -1166,7 +1145,7 @@ templates, compact metadata, card interactions
     color: var(--text-faint);
 }
 
-/* ── Templates ── */
+/* Templates */
 
 .nt-template-wrap {
     position: relative;
@@ -1220,7 +1199,7 @@ templates, compact metadata, card interactions
     flex-shrink: 0;
 }
 
-/* ── Toolbar separator ── */
+/* Toolbar separator */
 
 .nt-tb-sep {
     width: 1px;
@@ -1231,7 +1210,7 @@ templates, compact metadata, card interactions
     align-self: center;
 }
 
-/* ── Note Preview Overlay ── */
+/* Note Preview Overlay */
 
 .nt-preview-overlay {
     position: fixed;
@@ -1436,7 +1415,7 @@ templates, compact metadata, card interactions
     overscroll-behavior: contain;
 }
 
-/* ── Improved editor tabs row ── */
+/* Improved editor tabs row */
 
 .note-editor-tabs-row {
     display: flex;
@@ -1445,8 +1424,6 @@ templates, compact metadata, card interactions
     margin-bottom: 6px;
     gap: 8px;
 }
-
-/* ── Responsive: Notes ── */
 
 @media (max-width: 991.98px) {
     .nt-preview-panel {
@@ -1547,8 +1524,6 @@ templates, compact metadata, card interactions
     }
 }
 
-/* ── Reduced motion ── */
-
 @media (prefers-reduced-motion: reduce) {
     .nt-preview-panel,
     .nt-preview-overlay,
@@ -1570,10 +1545,7 @@ templates, compact metadata, card interactions
     background: rgba(0,0,0,.3);
 }
 
-/* ============================================================
-NOTES v3.1 — Card layout fixes, modal opacity, select icon
-============================================================ */
-/* ── Note card: header row ── */
+/* NOTES v3.1 — Card layout fixes, modal opacity, select icon */
 
 .note-card-header {
     display: flex;
@@ -1702,7 +1674,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     background: rgba(180,83,9,.18);
 }
 
-/* ── Bottom meta row: subject · task · tags (all inline) ── */
+/* Bottom meta row: subject · task · tags (all inline) */
 
 .nt-card-bottom-meta {
     display: flex;
@@ -1778,7 +1750,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     padding: 0 2px;
 }
 
-/* ── Select icon-only button (in search row) ── */
+/* Select icon-only button (in search row) */
 
 .nt-select-icon-btn {
     width: 36px !important;
@@ -1797,7 +1769,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     background: rgba(var(--accent), .14) !important;
 }
 
-/* ── Note preview text (no onclick needed, card handles it) ── */
+/* Note preview text (no onclick needed, card handles it) */
 
 .note-preview-text {
     cursor: pointer;
@@ -1810,7 +1782,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     margin-bottom: 2px;
 }
 
-/* ── Note card footer ── */
+/* Note card footer */
 
 .note-card-footer {
     display: flex;
@@ -1820,8 +1792,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     gap: 6px;
 }
 
-/* ── Modal: make it more opaque / visible ── */
-/* Note card glass: slightly more opaque for readability */
+/* Modal: make it more opaque / visible */
 
 .note-card.glass {
     background: var(--surface-2) !important;
@@ -1834,8 +1805,6 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
 [data-theme="light"] .note-card.glass {
     background: rgba(255,255,255,.90) !important;
 }
-
-/* ── Mobile: compact header ── */
 
 @media (max-width: 575.98px) {
     .nt-card-actions {
@@ -1873,7 +1842,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     }
 }
 
-/* ── Note preview panel: solid background ── */
+/* Note preview panel: solid background */
 
 .nt-preview-panel {
     background: var(--bg) !important;
@@ -1893,7 +1862,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     background: #0e0e0e !important;
 }
 
-/* ── Remove old conflicting rules ── */
+/* Remove old conflicting rules */
 
 .note-fav-btn {
     display: none !important;
@@ -1922,12 +1891,6 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
 .nt-card-links {
     display: none !important;
 }
-
-/* replaced by bottom meta */
-
-/* ============================================================
-   NOTES — uniform control height + popup filter dropdowns
-============================================================ */
 
 /* Every control in the panel shares one height (search, select, star, filters, All) */
 .nt-search-input {
@@ -2103,7 +2066,6 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     }
 }
 
-/* ── Select + star buttons: exactly the same height as the search bar & filters ── */
 .nt-controls .nt-icon-btn,
 .nt-controls .nt-select-icon-btn {
     width: var(--btn-height) !important;
@@ -2114,7 +2076,7 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     font-size: 1rem !important;
 }
 
-/* ── Select-all inside the bulk toolbar ── */
+/* Select-all inside the bulk toolbar */
 .nt-bulk-all-active {
     color: rgb(var(--accent));
     border-color: rgba(var(--accent), .45);
@@ -2130,11 +2092,6 @@ NOTES v3.1 — Card layout fixes, modal opacity, select icon
     font-family: inherit !important;
 }
 
-/* ============================================================
-   NOTES — formatting parity: editor, Preview tab, note view
-   ============================================================ */
-
-/* One heading scale everywhere (H1/H2/H3 buttons are h4/h5/h6) */
 .note-editor-ta h4, .note-editor-ta h5, .note-editor-ta h6,
 .note-preview-pane h4.md-h, .note-preview-pane h5.md-h, .note-preview-pane h6.md-h,
 .nt-preview-content h4.md-h, .nt-preview-content h5.md-h, .nt-preview-content h6.md-h {
