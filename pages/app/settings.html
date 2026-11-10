@@ -18,80 +18,115 @@
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content">
     <div class="topbar"><div><h1 class="page-title">Settings</h1><p class="page-sub">Personalize your planner</p></div></div>
-
-    <div class="row g-3">
-      <div class="col-lg-6">
-        <div class="glass card-pad fade-in mb-3">
-          <div class="section-title"><i class="bi bi-person-fill"></i>Student Profile</div>
-          <div class="row g-2">
-            <div class="col-12"><label for="sName">Name</label><input class="form-control" id="sName" autocomplete="name"></div>
-            <div class="col-12"><label for="sCourse">Course</label><input class="form-control" id="sCourse" autocomplete="off"></div>
-            <div class="col-12"><label for="sYear">Year Level</label><input class="form-control" id="sYear" autocomplete="off"></div>
-            <div class="col-12"><label for="sSchool">School</label><input class="form-control" id="sSchool" autocomplete="organization"></div>
-          </div>
-          <button class="btn btn-accent w-100 mt-3" onclick="saveProfile()">Save Profile</button>
-        </div>
-
-        <div class="glass card-pad fade-in mb-3">
-          <div class="section-title"><i class="bi bi-calendar3"></i>Academic Semesters</div>
-          <p class="text-faint mb-3" style="font-size:.8rem">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, notes, and syllabi.</p>
-          <div id="semesterManager">Loading…</div>
-        </div>
-
-        <div class="glass card-pad fade-in mb-3" id="syncStatusCard" hidden>
-          <div class="section-title"><i class="bi bi-cloud-slash"></i>Sync Status</div>
-          <p class="text-faint mb-2" style="font-size:.8rem" id="syncStatusMsg"></p>
-          <button class="btn btn-ghost w-100" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh &amp; Retry</button>
-        </div>
-
-        <div class="glass card-pad fade-in">
-          <div class="section-title"><i class="bi bi-bell-fill"></i>Notifications</div>
-          <div id="notifToggles"></div>
-          <button class="btn btn-ghost w-100 mt-2" onclick="requestNotifPermission()"><i class="bi bi-bell me-1"></i>Enable Browser Notifications</button>
+  
+    <div class="row">
+      <!-- Settings Navigation -->
+      <div class="col-lg-3">
+        <div class="glass card-pad fade-in mb-4 set-nav">
+          <div class="section-title set-nav-btn active" onclick="selectCategory('general')"><i class="bi bi-person-fill"></i>General</div>
+          <div class="section-title set-nav-btn" onclick="selectCategory('academic')"><i class="bi bi-calendar3"></i>Academic</div>
+          <div class="section-title set-nav-btn" onclick="selectCategory('personalize')"><i class="bi bi-palette2"></i>Personalization</div>
+          <div class="section-title set-nav-btn" onclick="selectCategory('data')"><i class="bi bi-hdd-fill"></i>Data & Storage</div>
+          <div class="section-title set-nav-btn" onclick="selectCategory('privacy')"><i class="bi bi-shield-lock-fill"></i>Privacy & Security</div>
         </div>
       </div>
 
-      <div class="col-lg-6">
-        <div class="glass card-pad fade-in mb-3">
-          <div class="section-title"><i class="bi bi-moon-stars-fill"></i>Theme</div>
-          <div class="row row-cols-3 g-2 mb-3">
-            <div class="col"><button class="btn-ghost btn w-100" id="theme_dark" onclick="chooseTheme('dark')"><i class="bi bi-moon-stars d-block mb-1"></i>Dark</button></div>
-            <div class="col"><button class="btn-ghost btn w-100" id="theme_light" onclick="chooseTheme('light')"><i class="bi bi-sun d-block mb-1"></i>Light</button></div>
-            <div class="col"><button class="btn-ghost btn w-100" id="theme_amoled" onclick="chooseTheme('amoled')"><i class="bi bi-circle-fill d-block mb-1"></i>AMOLED</button></div>
-          </div>
-          <div class="section-title"><i class="bi bi-palette2"></i>Accent Color</div>
-          <div id="accentPicker"></div>
-        </div>
+      <div class="col-lg-9">
 
-        <div class="glass card-pad fade-in mb-3">
-          <div class="section-title"><i class="bi bi-layout-text-window"></i>Display Preferences</div>
-          <div class="pref-row">
-            <div><div class="pref-label">Compact density</div><div class="pref-help">Tighter spacing on cards and lists.</div></div>
-            <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prefCompact" aria-label="Compact density"></div>
-          </div>
-          <div class="pref-row">
-            <div><div class="pref-label">Reduce motion</div><div class="pref-help">Turn off animations and transitions.</div></div>
-            <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prefReduceMotion" aria-label="Reduce motion"></div>
-          </div>
-        </div>
+        <!-- General View -->
+        <div id="generalView" class="row me-0 ms-0">
 
-        <div class="glass card-pad fade-in mb-3" id="data">
-          <div class="section-title"><i class="bi bi-hdd-fill"></i>Backup &amp; Export</div>
-          <div class="d-flex flex-column gap-2">
-            <button class="btn btn-ghost" onclick="exportData()"><i class="bi bi-download me-1"></i>Export All Data (JSON)</button>
-            <label class="btn btn-ghost mb-0">
-              <i class="bi bi-upload me-1"></i>Import Data
-              <input type="file" accept=".json" id="importFile" hidden onchange="importData(event.target.files[0])">
-            </label>
-            <button class="btn btn-ghost btn-danger-ghost" onclick="confirmReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset All Data</button>
+          <!-- Student Profile View -->
+          <div class="glass card-pad fade-in mb-3">
+            <div class="section-title"><i class="bi bi-person-fill"></i>Student Profile</div>
+            <div class="row g-2">
+              <div class="col-12"><label for="sName">Name</label><input class="form-control" id="sName" autocomplete="name"></div>
+              <div class="col-12"><label for="sCourse">Course</label><input class="form-control" id="sCourse" autocomplete="off"></div>
+              <div class="col-12"><label for="sYear">Year Level</label><input class="form-control" id="sYear" autocomplete="off"></div>
+              <div class="col-12"><label for="sSchool">School</label><input class="form-control" id="sSchool" autocomplete="organization"></div>
+            </div>
+            <button class="btn btn-accent w-100 mt-3" onclick="saveProfile()">Save Profile</button>
+          </div>
+
+          <!-- Notifications view -->
+          <div class="glass card-pad fade-in mb-3">
+            <div class="section-title"><i class="bi bi-bell-fill"></i>Notifications</div>
+            <div id="notifToggles"></div>
+            <button class="btn btn-ghost w-100 mt-2" onclick="requestNotifPermission()"><i class="bi bi-bell me-1"></i>Enable Browser Notifications</button>
           </div>
         </div>
 
-        <div class="glass card-pad fade-in">
-          <div class="section-title"><i class="bi bi-shield-lock-fill"></i>Privacy</div>
-          <p class="text-soft pref-help-lg">Your planner data is synced to your account on our server and cached in this browser for instant loading. It is only visible to you while signed in.</p>
-          <p class="text-faint pref-help">Clearing your browser data only clears this device's cache; using Reset All Data above permanently removes it everywhere. Export a backup first if you want to keep it.</p>
+        <!-- Acadamic View -->
+        <div id="academicView" class="row me-0 ms-0 d-none">
+          <!-- Academic Semesters view -->
+          <div class="glass card-pad fade-in mb-3">
+            <div class="section-title"><i class="bi bi-calendar3"></i>Academic Semesters</div>
+            <p class="text-faint mb-3" style="font-size:.8rem">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, notes, and syllabi.</p>
+            <div id="semesterManager">Loading…</div>
+          </div>
+
+          <!-- Sync Status view -->
+          <div class="glass card-pad fade-in mb-3" id="syncStatusCard" hidden>
+            <div class="section-title"><i class="bi bi-cloud-slash"></i>Sync Status</div>
+            <p class="text-faint mb-2" style="font-size:.8rem" id="syncStatusMsg"></p>
+            <button class="btn btn-ghost w-100" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh &amp; Retry</button>
+          </div>
         </div>
+
+        <!-- Personalization View -->
+        <div id="personalizeView" class="row me-0 ms-0 d-none">
+          <!-- Theme view -->
+          <div class="glass card-pad fade-in mb-3">
+            <div class="section-title"><i class="bi bi-moon-stars-fill"></i>Theme</div>
+            <div class="row row-cols-3 g-2 mb-3">
+              <div class="col"><button class="btn-ghost btn w-100" id="theme_dark" onclick="chooseTheme('dark')"><i class="bi bi-moon-stars d-block mb-1"></i>Dark</button></div>
+              <div class="col"><button class="btn-ghost btn w-100" id="theme_light" onclick="chooseTheme('light')"><i class="bi bi-sun d-block mb-1"></i>Light</button></div>
+              <div class="col"><button class="btn-ghost btn w-100" id="theme_amoled" onclick="chooseTheme('amoled')"><i class="bi bi-circle-fill d-block mb-1"></i>AMOLED</button></div>
+            </div>
+            <div class="section-title"><i class="bi bi-palette2"></i>Accent Color</div>
+            <div id="accentPicker"></div>
+          </div>
+
+          <!-- Display Preferences view -->
+          <div class="glass card-pad fade-in mb-3">
+            <div class="section-title"><i class="bi bi-layout-text-window"></i>Display Preferences</div>
+            <div class="pref-row">
+              <div><div class="pref-label">Compact density</div><div class="pref-help">Tighter spacing on cards and lists.</div></div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prefCompact" aria-label="Compact density"></div>
+            </div>
+            <div class="pref-row">
+              <div><div class="pref-label">Reduce motion</div><div class="pref-help">Turn off animations and transitions.</div></div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="prefReduceMotion" aria-label="Reduce motion"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data & Storage View -->
+        <div id="dataView" class="row me-0 ms-0 d-none">
+          <!-- Backup view -->
+          <div class="glass card-pad fade-in mb-3" id="data">
+            <div class="section-title"><i class="bi bi-hdd-fill"></i>Backup &amp; Export</div>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn btn-ghost" onclick="exportData()"><i class="bi bi-download me-1"></i>Export All Data (JSON)</button>
+              <label class="btn btn-ghost mb-0">
+                <i class="bi bi-upload me-1"></i>Import Data
+                <input type="file" accept=".json" id="importFile" hidden onchange="importData(event.target.files[0])">
+              </label>
+              <button class="btn btn-ghost btn-danger-ghost" onclick="confirmReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset All Data</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Security View -->
+        <div id="privacyView" class="row me-0 ms-0 d-none">
+          <!-- Privacy view -->
+          <div class="glass card-pad fade-in">
+            <div class="section-title"><i class="bi bi-shield-lock-fill"></i>Privacy</div>
+            <p class="text-soft pref-help-lg">Everything in this app is currently stored only in this browser (localStorage). It is not linked to an account and is not sent to any server.</p>
+            <p class="text-faint pref-help">Clearing your browser data or using Reset All Data above permanently removes it. Export a backup first if you want to keep it.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
