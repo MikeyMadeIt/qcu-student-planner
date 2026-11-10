@@ -45,4 +45,10 @@ export const AiChatStore = {
         const { error } = await sb.from('ai_chat_conversations').delete().eq('id', id);
         if (error) fail(error);
     },
+
+    async renameConversation(id, title) {
+        const sb = await getSupabase();
+        const { error } = await sb.from('ai_chat_conversations').update({ title }).eq('id', id);
+        if (error) fail(error);
+    },
 };
