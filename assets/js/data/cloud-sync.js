@@ -240,7 +240,6 @@
             description: row.description || '',
             subjectId: row.subject_id || null,
             // Syllabus feature removed: the tasks.syllabus_week_id column no longer exists.
-            syllabusWeekId: null,
             category: row.category || '',
             priority: row.priority || 'medium',
             dueDate: row.due_date || '',
