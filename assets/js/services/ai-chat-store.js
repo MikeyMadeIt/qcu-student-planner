@@ -3,12 +3,6 @@ import { getSupabase } from '../core/supabase-client.js';
 function fail(error) { throw new Error(error?.message || 'Database request failed'); }
 
 export const AiChatStore = {
-    /**
-     * Saves one finished turn (the student's message + the AI's reply) atomically.
-     * Pass conversationId = null for the first turn: a conversation is created
-     * (titled from the first message) and its id is returned. For later turns,
-     * pass the id returned previously.
-     */
     async saveTurn(conversationId, { title, userContent, userFileName = null, assistantContent }) {
         const sb = await getSupabase();
         const { data, error } = await sb.rpc('save_ai_chat_turn', {
@@ -31,7 +25,6 @@ export const AiChatStore = {
         return data || [];
     },
 
-    /** Returns { id, title, messages:[{role, content, fileName}] } in conversation order. */
     async getConversation(id) {
         const sb = await getSupabase();
         const [cv, ms] = await Promise.all([

@@ -1,4 +1,4 @@
-/* Single-step authentication forms: login, forgot password and reset password. */
+// Single-step authentication forms: login, forgot password and reset password.
 
 import { AuthService } from '../services/auth-service.js';
 import { validators } from '../utils/validation.js';
@@ -15,8 +15,7 @@ import {
 
 const REMEMBER_EMAIL_KEY = 'qcuRememberedEmail';
 
-/* "Remember me" only affects what's pre-filled next time -- it never touches
-   the Supabase session itself, so sign-in/sign-out behaviour is unchanged. */
+// "Remember me" only affects what's pre-filled next time it never touches
 function applyRememberedEmail(form) {
     const emailInput = $('[name="email"]', form);
     const rememberInput = $('[name="rememberMe"]', form);
@@ -30,7 +29,6 @@ function applyRememberedEmail(form) {
             rememberInput.checked = true;
         }
     } catch (error) {
-        /* Storage unavailable (private browsing, disabled storage) -- fall back silently. */
     }
 }
 
@@ -47,7 +45,6 @@ function persistRememberedEmail(form) {
             window.localStorage.removeItem(REMEMBER_EMAIL_KEY);
         }
     } catch (error) {
-        /* Storage unavailable -- nothing to persist, login still succeeds. */
     }
 }
 
@@ -58,7 +55,6 @@ const RULES = {
     confirm: (input, form) => validators.confirm(readValue(input), $('[name="password"]', form).value),
 };
 
-/* Integration point: each handler forwards the validated values to the auth service. */
 const SUBMIT_HANDLERS = {
     login: form => AuthService.signIn({
         email: readValue($('[name="email"]', form)),
@@ -144,7 +140,7 @@ async function submitForm(form, submitButton) {
         }
 
         if (type === 'reset') {
-            showAlert(form, 'Your password has been updated. Redirecting to log in\u2026', 'info'); // MIN-01: \u2026 escaped to avoid mojibake if served without UTF-8 charset header
+            showAlert(form, 'Your password has been updated. Redirecting to log in\u2026', 'info');
             setTimeout(() => { location.href = 'login.html'; }, 1500);
             return;
         }
@@ -174,10 +170,7 @@ export function initAuthForms() {
     $$('[data-auth-form]').forEach(setupForm);
 }
 
-/* "Continue with Google" button on login.html / register.html. Clicking it redirects the
-   whole page to Google -- there is nothing to show success/failure for on *this* page beyond
-   a possible immediate error (e.g. offline), since the real outcome is decided after the
-   redirect back, on callback.html. */
+// "Continue with Google" button on login.html / register.html. Clicking it redirects the
 export function initGoogleButton() {
     const button = $('[data-google-signin]');
 
@@ -193,7 +186,5 @@ export function initGoogleButton() {
             const card = button.closest('.auth-card');
             if (card) showAlert(card, result.message);
         }
-        /* On success the browser is already navigating away to Google; leave the button
-           disabled/loading so it can't be double-clicked while that happens. */
     });
 }

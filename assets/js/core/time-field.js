@@ -1,13 +1,9 @@
-/* ============================================================
-   TIME-FIELD.JS — shared typed + dropdown time input
-   Uses the .sch-time-* styles. Stores "HH:MM" in a hidden input
-   whose id is the id you pass to TimeField.html().
-   ============================================================ */
+// TIME-FIELD.JS — shared typed + dropdown time input
 (function () {
     'use strict';
 
-    var MENU_FIRST = 5 * 60;        // 5:00 AM
-    var MENU_LAST = 23 * 60 + 45;   // 11:45 PM
+    var MENU_FIRST = 5 * 60;
+    var MENU_LAST = 23 * 60 + 45;
     var STEP = 15;
     var ORDER_MSG = 'End time must be later than start time';
     var globalBound = false;
@@ -279,7 +275,7 @@
         text.addEventListener('input', function () {
             setError('');
             navigated = false;
-            if (!menu.hidden) { // keep the list in step with what's typed
+            if (!menu.hidden) {
                 var r = parse(text.value, afterMins());
                 var opt = r.value && menu.querySelector('[data-value="' + r.value + '"]');
                 if (opt) setActive(opt, true);
@@ -299,9 +295,9 @@
                 if (!menu.hidden && navigated && active) setValue(active.dataset.value);
                 else commit();
                 close();
-                if (window.matchMedia('(hover: none)').matches) text.blur(); // dismiss on-screen keyboard
+                if (window.matchMedia('(hover: none)').matches) text.blur();
             } else if (e.key === 'Escape' && !menu.hidden) {
-                e.stopPropagation(); // close the list, not the whole modal
+                e.stopPropagation();
                 close();
             }
         });
@@ -313,7 +309,7 @@
             commit();
             open();
         });
-        menu.addEventListener('mousedown', function (e) { e.preventDefault(); }); // keep focus put
+        menu.addEventListener('mousedown', function (e) { e.preventDefault(); });
         menu.addEventListener('click', function (e) {
             var opt = e.target.closest('.sch-time-opt');
             if (!opt) return;
@@ -333,7 +329,7 @@
         }
     }
 
-    /* Commits each field, shows errors, focuses the first bad one. Returns true when all are valid. */
+    // Commits each field, shows errors, focuses the first bad one. Returns true when all are valid.
     function validate(ids) {
         var firstBad = null;
         ids.forEach(function (id) {

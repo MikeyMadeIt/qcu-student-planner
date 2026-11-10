@@ -1,13 +1,4 @@
-/* ============================================================
-   AI STUDY ASSISTANT
-   Conversation-style chat. Each finished turn (question + reply)
-   is saved to Supabase through services/ai-chat-store.js so past
-   conversations can be reopened and continued.
-   The frontend sends recent prior turns as `history` on every
-   request since the backend does not remember earlier messages
-   on its own. AI output is rendered through a small safe
-   markdown-lite renderer that builds DOM nodes directly —
-   never through unsafe innerHTML of untrusted text. ============================================================ */
+// AI STUDY ASSISTANT
 
 let asaAttachment = null;
 let asaMessages = [];   /* [{role:'user'|'assistant', content, fileName?}] */
@@ -15,14 +6,11 @@ let asaBusy = false;
 let asaConvId = null;   /* saved conversation id, once the first turn is persisted */
 let asaSaveChain = Promise.resolve(); /* serializes saves so one chat never creates two conversations */
 
-/* Keep only the last N turns as context sent to the backend, to bound payload size. */
 const ASA_HISTORY_LIMIT = 12;
 
 function asaEl(id) { return document.getElementById(id); }
 
-/* See aqmSafeBind in ai-quiz-maker.js for why this exists: a missing element
-   or setup error is logged, never thrown, so it can't block the rest of this
-   page's controls (including Send) from being wired up. */
+// See aqmSafeBind in ai-quiz-maker.js for why this exists: a missing element
 function asaSafeBind(id, event, handler) {
     try {
         const el = asaEl(id);
@@ -34,8 +22,6 @@ function asaSafeBind(id, event, handler) {
 }
 
 function initAiStudyAssistant() {
-    /* Bound first and on its own so Send is never skipped because something
-       else below it failed to set up. */
     asaSafeBind('asaForm', 'submit', event => {
         event.preventDefault();
         asaSend();
@@ -145,12 +131,11 @@ async function asaSend() {
     }
 }
 
-/* ---------- Persistence (Supabase) ---------- */
+// Persistence (Supabase)
 
 async function asaStore() { return (await import('../services/ai-chat-store.js')).AiChatStore; }
 
-/* Saves the finished turn. Runs on a chain so rapid turns are saved in order
-   and the first one finishes creating the conversation before the next reuses its id. */
+// Saves the finished turn. Runs on a chain so rapid turns are saved in order
 function asaPersistTurn(userTurn, replyText) {
     const title = (asaMessages.find(m => m.role === 'user')?.content || 'New chat').slice(0, 60);
     asaSaveChain = asaSaveChain.then(async () => {
@@ -225,7 +210,7 @@ function asaDeleteSaved(id) {
     });
 }
 
-/* Starts a fresh chat. Saved conversations stay in the list. */
+// Starts a fresh chat. Saved conversations stay in the list.
 function asaNewChat() {
     if (asaBusy) return;
     asaMessages = [];
@@ -235,10 +220,7 @@ function asaNewChat() {
     asaLoadHistory();
 }
 
-/* The "ai-study" backend returns the assistant's reply as a plain string in
-   `result` for the "assistant" feature. A couple of alternate shapes are
-   tolerated defensively in case the backend's "additional metadata" ever
-   wraps the text. */
+// The "ai-study" backend returns the assistant's reply as a plain string in
 function asaExtractReplyText(data) {
     if (typeof data === 'string') return data.trim();
     if (data && typeof data.reply === 'string') return data.reply.trim();
@@ -277,8 +259,7 @@ function asaScrollToBottom() {
     log.scrollTop = log.scrollHeight;
 }
 
-/* Rebuilds the whole log from asaMessages. Simple and safe for a chat of this
-   size; every piece of text goes through safe DOM construction. */
+// Rebuilds the whole log from asaMessages. Simple and safe for a chat of this
 function asaRenderMessages() {
     const log = asaEl('asaChatLog');
     log.innerHTML = '';
@@ -310,10 +291,7 @@ function asaRenderMessages() {
     asaScrollToBottom();
 }
 
-/* ---------- Safe markdown-lite renderer ----------
-   Builds real DOM nodes for paragraphs, unordered/ordered lists, headings,
-   and fenced code blocks. Never passes AI-generated text through innerHTML —
-   all text content is set via textContent / createTextNode. */
+// Safe markdown-lite renderer
 function asaRenderFormattedContent(text) {
     const wrapper = document.createElement('div');
     const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
@@ -335,7 +313,6 @@ function asaRenderFormattedContent(text) {
     while (i < lines.length) {
         const line = lines[i];
 
-        /* fenced code block */
         if (/^```/.test(line.trim())) {
             flushParagraph();
             closeList();
@@ -354,7 +331,6 @@ function asaRenderFormattedContent(text) {
             continue;
         }
 
-        /* heading */
         const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
         if (headingMatch) {
             flushParagraph();
@@ -366,7 +342,6 @@ function asaRenderFormattedContent(text) {
             continue;
         }
 
-        /* list item (- , * , or 1. ) */
         const bulletMatch = line.match(/^\s*[-*]\s+(.*)$/);
         const orderedMatch = line.match(/^\s*\d+[.)]\s+(.*)$/);
         if (bulletMatch || orderedMatch) {
@@ -383,7 +358,6 @@ function asaRenderFormattedContent(text) {
             continue;
         }
 
-        /* blank line separates paragraphs */
         if (!line.trim()) {
             flushParagraph();
             closeList();
@@ -391,7 +365,6 @@ function asaRenderFormattedContent(text) {
             continue;
         }
 
-        /* plain text line */
         closeList();
         paraLines.push(line.trim());
         i++;

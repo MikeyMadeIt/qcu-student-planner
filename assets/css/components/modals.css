@@ -45,13 +45,6 @@
     border-color: var(--border);
 }
 
-/* Modal close button: a single themed X, not Bootstrap's filter-inverted
-   background image (the source of the white-box look in every theme).
-   Drawn with an SVG mask so its color always comes from currentColor/the
-   theme tokens below, never a raster asset. One rule covers every modal —
-   the header-provided .btn-close and the .modal-close-floating fallback
-   initModalDefaults() (layout.js) injects for modals with no header, such
-   as the one-off Event and University Event dialogs. */
 .btn-close,
 .modal-close-floating {
     box-sizing: border-box;
@@ -148,7 +141,7 @@
     opacity: .6;
 }
 
-/* ---------- custom select (replaces native <select> rendering) ---------- */
+/* custom select (replaces native <select> rendering) */
 
 .custom-select {
     position: relative;

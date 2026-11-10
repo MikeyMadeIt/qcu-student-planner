@@ -1,4 +1,4 @@
-/* ---------- CALENDAR ---------- */
+/* CALENDAR */
 
 .cal-grid {
     display: grid;
@@ -46,7 +46,7 @@
     max-width: 100%;
 }
 
-/* ---------- UNIVERSITY EVENTS MINI CALENDAR ---------- */
+/* UNIVERSITY EVENTS MINI CALENDAR */
 
 .uc-grid {
     display: grid;

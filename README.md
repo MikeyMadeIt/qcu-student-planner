@@ -122,14 +122,14 @@ Latest versions of Chrome, Edge, Firefox, and Safari (desktop & mobile). PWA ins
 
 ## 🧪 Testing
 
-There is no automated test suite (unit, integration, or end-to-end) in this project — `package.json` declares no `test` script. Changes are currently validated manually: by exercising the app in a browser against the live Supabase project, and by the static checks described in `CODEBASE_AUDIT_REPORT.md` and `FINAL_AUDIT_REPORT.md` (JS syntax via `node --check`, JSON validation, and script-based reference checking of every script/link/import path — no live-browser or live-database checks are performed by those scripts). If you add real tests, document how to run them here.
+There is a small Node.js unit-test suite in `tests/` (run with `node --test tests/`), covering the Notes markdown editor's parsing/serialization. It uses only `node:test`/`node:assert` — no dependencies to install. `package.json` declares no `test` script, so run the command above directly. Beyond that, changes are validated manually: by exercising the app in a browser against the live Supabase project, and by the static checks described in `CODEBASE_AUDIT_REPORT.md` and `FINAL_AUDIT_REPORT.md` (JS syntax via `node --check`, JSON validation, and script-based reference checking of every script/link/import path — no live-browser or live-database checks are performed by those scripts).
 
 ## ⚠️ Known limitations
 
 - **No fresh-database bootstrap script.** As noted above, the core planner tables are not created by any migration in this repo — only by the live project's pre-existing schema. Standing up a truly new Supabase project requires capturing that schema first (see "Backend setup" above).
-- **No automated tests.** All verification is manual/static; there is no CI pipeline in this repo.
+- **Minimal automated tests.** Only `tests/notes-editor.test.cjs` exists; everything else is manual/static verification, and there is no CI pipeline that runs tests in this repo.
 - **Classic scripts + ES modules side by side.** Student-facing planner pages (`pages/app/*.html`) load plain global `<script>` tags; the auth and admin flows load ES modules (`type="module"`). This is an intentional, pre-existing split, not an inconsistency to "fix" — don't change a page's script-loading style without updating every file that depends on globals it may set.
-- **`supabase/README.md`'s migration walkthrough** describes migrations through roughly `0009`; the `supabase/migrations/` folder now goes through `0018`. The newer files are self-documenting in their own header comments — read each later migration's header for what it does, or see `DATABASE_MIGRATION_REPORT.md` for a file-by-file summary of every migration through `0018`.
+- **`supabase/README.md`'s migration walkthrough** describes migrations through roughly `0009`; the `supabase/migrations/` folder now goes through `0023`. The newer files are self-documenting in their own header comments — read each later migration's header for what it does, or see `DATABASE_MIGRATION_REPORT.md` for a file-by-file summary of the migrations it covers.
 - **Root-level audit reports** (`CODEBASE_AUDIT_REPORT.md`, `DATABASE_MIGRATION_REPORT.md`, `FINAL_AUDIT_REPORT.md`, `SECURITY_AUDIT.md`) are point-in-time QA snapshots, not living documentation — each states clearly what was verified vs. assumed. Re-run the same checks after future changes rather than trusting an old report's specifics to still hold.
 
 ---

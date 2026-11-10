@@ -1,21 +1,4 @@
 -- Removes the student "section" field (e.g. "BSIT 2A") from public.profiles.
---
--- Product decision: registration/finish-profile now only collect the three
--- academic fields Program (course), Year Level and Campus (school). Section
--- was never used by any other feature -- it was only ever written by
--- handle_new_user() / submit_profile_details() (both fed exclusively by the
--- registration and finish-profile forms, which no longer send it) and only
--- ever read by the admin account-detail view. No RLS policy, index, or other
--- function references this column, so dropping it is safe and self-contained.
--- (Verified: `section` on calendar/schedule subjects is an unrelated,
--- unrelated planner feature -- a class/section like "BSCS-1A" on a subject
--- row -- and is untouched by this migration.)
---
--- This migration is forward-only and does not touch any other column.
--- Existing student accounts, their account_status, role, and all other
--- profile data are preserved.
---
--- Run this once in the Supabase SQL editor (or via `supabase db push`).
 
 -- 1. handle_new_user(): stop writing profiles.section at signup time.
 create or replace function public.handle_new_user()
@@ -58,7 +41,6 @@ end;
 $$;
 
 -- 2. submit_profile_details(): drop the 5-arg version (0005) that takes
---    p_section and replace it with a 4-arg version that doesn't.
 drop function if exists public.submit_profile_details(text, text, text, text, text);
 
 create or replace function public.submit_profile_details(
@@ -85,7 +67,5 @@ $$;
 grant execute on function public.submit_profile_details(text, text, text, text) to authenticated;
 
 -- 3. Drop the now-unused column. Safe: nothing else reads or writes it
---    (frontend queries and admin screens have been updated to stop
---    selecting/displaying it before this migration is applied).
 alter table public.profiles
     drop column if exists section;

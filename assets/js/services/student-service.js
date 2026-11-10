@@ -1,12 +1,4 @@
-/* Student-facing data service (ES module) for the two Phase 5 features:
-   - Inbox: read-only messages addressed to the signed-in student. Every query
-     is already scoped by RLS to admin_message_recipients.student_id = auth.uid()
-     (see supabase/migrations/0008_messaging_and_support_tickets.sql) -- this
-     file does not and cannot grant access beyond that on its own.
-   - Reports: the student Report tab. Reports are written through
-     submit_support_report(), which always stamps student_id = auth.uid()
-     server-side, so a student can never file (or read) a report under another
-     account no matter what this file sends. */
+// Student-facing data service (ES module) for the two Phase 5 features:
 
 import { getSupabase } from '../core/supabase-client.js';
 
@@ -27,7 +19,6 @@ function readableDbError(error) {
 }
 
 export const StudentService = {
-    /* ---------- Inbox ---------- */
 
     async listInboxMessages({ search = '', unreadOnly = false, page = 1, pageSize = 20 } = {}) {
         try {
@@ -50,10 +41,6 @@ export const StudentService = {
             const { data, error, count } = await query;
             if (error) return fail(readableDbError(error));
 
-            /* The message itself can come back null if it was archived after the
-               recipient row was created (the RLS select policy on admin_messages
-               hides archived rows) -- filter those out instead of showing a blank
-               row the student can't open. */
             let rows = data.filter(r => r.message);
             if (search.trim()) {
                 const term = search.trim().toLowerCase();
@@ -73,13 +60,6 @@ export const StudentService = {
             const { data: sessionData } = await supabase.auth.getSession();
             if (!sessionData.session) return fail('Not signed in.');
 
-            /* `message:message_id!inner(id)` requires a matching, RLS-visible
-               admin_messages row -- so a recipient row left behind by an
-               archived message (hidden from students by that table's select
-               policy, see 0008_messaging_and_support_tickets.sql) is excluded
-               here too. Without the inner join this count included archived
-               messages the student can no longer open, so the inbox badge
-               showed unread mail that never actually appeared in the list. */
             const { count, error } = await supabase
                 .from('admin_message_recipients')
                 .select('id, message:message_id!inner(id)', { count: 'exact', head: true })
@@ -106,8 +86,6 @@ export const StudentService = {
             return fail('Could not update that message.');
         }
     },
-
-    /* ---------- Reports (Report tab / Support Tickets) ---------- */
 
     async submitReport({ category, subject, description }) {
         try {
@@ -158,9 +136,6 @@ export const StudentService = {
                 .eq('id', id)
                 .maybeSingle();
 
-            /* RLS already scopes this to the caller's own rows -- a mismatched ID
-               (another student's report) simply comes back as "not found", never
-               someone else's data. */
             if (error || !data) return fail('Report not found.');
             return ok(data);
         } catch (error) {

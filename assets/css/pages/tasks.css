@@ -1,4 +1,4 @@
-/* ---------- TASKS ---------- */
+/* TASKS */
 
 .task-row {
     display: flex;
@@ -64,10 +64,7 @@
     margin-top: 2px;
 }
 
-/* ============================================================
-TASKS PAGE — Redesigned (2026)
-============================================================ */
-/* ── Page Header ── */
+/* TASKS PAGE — Redesigned (2026) */
 
 .tk-header {
     display: flex;
@@ -91,7 +88,7 @@ TASKS PAGE — Redesigned (2026)
     flex: 1 0;
 }
 
-/* ── Stats Row ── */
+/* Stats Row */
 
 .tk-stats-row {
     display: grid;
@@ -102,7 +99,6 @@ TASKS PAGE — Redesigned (2026)
     margin-right: var(--page-gap);
     flex: 0 1 115px;
 }
-
 
 .tk-stat-card {
     padding: var(--card-pad-sm);
@@ -184,7 +180,7 @@ TASKS PAGE — Redesigned (2026)
     margin-top: 3px;
 }
 
-/* ── Controls bar ── */
+/* Controls bar */
 
 .tk-controls {
     display: flex;
@@ -217,7 +213,7 @@ TASKS PAGE — Redesigned (2026)
     font-size: .85rem !important;
 }
 
-/* ── Filter/Sort icon buttons ── */
+/* Filter/Sort icon buttons */
 
 .tk-icon-btn {
     width: var(--icon-btn-size-sm);
@@ -253,7 +249,7 @@ TASKS PAGE — Redesigned (2026)
     pointer-events: none;
 }
 
-/* ── Inline filter/sort panels ── */
+/* Inline filter/sort panels */
 
 .tk-panel {
     margin-bottom: 10px;
@@ -324,7 +320,7 @@ TASKS PAGE — Redesigned (2026)
     font-weight: 700;
 }
 
-/* ── Task groups ── */
+/* Task groups */
 
 .tk-groups-wrap {
     display: flex;
@@ -388,7 +384,7 @@ TASKS PAGE — Redesigned (2026)
     font-style: italic;
 }
 
-/* ── Task card ── */
+/* Task card */
 
 .tk-card {
     background: var(--surface);
@@ -428,7 +424,7 @@ TASKS PAGE — Redesigned (2026)
     opacity: 1;
 }
 
-/* ── Card header ── */
+/* Card header */
 
 .tk-card-header {
     display: flex;
@@ -513,7 +509,7 @@ TASKS PAGE — Redesigned (2026)
     background: rgba(var(--accent), .08);
 }
 
-/* ── Status badge ── */
+/* Status badge */
 
 .tk-status-badge {
     display: inline-flex;
@@ -543,7 +539,7 @@ TASKS PAGE — Redesigned (2026)
     font-size: .65rem;
 }
 
-/* ── Collapsed body ── */
+/* Collapsed body */
 
 .tk-card-body-collapsed {
     padding: 0 12px 12px 42px;
@@ -680,7 +676,7 @@ TASKS PAGE — Redesigned (2026)
 
 .modal-body .sch-subject-required { color: #fb7185; }
 
-/* ── Progress bar ── */
+/* Progress bar */
 
 .tk-progress-wrap {
     display: flex;
@@ -728,7 +724,7 @@ TASKS PAGE — Redesigned (2026)
     color: var(--text-faint);
 }
 
-/* ── Expanded body ── */
+/* Expanded body */
 
 .tk-card-body-expanded {
     padding: 0 14px 14px 42px;
@@ -751,7 +747,7 @@ TASKS PAGE — Redesigned (2026)
     margin: 0;
 }
 
-/* ── Checklist (expanded) ── */
+/* Checklist (expanded) */
 
 .tk-cl-section {
     display: flex;
@@ -852,7 +848,7 @@ TASKS PAGE — Redesigned (2026)
     border-color: rgba(var(--accent), .6);
 }
 
-/* ── Meta grid (expanded) ── */
+/* Meta grid (expanded) */
 
 .tk-meta-grid {
     display: flex;
@@ -896,7 +892,7 @@ TASKS PAGE — Redesigned (2026)
     font-weight: 700;
 }
 
-/* ── Card actions (expanded) ── */
+/* Card actions (expanded) */
 
 .tk-card-actions {
     display: flex;
@@ -916,7 +912,7 @@ TASKS PAGE — Redesigned (2026)
     border-color: rgba(251,113,133,.5) !important;
 }
 
-/* ── Modal checklist ── */
+/* Modal checklist */
 
 .tk-modal-cl-wrap {
     display: flex;
@@ -944,7 +940,7 @@ TASKS PAGE — Redesigned (2026)
     border-top: 1px solid var(--border);
 }
 
-/* ── Empty state ── */
+/* Empty state */
 
 .tk-empty-state {
     text-align: center;
@@ -971,8 +967,6 @@ TASKS PAGE — Redesigned (2026)
     margin: 0;
     color: var(--text-faint);
 }
-
-/* ── Responsive ── */
 
 @media (max-width: 767px) {
     .tk-main-body {
@@ -1048,8 +1042,6 @@ TASKS PAGE — Redesigned (2026)
     }
 }
 
-/* ── Reduced motion ── */
-
 @media (prefers-reduced-motion: reduce) {
     .tk-progress-bar-fill {
         transition: none !important;
@@ -1062,10 +1054,7 @@ TASKS PAGE — Redesigned (2026)
     }
 }
 
-/* ============================================================
-TASKS — Redesigned Select All, Complete button, Selected state
-============================================================ */
-/* ── Select All button in controls bar ── */
+/* TASKS — Redesigned Select All, Complete button, Selected state */
 
 .tk-select-all-btn {
     display: flex;
@@ -1106,7 +1095,7 @@ TASKS — Redesigned Select All, Complete button, Selected state
     font-weight: 700;
 }
 
-/* ── Complete button inside task card ── */
+/* Complete button inside task card */
 
 .tk-complete-btn {
     display: flex;
@@ -1153,7 +1142,7 @@ TASKS — Redesigned Select All, Complete button, Selected state
     border-color: rgba(52, 211, 153, .55);
 }
 
-/* ── Task selected state — distinct from completed ── */
+/* Task selected state — distinct from completed */
 
 .tk-card.tk-selected {
     border-color: rgba(var(--accent), .55) !important;
@@ -1215,8 +1204,6 @@ TASKS — Redesigned Select All, Complete button, Selected state
     flex-shrink: 0;
 }
 
-/* Mobile: hide complete button label text, show icon only */
-
 @media (max-width: 480px) {
     .tk-complete-btn span {
         display: none;
@@ -1235,8 +1222,6 @@ TASKS — Redesigned Select All, Complete button, Selected state
     }
 }
 
-/* prefers-reduced-motion for new elements */
-
 @media (prefers-reduced-motion: reduce) {
     .tk-complete-btn,
     .tk-select-all-btn,
@@ -1245,10 +1230,7 @@ TASKS — Redesigned Select All, Complete button, Selected state
     }
 }
 
-/* ============================================================
-TASKS — Fixed bulk action bar v3
-============================================================ */
-/* Bulk toolbar: always single row, no wrap */
+/* TASKS — Fixed bulk action bar v3 */
 
 .tk-bulk-toolbar {
     display: flex;
@@ -1373,8 +1355,6 @@ TASKS — Fixed bulk action bar v3
     color: var(--text-soft);
 }
 
-/* Mobile: keep toolbar compact, one row */
-
 @media (max-width: 575.98px) {
     .tk-bulk-toolbar {
         padding: 6px 9px;
@@ -1397,8 +1377,6 @@ TASKS — Fixed bulk action bar v3
     }
 }
 
-/* Very small screens: hide labels, show icons only */
-
 @media (max-width: 360px) {
     .tk-bulk-complete span,
     .tk-bulk-reopen span {
@@ -1411,19 +1389,13 @@ TASKS — Fixed bulk action bar v3
     }
 }
 
-/* prefers-reduced-motion */
-
 @media (prefers-reduced-motion: reduce) {
     .tk-bulk-btn {
         transition: none !important;
     }
 }
 
-/* ============================================================
-TASKS v3 — Advanced Academic Task Management
-Filter Drawer, Board View, Progress Rings, Time Estimate
-============================================================ */
-/* ── Filter/Sort Button with badge ── */
+/* TASKS v3 — Advanced Academic Task Management */
 
 .tk-filter-btn {
     position: relative;
@@ -1457,7 +1429,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     line-height: 1;
 }
 
-/* ── View toggle ── */
+/* View toggle */
 
 .tk-view-toggle {
     display: flex;
@@ -1501,7 +1473,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Close button (used by the Bulk Move modal) ── */
+/* Close button (used by the Bulk Move modal) */
 
 .tkd-close-btn {
     width: 28px;
@@ -1524,8 +1496,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     background: rgba(var(--accent), .1);
 }
 
-/* ── Filter & Sort popup (standard .modal; colors come from theme tokens so
-      light, dark and AMOLED all follow automatically) ── */
+/* Filter & Sort popup (standard .modal; colors come from theme tokens so */
 
 .tk-filter-modal .modal-dialog {
     max-width: 440px;
@@ -1632,7 +1603,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Progress Ring ── */
+/* Progress Ring */
 
 .tk-ring-wrap {
     display: inline-flex;
@@ -1679,7 +1650,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Time Estimate Badge (card) ── */
+/* Time Estimate Badge (card) */
 
 .tk-estimate-badge {
     display: inline-flex;
@@ -1700,7 +1671,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     font-size: .62rem;
 }
 
-/* ---- Time fields ---- */
+/* Time fields */
 .sch-time-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
 .sch-time-col { min-width: 0; }
 .sch-time-field { position: relative; }
@@ -1735,11 +1706,11 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
 .sch-time-hint { margin: .4rem 0 0; font-size: .75rem; color: var(--text-faint); }
 .sch-time-hint .bi { margin-right: .15rem; }
 @media (max-width: 575.98px) {
-  .sch-time-input { font-size: 16px; } /* stops iOS zooming on focus */
+  .sch-time-input { font-size: 16px; }
   .sch-time-opt { padding: .7rem .7rem; }
 }
 
-/* ── Due label icon ── */
+/* Due label icon */
 
 .tk-due-label i {
     font-size: .68rem;
@@ -1747,7 +1718,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     opacity: .7;
 }
 
-/* ── Time Estimate Modal Row ── */
+/* Time Estimate Modal Row */
 
 .tk-time-est-row {
     display: flex;
@@ -1773,8 +1744,6 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
         width: 60px !important;
     }
 }
-
-/* ── Board View ── */
 
 @media (max-width: 767px) {
     .tk-board-wrap {
@@ -1825,7 +1794,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Bulk Move Modal ── */
+/* Bulk Move Modal */
 
 .tk-move-modal-overlay {
     position: fixed;
@@ -1911,7 +1880,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Bulk move button in toolbar ── */
+/* Bulk move button in toolbar */
 
 .tk-bulk-move {
     border-color: rgba(var(--accent), .25);
@@ -1925,7 +1894,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     color: rgb(var(--accent));
 }
 
-/* ── Stat cards — stagger animation ── */
+/* Stat cards — stagger animation */
 
 .tk-stat-card:nth-child(1) {
     animation-delay: 0ms;
@@ -1943,22 +1912,18 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     animation-delay: 150ms;
 }
 
-/* ── Overriding hidden sort inputs (removed from HTML) ── */
-
 #tkSort,
 #tkCatFilter,
 #tkSubFilter {
     display: none !important;
 }
 
-/* ── Controls bar improvements ── */
+/* Controls bar improvements */
 
 .tk-controls {
     flex-wrap: nowrap;
     overflow: hidden;
 }
-
-/* ── Responsive improvements ── */
 
 @media (max-width: 480px) {
     .tk-controls {
@@ -1998,8 +1963,6 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Stat card tweak for 4-column on small ── */
-
 @media (max-width: 480px) {
     .tk-stats-row {
         grid-template-columns: repeat(4, 1fr) !important;
@@ -2015,14 +1978,12 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Empty state filter icon ── */
+/* Empty state filter icon */
 
 .tk-empty-state .bi-filter-circle {
     opacity: .3;
     color: rgb(var(--accent));
 }
-
-/* ── Reduced motion for drawer ── */
 
 @media (prefers-reduced-motion: reduce) {
     .tk-fm-opt {
@@ -2030,7 +1991,7 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     }
 }
 
-/* ── Modal form-label ── */
+/* Modal form-label */
 
 .modal-body .form-label {
     font-size: .74rem;
@@ -2040,14 +2001,6 @@ Filter Drawer, Board View, Progress Rings, Time Estimate
     text-transform: uppercase;
     letter-spacing: .04em;
 }
-
-/* ============================================================
-TASKS v3 — FIX PATCH
-1. Filter drawer readability
-2. Selected highlight on overdue/completed cards
-3. Board view — vertical columns (no horizontal scroll)
-============================================================ */
-/* ── FIX 1: Close button (Bulk Move modal) ── */
 
 /* Close button in drawer */
 
@@ -2073,10 +2026,6 @@ TASKS v3 — FIX PATCH
     background: rgba(0,0,0,.07) !important;
 }
 
-
-
-/* ── FIX 2: Selected state — always wins over overdue/completed ── */
-
 .tk-card.tk-selected,
 .tk-card.overdue.tk-selected,
 .tk-card.completed.tk-selected {
@@ -2101,9 +2050,6 @@ TASKS v3 — FIX PATCH
     box-shadow: 0 0 0 2px rgba(var(--accent), .3) !important;
 }
 
-/* ── FIX 3: Board view — vertical stacked columns, NO horizontal scroll ── */
-/* Mobile: single-column vertical stack */
-
 @media (max-width: 767px) {
     .tk-board-wrap {
         grid-template-columns: 1fr !important;
@@ -2118,11 +2064,8 @@ TASKS v3 — FIX PATCH
     }
     /* Collapse completed column on mobile by default — show header only, expand on tap */
     .tk-board-col.col-completed .tk-board-col-cards {
-        /* stays visible — no collapse — just stacks naturally */
     }
 }
-
-/* Tablet: 2-column grid */
 
 @media (min-width: 576px) and (max-width: 767px) {
     .tk-board-wrap {
@@ -2134,11 +2077,7 @@ TASKS v3 — FIX PATCH
     }
 }
 
-/* ============================================================
-TASKS v3 — COMPACT BOARD CARD + SELECTION FIX
-============================================================ */
-/* ── Compact board card structure ── */
-/* Top row: checkbox + title + ring */
+/* TASKS v3 — COMPACT BOARD CARD + SELECTION FIX */
 
 .tk-bc-top {
     display: flex;
@@ -2338,9 +2277,6 @@ TASKS v3 — COMPACT BOARD CARD + SELECTION FIX
     border-color: rgba(var(--accent),.3);
 }
 
-/* ── Board card selected state — always wins ── */
-/* Bulk check on board card — same style as list */
-
 @media (prefers-reduced-motion: reduce) {
     .tk-bc-btn {
         transition: none !important;
@@ -2355,11 +2291,6 @@ TASKS v3 — COMPACT BOARD CARD + SELECTION FIX
         transition: none !important;
     }
 }
-
-/* ============================================================
-   TASKS — Stat cards stacked (icon / number / label), and
-   controls row unified to the search bar's height
-   ============================================================ */
 
 /* Stat cards: icon on top, number, then label — centered, still 4 per row */
 
@@ -2412,9 +2343,6 @@ TASKS v3 — COMPACT BOARD CARD + SELECTION FIX
         font-size: .78rem;
     }
 }
-
-/* Controls row: Select, Filter, and List/Board all match the search
-   bar's 36px height, instead of the smaller icon-button size. */
 
 .tk-select-all-btn,
 .tk-filter-btn,
