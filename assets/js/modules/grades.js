@@ -1,14 +1,6 @@
-/* ============================================================
-   GRADES.JS — Enhanced v4
-   Features:
-   1. Grade Trend Sparkline per subject (SVG, colored by direction)
-   2. GWA Target Planner (semester-level)
-   3. Inline Grade Equivalent Badge on numeric grades
-   4. GWA Card full-width with 3 stat blocks
-   5. Copy GWA Card as Image (Canvas API)
-   ============================================================ */
+// GRADES.JS — Enhanced v4
 
-/* ---- Grade equivalent badge ---- */
+// Grade equivalent badge
 
 function gradeEquivBadgeHtml(point) {
     if (point === null || point === undefined)
@@ -28,7 +20,7 @@ function gradeEquivBadgeHtml(point) {
     return `<span class="grade-equiv-badge ${cls}">${escapeHtml(row.label)}</span>`;
 }
 
-/* ---- Data normalization ---- */
+// Data normalization
 
 function normalizeGradeRecord(g) {
     if (!Array.isArray(g.components))
@@ -77,10 +69,9 @@ function syncGradesWithSubjects() {
     return allGrades.filter(g => subjects.some(s => s.id === g.subjectId));
 }
 
-/* ---- Sparkline trend data (grading period based) ---- */
+// Sparkline trend data (grading period based)
 
 function getSparklineDatapoints(components) {
-    // Use named grading period ordering if names match common patterns
     const periodOrder = ['prelim', 'midterm', 'semi', 'pre-final', 'final', 'prefinal'];
     function periodRank(name) {
         const n = (name || '').toLowerCase();
@@ -89,7 +80,6 @@ function getSparklineDatapoints(components) {
                 return i;
         return 999;
     }
-    // Sort components by grading period name, then collect one point per component
     const sorted = [...components].sort((a, b) => periodRank(a.name) - periodRank(b.name));
     const points = [];
     sorted.forEach(c => {
@@ -100,7 +90,7 @@ function getSparklineDatapoints(components) {
     return points;
 }
 
-/* ---- Trend direction ---- */
+// Trend direction
 
 function trendDirection(points) {
     if (!points || points.length < 2)
@@ -115,7 +105,7 @@ function trendDirection(points) {
     return 'flat';
 }
 
-/* ---- Init ---- */
+// Init
 
 function initGrades() {
     syncGradesWithSubjects();
@@ -125,7 +115,7 @@ function initGrades() {
     renderGwaCalculator();
 }
 
-/* ---- Overview (Current GWA) — full-width 3 stat blocks ---- */
+// Overview (Current GWA) — full-width 3 stat blocks
 
 function renderGradesOverview() {
     const semId = DB.getActiveSemesterId();
@@ -146,10 +136,8 @@ function renderGradesOverview() {
         if (tu > 0)
             gwa = scoredRows.reduce((s, r) => s + r.point * (+r.subject.units || 0), 0) / tu;
     }
-    // Highest and lowest subject GWA points (lower point = better in PH system)
     let highestRow = null, lowestRow = null;
     if (scoredRows.length) {
-        // Highest grade = lowest point number (1.00 is best)
         highestRow = scoredRows.reduce((best, r) => r.point < best.point ? r : best, scoredRows[0]);
         lowestRow = scoredRows.reduce((worst, r) => r.point > worst.point ? r : worst, scoredRows[0]);
     }
@@ -181,32 +169,26 @@ function renderGradesOverview() {
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} subject${scoredSubjects !== 1 ? 's' : ''}`;
         }
     }
-    // Highest block
     const hiNumEl = document.getElementById('gHighest');
     const hiSubEl = document.getElementById('gHighestSub');
     if (hiNumEl)
         hiNumEl.textContent = highestRow ? highestRow.point.toFixed(2) : '--';
     if (hiSubEl)
         hiSubEl.textContent = highestRow ? `${highestRow.subject.code} · ${highestRow.pct.toFixed(1)}%` : '—';
-    // Lowest block
     const loNumEl = document.getElementById('gLowest');
     const loSubEl = document.getElementById('gLowestSub');
     if (loNumEl)
         loNumEl.textContent = lowestRow ? lowestRow.point.toFixed(2) : '--';
     if (loSubEl)
         loSubEl.textContent = lowestRow ? `${lowestRow.subject.code} · ${lowestRow.pct.toFixed(1)}%` : '—';
-    // Sync GWA into target planner current display
     const gwaTargetCurrentEl = document.getElementById('gwaTargetCurrent');
     if (gwaTargetCurrentEl)
         gwaTargetCurrentEl.value = gwa === null ? '—' : gwa.toFixed(2);
 }
 
-/* ============================================================
-   GWA TARGET PLANNER (semester-level)
-   ============================================================ */
+// GWA TARGET PLANNER (semester-level)
 
 function renderGwaTargetPlanner() {
-    // Sync current GWA display — done in renderGradesOverview which runs first
     computeGwaTarget();
 }
 
@@ -241,14 +223,11 @@ function computeGwaTarget() {
     });
     const gradedRows = rows.filter(r => r.graded);
     const ungradedRows = rows.filter(r => !r.graded);
-    // Current weighted sum from graded subjects
     const gradedWeightedSum = gradedRows.reduce((s, r) => s + r.point * r.units, 0);
     const gradedUnits = gradedRows.reduce((s, r) => s + r.units, 0);
     const ungradedUnits = ungradedRows.reduce((s, r) => s + r.units, 0);
     const totalUnits = gradedUnits + ungradedUnits;
-    // Current GWA
     const currentGwa = gradedUnits > 0 ? gradedWeightedSum / gradedUnits : null;
-    // Already achieved?
     if (currentGwa !== null && currentGwa <= targetGwa) {
         resultEl.innerHTML = `
       <div class="gwa-target-result-box">
@@ -259,7 +238,6 @@ function computeGwaTarget() {
         return;
     }
     if (!ungradedRows.length) {
-        // All graded but target not met
         resultEl.innerHTML = `
       <div class="gwa-target-result-box">
         <div class="gwa-target-info-row"><span class="text-faint">Target GWA</span><span class="gwa-target-val">${targetGwa.toFixed(2)}</span></div>
@@ -268,11 +246,6 @@ function computeGwaTarget() {
       </div>`;
         return;
     }
-    /*
-     * Solve for required average GWA point across ungraded subjects:
-     * (gradedWeightedSum + X * ungradedUnits) / totalUnits = targetGwa
-     * X = (targetGwa * totalUnits - gradedWeightedSum) / ungradedUnits
-     */
     const requiredPointAvg = (targetGwa * totalUnits - gradedWeightedSum) / ungradedUnits;
     let html = `<div class="gwa-target-result-box">`;
     html += `<div class="gwa-target-info-row"><span class="text-faint">Target GWA</span><span class="gwa-target-val">${targetGwa.toFixed(2)}</span></div>`;
@@ -295,9 +268,7 @@ function computeGwaTarget() {
     resultEl.innerHTML = html;
 }
 
-/* ============================================================
-   SUBJECT CARDS — sparkline + inline grade badge
-   ============================================================ */
+// SUBJECT CARDS — sparkline + inline grade badge
 
 function renderGradeCards() {
     const wrap = document.getElementById('gradesWrap');
@@ -317,7 +288,6 @@ function renderGradeCards() {
         const totalWeight = sumWeights(g.components);
         const weightWarn = g.components.length && totalWeight !== 100;
         const collapseId = `gc-${s.id}`;
-        // Passing/Failing status
         let statusBadge = '';
         const hasComponents = g.components.length > 0;
         const hasAnyScores = hasComponents && g.components.some(c => c.assessments && c.assessments.some(a => assessmentPct(a) !== null));
@@ -332,9 +302,7 @@ function renderGradeCards() {
         else if (hasComponents && !hasAnyScores) {
             statusBadge = `<span class="grade-pass-badge no-data"><i class="bi bi-dash-circle"></i> No data</span>`;
         }
-        // Grade equiv badge
         const equivBadge = gradeEquivBadgeHtml(point);
-        // Sparkline — per grading period
         const sparkPoints = getSparklineDatapoints(g.components);
         const hasSparkline = sparkPoints.length >= 2;
         return `<div class="col-md-6 col-xl-4">
@@ -386,7 +354,7 @@ function renderGradeCards() {
     }).join('');
 }
 
-/* ---- SVG Sparkline (inline, below grade display) ---- */
+// SVG Sparkline (inline, below grade display)
 
 function renderSparklineHtml(points) {
     if (!points || points.length < 2)
@@ -405,9 +373,7 @@ function renderSparklineHtml(points) {
     const dotColorFn = (pct) => pct >= PASSING_PCT ? '#34d399' : '#fb7185';
     const polyPts = points.map((p, i) => `${toX(i).toFixed(1)},${toY(p.pct).toFixed(1)}`).join(' ');
     let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="grade-sparkline-svg" role="img" aria-label="Grade trend sparkline">`;
-    // Trend line
     svg += `<polyline points="${polyPts}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>`;
-    // Dots
     points.forEach((p, i) => {
         const cx = toX(i), cy = toY(p.pct);
         svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="${dotColorFn(p.pct)}" stroke="var(--bg,#0a0d16)" stroke-width="1">`;
@@ -421,10 +387,6 @@ function renderSparklineHtml(points) {
     ${svg}
   </div>`;
 }
-
-/* ============================================================
-   GRADE MODAL — fixed layout, live avg/weighted updates
-   ============================================================ */
 
 let gradeDraft = null, gradeDraftSubjectId = null;
 const ASSESS_GRID = '1fr 56px 56px 52px 28px';
@@ -608,7 +570,6 @@ function removeComponent(ci) {
 function refreshGradePreview() {
     const finalPct = computeSubjectFinalPct(gradeDraft.components);
     const isPassing = finalPct !== null ? finalPct >= PASSING_PCT : null;
-    /* MAJ-04: keep the weight-warning banner in sync while the user edits. */
     const totalWeight = sumWeights(gradeDraft.components);
     const weightWarnEl = document.getElementById('modalWeightWarn');
     if (weightWarnEl) {
@@ -639,10 +600,6 @@ function refreshGradePreview() {
 }
 
 function saveGradeComponents() {
-    // MAJ-10b: a component left unnamed used to be silently dropped here on
-    // save (no warning), making it look like the whole breakdown vanished.
-    // Only drop a component that's genuinely empty (no name AND no
-    // assessments entered); otherwise keep it and give it a default name.
     const cleaned = gradeDraft.components
         .map((c, i) => ({
         id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
@@ -666,8 +623,6 @@ function saveGradeComponents() {
     if (typeof Toast !== 'undefined') {
         const savedWeight = sumWeights(cleaned);
         if (cleaned.length && savedWeight !== 100) {
-            /* MAJ-04: warn when the saved weights don't sum to 100 so the user
-               knows the displayed grade is normalised, not the raw weighted sum. */
             Toast.show(`Saved \u2014 note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
         } else {
             Toast.show('Grading breakdown saved');
@@ -679,7 +634,7 @@ function saveGradeComponents() {
     renderGradeCards();
 }
 
-/* ---- Grade reference table ---- */
+// Grade reference table
 
 function renderGradeReferenceTable() {
     const host = document.getElementById('gradeReferenceTable');
@@ -693,9 +648,7 @@ function renderGradeReferenceTable() {
     </div>`).join('');
 }
 
-/* ============================================================
-   TARGET GRADE CALCULATOR
-   ============================================================ */
+// TARGET GRADE CALCULATOR
 
 function openTargetGradeInfo() {
     new bootstrap.Modal(document.getElementById('targetGradeInfoModal')).show();
@@ -835,9 +788,7 @@ function computeTargetGrade() {
     resultEl.innerHTML = resultHtml;
 }
 
-/* ============================================================
-   GWA CALCULATOR — clearly labeled as manual utility
-   ============================================================ */
+// GWA CALCULATOR — clearly labeled as manual utility
 
 function renderGwaCalculator() {
     const wrap = document.getElementById('gwaCalcRows');
@@ -962,9 +913,7 @@ function clearAllGwaRows() {
     renderGwaCalculator();
 }
 
-/* ============================================================
-   COPY GWA CARD AS IMAGE (Canvas API, no external libs)
-   ============================================================ */
+// COPY GWA CARD AS IMAGE (Canvas API, no external libs)
 
 function copyGwaCardAsImage() {
     const settings = DB.getSettings();
@@ -981,63 +930,49 @@ function copyGwaCardAsImage() {
     canvas.height = H * 2;
     const ctx = canvas.getContext('2d');
     ctx.scale(2, 2);
-    // Background gradient
     const bg = ctx.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#0f1220');
     bg.addColorStop(1, '#1a1030');
     ctx.fillStyle = bg;
     ctx.roundRect(0, 0, W, H, 18);
     ctx.fill();
-    // Accent stripe top
     const stripe = ctx.createLinearGradient(0, 0, W, 0);
     stripe.addColorStop(0, 'rgba(124,108,246,0.9)');
     stripe.addColorStop(1, 'rgba(79,140,255,0.9)');
     ctx.fillStyle = stripe;
     ctx.fillRect(0, 0, W, 4);
-    // App label
     ctx.font = '700 11px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(124,108,246,0.8)';
-    // MAJ-07: ctx.letterSpacing is not in the Canvas 2D spec and is unsupported
-    // in Firefox; removed to avoid silent mis-renders or throws in older
-    // Chromium builds where the property setter is non-writable.
     ctx.fillText('STUDENT PLANNER', 28, 30);
-    // Student name
     ctx.font = '600 18px system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.fillText(name, 28, 56);
-    // Semester
     ctx.font = '400 12px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.fillText(semLabel, 28, 76);
-    // Divider
     ctx.strokeStyle = 'rgba(255,255,255,0.1)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(28, 92);
     ctx.lineTo(W - 28, 92);
     ctx.stroke();
-    // GWA label
     ctx.font = '700 10px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.fillText('CURRENT GWA', 28, 118);
-    // GWA value
     ctx.font = '800 56px monospace';
     const gwaGrad = ctx.createLinearGradient(0, 0, 200, 0);
     gwaGrad.addColorStop(0, 'rgba(124,108,246,1)');
     gwaGrad.addColorStop(1, 'rgba(79,140,255,1)');
     ctx.fillStyle = gwaGrad;
     ctx.fillText(gwa, 26, 176);
-    // GWA sub label
     ctx.font = '400 13px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.fillText(gwaSub, 28, 200);
-    // Date
     const dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
     ctx.font = '400 11px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     const dateW = ctx.measureText(dateStr).width;
     ctx.fillText(dateStr, W - 28 - dateW, H - 18);
-    // Download as PNG
     canvas.toBlob(blob => {
         if (!blob) {
             showGwaToast('Failed to generate image', true);

@@ -129,28 +129,13 @@
     }
 }
 
-/* ---------- Compact tables: Support Tickets + the Dashboard "recent" panels ----------
-   Desktop: a real table, but rows never wrap — long text keeps to one line and the
-   `.adm-table-wrap` scrolls sideways if a row genuinely needs more room than the
-   viewport, instead of growing tall.
-   Mobile: not the generic stacked label/value card above — a single-line "rectangle"
-   row (same idea as the inbox's message rows): one bold primary line, one faint
-   secondary line underneath, a status pill / count top-right, and the existing
-   view action bottom-right. Only the handful of columns flagged by the row markup
-   (.adm-col-primary / .adm-col-secondary / .adm-col-status) are shown; everything
-   else (.adm-col-hide-compact) is hidden rather than turned into another stacked row. */
 .adm-table-compact th,
 .adm-table-compact td {
     white-space: nowrap;
 }
 
 @media (max-width: 720px) {
-    /* Right-side cluster (status/category pill, then the action button) sits
-       in its own two columns so it can sit SIDE BY SIDE as one unit, vertically
-       centered against the whole two-line left column -- not stacked as its
-       own two rows. Spacing between the pieces is done with margin on the
-       pieces themselves (not `column-gap`), so a row that only has a pill, or
-       only a button, never reserves empty gap space for the piece it lacks. */
+    /* Right-side cluster (status/category pill, then the action button) sits */
     .adm-table-compact tr {
         display: grid;
         grid-template-columns: 1fr auto auto;
@@ -169,17 +154,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    /* Padding alone is split into its own, more specific selector
-       (.adm-table-compact.adm-table, both classes are always present
-       together on these tables) so it reliably beats the unconditional
-       `.adm-table td { padding: var(--space-3) var(--space-4); }` rule
-       further down this file -- same specificity otherwise, and that rule
-       comes later in source order, so it was silently winning and re-adding
-       ~12px of top/bottom padding to every cell. Kept separate from the
-       `display` rule above: bumping specificity on that one too would (and
-       briefly did) also beat `.adm-col-hide-compact { display: none; }`
-       below, since that selector's specificity is lower, which switched the
-       hidden columns back on. */
+    /* Padding alone is split into its own, more specific selector */
     .adm-table-compact.adm-table td {
         padding: 0;
     }
@@ -222,9 +197,7 @@
         padding: 0;
         margin-left: 6px;
     }
-    /* Category/status pills in the compact top-right slot can carry long
-       labels ("Account or Login Issue") -- cap their width so one long
-       label never forces the row wider than the screen. */
+    /* Category/status pills in the compact top-right slot can carry long */
     .adm-table-compact .adm-col-status .status-badge {
         max-width: 7.5rem;
         padding: 1px 8px;
@@ -237,10 +210,7 @@
         border-bottom: 0;
     }
 
-    /* Row actions on mobile: icon only, no label (e.g. "Review" / "View") --
-       the row's own tap target and the pill above it already say enough. The
-       button also shrinks to a tight icon-only square instead of carrying
-       the full-size text button's height and side padding. */
+    /* Row actions on mobile: icon only, no label (e.g. "Review" / "View") */
     .adm-table-compact .adm-actions-label {
         display: none;
     }
@@ -251,20 +221,9 @@
     }
 }
 
-/* Dashboard "recent" panel pairs: never two-up — a table-shaped panel in the
-   right-hand column of a 2-col grid has nowhere to shrink to and overflows the
-   page, so these always stack as single full-width cards instead. */
+/* Dashboard "recent" panel pairs: never two-up — a table-shaped panel in the */
 .adm-stack-grid {
     display: grid;
-    /* minmax(0, 1fr), not a bare 1fr: a grid track won't shrink below its
-       content's intrinsic width unless told it can. These cards hold
-       .adm-table-compact tables (white-space: nowrap cells), so without the
-       0 floor the track -- and the card -- grows to fit the table's full
-       unwrapped width and pushes past .main-content's right padding,
-       sitting flush against the edge of the screen instead of fitting
-       inside it. The table's own .adm-table-wrap still scrolls sideways
-       for genuinely-too-wide rows; this just stops the card itself from
-       stretching the page. */
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
 }
@@ -273,16 +232,12 @@
     min-width: 0;
 }
 
-/* Rows that open a detail view on a tap/click anywhere on them (not just their
-   small action button) — same Gmail-style pattern as the inbox's message rows. */
+/* Rows that open a detail view on a tap/click anywhere on them (not just their */
 .adm-row-clickable {
     cursor: pointer;
 }
 
-/* Filter bar: search gets its own full-width row so it never fights the
-   other controls for space; status/date/sort wrap onto a second row and
-   shrink onto their own lines on narrow screens instead of being forced
-   into a fixed column count. */
+/* Filter bar: search gets its own full-width row so it never fights the */
 .adm-filters {
     display: flex;
     flex-direction: column;
@@ -333,7 +288,7 @@
     }
 }
 
-/* ---------- Admin shell additions ---------- */
+/* Admin shell additions */
 
 .adm-topbar {
     flex-wrap: nowrap;
@@ -629,9 +584,7 @@ a.adm-stat-card:focus-visible {
     overflow-wrap: anywhere;
 }
 
-/* Modal body polish shared by the ticket/message detail modals: predictable
-   vertical rhythm between sections, and the note/reply composer row never
-   wraps its button under the input on a narrow phone-width modal. */
+/* Modal body polish shared by the ticket/message detail modals: predictable */
 .modal-content .section-title {
     margin-top: var(--space-4);
 }
@@ -670,7 +623,7 @@ a.adm-stat-card:focus-visible {
     font-size: .88rem;
 }
 
-/* ---------- Admin shell: sidebar-only pages, charts ---------- */
+/* Admin shell: sidebar-only pages, charts */
 
 .adm-chart-grid {
     display: grid;
@@ -705,7 +658,7 @@ a.adm-stat-card:focus-visible {
     padding-top: var(--space-4);
 }
 
-/* ---------- Admin header: role pill, nav badges, column responsiveness ---------- */
+/* Admin header: role pill, nav badges, column responsiveness */
 
 .role-pill {
     display: inline-flex;
@@ -724,9 +677,7 @@ a.adm-stat-card:focus-visible {
     white-space: nowrap;
 }
 
-/* Reset native <button> chrome on the logout control so it matches the
-   <a> profile-item entries above it (full-width row, no border/background,
-   left-aligned text, pointer cursor) instead of looking like a bare system button. */
+/* Reset native <button> chrome on the logout control so it matches the */
 .profile-item-btn {
     width: 100%;
     border: 0;
@@ -742,9 +693,7 @@ a.adm-stat-card:focus-visible {
     cursor: default;
 }
 
-/* .nav-link-label, .nav-badge, .nav-link-soon / .drawer-link-soon and .nav-pill-soon
-   now live in assets/css/layout/sidebar.css — they're shared by the student sidebar
-   too (e.g. the "Soon" items in AI Tools / Safety & Support), not just admin. */
+/* .nav-link-label, .nav-badge, .nav-link-soon / .drawer-link-soon and .nav-pill-soon */
 
 .nav-badge {
     flex: 0 0 auto;
@@ -764,12 +713,7 @@ a.adm-stat-card:focus-visible {
     display: none;
 }
 
-/* Desktop All Users-style tables: explicit columns rather than the generic
-   label/value stack used elsewhere, so the table keeps real column alignment
-   down to tablet width. Only the mobile breakpoint collapses to No./Email/Actions.
-   Name and email read naturally left-aligned; every other column (being a short,
-   single-value field — a count, a status, a date) reads cleaner centered, matching
-   its centered header. */
+/* Desktop All Users-style tables: explicit columns rather than the generic */
 .adm-table-cols {
     font-size: .8rem;
 }
@@ -793,18 +737,12 @@ a.adm-stat-card:focus-visible {
     font-size: .8rem;
 }
 
-/* Icon-only actions (desktop and mobile alike) — the label is still available
-   to assistive tech and as a native tooltip via title/aria-label. */
+/* Icon-only actions (desktop and mobile alike) — the label is still available */
 .adm-actions {
     text-align: right;
     white-space: nowrap;
 }
 
-/* Combined with the button-type class (.btn-ghost.adm-icon-btn, not just
-   .adm-icon-btn alone) so this beats .btn-ghost.btn-sm's own height/padding on
-   specificity — otherwise the btn-sm rule's horizontal padding and 2rem height
-   (with no matching width) win and the box renders as a stretched rectangle
-   instead of a square. */
 .btn-ghost.adm-icon-btn,
 .btn-accent.adm-icon-btn {
     display: inline-flex;
@@ -820,17 +758,8 @@ a.adm-stat-card:focus-visible {
     margin-left: 4px;
 }
 
-/* Mobile: keep real table semantics (unlike the generic .adm-table stacking
-   rule above) and show only No. / Email Address / Actions, per the brief —
-   Full Name and every other column move behind the row's View action. Explicit
-   column widths (rather than letting flex/auto sizing fight each other) are
-   what stop the actions cell from wrapping onto its own line and overlapping
-   the row below. */
 @media (max-width: 720px) {
-    /* table-layout: auto (not fixed) — No. and Actions size to their own small
-       content via the width:1%/white-space:nowrap trick below, and Email Address,
-       the only column left unconstrained, naturally takes whatever space remains
-       between them instead of three equally-fought-over fixed widths. */
+    /* table-layout: auto (not fixed) — No. and Actions size to their own small */
     table.adm-table-cols {
         display: table;
         table-layout: auto;
@@ -865,10 +794,7 @@ a.adm-stat-card:focus-visible {
         white-space: nowrap;
     }
     .adm-table-cols .adm-col-email {
-        max-width: 0; /* with the cell's auto-sizing sibling widths pinned to
-            1%, this forces the remaining table width onto this column instead
-            of letting the cell grow to fit its text — which is what makes
-            overflow:hidden below actually truncate instead of no-op. */
+        max-width: 0;
         padding-left: 10px;
         overflow: hidden;
         white-space: nowrap;
@@ -890,7 +816,7 @@ a.adm-stat-card:focus-visible {
     }
 }
 
-/* ---------- Coming-soon placeholder (sidebar sections not yet implemented) ---------- */
+/* Coming-soon placeholder (sidebar sections not yet implemented) */
 
 .adm-placeholder {
     text-align: center;

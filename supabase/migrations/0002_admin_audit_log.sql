@@ -1,11 +1,4 @@
 -- Adds a trusted, append-only audit log for administrative actions, and extends
--- set_account_status() to write to it in the same transaction as the status
--- change it performs. No client role can INSERT/UPDATE/DELETE this table
--- directly -- only SECURITY DEFINER functions (running as the table owner)
--- can write to it, so the frontend cannot fabricate a log entry.
---
--- STATUS: Already applied manually via the Supabase SQL editor (confirmed by project owner).
--- Kept here so the repository reflects the live schema.
 
 create table if not exists public.admin_audit_log (
     id uuid primary key default gen_random_uuid(),

@@ -1,15 +1,6 @@
-/* ============================================================
-   Gmail-style message row — shared by the admin inbox (with an
-   archive action), the student inbox page, and the header inbox
-   dropdown preview, so all three render the exact same component:
-     [icon] [pill category / subject / preview] [time + action]
-   Global (imported from main.css) because the header dropdown
-   appears on every page, not just the inbox pages.
-   ============================================================ */
+/* Gmail-style message row — shared by the admin inbox (with an */
 
-/* One column everywhere — each message is its own full-width
-   rounded rectangle, stacked. Avatar is centered on the row so its
-   height lines up with the whole text block, not just the top line. */
+/* One column everywhere — each message is its own full-width */
 .msg-list {
     display: flex;
     flex-direction: column;
@@ -94,10 +85,7 @@
     text-overflow: ellipsis;
 }
 
-/* Right-hand column: time sits level with the pill on the first
-   line, the archive button sits below it — admin only; the student
-   page and the header preview omit .msg-row-actions and just show
-   the time (the header preview omits even that; see .msg-list-compact). */
+/* Right-hand column: time sits level with the pill on the first */
 .msg-row-side {
     flex: 0 0 auto;
     align-self: stretch;
@@ -168,12 +156,7 @@
     line-height: 1.5;
 }
 
-/* Compact variant for the header inbox dropdown. Padding, minimum row
-   height and row-to-row gap are kept identical to .header-panel-item
-   (shell-bar.css) — the notification dropdown's row component — so the
-   two header popups line up: same left edge for the icon/dot, same
-   vertical rhythm, same row height, no right-hand time/action column —
-   tapping anywhere opens the full inbox page. */
+/* Compact variant for the header inbox dropdown. Padding, minimum row */
 .msg-list-compact {
     gap: 2px;
 }

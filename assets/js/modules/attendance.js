@@ -1,15 +1,9 @@
-/* ============================================================
-   ATTENDANCE.JS — Enhanced v4
-   Features: Heatmap, Bulk Attendance, Consecutive Absence
-   Warnings, Export CSV/PDF, Skeleton states, Mode toggle,
-   Absence limit progress bars, Mobile-first layout.
-   ============================================================ */
+// ATTENDANCE.JS — Enhanced v4
 
 const DEFAULT_ABSENCE_LIMIT = 3;
-/* ---- Helpers ---- */
+// Helpers
 
 function escapeAttHtml(s) {
-    // Escape quotes too, so values are safe inside HTML attributes (data-*, aria-label, value)
     return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -1415,7 +1409,6 @@ function saveAttendanceEdit() {
         notes: document.getElementById('attEditNotes').value.trim()
     };
 
-    // ---- validation ----
     if (!next.subjectId)
         return fail('Choose a subject.');
     if (!next.date || isNaN(new Date(`${next.date}T00:00:00`).getTime()))
@@ -1437,7 +1430,7 @@ function saveAttendanceEdit() {
     if (clash)
         return fail(`${codeOf(next.subjectId)} already has a record on ${formatDisplayDate(next.date)}. Edit or delete that one instead.`);
 
-    // ---- what changed ----
+    // what changed
     const statusLabel = v => v === 'No Classes' ? 'No Class' : v;
     const changes = [];
     if (rec.subjectId !== next.subjectId)
@@ -1459,7 +1452,6 @@ function saveAttendanceEdit() {
         return;
     }
 
-    // Close the edit modal first so the confirm dialog never stacks behind it.
     const id = rec.id;
     modalEl.addEventListener('hidden.bs.modal', () => {
         confirmAction({
@@ -1468,7 +1460,7 @@ function saveAttendanceEdit() {
             confirmLabel: 'Save',
             icon: 'bi-pencil-square',
             onConfirm: () => applyAttendanceEdit(id, next),
-            onCancel: () => openAttendanceEdit(id, next) // ignored if confirmAction has no onCancel
+            onCancel: () => openAttendanceEdit(id, next)
         });
     }, { once: true });
     modal.hide();
@@ -1489,13 +1481,13 @@ function applyAttendanceEdit(id, next) {
     rec.notes = next.notes;
     if (subject && subject.semesterId)
         rec.semesterId = subject.semesterId;
-    DB.saveAttendance(latest); // cloud-sync diffs by id, marks dirty, upserts
+    DB.saveAttendance(latest);
     Toast.show('Attendance updated');
-    renderAttendanceSubjectList(); // the log form pre-fills from existing records
+    renderAttendanceSubjectList();
     renderAttendanceAll();
 }
 
-/* ---- Export CSV ---- */
+// Export CSV
 
 function exportAttendanceCSV() {
     const semId = DB.getActiveSemesterId();

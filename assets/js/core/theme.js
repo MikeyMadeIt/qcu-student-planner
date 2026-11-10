@@ -1,5 +1,4 @@
-/* Theme management. Loaded in <head> so the saved theme is applied before first paint.
-   Reads/writes the same local settings record as data/storage.js (browser-local only). */
+// Theme management. Loaded in <head> so the saved theme is applied before first paint.
 
 (function () {
     var KEY = 'sp_settings';

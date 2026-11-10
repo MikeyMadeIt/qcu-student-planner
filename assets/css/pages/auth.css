@@ -1,13 +1,8 @@
-/* Authentication pages: log in, sign up, password reset and status screens.
-   Swiss / International Typographic Style: strict grid, strong type, restrained
-   colour, flat geometry. Reuses the app's shared tokens (--space-*, --radius-*,
-   --accent, theme variables) so the pages stay inside the existing system. */
+/* Authentication pages: log in, sign up, password reset and status screens. */
 
-/* ---------- Theme tokens (dark and light share structure, differ in value) ---------- */
+/* Theme tokens (dark and light share structure, differ in value) */
 
 .auth-page {
-    /* Swiss geometry: hairline rules, no elevation. Radii reuse the app's own
-       scale (base/variables.css) rather than inventing new values. */
     --auth-rule: 1px;
 
     --auth-bg: #0F172A;
@@ -56,9 +51,6 @@ body.auth-page {
     color: var(--auth-text);
 }
 
-/* Calm, static backdrop grid -- no motion, no illustration. Reuses the shared
-   .grid-bg component (defined in components/grid-background.css) but quiets it
-   for an authentication context. */
 .auth-page .grid-bg::before,
 .auth-page .grid-bg::after {
     animation: none;
@@ -68,10 +60,7 @@ body.auth-page {
     opacity: 0.6;
 }
 
-/* ---------- Layout ---------- */
-/* The card sits on a single, centred grid column. Centring is true flex
-   centring: on short viewports or with the keyboard open the column simply
-   scrolls, it is never clipped. */
+/* Layout */
 
 .auth-main {
     position: relative;
@@ -158,7 +147,7 @@ body.auth-page {
     max-width: 38rem;
 }
 
-/* ---------- Theme toggle (same place on every auth page) ---------- */
+/* Theme toggle (same place on every auth page) */
 
 .theme-toggle {
     position: fixed;
@@ -208,7 +197,7 @@ body.auth-page {
     display: inline-block;
 }
 
-/* ---------- Form fields ---------- */
+/* Form fields */
 
 .auth-field {
     margin-bottom: var(--space-4);
@@ -344,8 +333,7 @@ body.auth-page {
     outline-offset: 2px;
 }
 
-/* Row beneath the password field: "Remember me" on the left, "Forgot
-   password?" on the right, on a shared baseline. */
+/* Row beneath the password field: "Remember me" on the left, "Forgot */
 .auth-row {
     display: flex;
     align-items: center;
@@ -415,7 +403,7 @@ body.auth-page {
     outline-offset: 2px;
 }
 
-/* ---------- Buttons ---------- */
+/* Buttons */
 
 .auth-submit {
     width: 100%;
@@ -474,7 +462,7 @@ body.auth-page {
     border-color: var(--auth-border-strong);
 }
 
-/* ---------- Google sign-in ---------- */
+/* Google sign-in */
 
 .auth-divider {
     display: flex;
@@ -549,10 +537,7 @@ body.auth-page {
     animation: auth-spin 1s linear infinite;
 }
 
-/* ---------- Student email hint ---------- */
-/* A single quiet line under the button, not a boxed callout -- the label
-   reuses the same small mono/uppercase treatment as .auth-field label so it
-   reads as part of the form rather than a bolted-on notice. */
+/* Student email hint */
 
 .auth-hint {
     margin: var(--space-4) 0 0;
@@ -582,7 +567,7 @@ body.auth-page {
     word-break: break-all;
 }
 
-/* ---------- Alerts and footer text ---------- */
+/* Alerts and footer text */
 
 .auth-alert {
     display: flex;
@@ -626,7 +611,7 @@ body.auth-page {
     color: var(--auth-text-soft);
 }
 
-/* ---------- Password requirements ---------- */
+/* Password requirements */
 
 .req-list {
     display: grid;
@@ -653,10 +638,7 @@ body.auth-page {
     font-weight: 600;
 }
 
-/* ---------- Registration stepper ---------- */
-/* A flat, ruled progress track instead of numbered circles and connector
-   lines: three labelled segments, the filled portion marking current/complete.
-   Quieter than a badge-and-line stepper, still legible at a glance. */
+/* Registration stepper */
 
 .stepper {
     counter-reset: step;
@@ -675,9 +657,7 @@ body.auth-page {
     gap: var(--space-2);
 }
 
-/* The marker is not shown in this layout -- step state reads from the label
-   colour and the track below it -- but it stays in the DOM since the wizard
-   script writes the step number / checkmark into it. */
+/* The marker is not shown in this layout step state reads from the label */
 .stepper-marker {
     position: absolute;
     width: 1px;
@@ -732,7 +712,7 @@ body.auth-page {
     background: rgb(var(--accent));
 }
 
-/* ---------- Wizard steps ---------- */
+/* Wizard steps */
 
 .wizard-step {
     min-width: 0;
@@ -775,7 +755,7 @@ body.auth-page {
     grid-template-columns: 1fr 1.4fr;
 }
 
-/* ---------- Legal text boxes ---------- */
+/* Legal text boxes */
 
 .legal-block {
     margin-bottom: var(--space-5);
@@ -841,7 +821,7 @@ body.auth-page {
     color: var(--auth-text-soft);
 }
 
-/* ---------- Consent checkboxes ---------- */
+/* Consent checkboxes */
 
 .auth-check {
     display: flex;
@@ -864,7 +844,7 @@ body.auth-page {
     cursor: pointer;
 }
 
-/* ---------- Status screens ---------- */
+/* Status screens */
 
 .auth-center {
     text-align: center;
@@ -924,19 +904,13 @@ body.auth-page {
     border: 0;
 }
 
-/* ---------- Responsive ---------- */
-
 @media (max-width: 575.98px) {
     .auth-main {
-        /* Centred top-to-bottom and side-to-side, same as desktop. When content is taller
-           than the viewport this still scrolls normally -- centring a flex item never clips
-           it, it only changes where the extra space goes when there IS extra space. */
         justify-content: center;
         padding: max(4.5rem, env(safe-area-inset-top) + 3.5rem) var(--space-4) var(--space-5);
     }
 
     .auth-card {
-        /* More breathing room than the outer page padding alone gave the card's own edges. */
         padding: var(--space-6) var(--space-5);
     }
 
