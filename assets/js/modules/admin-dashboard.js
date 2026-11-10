@@ -56,7 +56,6 @@ function renderCharts(counts, all) {
         });
     }
 
-    /* Registrations per day, last 14 days — derived from each account's created_at. */
     const days = [];
     for (let i = 13; i >= 0; i -= 1) {
         const d = new Date();
@@ -96,9 +95,7 @@ function renderCharts(counts, all) {
     });
 }
 
-/* Counts accounts per program/campus, excluding admin rows and blank values, and renders
-   a horizontal bar (program) + doughnut (campus). Both read straight from the already-fetched
-   `all` rows — no extra round trip to the database. */
+// Counts accounts per program/campus, excluding admin rows and blank values, and renders
 function renderBreakdownCharts(all) {
     const students = all.filter(row => row.role !== 'admin');
 
@@ -111,7 +108,6 @@ function renderBreakdownCharts(all) {
         return counts;
     };
 
-    /* ---- Program breakdown (top 8, horizontal bar) ---- */
     const programCounts = tally(students, 'course');
     const programEntries = [...programCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
 
@@ -153,7 +149,6 @@ function renderBreakdownCharts(all) {
         });
     }
 
-    /* ---- Campus breakdown (doughnut) ---- */
     const campusCounts = tally(students, 'school');
     const campusEntries = [...campusCounts.entries()].sort((a, b) => b[1] - a[1]);
     const campusLegend = document.getElementById('campusLegend');
@@ -186,9 +181,7 @@ function renderBreakdownCharts(all) {
     }
 }
 
-/* Renders the Recent Admin Activity widget from a listAuditLog() result. Kept separate
-   from the main stats load so a failure here (e.g. a permissions issue on that one table)
-   doesn't take down the rest of an otherwise-working dashboard. */
+// Renders the Recent Admin Activity widget from a listAuditLog() result. Kept separate
 async function loadRecentActivity() {
     const loading = document.getElementById('activityLoading');
     const list = document.getElementById('activityList');
@@ -228,12 +221,7 @@ async function loadRecentActivity() {
         </tr>`).join('');
 }
 
-/* Messaging + support ticket stats (Phase 5). Kept separate from the main
-   getDashboardStats() load, same reasoning as loadRecentActivity() above: a
-   problem here (e.g. the Phase 5 migration not yet applied) degrades only
-   these two cards/widgets instead of the whole dashboard. Message-count and
-   recipient-count are always shown as distinct numbers -- one message sent to
-   50 students is one row in "Recent administrative messages", never 50. */
+// Messaging + support ticket stats (Phase 5). Kept separate from the main
 async function loadCommsStats() {
     const unreadEl = document.getElementById('statUnreadMsgs');
     const openEl = document.getElementById('statOpenTickets');

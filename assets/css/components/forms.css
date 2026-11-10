@@ -1,6 +1,4 @@
-/* ---------- FORM CONTROLS ---------- */
-/* Shared sizing, placeholder visibility and focus states for every text
-   input, select, textarea, checkbox and radio in the application. */
+/* FORM CONTROLS */
 
 .form-control,
 .form-select {
@@ -13,7 +11,6 @@
     border-radius: var(--input-radius) !important;
     font-size: .9rem;
     line-height: calc(var(--input-height) - 2px);
-    /* --- CRITICAL MOBILE & CHROMIUM FIX --- */
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
@@ -26,7 +23,6 @@ textarea.form-control {
     line-height: 1.5;
 }
 
-/* Visible, theme-aware placeholder text everywhere. */
 .form-control::placeholder,
 textarea::placeholder,
 input::placeholder {
@@ -42,7 +38,6 @@ input::placeholder {
     color: var(--input-placeholder-color);
 }
 
-/* Disabled / read-only fields stay legible but visually distinct. */
 .form-control:disabled,
 .form-control[readonly],
 .form-select:disabled {
@@ -51,7 +46,6 @@ input::placeholder {
     cursor: not-allowed;
 }
 
-/* Autofill (email/password) in dark surfaces. */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover,
 .form-control:-webkit-autofill:focus {
@@ -67,7 +61,6 @@ input::placeholder {
     box-shadow: var(--focus-ring) !important;
 }
 
-/* Force dark/light theme options onto native dropdown popups */
 .form-select option,
 select option {
     background-color: #121724 !important;
@@ -80,15 +73,12 @@ select option {
     color: #161a26 !important;
 }
 
-/* ---------- Checkboxes & radios ---------- */
 input[type="checkbox"],
 input[type="radio"] {
     width: var(--checkbox-size);
     height: var(--checkbox-size);
     flex-shrink: 0;
     margin: 0;
-    /* Nudge so the box lines up with the first line of its label text
-       instead of floating above or below it. */
     position: relative;
     top: 0.15em;
     accent-color: rgb(var(--accent));
@@ -108,8 +98,6 @@ input[type="radio"]:disabled {
     cursor: not-allowed;
 }
 
-/* Label text that wraps next to a checkbox keeps the box pinned to the
-   top-left instead of re-centering vertically. */
 .form-check,
 .check-row,
 label.checkbox-label {
@@ -132,7 +120,7 @@ label.checkbox-label {
     line-height: 1.45;
 }
 
-/* ---------- Day selector (Mon–Sun), used by Add Subject / Add Event ---------- */
+/* Day selector (Mon–Sun), used by Add Subject / Add Event */
 .day-selector {
     display: flex;
     flex-wrap: wrap;
@@ -191,7 +179,7 @@ label.checkbox-label {
     cursor: not-allowed;
 }
 
-/* ---------- Color label swatches (subjects / events) ---------- */
+/* Color label swatches (subjects / events) */
 .color-swatch-group {
     display: flex;
     flex-wrap: wrap;
@@ -261,8 +249,7 @@ label.checkbox-label {
     color: var(--danger);
 }
 
-/* Input-group icons (search fields, password toggles, etc.) stay centered
-   and never distort the control's height. */
+/* Input-group icons (search fields, password toggles, etc.) stay centered */
 .input-group {
     display: flex;
     align-items: stretch;

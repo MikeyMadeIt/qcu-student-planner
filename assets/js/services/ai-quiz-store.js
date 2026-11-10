@@ -7,7 +7,6 @@ async function userId(sb) {
 function fail(error) { throw new Error(error?.message || 'Database request failed'); }
 
 export const AiQuizStore = {
-    /** quiz = { title, questions:[{question,choices,correctIndex,explanation}] } -> new quiz id */
     async saveQuiz(quiz, { topic = '', difficulty = '', fileName = null } = {}) {
         const sb = await getSupabase();
         const { data, error } = await sb.rpc('save_ai_quiz', {
@@ -40,7 +39,6 @@ export const AiQuizStore = {
         });
     },
 
-    /** Returns the same shape aqmValidateQuiz produces, plus id. */
     async getQuiz(id) {
         const sb = await getSupabase();
         const [qz, qs] = await Promise.all([

@@ -1,6 +1,4 @@
-/* ============================================================
-   SETTINGS.JS — includes Academic Semester Management
-   ============================================================ */
+// SETTINGS.JS — includes Academic Semester Management
 
 function initSettings() {
     const s = DB.getSettings();
@@ -16,10 +14,7 @@ function initSettings() {
     renderSyncStatus();
 }
 
-/* Shows the last Supabase sync failure (grades, semesters, etc.) in plain
-   language, so a student on mobile -- with no DevTools console -- has
-   somewhere to actually see why something "isn't saving". See
-   cloud-sync.js's recordSyncError/getLastSyncError. */
+// Shows the last Supabase sync failure (grades, semesters, etc.) in plain
 function renderSyncStatus() {
     const card = document.getElementById('syncStatusCard');
     const msgEl = document.getElementById('syncStatusMsg');
@@ -53,7 +48,7 @@ function saveProfile() {
     Toast.show('Profile saved');
 }
 
-/* Toggles which settings category is visible to the user */
+// Toggles which settings category is visible to the user
 function selectCategory(category) {
     document.getElementById('generalView').classList.toggle('d-none', category !== 'general');
     document.getElementById('academicView').classList.toggle('d-none', category !== 'academic');
@@ -62,7 +57,6 @@ function selectCategory(category) {
     document.getElementById('privacyView').classList.toggle('d-none', category !== 'privacy');
 }
 
-/* Shows the settings navigation buttons toggled when clicked*/
 const buttons = document.querySelectorAll('.set-nav-btn');
 buttons.forEach(button => {
   button.addEventListener('click', () => {
@@ -72,9 +66,7 @@ buttons.forEach(button => {
   });
 });
 
-/* ============================================================
-   SEMESTER MANAGEMENT
-   ============================================================ */
+// SEMESTER MANAGEMENT
 
 function renderSemesterManager() {
     const wrap = document.getElementById('semesterManager');
@@ -118,8 +110,6 @@ function renderSemesterManager() {
     <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
   </div>`;
     wrap.innerHTML = html;
-    // MAJ-09: Event delegation — read id from data-id attribute (safe DOM property),
-    // never from an interpolated onclick string, so crafted sem IDs can't XSS.
     wrap.addEventListener('click', function _semClick(e) {
         const switchBtn = e.target.closest('.sem-switch-btn');
         if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
@@ -127,7 +117,7 @@ function renderSemesterManager() {
         if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
         const deleteBtn = e.target.closest('.sem-delete-btn');
         if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
-    }, { once: true }); // { once: true } auto-removes listener on next renderSemesterManager call
+    }, { once: true });
     if (!wrap._semBound) {
     wrap._semBound = true;
     wrap.addEventListener('click', function (e) {
@@ -245,7 +235,6 @@ function confirmDeleteSemester(id) {
     const attCount = DB.getAttendanceForSemester(id).length;
     const gradeCount = DB.getGradesForSemester(id).length;
     const syllabusCount = DB.getSyllabusCoursesForSemester(id).length;
-    // Build a clear summary of what will be removed
     const parts = [];
     if (subCount)
         parts.push(`${subCount} subject${subCount !== 1 ? 's' : ''}`);
@@ -283,9 +272,7 @@ function ymdLocalNow() { return ymdLocal(new Date()); }
 function ymdLocalFuture(days) { return ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * days)); }
 // ymdLocal defined in storage.js
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-/* ============================================================
-   THEME / ACCENT / NOTIF
-   ============================================================ */
+// THEME / ACCENT / NOTIF
 
 function chooseTheme(theme) { setTheme(theme); highlightTheme(theme); }
 
@@ -330,9 +317,7 @@ function requestNotifPermission() {
     });
 }
 
-/* ============================================================
-   EXPORT
-   ============================================================ */
+// EXPORT
 
 function exportData() {
     const data = DB.exportAll();
@@ -342,16 +327,12 @@ function exportData() {
     a.href = url;
     a.download = `student-planner-backup-${todayKey()}.json`;
     a.click();
-    // MIN-05: Defer revokeObjectURL — calling it synchronously races the browser's download
-    // queue and can produce a 0-byte file on some browsers (compare copyGwaCardAsImage pattern).
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     Toast.show('Data exported');
 }
 
 window.exportData = exportData;
-/* ============================================================
-   IMPORT — with validation, preview, and overwrite confirmation
-   ============================================================ */
+// IMPORT — with validation, preview, and overwrite confirmation
 
 function importData(file) {
     if (!file)
@@ -374,13 +355,11 @@ function importData(file) {
             Toast.show('Invalid file — could not parse JSON', 'high', 'bi-exclamation-triangle');
             return;
         }
-        // Validate structure before touching current data
         const result = DB.validateImport(parsed);
         if (!result.valid) {
             Toast.show(result.error, 'high', 'bi-exclamation-triangle');
             return;
         }
-        // Count existing records to warn user
         const existingSubs = DB.getSubjects().length;
         const existingTasks = DB.getTasks().length;
         const hasData = existingSubs > 0 || existingTasks > 0;
@@ -406,9 +385,7 @@ function importData(file) {
     reader.readAsText(file);
 }
 
-/* ============================================================
-   RESET — clears all planner data, no demo seeding
-   ============================================================ */
+// RESET — clears all planner data, no demo seeding
 
 function confirmReset() {
     confirmAction({

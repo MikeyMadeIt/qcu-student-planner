@@ -1,9 +1,4 @@
-/* ============================================================
-   TASKS.JS — v3 Advanced Task Management
-   Features: Unified Filter/Sort Drawer, Board/List view,
-             Progress rings, Time estimate, Bulk move-to-subject,
-             Improved card design, mobile-first
-   ============================================================ */
+// TASKS.JS — v3 Advanced Task Management
 
 let tkFilter = 'all';
 let tkExpandedId = null;
@@ -13,21 +8,19 @@ let tkSort = 'due';
 let tkSortDir = 'asc';
 let tkCatFilter = '';
 let tkSubFilter = '';
-let tkView = 'list'; // 'list' | 'board'
-/* ── Init ── */
+let tkView = 'list';
+// Init
 
 function initTasks() {
     renderTasks();
     const searchEl = document.getElementById('tkSearch');
     if (searchEl) searchEl.addEventListener('input', debounce(renderTasks, 180));
-    // Unified filter/sort drawer
     var drawerBtn = document.getElementById('filterSortBtn');
     if (drawerBtn) {
         drawerBtn.addEventListener('click', function () {
             openFilterDrawer();
         });
     }
-    // View toggle
     var listViewBtn = document.getElementById('tkViewList');
     var boardViewBtn = document.getElementById('tkViewBoard');
     if (listViewBtn)
@@ -51,8 +44,6 @@ function setView(v) {
         boardBtn.classList.toggle('active', v === 'board');
     renderTasks();
 }
-
-/* ── Filter & Sort popup styles (self-contained; injected so this file works on its own) ── */
 
 (function injectFilterPopupStyles() {
     if (document.getElementById('tkFilterPopupStyles'))
@@ -171,7 +162,7 @@ function setView(v) {
     document.head.appendChild(style);
 })();
 
-/* ── Filter & Sort popup (standard Bootstrap modal, same pattern as #taskModal) ── */
+// Filter & Sort popup (standard Bootstrap modal, same pattern as #taskModal)
 
 function openFilterDrawer() {
     var existing = document.getElementById('tkFilterDrawer');
@@ -641,7 +632,7 @@ function metaGridHtml(t) {
         '</div>';
 }
 
-/* ── Build a single task card (list view) ── */
+// Build a single task card (list view)
 
 function buildTaskCard(t, inSubjectGroup) {
     var status = computeStatus(t);
@@ -702,7 +693,7 @@ function buildTaskCard(t, inSubjectGroup) {
         collapsed + expanded + '</div>';
 }
 
-/* ── Board card ── */
+// Board card
 
 function buildBoardCard(t) {
     var status = computeStatus(t);
@@ -713,7 +704,6 @@ function buildBoardCard(t) {
     var subs = DB.getSubjects();
     var sub = subs.find(function (s) { return s.id === t.subjectId; });
     var ringHtml = progressRingHtml(t);
-    // Compact due string
     var dueStr = '';
     if (t.dueDate) {
         var d = new Date(t.dueDate + 'T00:00:00');
@@ -722,16 +712,13 @@ function buildBoardCard(t) {
             dueStr += ' ' + fmtTime(t.dueTime);
     }
     var dueClass = isOverdue ? 'bdue-overdue' : (t.dueDate === todayKey() ? 'bdue-today' : 'bdue-normal');
-    // Priority color dot
     var priMap = { high: '#fb7185', medium: '#b45309', low: '#6b7280' };
     var priColor = priMap[t.priority || 'low'] || priMap.low;
-    // Time estimate compact
     var teStr = '';
     if (t.timeEstimate) {
         var h = Math.floor(t.timeEstimate / 60), m = t.timeEstimate % 60;
         teStr = h > 0 ? (h + 'h' + (m > 0 ? m + 'm' : '')) : m + 'm';
     }
-    // Checklist mini progress
     var clProg = '';
     if (t.checklist && t.checklist.length) {
         var done = t.checklist.filter(function (c) { return c.done; }).length;
@@ -775,7 +762,7 @@ function buildBoardCard(t) {
         '</div>';
 }
 
-/* ── Group builder ── */
+// Group builder
 
 function buildDueBucketGroup(label, icon, tasks, groupClass) {
     if (!tasks.length)
@@ -791,7 +778,7 @@ function buildSelectAllGroupBtn(tasks) {
     return '<button class="tk-group-select-all" onclick="event.stopPropagation();toggleSelectGroup(' + JSON.stringify(ids) + ')" title="Select all in group" aria-label="Select all in group"><i class="bi bi-check2-square"></i></button>';
 }
 
-/* ── Bulk toolbar ── */
+// Bulk toolbar
 
 function renderBulkToolbar(visibleIds) {
     var existing = document.getElementById('tkBulkToolbar');
@@ -819,7 +806,7 @@ function renderBulkToolbar(visibleIds) {
         wrap.parentNode.insertBefore(toolbar, wrap);
 }
 
-/* ── Select all button ── */
+// Select all button
 
 function renderSelectAllBtn(visibleIds) {
     var btn = document.getElementById('selectAllBtn');
@@ -846,7 +833,7 @@ function renderSelectAllBtn(visibleIds) {
     btn.onclick = function () { toggleSelectAll(visibleIds, !allSelected); };
 }
 
-/* ── Selection helpers ── */
+// Selection helpers
 
 function toggleSelect(id) {
     if (tkSelected.has(id))
@@ -874,7 +861,7 @@ function toggleSelectAll(ids, checked) {
 }
 
 function clearSelection() { tkSelected.clear(); renderTasks(); }
-/* ── Bulk actions ── */
+// Bulk actions
 
 function bulkComplete() {
     var tasks = DB.getTasks();
@@ -941,7 +928,7 @@ function bulkDelete() {
     });
 }
 
-/* ── Bulk move to subject ── */
+// Bulk move to subject
 
 function openBulkMove() {
     var semId = DB.getActiveSemesterId();
@@ -1012,12 +999,11 @@ function executeBulkMove() {
     renderTasks();
 }
 
-/* ── Main render ── */
+// Main render
 
 function renderTasks() {
     var semId = DB.getActiveSemesterId();
     var allTasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
-    // Auto-sync completed status
     var changed = false;
     allTasks.forEach(function (t) {
         if (t.status === 'not-started')
@@ -1032,7 +1018,6 @@ function renderTasks() {
     });
     if (changed)
         DB.saveTasks(DB.getTasks());
-    // Stats
     var doneStat = allTasks.filter(function (t) { return computeStatus(t) === 'completed'; }).length;
     var overdueStat = allTasks.filter(function (t) { return computeStatus(t) === 'overdue'; }).length;
     var activeStat = allTasks.filter(function (t) { var s = computeStatus(t); return s !== 'completed'; }).length;
@@ -1066,7 +1051,6 @@ function renderTasks() {
             return computeStatus(t) === 'overdue';
         return true;
     });
-    // Sort
     var priRank = { high: 0, medium: 1, low: 2 };
     if (tkSort === 'due') {
         filtered.sort(function (a, b) {
@@ -1087,7 +1071,6 @@ function renderTasks() {
     }
     if (tkSortDir === 'desc')
         filtered.reverse();
-    // Clean selection
     var visibleIds = filtered.map(function (t) { return t.id; });
     Array.from(tkSelected).forEach(function (id) { if (!visibleIds.includes(id))
         tkSelected.delete(id); });
@@ -1134,7 +1117,7 @@ function renderTasks() {
         renderBulkToolbar(visibleIds);
 }
 
-/* ── Board view ── */
+// Board view
 
 function renderBoardView(tasks) {
     var active = tasks.filter(function (t) { var s = computeStatus(t); return s === 'not-started' || s === 'in-progress'; });
@@ -1153,7 +1136,7 @@ function renderBoardView(tasks) {
         '</div>';
 }
 
-/* ── Subject grouping ── */
+// Subject grouping
 
 function renderSubjectGroups(tasks) {
     var subs = DB.getSubjects();
@@ -1195,7 +1178,7 @@ function renderSubjectGroups(tasks) {
     return html || '<div class="tk-group-empty">No tasks match the current filters.</div>';
 }
 
-/* ── Toggle expand/collapse ── */
+// Toggle expand/collapse
 
 function toggleCard(id, evt) {
     if (evt && evt.target && (evt.target.closest('.tk-bulk-check') || evt.target.closest('.tk-complete-btn') || evt.target.closest('.tk-expand-btn')))
@@ -1211,7 +1194,7 @@ function toggleCard(id, evt) {
     }
 }
 
-/* ── Complete / uncomplete ── */
+// Complete / uncomplete
 
 function toggleTaskComplete(id) {
     var tasks = DB.getTasks();
@@ -1240,7 +1223,7 @@ function toggleTaskComplete(id) {
     renderTasks();
 }
 
-/* ── Checklist ── */
+// Checklist
 
 function toggleChecklistItem(taskId, idx) {
     var tasks = DB.getTasks();
@@ -1300,7 +1283,7 @@ function deleteChecklistItem(taskId, idx) {
     renderTasks();
 }
 
-/* ── Delete task ── */
+// Delete task
 
 function deleteTask(id) {
     var t = DB.getTasks().find(function (x) { return x.id === id; });
@@ -1321,7 +1304,7 @@ function deleteTask(id) {
     });
 }
 
-/* ── Time estimate helpers ── */
+// Time estimate helpers
 
 function parseTimeEstimate(hrs, mins) {
     var h = parseInt(hrs) || 0;
@@ -1336,10 +1319,7 @@ function teHrsMins(te) {
     return { hrs: Math.floor(te / 60), mins: te % 60 };
 }
 
-/* ── Time fields (combobox dropdown, same look as Schedule) ── */
-
 var TK_EST_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240, 360, 480];
-
 
 function tkFmtDuration(mins) {
     var h = Math.floor(mins / 60), m = mins % 60;
@@ -1371,7 +1351,7 @@ function tkTimeFieldHtml(key, id, placeholder, label) {
         '<p class="sch-subject-error" id="' + id + 'Error" hidden></p>';
 }
 
-/* cfg: { options:[n], value:n|null, format(n), sub(n), parse(str), allowEmpty, fallback } */
+// cfg: { options:[n], value:n|null, format(n), sub(n), parse(str), allowEmpty, fallback }
 function tkInitTimeField(field, cfg) {
     var input = field.querySelector('.sch-time-input');
     var btn = field.querySelector('.sch-time-btn');
@@ -1467,7 +1447,7 @@ function tkInitTimeField(field, cfg) {
     input.addEventListener('input', function () { setError('') });
     input.addEventListener('blur', function () { commit(); close(); });
     menu.addEventListener('mousedown', function (e) {
-        e.preventDefault(); // keep focus in the input
+        e.preventDefault();
         var opt = e.target.closest('.sch-time-opt');
         if (opt) choose(parseInt(opt.dataset.i, 10));
     });
@@ -1482,7 +1462,7 @@ function tkInitTimeField(field, cfg) {
             else commit();
         } else if (e.key === 'Escape' && isOpen()) {
             e.preventDefault();
-            e.stopPropagation(); // don't close the whole modal
+            e.stopPropagation();
             close();
         }
     });
@@ -1503,7 +1483,7 @@ function tkInitTaskTimeFields(t) {
     });
 }
 
-/* ── Add/Edit Modal ── */
+// Add/Edit Modal
 
 function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
     var t = id ? DB.getTasks().find(function (x) { return x.id === id; }) : null;

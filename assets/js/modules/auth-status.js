@@ -1,4 +1,4 @@
-/* Status pages: pending verification and email verification. */
+// Status pages: pending verification and email verification.
 
 import { AuthService } from '../services/auth-service.js';
 import { APP_CONFIG } from '../core/config.js';

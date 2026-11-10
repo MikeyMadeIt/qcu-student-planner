@@ -1,7 +1,4 @@
-/* ============================================================
-CALENDAR IMPROVEMENTS (v2)
-============================================================ */
-/* Unified calendar filter toggles */
+/* CALENDAR IMPROVEMENTS (v2) */
 
 .cal-filter-bar {
     display: flex;
@@ -226,10 +223,7 @@ CALENDAR IMPROVEMENTS (v2)
     color: rgb(var(--accent));
 }
 
-/* ============================================================
-CALENDAR v3 — Advanced Scheduling & UI
-============================================================ */
-/* ── Calendar Two-Column Layout ───────────────────────────── */
+/* CALENDAR v3 — Advanced Scheduling & UI */
 
 .cal-layout {
     display: grid;
@@ -252,8 +246,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
-/* ── Calendar Toolbar ─────────────────────────────────────── */
-/* Row 1: [prev] [date-title] [next + add] */
+/* Calendar Toolbar */
 
 .cal-toolbar-row1 {
     display: flex;
@@ -302,8 +295,6 @@ CALENDAR v3 — Advanced Scheduling & UI
     flex-wrap: nowrap;
 }
 
-/* Normalize all toolbar buttons to same height */
-
 .cal-toolbar-row1 .btn-icon,
 .cal-toolbar-row1 .btn-accent.btn-sm,
 .cal-toolbar-row2 .btn-ghost.btn-sm,
@@ -335,7 +326,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
-/* ── View Bar (segmented control style) ───────────────────── */
+/* View Bar (segmented control style) */
 
 .cal-view-bar {
     display: flex;
@@ -377,7 +368,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
-/* ── Filter Toggle Button ─────────────────────────────────── */
+/* Filter Toggle Button */
 
 .cal-filter-toggle-btn {
     display: flex;
@@ -394,7 +385,6 @@ CALENDAR v3 — Advanced Scheduling & UI
     transition: background .18s, border-color .18s;
     flex-shrink: 0;
     position: relative;
-    /* needed for badge positioning */
 }
 
 .cal-filter-toggle-btn:hover {
@@ -404,7 +394,6 @@ CALENDAR v3 — Advanced Scheduling & UI
 
 .cal-filter-active-count {
     display: none;
-    /* hidden when all 4 filters active */
     position: absolute;
     top: -6px;
     right: -6px;
@@ -422,7 +411,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     border: 2px solid var(--surface);
 }
 
-/* ── Filter Dropdown ──────────────────────────────────────── */
+/* Filter Dropdown */
 
 .cal-filter-dropdown {
     min-width: 180px;
@@ -482,7 +471,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     opacity: 1;
 }
 
-/* ── Month View Improvements ──────────────────────────────── */
+/* Month View Improvements */
 
 .cal-dow-label {
     font-size: .62rem;
@@ -556,8 +545,6 @@ CALENDAR v3 — Advanced Scheduling & UI
     flex-shrink: 0;
 }
 
-/* Hide chips everywhere */
-
 .uc-cell-events,
 .uc-more-count {
     display: none !important;
@@ -608,7 +595,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
-/* ── Day view list ────────────────────────────────────────── */
+/* Day view list */
 
 .day-view-list {
     display: flex;
@@ -617,7 +604,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     padding: 4px 0;
 }
 
-/* ── Empty States ─────────────────────────────────────────── */
+/* Empty States */
 
 .cal-empty-state {
     display: flex;
@@ -647,7 +634,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     font-size: 1.5rem;
 }
 
-/* ── Drag and Drop ────────────────────────────────────────── */
+/* Drag and Drop */
 
 .is-draggable {
     cursor: grab;
@@ -681,7 +668,6 @@ CALENDAR v3 — Advanced Scheduling & UI
 }
 
 /* drag handles removed — whole card is draggable */
-/* ── Agenda Panel ─────────────────────────────────────────── */
 
 .cal-agenda-panel {
     position: sticky;
@@ -786,7 +772,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     white-space: nowrap;
 }
 
-/* ── Week Timetable (tt-*) ────────────────────────────────── */
+/* Week Timetable (tt-*) */
 
 .tt-wrap {
     position: relative;
@@ -1131,8 +1117,6 @@ CALENDAR v3 — Advanced Scheduling & UI
 
 .modal-body .sch-subject-required { color: #fb7185; }
 
-/* Mobile week timetable adaptations */
-
 @media (max-width: 575px) {
     .tt-scroll-area {
         max-height: 400px;
@@ -1192,7 +1176,7 @@ CALENDAR v3 — Advanced Scheduling & UI
     }
 }
 
-/* ── Day detail improvements (kept for compatibility) ─────── */
+/* Day detail improvements (kept for compatibility) */
 
 .day-detail-item {
     display: flex;
@@ -1217,8 +1201,6 @@ CALENDAR v3 — Advanced Scheduling & UI
     margin-top: 1px;
 }
 
-/* ── Reduced motion ───────────────────────────────────────── */
-
 @media (prefers-reduced-motion: reduce) {
     .tt-event-block,
     .agenda-item,
@@ -1227,8 +1209,6 @@ CALENDAR v3 — Advanced Scheduling & UI
         transition: none !important;
     }
 }
-
-/* ── Desktop agenda sticky ────────────────────────────────── */
 
 @media (min-width: 992px) {
     .cal-agenda-panel {
