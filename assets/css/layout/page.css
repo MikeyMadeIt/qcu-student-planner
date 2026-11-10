@@ -1,7 +1,4 @@
-/* Shared page rhythm: content column, page header, sections, card grids and form fields.
-   Spacing comes from the tokens in base/variables.css:
-     --page-gap  between major sections      --grid-gap  between cards in one grid
-     --form-gap  between stacked form fields --title-gap section heading -> content */
+/* Shared page rhythm: content column, page header, sections, card grids and form fields. */
 
 .main-content {
     flex: 1 1 0%;
@@ -9,11 +6,6 @@
     width: 100%;
     max-width: var(--content-max-width);
     margin-inline: auto;
-    /* Top padding reserves the space .shell-bar (layout/shell-bar.css) used to
-       occupy in normal flow before it became position: fixed — it's the bar's
-       own height plus its 1px bottom border plus the gap that used to be its
-       margin-bottom, so the page's first block of content clears the fixed
-       bar instead of rendering underneath it. */
     padding: calc(var(--shell-bar-height) + 1px + var(--page-gap)) var(--content-padding-x) var(--space-6);
 }
 
@@ -51,17 +43,13 @@
     color: var(--text-soft);
 }
 
-/* Bootstrap grid gutters follow the shared grid gap. */
 .row.g-2,
 .row.g-3 {
     --bs-gutter-x: var(--grid-gap);
     --bs-gutter-y: var(--grid-gap);
 }
 
-/* Bootstrap's .mb-3 is used both for page sections and for form fields.
-   Direct children of the page get the section gap, everything nested
-   (forms, modals, cards) gets the tighter field gap. !important is needed
-   only because Bootstrap's utility is !important. */
+/* Bootstrap's .mb-3 is used both for page sections and for form fields. */
 .mb-3 {
     margin-bottom: var(--form-gap) !important;
 }
@@ -94,7 +82,6 @@ label {
     max-width: 60rem;
 }
 
-/* ---------- Phones: one tidy, thumb-friendly rhythm for every page ---------- */
 @media (max-width: 575.98px) {
     .page-title {
         font-size: 1.35rem;
@@ -106,7 +93,6 @@ label {
         line-height: 1.45;
     }
 
-    /* Page-header actions span the full width instead of floating at one edge. */
     .tk-header > .btn,
     .nt-header > .btn,
     .topbar > .btn,
@@ -123,7 +109,6 @@ label {
         justify-content: center;
     }
 
-    /* Consistent control sizes. */
     .btn-sm,
     .form-control,
     .form-select {
@@ -155,7 +140,6 @@ label {
         padding: var(--card-pad-sm);
     }
 
-    /* Tables and wide blocks scroll inside themselves, never the page. */
     .table-responsive,
     .overflow-auto {
         -webkit-overflow-scrolling: touch;

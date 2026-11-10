@@ -1,16 +1,10 @@
-/* ============================================================
-   CALENDAR.JS — Advanced Calendar v3
-   ============================================================ */
+// CALENDAR.JS — Advanced Calendar v3
 
-/* ── State ─────────────────────────────────────────────────── */
 let calMode = 'month';
 let calDate = new Date();
-let calSelectedDate = null; // currently selected date string (YYYY-MM-DD)
-// Filter state
+let calSelectedDate = null;
 let calFilters = { classes: true, tasks: true, events: true, univ: true };
-// Drag state
 let dragState = null;
-/* ── Constants ─────────────────────────────────────────────── */
 const CATEGORY_COLORS = {
     Homework: '#B45309', Project: '#4F8CFF', Quiz: '#22D3EE',
     Exam: '#FB7185', Personal: '#34D399', Organization: '#A78BFA'
@@ -27,14 +21,13 @@ const EVENT_CAT_COLORS = {
     'Event': '#B45309',
     'Other': '#8a90a6'
 };
-// Stable subject color cache (persisted per session)
 const _subjectColorCache = {};
 let univModalMode = 'range';
 let univModalColor = UNIV_COLORS[0];
 let univEditingId = null;
 let eventEditingId = null;
 let taskEditingId = null;
-/* ── Init ──────────────────────────────────────────────────── */
+// Init
 
 function initCalendar() {
     calSelectedDate = todayKey();
@@ -42,13 +35,12 @@ function initCalendar() {
     renderAgenda(calSelectedDate);
     updateFilterUI();
     updateFilterCount();
-    // Set jump-to-date input to today
     const ji = document.getElementById('jumpDateInput');
     if (ji)
         ji.value = todayKey();
 }
 
-/* ── Subject Colors (stable) ───────────────────────────────── */
+// Subject Colors (stable)
 
 function getSubjectColor(subjectObj) {
     if (!subjectObj)
@@ -57,7 +49,6 @@ function getSubjectColor(subjectObj) {
         return subjectObj.color;
     if (_subjectColorCache[subjectObj.id])
         return _subjectColorCache[subjectObj.id];
-    // Assign from palette deterministically
     const palette = DB.colors || ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309'];
     const idx = Object.keys(_subjectColorCache).length % palette.length;
     _subjectColorCache[subjectObj.id] = palette[idx];
@@ -86,7 +77,7 @@ function isDateInSemester(date) {
     return !!(dateKey && startKey && endKey && startKey <= dateKey && dateKey <= endKey);
 }
 
-/* ── Unified Event Collection ──────────────────────────────── */
+// Unified Event Collection
 
 function allEventsForDate(dateStr) {
     const semId = DB.getActiveSemesterId();
@@ -99,7 +90,7 @@ function allEventsForDate(dateStr) {
                 color: getSubjectColor(s),
                 time: s.start, endTime: s.end,
                 sub: s.desc || '', room: s.room || '',
-                draggable: false, // recurring class — not safe to drag
+                draggable: false,
                 _obj: s
             });
         });
@@ -143,7 +134,7 @@ function allEventsForDate(dateStr) {
     return events.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 }
 
-/* ── View Switching ────────────────────────────────────────── */
+// View Switching
 
 function setCalMode(m) {
     calMode = m;
@@ -180,7 +171,7 @@ function goToToday() {
     renderAgenda(calSelectedDate);
 }
 
-/* ── Jump to Date ──────────────────────────────────────────── */
+// Jump to Date
 
 function doJumpDate() {
     const inp = document.getElementById('jumpDateInput');
@@ -195,7 +186,6 @@ function doJumpDate() {
     calSelectedDate = inp.value;
     renderCalendar();
     renderAgenda(calSelectedDate);
-    // Close dropdown
     const dd = document.getElementById('jumpDateBtn');
     if (dd) {
         const bsdd = bootstrap.Dropdown.getInstance(dd);
@@ -204,7 +194,7 @@ function doJumpDate() {
     }
 }
 
-/* ── Filter Toggles ────────────────────────────────────────── */
+// Filter Toggles
 
 function toggleFilter(f) {
     calFilters[f] = !calFilters[f];
@@ -230,14 +220,14 @@ function updateFilterCount() {
         return;
     if (active < 4) {
         el.textContent = active;
-        el.style.display = 'flex'; // position:absolute badge above button
+        el.style.display = 'flex';
     }
     else {
         el.style.display = 'none';
     }
 }
 
-/* ── Render Calendar ───────────────────────────────────────── */
+// Render Calendar
 
 function renderCalendar() {
     const body = document.getElementById('calBody');
@@ -249,13 +239,10 @@ function renderCalendar() {
         body.innerHTML = weekTimetableHtml();
     else
         body.innerHTML = dayHtml();
-    // Re-attach drag events after render
     attachDragListeners();
 }
 
-/* ════════════════════════════════════════════════════════════
-   MONTH VIEW
-   ════════════════════════════════════════════════════════════ */
+// MONTH VIEW
 
 function monthHtml() {
     const y = calDate.getFullYear(), m = calDate.getMonth();
@@ -285,7 +272,6 @@ function monthHtml() {
         const isToday = dateStr === todayKey();
         const isSelected = dateStr === calSelectedDate;
         const evts = allEventsForDate(dateStr);
-        // Always dots — clean and compact on all screen sizes
         const dots = evts.slice(0, 7).map(e => `<span class="uc-dot" style="background:${e.color}" aria-hidden="true"></span>`).join('');
         html += `<div class="uc-cell ${isToday ? 'today' : ''} ${other ? 'other-month' : ''} ${isSelected ? 'selected' : ''}"
       onclick="selectCalDate('${dateStr}')"
@@ -303,13 +289,9 @@ function monthHtml() {
     return html;
 }
 
-/* ════════════════════════════════════════════════════════════
-   WEEK VIEW — Timetable Layout
-   ════════════════════════════════════════════════════════════ */
-
-const TIMETABLE_START = 7; // 7 AM
-const TIMETABLE_END = 24; // 12 AM (midnight)
-const HOUR_HEIGHT = 60; // px per hour
+const TIMETABLE_START = 7;
+const TIMETABLE_END = 24;
+const HOUR_HEIGHT = 60;
 
 function weekTimetableHtml() {
     const start = new Date(calDate);
@@ -318,25 +300,21 @@ function weekTimetableHtml() {
     end.setDate(start.getDate() + 6);
     document.getElementById('calTitle').textContent =
         `${start.toLocaleDateString([], { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    // Collect all days
     const days = [];
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
         d.setDate(start.getDate() + i);
         days.push(d);
     }
-    // Build events per day, then calculate layout
     const dayEventLayouts = days.map(d => {
         const dateStr = ymdLocal(d);
-        const evts = allEventsForDate(dateStr).filter(e => e.time); // only timed events
+        const evts = allEventsForDate(dateStr).filter(e => e.time);
         const allDay = allEventsForDate(dateStr).filter(e => !e.time);
         return { dateStr, d, evts, allDay, layout: computeOverlapLayout(evts) };
     });
     const totalHours = TIMETABLE_END - TIMETABLE_START;
     const totalHeight = totalHours * HOUR_HEIGHT;
-    // Day headers
     let html = `<div class="tt-wrap" aria-label="Week timetable view">`;
-    // All-day row
     const hasAllDay = dayEventLayouts.some(dl => dl.allDay.length > 0);
     if (hasAllDay) {
         html += `<div class="tt-allday-row">
@@ -359,7 +337,6 @@ function weekTimetableHtml() {
         });
         html += `</div>`;
     }
-    // Header row
     html += `<div class="tt-header-row">
     <div class="tt-time-gutter"></div>`;
     dayEventLayouts.forEach(dl => {
@@ -376,7 +353,6 @@ function weekTimetableHtml() {
     </div>`;
     });
     html += `</div>`;
-    // Scrollable timetable body
     html += `<div class="tt-scroll-area">
     <div class="tt-body" style="height:${totalHeight}px;position:relative;">
       <!-- Time gutter + hour lines -->
@@ -387,14 +363,12 @@ function weekTimetableHtml() {
         html += `<div class="tt-hour-label" style="top:${top}px" aria-hidden="true">${label}</div>`;
     }
     html += `</div>`;
-    // Hour grid lines
     html += `<div class="tt-grid-lines" aria-hidden="true">`;
     for (let h = TIMETABLE_START; h < TIMETABLE_END; h++) {
         html += `<div class="tt-grid-line" style="top:${(h - TIMETABLE_START) * HOUR_HEIGHT}px"></div>`;
         html += `<div class="tt-grid-line tt-grid-half" style="top:${(h - TIMETABLE_START) * HOUR_HEIGHT + 30}px"></div>`;
     }
     html += `</div>`;
-    // Day columns
     dayEventLayouts.forEach(dl => {
         const isToday = dl.dateStr === todayKey();
         const isSelected = dl.dateStr === calSelectedDate;
@@ -402,7 +376,6 @@ function weekTimetableHtml() {
       data-date="${dl.dateStr}"
       data-drop-target="true"
       onclick="selectCalDate('${dl.dateStr}')">`;
-        // Current time indicator
         if (isToday) {
             const now = new Date();
             const nowMins = now.getHours() * 60 + now.getMinutes();
@@ -413,26 +386,21 @@ function weekTimetableHtml() {
                 html += `<div class="tt-now-line" style="top:${topPx}px" aria-label="Current time"></div>`;
             }
         }
-        // Render events with overlap layout
         dl.layout.forEach(item => {
             const e = item.event;
             const totalMins = (TIMETABLE_END - TIMETABLE_START) * 60;
             let topMins = timeToMinutes(e.time) - TIMETABLE_START * 60;
             let endMins = e.endTime ? timeToMinutes(e.endTime) - TIMETABLE_START * 60 : topMins + 60;
-            // Skip events fully outside the visible range
             if (topMins >= totalMins || endMins <= 0)
                 return;
-            // Clamp to visible range
             topMins = Math.max(0, topMins);
             endMins = Math.min(totalMins, endMins);
-            let heightMins = Math.max(endMins - topMins, 22); // min 22 min so block is visible
-            // If enforcing min-height would push past the bottom, nudge top up instead
+            let heightMins = Math.max(endMins - topMins, 22);
             if (topMins + heightMins > totalMins) {
                 topMins = Math.max(0, totalMins - heightMins);
             }
             const top = (topMins / 60) * HOUR_HEIGHT;
             const height = (heightMins / 60) * HOUR_HEIGHT;
-            // Overlap: width and left based on column count
             const colCount = item.totalCols;
             const colIdx = item.col;
             const widthPct = 100 / colCount;
@@ -443,7 +411,6 @@ function weekTimetableHtml() {
             const timeLabelHtml = timeStart + (timeEnd ? '<br>' + timeEnd : '');
             const isShort = height < 45;
             const typeIcon = { class: 'bi-calendar2-week', task: 'bi-check2-square', event: 'bi-calendar-event', univ: 'bi-bank2' }[e.type] || 'bi-circle';
-            // Stagger overlapping cols so bottom ones remain clickable
             const zIdx = 5 + colIdx;
             html += `<div class="tt-event-block ${e.draggable ? 'tt-draggable' : ''} tt-type-${e.type}"
         style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px);background:${hexWithAlpha(e.color, 0.82)};color:#fff;z-index:${zIdx}"
@@ -460,11 +427,11 @@ function weekTimetableHtml() {
         });
         html += `</div>`;
     });
-    html += `</div></div></div>`; // tt-body, tt-scroll-area, tt-wrap
+    html += `</div></div></div>`;
     return html;
 }
 
-/* Converts "HH:MM" to minutes since midnight */
+// Converts "HH:MM" to minutes since midnight
 
 function timeToMinutes(t) {
     if (!t)
@@ -473,16 +440,14 @@ function timeToMinutes(t) {
     return h * 60 + (m || 0);
 }
 
-/* Compute overlap layout for timed events */
+// Compute overlap layout for timed events
 
 function computeOverlapLayout(events) {
     if (!events.length)
         return [];
-    // Sort by start time
     const sorted = events.map((e, i) => ({ event: e, idx: i }))
         .sort((a, b) => timeToMinutes(a.event.time) - timeToMinutes(b.event.time));
     const result = [];
-    // Group overlapping events into clusters
     const clusters = [];
     let currentCluster = [];
     sorted.forEach(item => {
@@ -504,7 +469,6 @@ function computeOverlapLayout(events) {
     });
     if (currentCluster.length)
         clusters.push(currentCluster);
-    // Assign columns within each cluster
     clusters.forEach(cluster => {
         const cols = [];
         cluster.forEach(item => {
@@ -523,16 +487,13 @@ function computeOverlapLayout(events) {
                 result.push({ event: item.event, col: cols.length - 1, totalCols: 0 });
             }
         });
-        // Set totalCols for all in this cluster
         const totalCols = cols.length;
         result.filter(r => cluster.some(c => c.event === r.event)).forEach(r => r.totalCols = totalCols);
     });
     return result;
 }
 
-/* ════════════════════════════════════════════════════════════
-   DAY VIEW
-   ════════════════════════════════════════════════════════════ */
+// DAY VIEW
 
 function dayHtml() {
     const dateStr = ymdLocal(calDate);
@@ -550,7 +511,7 @@ function dayHtml() {
     return `<div class="day-view-list">${evts.map(e => renderDayEventRow(e, dateStr)).join('')}</div>`;
 }
 
-/* ── Day Event Row ─────────────────────────────────────────── */
+// Day Event Row
 
 function renderDayEventRow(e, dateStr) {
     const typeBadge = `<span class="day-detail-type-badge badge-${e.type}">${e.type}</span>`;
@@ -578,21 +539,18 @@ function renderDayEventRow(e, dateStr) {
   </div>`;
 }
 
-/* ── Select Date ───────────────────────────────────────────── */
+// Select Date
 
 function selectCalDate(dateStr) {
     calSelectedDate = dateStr;
     calDate = new Date(dateStr + 'T00:00');
-    // Update selected state visually — works for both month cells and week timetable headers/cols
     document.querySelectorAll('[data-date]').forEach(el => {
         el.classList.toggle('selected', el.dataset.date === dateStr);
     });
     renderAgenda(dateStr);
 }
 
-/* ════════════════════════════════════════════════════════════
-   AGENDA PANEL
-   ════════════════════════════════════════════════════════════ */
+// AGENDA PANEL
 
 function renderAgenda(dateStr) {
     const header = document.getElementById('calAgendaHeader');
@@ -640,7 +598,6 @@ function renderAgenda(dateStr) {
     </div>`;
     }
     body.innerHTML = html;
-    // Re-attach drag listeners so agenda items are draggable
     attachDragListeners();
 }
 
@@ -665,7 +622,7 @@ function renderAgendaItem(e, dateStr) {
   </div>`;
 }
 
-/* ── Day Event Click ───────────────────────────────────────── */
+// Day Event Click
 
 function handleDayEventClick(type, id, date) {
     if (type === 'class')
@@ -678,10 +635,9 @@ function handleDayEventClick(type, id, date) {
         openUnivEventModal(id);
 }
 
-/* ── Legacy Day Modal (kept for mobile fallback) ───────────── */
+// Legacy Day Modal (kept for mobile fallback)
 
 function openDayModal(dateStr) {
-    // On mobile, show the agenda as a modal
     if (window.innerWidth < 768) {
         const evts = allEventsForDate(dateStr);
         const body = document.getElementById('dayModalBody');
@@ -723,25 +679,18 @@ function openDayModal(dateStr) {
     }
 }
 
-/* ════════════════════════════════════════════════════════════
-   DRAG AND DROP
-   ════════════════════════════════════════════════════════════ */
-// Ghost element for touch drag
 let _touchGhost = null;
 
 function attachDragListeners() {
-    // Desktop drag sources
     document.querySelectorAll('[draggable="true"][data-drag-type]').forEach(el => {
         el.addEventListener('dragstart', onDragStart);
         el.addEventListener('dragend', onDragEnd);
     });
-    // Desktop drop targets
     document.querySelectorAll('[data-drop-target="true"]').forEach(el => {
         el.addEventListener('dragover', onDragOver);
         el.addEventListener('dragleave', onDragLeave);
         el.addEventListener('drop', onDrop);
     });
-    // Touch drag — long-press on draggable item, move anywhere on document
     document.querySelectorAll('[draggable="true"][data-drag-type]').forEach(el => {
         let touchTimer = null;
         let _ghostWidth = 0;
@@ -761,14 +710,13 @@ function attachDragListeners() {
         function _onTouchMove(e) {
             if (!dragState)
                 return;
-            e.preventDefault(); // must be non-passive to block scroll
+            e.preventDefault();
             const t = e.touches[0];
             if (_touchGhost) {
                 _touchGhost.style.left = (t.clientX - _ghostWidth / 2) + 'px';
                 _touchGhost.style.top = (t.clientY - 24) + 'px';
             }
             document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
-            // elementFromPoint is blocked by the ghost (pointer-events:none so it passes through)
             const under = document.elementFromPoint(t.clientX, t.clientY);
             if (under) {
                 const dt = under.closest('[data-drop-target="true"]');
@@ -801,7 +749,6 @@ function attachDragListeners() {
             _touchCleanup();
         }
         el.addEventListener('touchstart', e => {
-            // Cancel any previous timer
             clearTimeout(touchTimer);
             touchTimer = setTimeout(() => {
                 dragState = {
@@ -824,16 +771,13 @@ function attachDragListeners() {
                 _touchGhost.style.top = (t.clientY - 24) + 'px';
                 if (navigator.vibrate)
                     navigator.vibrate(40);
-                // Attach move/end to document so they fire even when touch moves off el
                 document.addEventListener('touchmove', _onTouchMove, { passive: false });
                 document.addEventListener('touchend', _onTouchEnd, { passive: true });
                 document.addEventListener('touchcancel', _onTouchCancel, { passive: true });
             }, 450);
         }, { passive: true });
-        // Cancel timer if finger lifts before long-press fires
         el.addEventListener('touchend', () => clearTimeout(touchTimer), { passive: true });
         el.addEventListener('touchmove', () => {
-            // If drag hasn't started yet and finger moved, cancel long-press
             if (!dragState)
                 clearTimeout(touchTimer);
         }, { passive: true });
@@ -867,7 +811,6 @@ function onDragOver(e) {
 }
 
 function onDragLeave(e) {
-    // Only remove if we're truly leaving (not entering a child)
     if (!e.currentTarget.contains(e.relatedTarget)) {
         e.currentTarget.classList.remove('drag-over');
     }
@@ -915,7 +858,6 @@ function applyDrop(type, id, fromDate, toDate) {
         Toast.show('Event moved to ' + new Date(toDate + 'T00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }));
     }
     else {
-        // class / univ — not draggable, ignore
         return;
     }
     renderCalendar();
@@ -923,15 +865,12 @@ function applyDrop(type, id, fromDate, toDate) {
         renderAgenda(calSelectedDate);
 }
 
-/* ════════════════════════════════════════════════════════════
-   EXPORT: .ICS
-   ════════════════════════════════════════════════════════════ */
+// EXPORT: .ICS
 
 function exportICS() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
     const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Student Planner//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
-    // Add calendar events
     const calEvents = DB.getCalendarEventsForSemester(semId);
     calEvents.forEach(ev => {
         if (!ev.date)
@@ -948,7 +887,6 @@ function exportICS() {
             lines.push('DESCRIPTION:' + icsEscape(ev.description));
         lines.push('END:VEVENT');
     });
-    // Add tasks with due dates
     const tasks = DB.getTasksForSemester(semId).filter(t => t.dueDate);
     tasks.forEach(t => {
         const dtstart = icsDate(t.dueDate, t.dueTime || '00:00');
@@ -962,7 +900,6 @@ function exportICS() {
             lines.push('DESCRIPTION:' + icsEscape(t.description));
         lines.push('END:VEVENT');
     });
-    // Add university events
     const univEvents = DB.getUniversityEvents();
     univEvents.forEach(u => {
         if (!u.dates || !u.dates.length)
@@ -1014,9 +951,7 @@ function icsEscape(s) {
     return String(s || '').replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
 }
 
-/* ════════════════════════════════════════════════════════════
-   EXPORT: GOOGLE CALENDAR
-   ════════════════════════════════════════════════════════════ */
+// EXPORT: GOOGLE CALENDAR
 
 function exportGoogleCalendar() {
     const semId = DB.getActiveSemesterId();
@@ -1025,7 +960,6 @@ function exportGoogleCalendar() {
         Toast.show('No exportable events. Use .ics for tasks & university events.', 'medium', 'bi-info-circle');
         return;
     }
-    // Open Google Calendar for the first event as a demonstration
     const first = calEvents[0];
     const start = googleCalDate(first.date, first.startTime);
     const end = googleCalDate(first.date, first.endTime || first.startTime);
@@ -1034,7 +968,6 @@ function exportGoogleCalendar() {
         window.open(url, '_blank', 'noopener,noreferrer');
     }
     else {
-        // Multiple events: guide user to use .ics for bulk, or open one by one
         const choice = confirm(`You have ${calEvents.length} events.\n\nClick OK to open the first event in Google Calendar,\nor Cancel to download the .ics file for bulk import.`);
         if (choice) {
             window.open(url, '_blank', 'noopener,noreferrer');
@@ -1055,9 +988,7 @@ function googleCalDate(dateStr, timeStr) {
     return d + 'T' + t + 'Z';
 }
 
-/* ════════════════════════════════════════════════════════════
-   HELPER
-   ════════════════════════════════════════════════════════════ */
+// HELPER
 
 function hexWithAlpha(hex, alpha) {
     try {
@@ -1069,9 +1000,7 @@ function hexWithAlpha(hex, alpha) {
     }
 }
 
-/* ════════════════════════════════════════════════════════════
-   SCHEDULE MODAL (add/edit class)
-   ════════════════════════════════════════════════════════════ */
+// SCHEDULE MODAL (add/edit class)
 
 function openScheduleModal(id, presetDay) {
     const s = id ? DB.getSubject(id) : null;
@@ -1182,9 +1111,7 @@ function deleteScheduleEntry(id) {
         renderAgenda(calSelectedDate);
 }
 
-/* ════════════════════════════════════════════════════════════
-   TASK MODAL
-   ════════════════════════════════════════════════════════════ */
+// TASK MODAL
 
 function openTaskModal(id, presetDate) {
     taskEditingId = id || null;
@@ -1260,10 +1187,6 @@ function deleteCalTask(id) {
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
 }
-
-/* ════════════════════════════════════════════════════════════
-   ONE-OFF CALENDAR EVENT MODAL
-   ════════════════════════════════════════════════════════════ */
 
 let calEventModalColor = EVENT_CAT_COLORS['Event'];
 
@@ -1348,9 +1271,7 @@ function deleteCalEvent(id) {
         renderAgenda(calSelectedDate);
 }
 
-/* ════════════════════════════════════════════════════════════
-   UNIVERSITY EVENT MODAL
-   ════════════════════════════════════════════════════════════ */
+// UNIVERSITY EVENT MODAL
 
 function openUnivEventModal(id, presetDate) {
     univEditingId = id || null;

@@ -1,5 +1,4 @@
-/* ---------- BUTTONS ---------- */
-/* One token-driven button system shared by every page. */
+/* BUTTONS */
 
 .btn-accent,
 .btn-ghost {
@@ -97,7 +96,6 @@
     color: rgb(var(--accent));
 }
 
-/* Size variants, shared across every button type. */
 .btn-accent.btn-sm,
 .btn-ghost.btn-sm,
 .btn-danger.btn-sm,
@@ -216,7 +214,7 @@
     border-color: rgba(251,113,133,.3);
 }
 
-/* ---------- FAB (floating action button) ---------- */
+/* FAB (floating action button) */
 
 .fab-btn {
     position: fixed;

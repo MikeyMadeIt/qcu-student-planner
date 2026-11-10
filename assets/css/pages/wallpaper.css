@@ -1,7 +1,4 @@
-/* ============================================================
-WALLPAPER GENERATOR PAGE
-============================================================ */
-/* ── Mode Selector Bar ── */
+/* WALLPAPER GENERATOR PAGE */
 
 .wp-mode-bar {
     display: flex;
@@ -53,7 +50,7 @@ WALLPAPER GENERATOR PAGE
     box-shadow: 0 1px 2px rgba(var(--accent),.3);
 }
 
-/* ── Theme Swatches ── */
+/* Theme Swatches */
 
 .wp-swatch {
     width: 100%;
@@ -86,7 +83,7 @@ WALLPAPER GENERATOR PAGE
     font-weight: 600;
 }
 
-/* ── Day Chips ── */
+/* Day Chips */
 
 .wp-day-chips {
     display: flex;
@@ -117,7 +114,7 @@ WALLPAPER GENERATOR PAGE
     color: rgb(var(--accent));
 }
 
-/* ── Subject Checklist ── */
+/* Subject Checklist */
 
 .wp-subject-checklist {
     display: flex;
@@ -168,7 +165,7 @@ WALLPAPER GENERATOR PAGE
     max-width: 120px;
 }
 
-/* ── Info Toggles ── */
+/* Info Toggles */
 
 .wp-toggles-grid {
     display: grid;
@@ -181,7 +178,7 @@ WALLPAPER GENERATOR PAGE
     font-size: .82rem;
 }
 
-/* ── Preview Shell ── */
+/* Preview Shell */
 
 .wp-preview-shell {
     display: flex;
@@ -199,8 +196,6 @@ WALLPAPER GENERATOR PAGE
     box-shadow: 0 1px 2px rgba(0,0,0,.4);
     display: block;
 }
-
-/* ── Mobile responsive ── */
 
 @media (max-width:575.98px) {
     .wp-mode-bar {
@@ -246,8 +241,7 @@ WALLPAPER GENERATOR PAGE
     }
 }
 
-/* Theme picker: self-contained grid so swatches stay square and compact
-   regardless of the Bootstrap grid. */
+/* Theme picker: self-contained grid so swatches stay square and compact */
 .wp-theme-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
