@@ -1,7 +1,7 @@
 import { StudentService } from '../services/student-service.js';
 import { MESSAGE_CATEGORY_LABELS, MESSAGE_CATEGORY_ICONS, messageCategoryBadge } from './comms-shared.js';
 
-const PAGE_SIZE = 10; // 2 columns × 5 rows on desktop
+const PAGE_SIZE = 10;
 
 let allRows = [];
 let activeFilter = 'all';

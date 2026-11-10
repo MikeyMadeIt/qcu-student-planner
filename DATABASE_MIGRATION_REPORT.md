@@ -1,5 +1,7 @@
 # Database Migration Report — QCU Student Planner
 
+> **Scope note:** this report covers migrations `0001`–`0018` only. Five later migrations (`0019`–`0023`) have since been added and are not analyzed here — read their own one-line headers in `supabase/migrations/` for what each does, and treat any "latest migration" claim below as referring to `0018`.
+
 > **Final QA pass note (re-verification):** This report was re-checked
 > during the final QA audit. Confirmed by direct inspection in this pass:
 > the migration sequence on disk is contiguous `0001`–`0018` with no gaps

@@ -10,8 +10,7 @@
     line-height: 1;
 }
 
-/* Explicit size utilities so icons never stretch, shrink unexpectedly,
-   or change size between themes. */
+/* Explicit size utilities so icons never stretch, shrink unexpectedly, */
 .icon-sm {
     font-size: var(--icon-size-sm) !important;
 }
@@ -81,7 +80,6 @@ label.icon-label {
     margin: 0 !important;
 }
 
-/* Bootstrap spacing helpers on icons inside flex rows are replaced by the gap above. */
 .btn .me-1,
 .btn .me-2,
 .btn-accent .me-1,
@@ -97,8 +95,6 @@ label.icon-label {
     align-items: center;
 }
 
-/* Full-width rows keep block layout while aligning icon and label.
-   (.nav-link is styled in layout/sidebar.css.) */
 .profile-item,
 .drawer-link {
     display: flex;
