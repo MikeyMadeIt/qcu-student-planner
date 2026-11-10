@@ -425,7 +425,7 @@ async function aqmLoadHistory() {
               <button type="button" class="btn-icon btn-sm aqm-danger" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
             </div>
           </div>`).join('')
-          : aqmHistoryEmptyMarkup('bi-journal-text', 'No saved quizzes yet', 'Generate a quiz below and it will show up here.');
+          : aqmHistoryEmptyMarkup('bi-journal-text', 'Generate a quiz and it will show up here.');
     } catch (error) {
         host.innerHTML = aqmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved quizzes", 'Please refresh the page to try again.');
     }
