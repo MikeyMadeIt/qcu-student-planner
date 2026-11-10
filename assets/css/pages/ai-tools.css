@@ -467,9 +467,11 @@
 
 /* ============================================================
    AI QUIZ MAKER — page-specific layout
-   (classes prefixed "aqm-" are unique to this page; nothing
-   above this point is touched, so Flashcard Maker and the Study
-   Assistant are unaffected.) ============================================================ */
+   (classes prefixed "aqm-" originated on this page but are now the
+   shared two-column AI-tool layout: AI Flashcard Maker reuses them
+   directly instead of duplicating the layout/upload/history rules.
+   Nothing above this point is touched, so the Study Assistant is
+   unaffected.) ============================================================ */
 
 /* ---- Two-column desktop layout: a comfortably-sized form next to a
    scannable history list, instead of either stretching edge-to-edge. ---- */
@@ -502,6 +504,16 @@
 
     .aqm-history {
         height: 100%;
+        /* The grid row is sized by the taller column (usually the form).
+           Without a cap here, a long list of saved quizzes would instead
+           grow the row — and the form card with it — so the list scrolls
+           inside the fixed card height instead. */
+        min-height: 0;
+    }
+
+    .aqm-history-list {
+        overflow-y: auto;
+        min-height: 0;
     }
 }
 
@@ -782,12 +794,12 @@
     justify-content: center;
     gap: .35rem;
     text-align: center;
-    padding: 1.75rem 1rem;
+    padding: 1.25rem 1rem;
     color: var(--text-soft);
 }
 
 .aqm-history-empty i {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--text-faint);
     margin-bottom: .15rem;
 }

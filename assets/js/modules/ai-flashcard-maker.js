@@ -40,7 +40,8 @@ function initAiFlashcardMaker() {
     try {
         afmAttachment = initAiFileAttachment({
             inputEl: afmEl('afmFileInput'),
-            triggerEl: afmEl('afmAttachBtn'),
+            triggerEl: afmEl('afmDropzone'),
+            dropzoneEl: afmEl('afmDropzone'),
             infoEl: afmEl('afmFileInfo'),
             removeEl: afmEl('afmFileRemove'),
             emptyEl: afmEl('afmFileEmpty'),
@@ -156,21 +157,33 @@ async function afmLoadHistory() {
     try {
         const list = await (await afmStore()).listDecks();
         host.innerHTML = list.length ? list.map(d => `
-          <div class="glass card-pad mb-2 d-flex align-items-center gap-2">
-            <div class="flex-grow-1 min-w-0">
-              <div class="fw-bold">${escHtml(d.title)}</div>
-              <div class="text-faint" style="font-size:.78rem">
+          <div class="aqm-history-card">
+            <div class="aqm-history-card-info">
+              <div class="aqm-history-card-title text-truncate" title="${escHtml(d.title)}">${escHtml(d.title)}</div>
+              <div class="aqm-history-card-meta">
                 ${d.card_count} card${d.card_count === 1 ? '' : 's'}${d.topic ? ' · ' + escHtml(d.topic) : ''}
               </div>
             </div>
-            <button type="button" class="btn btn-accent btn-sm" onclick="afmOpenSaved('${d.id}')">Open</button>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="afmDeleteSaved('${d.id}')" aria-label="Delete deck"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+            <div class="aqm-history-card-actions">
+              <button type="button" class="btn-icon btn-sm" onclick="afmOpenSaved('${d.id}')" aria-label="Open ${escHtml(d.title)}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="afmDeleteSaved('${d.id}')" aria-label="Delete ${escHtml(d.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+            </div>
           </div>`).join('')
-          : '<div class="text-faint" style="font-size:.85rem">No saved decks yet.</div>';
+          : afmHistoryEmptyMarkup('bi-journal-text', 'Generate a flashcard set and it will show up here.');
     } catch (error) {
         console.warn('AI Flashcard Maker: could not load history', error);
-        host.innerHTML = '<div class="text-faint" style="font-size:.85rem">Couldn\'t load your saved decks. ' + escHtml(error.message || '') + '</div>';
+        host.innerHTML = afmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved decks", 'Please refresh the page to try again.');
     }
+}
+
+/* Mirrors aqmHistoryEmptyMarkup in ai-quiz-maker.js — same centered
+   icon + message treatment for the loading / empty / error states. */
+function afmHistoryEmptyMarkup(icon, title, subtext) {
+    return `<div class="aqm-history-empty">
+        <i class="bi ${icon}" aria-hidden="true"></i>
+        <p>${escHtml(title)}</p>
+        ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
+    </div>`;
 }
 
 async function afmOpenSaved(id) {
