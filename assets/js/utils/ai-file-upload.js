@@ -70,6 +70,10 @@ function aiUploadToBase64(file) {
  * opts:
  *   inputEl     - the <input type="file"> element
  *   triggerEl   - optional element that opens the file picker when clicked
+ *   dropzoneEl  - optional element (often the same as triggerEl) that also
+ *                 accepts drag-and-drop and Enter/Space-to-open for keyboard
+ *                 users, and gets an "is-dragover" class while a file is
+ *                 dragged over it
  *   infoEl      - element to show "filename.pdf · 1.2 MB" in
  *   removeEl    - element that clears the current attachment
  *   emptyEl     - optional element to toggle visible when nothing is attached
@@ -79,7 +83,7 @@ function aiUploadToBase64(file) {
  * Returns an object: { getFile(), clear() }
  */
 function initAiFileAttachment(opts) {
-    const { inputEl, triggerEl, infoEl, removeEl, emptyEl, onError, onChange } = opts;
+    const { inputEl, triggerEl, dropzoneEl, infoEl, removeEl, emptyEl, onError, onChange } = opts;
     let currentFile = null;
 
     function renderState() {
@@ -127,7 +131,39 @@ function initAiFileAttachment(opts) {
         triggerEl.addEventListener('click', () => inputEl.click());
     }
     if (removeEl) {
-        removeEl.addEventListener('click', clear);
+        removeEl.addEventListener('click', event => {
+            event.stopPropagation(); /* the remove button usually sits inside the dropzone itself */
+            clear();
+        });
+    }
+
+    if (dropzoneEl) {
+        dropzoneEl.addEventListener('keydown', event => {
+            if (event.target !== dropzoneEl) return; /* let inner buttons (e.g. remove) handle their own keys */
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                if (inputEl) inputEl.click();
+            }
+        });
+
+        let dragDepth = 0; /* tracks nested dragenter/dragleave on child elements */
+        dropzoneEl.addEventListener('dragenter', event => {
+            event.preventDefault();
+            dragDepth++;
+            dropzoneEl.classList.add('is-dragover');
+        });
+        dropzoneEl.addEventListener('dragover', event => event.preventDefault());
+        dropzoneEl.addEventListener('dragleave', () => {
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) dropzoneEl.classList.remove('is-dragover');
+        });
+        dropzoneEl.addEventListener('drop', event => {
+            event.preventDefault();
+            dragDepth = 0;
+            dropzoneEl.classList.remove('is-dragover');
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            if (file) setFile(file);
+        });
     }
 
     renderState();
