@@ -1,11 +1,11 @@
-/* ---------- INIT ON EVERY PAGE ---------- */
+// INIT ON EVERY PAGE
 
 document.addEventListener('DOMContentLoaded', () => {
     registerSW();
     setupInstallPrompt();
 });
 
-/* ---------- PWA ---------- */
+// PWA
 
 function registerSW() {
     if ('serviceWorker' in navigator) {

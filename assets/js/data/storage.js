@@ -1,6 +1,4 @@
-/* ============================================================
-   STORAGE.JS — localStorage data layer (Multi-Semester Edition)
-   ============================================================ */
+// STORAGE.JS — localStorage data layer (Multi-Semester Edition)
 
 const DB_KEYS = {
     subjects: 'sp_subjects',
@@ -10,29 +8,20 @@ const DB_KEYS = {
     grades: 'sp_grades',
     gwaCalc: 'sp_gwa_calc',
     settings: 'sp_settings',
-    semester: 'sp_semester', // legacy single-semester (kept for migration)
+    semester: 'sp_semester',
     pomodoro: 'sp_pomodoro_stats',
     universityEvents: 'sp_university_events',
     calendarEvents: 'sp_calendar_events',
     syllabusCourses: 'sp_syllabus_courses',
-    semesters: 'sp_semesters', // array of semester objects
+    semesters: 'sp_semesters',
     activeSemesterId: 'sp_active_semester_id',
 };
 
-/* ============================================================
-   CURRENT EXPORT SCHEMA VERSION
-   Bump when data shape changes incompatibly.
-   ============================================================ */
-
 const EXPORT_SCHEMA_VERSION = 1;
-/* Real UUIDs are required now that subjects/tasks/calendar events are persisted to
-   Supabase (uuid primary keys) -- see assets/js/data/cloud-sync.js. Falls back to the
-   old short id only if the browser has no crypto.randomUUID (very old browsers), in
-   which case cloud sync for that one record is skipped rather than sent with a bad id. */
+// Real UUIDs are required now that subjects/tasks/calendar events are persisted to
 const uid = () => {
     if (window.crypto && typeof window.crypto.randomUUID === 'function')
         return window.crypto.randomUUID();
-    // Fallback: still a valid RFC 4122 v4 UUID (insecure contexts / old browsers)
     const b = new Uint8Array(16);
     if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(b);
     else for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
@@ -73,9 +62,7 @@ const DEFAULT_SETTINGS = {
 };
 
 const SUBJECT_COLORS = ['#2457D6', '#1F9254', '#B45309', '#D6433C', '#6D5BD6', '#0E8C8C', '#C2498A', '#4B5563'];
-/* ============================================================
-   SEMESTER HELPERS
-   ============================================================ */
+// SEMESTER HELPERS
 
 function makeSemesterId(schoolYear, semName) {
     const num = semName.toLowerCase().includes('2nd') ? '2' : '1';
@@ -95,16 +82,13 @@ function makeSemesterObject(schoolYear, semName, extra) {
     };
 }
 
-/* ============================================================
-   DATA MIGRATION — run once safely
-   ============================================================ */
+// DATA MIGRATION — run once safely
 
 function migrateLegacyData() {
     if (localStorage.getItem('sp_semester_migrated'))
         return;
     const legacySem = readKey(DB_KEYS.semester, null);
     let semesters = readKey(DB_KEYS.semesters, []);
-    // If no semester list yet, build from legacy or create default
     if (!semesters.length) {
         const schoolYear = (legacySem && legacySem.schoolYear) ? legacySem.schoolYear : '2026-2027';
         const semName = (legacySem && legacySem.name) ? legacySem.name : '1st Semester';
@@ -116,7 +100,6 @@ function migrateLegacyData() {
     if (!localStorage.getItem(DB_KEYS.activeSemesterId)) {
         writeKey(DB_KEYS.activeSemesterId, activeSemId);
     }
-    // Migrate subjects — add semesterId if missing
     const subjects = readKey(DB_KEYS.subjects, []);
     let subjectsChanged = false;
     subjects.forEach(s => {
@@ -128,7 +111,6 @@ function migrateLegacyData() {
     });
     if (subjectsChanged)
         writeKey(DB_KEYS.subjects, subjects);
-    // Migrate attendance
     const attendance = readKey(DB_KEYS.attendance, []);
     let attChanged = false;
     attendance.forEach(r => {
@@ -140,7 +122,6 @@ function migrateLegacyData() {
     });
     if (attChanged)
         writeKey(DB_KEYS.attendance, attendance);
-    // Migrate grades
     const grades = readKey(DB_KEYS.grades, []);
     let gradesChanged = false;
     grades.forEach(g => {
@@ -152,7 +133,6 @@ function migrateLegacyData() {
     });
     if (gradesChanged)
         writeKey(DB_KEYS.grades, grades);
-    // Migrate tasks
     const tasks = readKey(DB_KEYS.tasks, []);
     let tasksChanged = false;
     tasks.forEach(t => {
@@ -164,7 +144,6 @@ function migrateLegacyData() {
     });
     if (tasksChanged)
         writeKey(DB_KEYS.tasks, tasks);
-    // Migrate notes
     const notes = readKey(DB_KEYS.notes, []);
     let notesChanged = false;
     notes.forEach(n => {
@@ -175,7 +154,6 @@ function migrateLegacyData() {
     });
     if (notesChanged)
         writeKey(DB_KEYS.notes, notes);
-    // Migrate syllabus courses
     const courses = readKey(DB_KEYS.syllabusCourses, []);
     let coursesChanged = false;
     courses.forEach(c => {
@@ -190,15 +168,11 @@ function migrateLegacyData() {
     localStorage.setItem('sp_semester_migrated', '1');
 }
 
-/* ============================================================
-   FIRST-RUN INIT — creates a clean empty planner (no demo data)
-   ============================================================ */
+// FIRST-RUN INIT — creates a clean empty planner (no demo data)
 
 function initIfEmpty() {
-    // Already initialized
     if (localStorage.getItem('sp_initialized'))
         return;
-    // Build a default semester so the app is functional immediately
     const defaultSem = makeSemesterObject('2026-2027', '1st Semester', {
         startDate: ymdLocal(new Date()),
         endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)),
@@ -218,7 +192,6 @@ function initIfEmpty() {
     writeKey(DB_KEYS.syllabusCourses, []);
     writeKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] });
     writeKey(DB_KEYS.settings, DEFAULT_SETTINGS);
-    // Keep legacy semester key for backward compat
     writeKey(DB_KEYS.semester, { name: '1st Semester', schoolYear: '2026-2027',
         startDate: ymdLocal(new Date()),
         endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)),
@@ -228,22 +201,17 @@ function initIfEmpty() {
     localStorage.setItem('sp_semester_migrated', '1');
 }
 
-/* ============================================================
-   IMPORT VALIDATION
-   ============================================================ */
+// IMPORT VALIDATION
 
 function validateImport(obj) {
-    // Must be a plain object
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
         return { valid: false, error: 'File does not contain a valid backup object.' };
     }
-    // Accept both new schema-versioned format and legacy raw format
     const isNewFormat = ('schemaVersion' in obj) && ('data' in obj);
     const isLegacyFormat = !isNewFormat && ('subjects' in obj || 'tasks' in obj || 'semesters' in obj);
     if (!isNewFormat && !isLegacyFormat) {
         return { valid: false, error: 'File does not appear to be a Student Planner backup.' };
     }
-    // Schema version check (new format)
     if (isNewFormat) {
         const ver = obj.schemaVersion;
         if (typeof ver !== 'number' || ver < 1) {
@@ -256,7 +224,6 @@ function validateImport(obj) {
         if (!data || typeof data !== 'object') {
             return { valid: false, error: 'Backup "data" section is missing or malformed.' };
         }
-        // Check arrays
         const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'semesters', 'calendarEvents', 'syllabusCourses'];
         for (const f of arrayFields) {
             if (data[f] !== undefined && !Array.isArray(data[f])) {
@@ -264,7 +231,6 @@ function validateImport(obj) {
             }
         }
     }
-    // Legacy format: check that arrays are arrays
     if (isLegacyFormat) {
         const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'semesters', 'calendarEvents', 'syllabusCourses'];
         for (const f of arrayFields) {
@@ -276,13 +242,8 @@ function validateImport(obj) {
     return { valid: true, isNewFormat, isLegacyFormat };
 }
 
-/* ============================================================
-   DB OBJECT
-   ============================================================ */
-
 const DB = {
     init() {
-        // If user has old 'sp_seeded' flag (pre-Phase1), treat as initialized
         if (localStorage.getItem('sp_seeded') && !localStorage.getItem('sp_initialized')) {
             localStorage.setItem('sp_initialized', '1');
         }
@@ -292,10 +253,8 @@ const DB = {
     uid,
     colors: SUBJECT_COLORS,
     EXPORT_SCHEMA_VERSION,
-    // generic
     get(key, fallback) { return readKey(DB_KEYS[key], fallback); },
     set(key, value) { return writeKey(DB_KEYS[key], value); },
-    /* ---- SEMESTER MANAGEMENT ---- */
     getSemesters() { return readKey(DB_KEYS.semesters, []); },
     saveSemesters(list) { return writeKey(DB_KEYS.semesters, list); },
     getActiveSemesterId() {
@@ -337,7 +296,6 @@ const DB = {
             return false;
         const filtered = sems.filter(s => s.id !== id);
         this.saveSemesters(filtered);
-        // Delete all data belonging to this semester
         ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'syllabusCourses', 'calendarEvents'].forEach(key => {
             const all = readKey(DB_KEYS[key], []);
             const remaining = all.filter(r => r.semesterId !== id);
@@ -348,7 +306,6 @@ const DB = {
         }
         return true;
     },
-    /* ---- SEMESTER-FILTERED DATA HELPERS ---- */
     getSubjectsForSemester(semId) { return this.getSubjects().filter(s => s.semesterId === semId); },
     getAttendanceForSemester(semId) { return this.getAttendance().filter(r => r.semesterId === semId); },
     getGradesForSemester(semId) { return this.getGrades().filter(g => g.semesterId === semId); },
@@ -356,14 +313,12 @@ const DB = {
     getNotesForSemester(semId) { return this.getNotes().filter(n => n.semesterId === semId); },
     getSyllabusCoursesForSemester(semId) { return this.getSyllabusCourses().filter(c => c.semesterId === semId); },
     getCalendarEventsForSemester(semId) { return this.getCalendarEvents().filter(e => e.semesterId === semId); },
-    /* ---- ACTIVE SEMESTER SHORTCUTS ---- */
     getActiveSubjects() { return this.getSubjectsForSemester(this.getActiveSemesterId()); },
     getActiveAttendance() { return this.getAttendanceForSemester(this.getActiveSemesterId()); },
     getActiveGrades() { return this.getGradesForSemester(this.getActiveSemesterId()); },
     getActiveTasks() { return this.getTasksForSemester(this.getActiveSemesterId()); },
     getActiveNotes() { return this.getNotesForSemester(this.getActiveSemesterId()); },
     getActiveSyllabusCourses() { return this.getSyllabusCoursesForSemester(this.getActiveSemesterId()); },
-    /* ---- RAW DATA (full arrays, all semesters) ---- */
     getSubjects() { return readKey(DB_KEYS.subjects, []); },
     saveSubjects(list) { return writeKey(DB_KEYS.subjects, list); },
     getSubject(id) { return this.getSubjects().find(s => s.id === id); },
@@ -377,8 +332,6 @@ const DB = {
     saveGrades(list) { return writeKey(DB_KEYS.grades, list); },
     getGwaCalcRows() { return readKey(DB_KEYS.gwaCalc, []); },
     saveGwaCalcRows(list) { return writeKey(DB_KEYS.gwaCalc, list); },
-    // AJ-08: cancelled class occurrences — routed through DB so cloud-sync.js
-    // can intercept saveCancelledOccurrences and push/hydrate from Supabase.
     getCancelledOccurrences() {
         try { return JSON.parse(localStorage.getItem('sp_cancelled_occurrences') || '[]'); }
         catch (e) { return []; }
@@ -402,12 +355,10 @@ const DB = {
         };
     },
     saveSettings(s) { return writeKey(DB_KEYS.settings, s); },
-    // Legacy single-semester support
     getSemester() { return this.getActiveSemester() || readKey(DB_KEYS.semester, { name: '1st Semester', schoolYear: '2026-2027', startDate: ymdLocal(new Date()), endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)), finalsDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 100)), totalWeeks: 15 }); },
     saveSemester(s) { return writeKey(DB_KEYS.semester, s); },
     getPomo() { return readKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] }); },
     savePomo(p) { return writeKey(DB_KEYS.pomodoro, p); },
-    /* ---- EXPORT / IMPORT (schema-versioned) ---- */
     exportAll() {
         return {
             schemaVersion: EXPORT_SCHEMA_VERSION,
@@ -431,17 +382,13 @@ const DB = {
         };
     },
     importAll(obj) {
-        // Determine data source
         let data;
         if (obj.schemaVersion && obj.data) {
-            // New format
             data = obj.data;
         }
         else {
-            // Legacy format — keys match DB_KEYS keys directly
             data = obj;
         }
-        // Write each field if present and valid
         const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'gwaCalc', 'calendarEvents', 'syllabusCourses', 'universityEvents', 'semesters'];
         arrayFields.forEach(k => {
             if (Array.isArray(data[k]))
@@ -453,7 +400,6 @@ const DB = {
             writeKey(DB_KEYS.settings, data.settings);
         if (data.pomodoro && typeof data.pomodoro === 'object')
             writeKey(DB_KEYS.pomodoro, data.pomodoro);
-        // Ensure semesters list is not empty after import
         const sems = readKey(DB_KEYS.semesters, []);
         if (!sems.length) {
             const fallbackSem = makeSemesterObject('2026-2027', '1st Semester', {});
@@ -464,68 +410,28 @@ const DB = {
         localStorage.setItem('sp_semester_migrated', '1');
         return true;
     },
-    /* ---- SIGN-OUT CACHE WIPE ----
-       Security: this is a shared/public-device risk, not just a Supabase RLS
-       one. storage.js's keys are a *local cache* of one signed-in student's
-       Supabase rows (see cloud-sync.js). If they are left in localStorage
-       after sign-out and a different student signs in on the same browser,
-       that student's pages would render against the previous student's
-       cached subjects/tasks/notes/etc. until (and unless) a fresh cloud
-       hydrate overwrites every key -- an accidental cross-student data
-       exposure that has nothing to do with RLS. Called from
-       AuthService.signOut(). Deliberately leaves `sp_settings` (theme/accent,
-       a device preference, not student data) and Supabase's own auth
-       storage (it manages/clears that itself) untouched. */
     clearPrivateCacheOnSignOut() {
         Object.keys(DB_KEYS).forEach(k => {
-            if (k === 'settings') return; // device-level UI preference, not student data
+            if (k === 'settings') return;
             localStorage.removeItem(DB_KEYS[k]);
         });
-        // Extra keys written directly to localStorage by feature modules (not via DB_KEYS):
-        //   sp_cancelled_occurrences -- schedule.js: per-student cancelled class occurrences
-        //   sp_cloud_*              -- cloud-sync.js: sync state tied to the signed-in user
-        //
-        // MAJ-14: `sp_cloud_semester_map` and `sp_cloud_server_semester_id` used to be
-        // wiped here too. They hold no student content at all -- just internal
-        // bookkeeping (server-row-id -> local-semester-id, and the id of the one
-        // placeholder semester row) that cloud-sync.js's semFor()/getServerSemesterId()
-        // need to know which semester a subject/grade/attendance/calendar/syllabus row
-        // pulled from the server actually belongs to. Wiping it on logout meant that on
-        // the very next login, every one of those rows forgot which semester it came
-        // from and silently fell back to whatever semester loaded first -- this is what
-        // made a grade breakdown or an added semester look like it had "disappeared"
-        // after logging back in, even though the row itself was still on the server the
-        // whole time. Since it contains only UUID->UUID associations (never grade
-        // content, subject names, etc.), keeping it across logout on the same device is
-        // not a student-data exposure, so it's left alone here. (A different student
-        // signing in afterwards still can't be affected: the hydrate() cross-user guard
-        // in cloud-sync.js detects that case independently and clears everything,
-        // including this map, before rendering that student's pages.)
         ['sp_program_code', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
          'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance',
          'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
             .forEach(k => localStorage.removeItem(k));
     },
     validateImport,
-    /* ---- RESET — clears planner data, leaves app functional ---- */
     resetAll() {
-        // Remove all planner data
         Object.values(DB_KEYS).forEach(k => localStorage.removeItem(k));
-        // Remove init flags so initIfEmpty() runs fresh
         localStorage.removeItem('sp_seeded');
         localStorage.removeItem('sp_initialized');
         localStorage.removeItem('sp_semester_migrated');
-        // Re-initialize with clean empty state (no demo data)
         initIfEmpty();
         migrateLegacyData();
     }
 };
 
 DB.init();
-
-/* ============================================================
-   SELECTED PROGRAM (set at registration, changeable on Curriculum page)
-   ============================================================ */
 
 const PROGRAM_KEY = 'sp_program_code';
 

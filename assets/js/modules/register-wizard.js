@@ -1,6 +1,4 @@
-/* Three-step registration wizard (ES module).
-   The submit step calls AuthService.signUp, which creates the Supabase Auth user and records
-   the submitted program/campus/year on the pending profile row via the submit_profile_details RPC. */
+// Three-step registration wizard (ES module).
 
 import { AuthService } from '../services/auth-service.js';
 import { APP_CONFIG } from '../core/config.js';
@@ -18,7 +16,6 @@ import {
 
 const TOTAL_STEPS = 3;
 
-/* Fields to validate on each step, in display order. */
 const STEP_FIELDS = {
     1: ['fullName', 'email', 'password', 'confirmPassword'],
     2: ['program', 'campus', 'yearLevel'],
@@ -40,7 +37,7 @@ const FIELD_RULES = {
 let currentStep = 1;
 let isSubmitting = false;
 
-/* ---------- Validation ---------- */
+// Validation
 
 function validateField(form, name) {
     const input = form.elements[name];
@@ -70,7 +67,7 @@ function findFirstInvalidStep(form) {
     return null;
 }
 
-/* ---------- Step display ---------- */
+// Step display
 
 function updateStepper(stepper) {
     $$('[data-step-indicator]', stepper).forEach(item => {
@@ -112,12 +109,7 @@ function showStep(form, stepper, step, { moveFocus = true } = {}) {
     heading.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
-/* ---------- Dropdown options ---------- */
-
-/* Last-resort popup: loadRegistrationOptions() already falls back to an embedded copy of the
-   data, so this only fires if that embedded fallback is itself somehow malformed. Built as a
-   minimal Bootstrap modal (Bootstrap's JS bundle is loaded on this page) rather than the old
-   inline banner, so the failure is impossible to miss. */
+// Last-resort popup: loadRegistrationOptions() already falls back to an embedded copy of the
 function ensureOptionsErrorModal() {
     if (document.getElementById('optionsErrorModal')) return;
 
@@ -201,10 +193,6 @@ async function populateOptions(form) {
         fillSelect(form.elements.campus, options.campuses.map(campus => createOption(campus)));
         fillSelect(form.elements.yearLevel, options.yearLevels.map(level => createOption(level)));
     } catch (error) {
-        /* True last resort: loadRegistrationOptions() already has its own embedded fallback, so
-           reaching here means even that fallback failed to apply (e.g. it was malformed). Keep an
-           accessible, mostly-hidden status message for assistive tech, and surface the real,
-           user-visible error as a popup instead of inline page text. */
         submitButtons.forEach(button => { button.disabled = true; });
         status.hidden = false;
         status.textContent = 'The program, campus and year level lists could not be loaded.';
@@ -212,7 +200,7 @@ async function populateOptions(form) {
     }
 }
 
-/* ---------- Submission ---------- */
+// Submission
 
 function collectRegistration(form) {
     return {
@@ -231,7 +219,6 @@ function showSubmittedConfirmation() {
     try {
         sessionStorage.setItem(APP_CONFIG.registrationPreviewFlag, '1');
     } catch (error) {
-        /* The confirmation page falls back to its default message. */
     }
 
     location.href = APP_CONFIG.routes.pending;
@@ -270,7 +257,7 @@ async function submitRegistration(form, stepper, submitButton) {
     setLoading(submitButton, false);
 }
 
-/* ---------- Setup ---------- */
+// Setup
 
 function attachFieldListeners(form) {
     Object.keys(FIELD_RULES).forEach(name => {

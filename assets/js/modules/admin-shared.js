@@ -1,10 +1,7 @@
-/* Shared helpers for admin pages (ES module). */
+// Shared helpers for admin pages (ES module).
 
 import { AuthService } from '../services/auth-service.js';
 
-/* Shared label map for admin_audit_log.action values — used by both the full
-   Audit Logs page and the dashboard's Recent Admin Activity widget so the two
-   never drift out of sync. */
 export const ACTION_LABELS = {
     account_status_change: 'Account status change',
     account_permanently_deleted: 'Account permanently deleted',
@@ -38,11 +35,8 @@ export function statusBadge(status) {
     return `<span class="status-badge ${escHtml(status || '')}">${escHtml(label)}</span>`;
 }
 
-/* Admin name + log out now live at the bottom of the sidebar (rendered by layout.js's
-   renderShell), not in the per-page topbar, so this wires those elements instead. */
+// Admin name + log out now live at the bottom of the sidebar (rendered by layout.js's
 export function mountAdminTopbar(admin) {
-    /* The desktop sidebar and the mobile nav drawer each render their own copy of the name
-       and log-out control, so every matching element (not just the first) is wired here. */
     document.querySelectorAll('.js-admin-name').forEach(nameEl => {
         nameEl.textContent = `Signed in as ${admin.full_name || 'Administrator'}`;
     });
@@ -60,18 +54,14 @@ export function renderError(container, message) {
     container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
 }
 
-/* Same as renderError, plus a Retry button wired to onRetry. Used wherever a failed
-   fetch should let the admin try again in place instead of reloading the whole page. */
+// Same as renderError, plus a Retry button wired to onRetry. Used wherever a failed
 export function renderErrorWithRetry(container, message, onRetry) {
     container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="bi bi-arrow-clockwise"></i> Retry</button></div>`;
     const btn = container.querySelector('#admErrorRetryBtn');
     if (btn) btn.addEventListener('click', onRetry, { once: true });
 }
 
-/* Shared "View" detail modal used by All Users, Pending Approvals and Rejected
-   Accounts. Every field it shows comes straight off the profiles row already
-   fetched by AdminService.getAccount() -- never invented, never a secret
-   (password/token) column. */
+// Shared "View" detail modal used by All Users, Pending Approvals and Rejected
 export function renderAccountDetail(account) {
     const titleEl = document.getElementById('userDetailTitle');
     const bodyEl = document.getElementById('userDetailBody');
@@ -93,9 +83,7 @@ export function renderAccountDetail(account) {
     new bootstrap.Modal(document.getElementById('userDetailModal')).show();
 }
 
-/* The markup for the shared detail modal above -- identical on every page
-   that uses it, so it's generated once here instead of copy-pasted into
-   three HTML files that could drift out of sync. */
+// The markup for the shared detail modal above identical on every page
 export function userDetailModalMarkup() {
     return `
 <div class="modal fade" id="userDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="userDetailTitle">

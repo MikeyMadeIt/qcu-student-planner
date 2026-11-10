@@ -1,31 +1,22 @@
-/* ============================================================
-   NAV
-   ============================================================ */
+// NAV
 const NAV_ITEMS = [
-    /* COMMUNICATION */
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
     { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'announcements', base: 'app', soon: true },
-    /* OVERVIEW */
     { href: 'dashboard.html', icon: 'bi-grid-1x2-fill', label: 'Dashboard', key: 'dashboard', base: 'app' },
-    /* ACADEMICS */
     { href: 'schedule.html', icon: 'bi-calendar2-week-fill', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
     { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
     { href: 'grades.html', icon: 'bi-mortarboard-fill', label: 'Grades', key: 'grades', base: 'app' },
     { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
-    /* UNIVERSITY */
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
-    /* AI TOOLS */
     { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
     { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
     { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
     { href: 'ai-summarizer.html', icon: 'bi-file-earmark-text-fill', label: 'AI Summarizer', key: 'ai-summarizer', base: 'app', soon: true },
     { href: 'ai-reviewer.html', icon: 'bi-clipboard2-check-fill', label: 'AI Reviewer', key: 'ai-reviewer', base: 'app', soon: true },
-    /* PERSONALIZATION */
     { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
-    /* SAFETY & SUPPORT */
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
     { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
@@ -47,7 +38,6 @@ const THEME_OPTIONS = [
     { value: 'light', label: 'Light', icon: 'bi-sun' },
     { value: 'amoled', label: 'AMOLED', icon: 'bi-circle-fill' }
 ];
-/* ---------- Dynamic page titles (shown in the mobile/desktop header) ---------- */
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 
 const PAGE_SECTIONS = {
@@ -84,24 +74,19 @@ const PAGE_SECTIONS = {
     'admin-activity': 'System',
     'admin-settings': 'System',
 };
-/* ---------- Sign out ---------- */
-/* Dynamic import specifiers in this classic script resolve relative to layout.js itself. */
+// Sign out
 async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
     try {
         const { AuthService } = await import('../services/auth-service.js');
         await AuthService.signOut();
     } catch (error) {
-        /* Even if sign-out fails client-side, still send the user back to the login page. */
     }
     location.href = '../auth/login.html';
 }
 window.signOutAndRedirect = signOutAndRedirect;
 
-/* ---------- Current-semester card (header avatar popup) ----------
-   Reuses the same active-semester data source and "Active" concept as Settings'
-   semester manager (DB.getActiveSemester / DB.getActiveSemesterId) — this is a
-   manually-configured flag, not a dynamically verified status, same as on Settings. */
+// Current-semester card (header avatar popup)
 function formatSemesterCardDate(ymd) {
     if (!ymd) return '';
     const d = new Date(ymd + 'T00:00:00');
@@ -122,7 +107,7 @@ function renderShellSemesterCardHtml() {
         </div>`;
 }
 
-/* ---------- Theme switcher (topbar) ---------- */
+// Theme switcher (topbar)
 function renderThemeSwitchHtml() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     return THEME_OPTIONS.map(option => `
@@ -152,7 +137,7 @@ function initThemeSwitches() {
     });
 }
 
-/* ---------- Theme switcher (labeled, 3-across — used in the student profile panel) ---------- */
+// Theme switcher (labeled, 3-across — used in the student profile panel)
 function renderThemeOptionsHtml() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     return THEME_OPTIONS.map(option => `
@@ -183,9 +168,7 @@ function initThemeOptions() {
     });
 }
 
-/* ---------- Sidebar toggle (header) ---------- */
-/* The desktop sidebar is a permanent static column and cannot be collapsed or hidden — this
-   toggle only ever opens/closes the mobile nav drawer. The icon reflects the drawer's state. */
+// Sidebar toggle (header)
 function toggleSidebar() {
     const drawer = document.getElementById('navDrawer');
     if (drawer && drawer.classList.contains('is-open'))
@@ -208,13 +191,9 @@ function wireSidebarToggles() {
         btn.dataset.wired = '1';
         btn.addEventListener('click', toggleSidebar);
     });
-    /* Normalizes the icon on load — some pages (e.g. the admin topbar) still markup their
-       toggle button with the old hamburger glyph in HTML; this makes every toggle consistent
-       without having to hand-edit each page. */
     syncSidebarToggleIcon(false);
 }
 
-/* ---------- Notifications (derived from real task data — never fabricated) ---------- */
 const NOTIFICATION_READ_KEY = 'sp_notification_read';
 
 function getTaskNotifications() {
@@ -312,9 +291,7 @@ function renderInboxPanelLoading() {
     return `<div class="header-panel-empty"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Loading…</div>`;
 }
 
-/* Mirrors the admin/student inbox page's own message-row layout (pill
-   category, subject, ellipsized preview) so the preview in this dropdown
-   and the full inbox page always look like the same component. */
+// Mirrors the admin/student inbox page's own message-row layout (pill
 function renderInboxPanelItems(rows, icons, categoryBadge) {
     if (!rows.length)
         return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
@@ -333,10 +310,7 @@ function renderInboxPanelItems(rows, icons, categoryBadge) {
     }).join('') + `</div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
 }
 
-/* Fetches the signed-in student's real inbox preview + unread count from Supabase
-   (via a dynamic import, since this file is a classic script, not a module) and
-   fills in the header popover + badge. Never fabricates a count: if there is no
-   session or the request fails, the badge just stays hidden. */
+// Fetches the signed-in student's real inbox preview + unread count from Supabase
 async function refreshInboxPreview() {
     const badge = document.getElementById('inboxUnreadCount');
     const body = document.querySelector('#inboxPanel .header-panel-body');
@@ -379,11 +353,7 @@ async function refreshInboxPreview() {
     }
 }
 
-/* Admin header bar: sidebar toggle + dynamic page title on the left; theme toggle,
-   avatar and a role pill (never hardcoded — filled in from the real `profiles.role`
-   value by admin-shared.js's mountAdminTopbar, once the authenticated admin's own
-   row has been verified) on the right. No notifications/inbox popovers here — the
-   admin Inbox is its own sidebar page, not a header shortcut. */
+// Admin header bar: sidebar toggle + dynamic page title on the left; theme toggle,
 function renderAdminShellBar(activeKey, admin) {
     const main = document.querySelector('.main-content');
     if (!main || document.getElementById('shellBar'))
@@ -515,13 +485,6 @@ function renderShellBar(activeKey) {
     });
     window.addEventListener('planner:notifications-changed', refreshNotificationPreview);
     window.addEventListener('planner:tasks-changed', refreshNotificationPreview);
-    // The shell bar (and this semester card inside the avatar popup) is built
-    // synchronously on page load, straight from whatever is in localStorage at
-    // that instant -- but right after login that cache is still empty/stale,
-    // because cloud-sync.js's hydrate() (which pulls the real semester list from
-    // Supabase) finishes afterwards, asynchronously. Without this listener the
-    // card just silently stayed blank/outdated until the student manually
-    // refreshed the page, even though the correct data had already arrived.
     window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
 }
 
@@ -535,8 +498,7 @@ function refreshNotificationPreview() {
     const body = document.querySelector('#notifPanel .header-panel-body');
     if (body) body.innerHTML = renderNotifPanelBody();
 }
-/* Generic open/close wiring shared by the profile, notifications and inbox popovers:
-   click-outside closes, Escape closes, and only one popover is open at a time. */
+// Generic open/close wiring shared by the profile, notifications and inbox popovers:
 function initHeaderPanel(bar, triggerId, panelId, wrapId) {
     const trigger = bar.querySelector('#' + triggerId);
     const panel = bar.querySelector('#' + panelId);
@@ -583,9 +545,7 @@ function initHeaderPanel(bar, triggerId, panelId, wrapId) {
     });
 }
 
-/* Bootstrap already manages modal focus trapping, Escape/backdrop dismissal, body scroll,
-   and focus restoration. Normalize the visible close control for all existing and lazy
-   modals without replacing their established submit/cancel behavior. */
+// Bootstrap already manages modal focus trapping, Escape/backdrop dismissal, body scroll,
 function wireModalDefaults() {
     if (window.__qcuModalDefaultsWired) return;
     window.__qcuModalDefaultsWired = true;
@@ -629,12 +589,6 @@ function wireModalDefaults() {
         } else {
             const header = content.querySelector(':scope > .modal-header');
             const closeSelector = 'button.btn-close, button[data-bs-dismiss="modal"]';
-            /* Look for an existing close button anywhere inside the modal content —
-               not just as a direct child of a .modal-header or of .modal-content —
-               since several of our modals (e.g. the admin "view" detail modal) put
-               their own button.btn-close inside a plain header-style wrapper div
-               instead of a real .modal-header. Scoping the search too narrowly made
-               this miss that button and inject a second, floating one on top of it. */
             let closeButton = content.querySelector(closeSelector) || content.querySelector('.modal-close-floating');
             if (!closeButton) {
                 closeButton = document.createElement('button');
@@ -697,7 +651,6 @@ function renderShell(activeKey, admin) {
     const isAdminArea = String(activeKey).startsWith('admin-');
     if (isAdminArea) renderAdminShellBar(activeKey, admin);
     else renderShellBar(activeKey);
-    // sidebar
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
         const sidebarGroups = isAdminArea
@@ -745,11 +698,6 @@ function renderShell(activeKey, admin) {
     </div>
     <div class="sidebar-user js-admin-name" id="admSidebarName">Administrator</div>`;
         } else {
-            /* "Add Task" and "Export" used to live here as sidebar-only shortcuts. Both actions
-               already have a real home on their own pages (the Tasks page toolbar's "Add Task"
-               button, and Settings' "Export All Data" button) — removing the sidebar-only copy
-               does not remove any functionality, it just stops duplicating nav real estate on
-               desktop. See tasks.html and settings.html. */
             sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
       <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
@@ -778,12 +726,7 @@ function renderShell(activeKey, admin) {
     if (isAdminArea) refreshAdminNavBadges();
 }
 
-/* ---------- Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer ----------
-   Builds one such menu per (triggerId, panelId) pair, rendered into document.body (not
-   inside .sidebar/.nav-drawer) and positioned with fixed coordinates, so it is never
-   clipped by the sidebar's/drawer's own overflow:hidden. Flips open upward or downward
-   based on available space, closes on outside click/Escape, and participates in the same
-   closeOthers() set (.header-panel, .profile-panel) as the header popups in initHeaderPanel(). */
+// Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer
 function ensureFooterProfileMenu(triggerId, panelId) {
     const trigger = document.getElementById(triggerId);
     if (!trigger) {
@@ -818,9 +761,6 @@ function ensureFooterProfileMenu(triggerId, panelId) {
         const gutter = 8;
         const spaceAbove = rect.top;
         const spaceBelow = window.innerHeight - rect.bottom;
-        /* The footer trigger usually has little or no room below it, so prefer
-           opening upward; fall back to downward only when there is genuinely
-           more room that way (e.g. a very short viewport). */
         const openUp = spaceAbove >= (panelRect.height + gutter) || spaceAbove >= spaceBelow;
         const top = openUp
             ? Math.max(gutter, rect.top - panelRect.height - 8)
@@ -859,10 +799,7 @@ function ensureDrawerProfileMenu() {
     ensureFooterProfileMenu('drawerProfileMoreBtn', 'drawerProfilePanel');
 }
 
-/* Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
-   and the mobile nav drawer share the same data-admin-badge attribute, so one
-   querySelectorAll updates both). Never shows a fabricated number: if the request
-   fails for any reason the badge just stays hidden, same as every other badge here. */
+// Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
 async function refreshAdminNavBadges() {
     const badges = document.querySelectorAll('[data-admin-badge="admin-tickets"]');
     if (!badges.length) return;
@@ -880,19 +817,7 @@ async function refreshAdminNavBadges() {
     }
 }
 
-/* ---------- Real authenticated identity (profile sections, bottom of both sidebars) ----------
-   The local "name" field in Settings is a user-editable device-local label (shown instantly,
-   before this resolves, so the sidebar never looks empty). The user's actual authenticated
-   email can only come from the live Supabase session, and the most reliable real name comes
-   from the `profiles` row created at sign-up — both are fetched here, once, straight from the
-   same AuthService/Supabase client every other page already uses. Never fabricated: if the
-   session/profile call fails (e.g. offline, or this is a static preview with no backend), the
-   device-local fallback already in the DOM is simply left in place. */
-/* Fills a .profile-avatar (or .profile-avatar-lg) element with the user's
-   Google account photo when one is available, replacing the single-letter
-   fallback with a real <img>. Falls back to the initial — never left blank —
-   if there is no photo URL, or if the image itself fails to load (a revoked/
-   expired Google photo URL, an offline moment, etc.). */
+// Real authenticated identity (profile sections, bottom of both sidebars)
 function setAvatarPhoto(el, photoUrl, initial) {
     if (!el) return;
     if (!photoUrl) {
@@ -924,8 +849,6 @@ async function hydrateProfileIdentity() {
         const email = user ? user.email : '';
         if (!email) return;
 
-        /* Google OAuth profile data Supabase attaches to the session — no extra
-           request needed. Different providers/versions use either key. */
         const metadata = user.user_metadata || {};
         const photoUrl = metadata.avatar_url || metadata.picture || '';
 
@@ -946,12 +869,8 @@ async function hydrateProfileIdentity() {
         }
         document.querySelectorAll('.js-profile-avatar').forEach(el => setAvatarPhoto(el, photoUrl, initial));
     } catch (error) {
-        /* No live Supabase session available (offline, static preview, etc.) — keep the
-           device-local fallback already rendered. */
     }
 }
-/* ---------- MOBILE NAVIGATION DRAWER ---------- */
-/* Keep the student navigation hierarchy identical in the desktop sidebar and mobile drawer. */
 const DRAWER_GROUPS = [
     { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
     { label: 'Overview', keys: ['dashboard'] },
@@ -1029,8 +948,6 @@ function ensureNavDrawer(activeKey) {
     drawer.querySelectorAll('[data-drawer-close]').forEach(el => {
         el.addEventListener('click', closeNavDrawer);
     });
-    /* Close the drawer once a destination is chosen, so it never lingers open behind the
-       page that just loaded (and doesn't trap focus if the browser serves a cached page). */
     drawer.querySelectorAll('.drawer-link[href]').forEach(el => {
         el.addEventListener('click', closeNavDrawer);
     });

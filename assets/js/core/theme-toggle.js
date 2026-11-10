@@ -1,5 +1,4 @@
-/* Wires every [data-theme-toggle] button to the shared theme system in theme.js.
-   Toggles between light and dark; AMOLED counts as dark. */
+// Wires every [data-theme-toggle] button to the shared theme system in theme.js.
 
 (function () {
     function isDark() {

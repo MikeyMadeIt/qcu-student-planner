@@ -1,9 +1,4 @@
-/* ============================================================
-   AI FLASHCARD MAKER
-   Creation form -> validated flashcard set -> flip/shuffle/
-   navigate UI. Generated decks are saved to Supabase through
-   services/ai-flashcard-store.js (protected by RLS).
-   ============================================================ */
+// AI FLASHCARD MAKER
 
 let afmAttachment = null;
 let afmSet = null;       /* { title, cards: [{front, back}] } */
@@ -16,9 +11,7 @@ let afmSavePromise = null; /* resolves when the deck row exists */
 
 function afmEl(id) { return document.getElementById(id); }
 
-/* See aqmSafeBind in ai-quiz-maker.js for why this exists: a missing element
-   or setup error is logged, never thrown, so it can't block the rest of this
-   page's controls (including the Generate button) from being wired up. */
+// See aqmSafeBind in ai-quiz-maker.js for why this exists: a missing element
 function afmSafeBind(id, event, handler) {
     try {
         const el = afmEl(id);
@@ -30,8 +23,6 @@ function afmSafeBind(id, event, handler) {
 }
 
 function initAiFlashcardMaker() {
-    /* Bound first and on its own so it's never skipped because something
-       else below it failed to set up. */
     afmSafeBind('afmForm', 'submit', event => {
         event.preventDefault();
         afmGenerate();
@@ -133,7 +124,7 @@ async function afmGenerate() {
     }
 }
 
-/* ---------- Persistence (Supabase) ---------- */
+// Persistence (Supabase)
 
 async function afmStore() { return (await import('../services/ai-flashcard-store.js')).AiFlashcardStore; }
 
@@ -176,8 +167,7 @@ async function afmLoadHistory() {
     }
 }
 
-/* Mirrors aqmHistoryEmptyMarkup in ai-quiz-maker.js — same centered
-   icon + message treatment for the loading / empty / error states. */
+// Mirrors aqmHistoryEmptyMarkup in ai-quiz-maker.js — same centered
 function afmHistoryEmptyMarkup(icon, title, subtext) {
     return `<div class="aqm-history-empty">
         <i class="bi ${icon}" aria-hidden="true"></i>

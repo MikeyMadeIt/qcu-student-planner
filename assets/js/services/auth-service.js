@@ -1,6 +1,4 @@
-/* Authentication service boundary (ES module), backed by Supabase Auth + the `profiles` table.
-   Every function returns { ok, code?, message, data? }. Nothing here ever reports success
-   without the Supabase call actually succeeding. */
+// Authentication service boundary (ES module), backed by Supabase Auth + the `profiles` table.
 
 import { getSupabase } from '../core/supabase-client.js';
 
@@ -14,11 +12,7 @@ function ok(data) {
     return { ok: true, data };
 }
 
-/* Maps a Supabase/Postgres error into a message safe to show a user. Known cases get a
-   friendly rewrite; anything unrecognized still shows the real underlying message instead of
-   a dead-end "something went wrong" -- a vague message with no detail is exactly what made the
-   Google-OAuth config problem and this RPC problem both hard to find, so every failure is also
-   logged to the console and, as a last resort, shown inline so it can actually be diagnosed. */
+// Maps a Supabase/Postgres error into a message safe to show a user. Known cases get a
 function readableAuthError(error) {
     if (!error) return 'Something went wrong. Please try again.';
 
@@ -42,16 +36,10 @@ function readableAuthError(error) {
         return "The server's database is missing a required column. An administrator needs to run the project's latest Supabase migration, then try again.";
     }
 
-    /* Last resort: show the actual error instead of a dead end. */
     return error.message ? `We could not process that request: ${error.message}` : 'We could not process that request. Please try again.';
 }
 
-/* Google sign-in fails for very different reasons than a password login (almost always a
-   Supabase/Google Cloud *configuration* problem, not something the student did), so it gets
-   its own, much more specific error mapping instead of the generic one above. Anything
-   unrecognized still shows the real Supabase message -- these screens are used by club
-   officers who need to fix the setup, not end users, so hiding the actual cause behind a
-   vague "something went wrong" just makes it impossible to diagnose. */
+// Google sign-in fails for very different reasons than a password login (almost always a
 function readableOAuthError(error) {
     if (!error) return 'Something went wrong starting Google sign-in. Please try again.';
 
@@ -97,9 +85,6 @@ export const AuthService = {
                 return fail('We could not load your account. Please try again or contact an administrator.', 'PROFILE_ERROR');
             }
 
-            /* A pending profile is considered incomplete when any of the academic-detail
-               fields that the registration form collects (and Google never supplies) are
-               still missing -- matching the same logic used in auth-routing.js. */
             const profileIncomplete = !profile.course || !profile.year_level || !profile.school;
 
             return ok({
@@ -119,12 +104,6 @@ export const AuthService = {
         try {
             const supabase = getSupabase();
 
-            /* The registration details travel as signup metadata (auth.users.raw_user_meta_data),
-               not a follow-up RPC call: a follow-up call needs an authenticated session, and
-               Supabase does not issue one at signUp() time when "Confirm email" is enabled.
-               The handle_new_user DB trigger reads this metadata to create the pending profiles
-               row atomically with the auth user, so it works either way. Student number is
-               intentionally never collected or sent. */
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -146,10 +125,6 @@ export const AuthService = {
         }
     },
 
-    /* Redirects the browser to Google, then back to callback.html. Supabase issues a real,
-       live session the moment Google confirms the identity -- there is no way to make OAuth
-       itself "not sign the user in". The manual pending/approve gate is enforced afterwards,
-       in the callback page, exactly like signIn() enforces it above for passwords. */
     async signInWithGoogle() {
         try {
             const supabase = getSupabase();
@@ -169,10 +144,6 @@ export const AuthService = {
         }
     },
 
-    /* Waits for the session Supabase creates from the Google redirect. supabase-js resolves
-       this in one of two ways depending on timing: getSession() already has it, or it arrives
-       a moment later via onAuthStateChange (SIGNED_IN) while detectSessionInUrl finishes the
-       PKCE code exchange. Covers both so the callback page never races it. */
     async waitForOAuthSession(timeoutMs = 8000) {
         const supabase = getSupabase();
 
@@ -197,9 +168,6 @@ export const AuthService = {
         });
     },
 
-    /* Fills in the academic details a Google sign-in never provides (program, campus, year
-       level). Only ever touches the caller's own row, and only while still pending --
-       enforced server-side by submit_profile_details(). */
     async completeProfile({ fullName, program, campus, yearLevel }) {
         try {
             const supabase = getSupabase();
@@ -300,22 +268,11 @@ export const AuthService = {
 
     async signOut() {
         try {
-            // MAJ-12: grade edits and semester adds/edits save to localStorage
-            // instantly but push to Supabase in the background (see cloud-sync.js).
-            // Tearing down the session and wiping the local cache before that push
-            // lands silently drops the edit -- it still looked saved right up until
-            // logout, but the server never got it, so it's gone on the next login.
-            // Give any in-flight saves a chance to actually finish first (bounded
-            // by a timeout so a stuck connection can't block logout forever).
             if (typeof window !== 'undefined' && window.CloudSync && typeof window.CloudSync.waitForPendingSync === 'function') {
                 try { await window.CloudSync.waitForPendingSync(); } catch (e) { /* ignore */ }
             }
             const supabase = getSupabase();
             await supabase.auth.signOut();
-            // Security: clear this device's local cache of the signed-out student's
-            // planner data so a different student signing in on the same browser
-            // never sees stale subjects/tasks/notes/etc. in the moment before (or if)
-            // a fresh cloud sync overwrites them. See storage.js clearPrivateCacheOnSignOut.
             if (typeof DB !== 'undefined' && typeof DB.clearPrivateCacheOnSignOut === 'function') {
                 DB.clearPrivateCacheOnSignOut();
             }

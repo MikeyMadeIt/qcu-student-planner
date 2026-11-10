@@ -1,5 +1,4 @@
-﻿/* Client-side validation (ES module).
-   This only improves form usability. It is NOT security: the server must re-validate everything. */
+﻿// Client-side validation (ES module).
 
 import { APP_CONFIG } from '../core/config.js';
 
@@ -36,7 +35,6 @@ export function passwordIssues(value) {
     return PASSWORD_RULES.filter(rule => !rule.test(value)).map(rule => rule.id);
 }
 
-/* Each validator returns an error message, or '' when valid. */
 export const validators = {
     email: value => {
         if (!value) return 'Enter your email address.';
@@ -62,8 +60,6 @@ export const validators = {
     fullName: value => {
         if (!value.trim()) return 'Enter your full name.';
         if (value.trim().length < 2) return 'Enter your full name.';
-        // MIN-02: Added typographic apostrophes (‘’) and digits (\d) so names like
-        // 'Jose Jr. 2nd' or 'O’Brien' pass validation without registration failures.
         return /^[a-zA-Z\u00C0-\u017F‘’\d.,'\"\- ]+$/.test(value.trim()) ? '' : 'Use letters, numbers, and standard punctuation for your full name.';
 
     },

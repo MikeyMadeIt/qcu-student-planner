@@ -196,7 +196,6 @@ function onRowAction(e) {
         if (btn.dataset.act === 'view') viewTicket(btn.dataset.id);
         return;
     }
-    // Clicking anywhere else on the row (Gmail-style) opens the ticket too.
     const row = e.target.closest('.adm-row-clickable');
     if (row) viewTicket(row.dataset.id);
 }

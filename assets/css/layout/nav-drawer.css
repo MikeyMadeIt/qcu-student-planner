@@ -150,8 +150,7 @@
     box-shadow: inset 2px 0 0 rgb(var(--accent));
 }
 
-/* Inbox / Notifications — same prominent row treatment on mobile as on the desktop sidebar,
-   placed directly below branding and above the categorized nav groups. */
+/* Inbox / Notifications — same prominent row treatment on mobile as on the desktop sidebar, */
 .drawer-quick-row {
     display: flex;
     flex-direction: column;
@@ -170,8 +169,7 @@
     font-family: inherit;
 }
 
-/* Bottom utility group (Settings, Help, Report, Log out) — anchored under the scrollable
-   nav, not inside it. */
+/* Bottom utility group (Settings, Help, Report, Log out) — anchored under the scrollable */
 .drawer-bottom {
     flex: 0 0 auto;
     padding: var(--space-2);
@@ -182,8 +180,6 @@
     padding: var(--space-1) var(--space-3) var(--space-2);
 }
 
-/* Log out row: same row shape/typography/padding as every other drawer link, with only a
-   subtle destructive tint — never an oversized red button. */
 .drawer-link.drawer-link-danger,
 button.drawer-link {
     width: 100%;
@@ -224,8 +220,7 @@ button.drawer-link {
     overflow: hidden;
 }
 
-/* Overflow ("...") trigger for the drawer footer profile menu — stays pinned to
-   the far right regardless of how long the name/email text next to it gets. */
+/* Overflow ("...") trigger for the drawer footer profile menu — stays pinned to */
 .drawer-profile-more {
     flex: 0 0 auto;
     display: inline-flex;

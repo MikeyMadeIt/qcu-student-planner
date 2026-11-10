@@ -1,9 +1,5 @@
-/* ============================================================
-   WALLPAPER.JS — canvas-based schedule wallpaper generator
-   Two modes: Subject List + Timetable
-   ============================================================ */
+// WALLPAPER.JS — canvas-based schedule wallpaper generator
 
-/* ── Themes ── */
 const WP_THEMES = {
     minimal: { bg: ['#f5f6fa', '#eceff5'], text: '#1c2030', sub: '#6a7086', accent: '#7C6CF6', card: 'rgba(20,25,45,.06)', line: 'rgba(20,25,45,.1)' },
     dark: { bg: ['#12141d', '#0a0c13'], text: '#f2f3fa', sub: '#9aa0b8', accent: '#7C6CF6', card: 'rgba(255,255,255,.07)', line: 'rgba(255,255,255,.12)' },
@@ -15,9 +11,8 @@ const WP_THEMES = {
     amoled: { bg: ['#000000', '#000000'], text: '#ffffff', sub: '#8a8fa3', accent: '#7C6CF6', card: 'rgba(255,255,255,.06)', line: 'rgba(255,255,255,.14)' },
 };
 
-/* ── State ── */
 let wpTheme = 'dark';
-let wpMode = 'list'; // 'list' | 'timetable'
+let wpMode = 'list';
 let wpToggleState = { room: true, professor: true, name: true, semester: true };
 const WP_DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const WP_DAY_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
@@ -27,7 +22,7 @@ function getSubjectColor(subject) {
     return subject.color || WP_PALETTE[0];
 }
 
-/* ── Helpers: get all active non-archived subjects / all days they use ── */
+// Helpers: get all active non-archived subjects / all days they use
 
 function getAllSubjects() {
     return DB.getActiveSubjects().filter(s => !s.archived);
@@ -39,9 +34,7 @@ function getAllDaysInUse(subjects) {
     return WP_DAY_ORDER.filter(d => used.has(d));
 }
 
-/* ══════════════════════════════════════════
-   INIT
-   ══════════════════════════════════════════ */
+// INIT
 
 function initWallpaper() {
     buildThemePicker();
@@ -50,7 +43,7 @@ function initWallpaper() {
     generateWallpaper();
 }
 
-/* ── Mode toggle ── */
+// Mode toggle
 
 function setWpMode(mode) {
     wpMode = mode;
@@ -61,7 +54,7 @@ function setWpMode(mode) {
     generateWallpaper();
 }
 
-/* ── Theme picker ── */
+// Theme picker
 
 function buildThemePicker() {
     const grid = document.getElementById('themePicker');
@@ -87,7 +80,7 @@ function selectWpTheme(k) {
     generateWallpaper();
 }
 
-/* ── Info toggles ── */
+// Info toggles
 
 function buildToggles() {
     const labels = { name: 'Student Name', semester: 'Semester', room: 'Room / Building', professor: 'Professor' };
@@ -99,7 +92,7 @@ function buildToggles() {
     </div>`).join('');
 }
 
-/* ── Size ── */
+// Size
 
 function onSizeChange() {
     const val = document.getElementById('wpSize').value;
@@ -115,9 +108,7 @@ function getWpSize() {
     return sel.split('x').map(Number);
 }
 
-/* ══════════════════════════════════════════
-   MAIN GENERATE DISPATCHER
-   ══════════════════════════════════════════ */
+// MAIN GENERATE DISPATCHER
 
 function generateWallpaper() {
     const [W, H] = getWpSize();
@@ -135,9 +126,7 @@ function generateWallpaper() {
     }
 }
 
-/* ══════════════════════════════════════════
-   BACKGROUND
-   ══════════════════════════════════════════ */
+// BACKGROUND
 
 function drawBackground(ctx, W, H, t) {
     const grad = ctx.createLinearGradient(0, 0, W, H);
@@ -172,17 +161,14 @@ function drawBackground(ctx, W, H, t) {
     }
 }
 
-/* ══════════════════════════════════════════
-   SUBJECT LIST MODE
-   ══════════════════════════════════════════ */
+// SUBJECT LIST MODE
 
 function drawSubjectList(ctx, W, H, t) {
     const scale = W / 1080;
-    const pad = W * 0.08; // equal left & right margin
-    let y = H * 0.22; // 22% top space
+    const pad = W * 0.08;
+    let y = H * 0.22;
     const settings = DB.getSettings();
     const sem = DB.getSemester();
-    /* Header */
     if (wpToggleState.name) {
         ctx.fillStyle = t.sub;
         ctx.font = `500 ${30 * scale}px 'Inter', sans-serif`;
@@ -199,7 +185,6 @@ function drawSubjectList(ctx, W, H, t) {
         ctx.fillText(`${sem.name || ''} · ${sem.schoolYear || ''}`, pad, y);
         y += 46 * scale;
     }
-    /* Divider */
     y += 10 * scale;
     ctx.strokeStyle = t.line;
     ctx.lineWidth = 1.5 * scale;
@@ -208,7 +193,6 @@ function drawSubjectList(ctx, W, H, t) {
     ctx.lineTo(W - pad, y);
     ctx.stroke();
     y += 30 * scale;
-    /* All subjects, all days */
     const subjects = getAllSubjects();
     const usedDays = getAllDaysInUse(subjects);
     const dayBlocks = usedDays.map(d => ({
@@ -219,14 +203,11 @@ function drawSubjectList(ctx, W, H, t) {
         drawEmptyState(ctx, W, H, t, scale, y);
         return;
     }
-    /* Sizing — bigger rows */
     const reserveBottom = H * 0.04;
     const availH = H - y - reserveBottom;
     const totalClassRows = dayBlocks.reduce((s, b) => s + b.items.length, 0);
     const totalDayHeaders = dayBlocks.length;
-    // Day header is 0.45× of a class row weight
     const effectiveRows = totalClassRows + totalDayHeaders * 0.45;
-    // Clamp row height: bigger minimum than before (was 52, now 70)
     const itemH = Math.max(70 * scale, Math.min(110 * scale, availH / effectiveRows));
     const dayHeaderH = Math.round(itemH * 0.45);
     const gapH = Math.round(6 * scale);
@@ -245,7 +226,6 @@ function drawSubjectList(ctx, W, H, t) {
             overflowed = true;
             return;
         }
-        /* Day label */
         ctx.fillStyle = t.accent;
         ctx.font = `700 ${dayFontSz}px 'Plus Jakarta Sans', sans-serif`;
         ctx.fillText(WP_DAY_FULL[block.day].toUpperCase(), pad, y + dayHeaderH / 2);
@@ -258,10 +238,8 @@ function drawSubjectList(ctx, W, H, t) {
             const color = getSubjectColor(s);
             const rowH = itemH - gapH;
             const midY = y + rowH / 2;
-            /* Accent border */
             ctx.fillStyle = color;
             roundRectFill(ctx, pad, y, accentW, rowH, accentR);
-            /* Time: stacked start / end */
             const timeX = pad + accentW + 20 * scale;
             ctx.fillStyle = t.text;
             ctx.font = `600 ${timeFontSz}px 'JetBrains Mono', monospace`;
@@ -269,12 +247,10 @@ function drawSubjectList(ctx, W, H, t) {
             ctx.fillStyle = t.sub;
             ctx.font = `500 ${timeFontSz}px 'JetBrains Mono', monospace`;
             ctx.fillText(fmtTime(s.end), timeX, midY + timeFontSz * 0.75);
-            /* Course code — right margin equals left pad */
             const maxInfoW = W - infoX - pad;
             ctx.fillStyle = t.text;
             ctx.font = `700 ${codeFontSz}px 'Plus Jakarta Sans', sans-serif`;
             ctx.fillText(truncateText(ctx, s.code || '', maxInfoW), infoX, midY - codeFontSz * 0.6);
-            /* Room · Professor */
             const meta = [];
             if (wpToggleState.room) {
                 const loc = [s.room, s.building].filter(Boolean).join(' ');
@@ -292,7 +268,7 @@ function drawSubjectList(ctx, W, H, t) {
             }
             y += itemH;
         });
-        y += 6 * scale; // gap between day groups
+        y += 6 * scale;
     });
     if (overflowed) {
         ctx.textBaseline = 'alphabetic';
@@ -303,18 +279,14 @@ function drawSubjectList(ctx, W, H, t) {
     ctx.textBaseline = 'alphabetic';
 }
 
-/* ══════════════════════════════════════════
-   TIMETABLE MODE — no clock, just the grid
-   ══════════════════════════════════════════ */
+// TIMETABLE MODE — no clock, just the grid
 
 function drawTimetable(ctx, W, H, t) {
     const scale = W / 1080;
-    const pad = W * 0.08; // equal left & right margin
-    const gridTop = H * 0.22; // 22% top space
-    /* All subjects — use Mon–Fri always as columns, add Sat/Sun if needed */
+    const pad = W * 0.08;
+    const gridTop = H * 0.22;
     const subjects = getAllSubjects();
     const usedByData = getAllDaysInUse(subjects);
-    // Always show Mon–Fri; append Sat/Sun only if subjects use them
     const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     const extras = ['Sat', 'Sun'].filter(d => usedByData.includes(d));
     const days = [...WEEKDAYS, ...extras];
@@ -323,7 +295,6 @@ function drawTimetable(ctx, W, H, t) {
         ctx.textBaseline = 'alphabetic';
         return;
     }
-    /* Time range from actual data */
     const allTimes = subjects.flatMap(s => (s.days || []).filter(d => days.includes(d)).length ? [s.start, s.end] : []);
     const minHour = allTimes.length
         ? Math.max(6, Math.floor(Math.min(...allTimes.map(timeToMins)) / 60))
@@ -331,7 +302,6 @@ function drawTimetable(ctx, W, H, t) {
     const maxHour = allTimes.length
         ? Math.min(22, Math.ceil(Math.max(...allTimes.map(timeToMins)) / 60))
         : 18;
-    /* Layout */
     const timeColW = Math.round(68 * scale);
     const gridLeft = pad + timeColW;
     const gridW = W - gridLeft - pad;
@@ -344,10 +314,8 @@ function drawTimetable(ctx, W, H, t) {
     const codeSz = Math.max(10, Math.min(18, 14 * scale));
     const metaSz = Math.max(9, Math.min(15, 12 * scale));
     ctx.textBaseline = 'middle';
-    /* Day header background strip */
     ctx.fillStyle = hexToRgba(t.accent || '#7C6CF6', .08);
     ctx.fillRect(gridLeft, gridTop, gridW, headerH);
-    /* Day header labels */
     ctx.fillStyle = t.sub;
     ctx.font = `700 ${dayFontSz}px 'Plus Jakarta Sans', sans-serif`;
     days.forEach((d, i) => {
@@ -355,14 +323,12 @@ function drawTimetable(ctx, W, H, t) {
         const cx = gridLeft + i * dayColW + dayColW / 2;
         ctx.fillText(lbl, cx - ctx.measureText(lbl).width / 2, gridTop + headerH / 2);
     });
-    /* Header bottom border */
     ctx.strokeStyle = t.line;
     ctx.lineWidth = 1.5 * scale;
     ctx.beginPath();
     ctx.moveTo(gridLeft, gridTop + headerH);
     ctx.lineTo(W - pad, gridTop + headerH);
     ctx.stroke();
-    /* Vertical column separators */
     ctx.lineWidth = scale;
     days.forEach((_, i) => {
         const lx = gridLeft + i * dayColW;
@@ -377,7 +343,6 @@ function drawTimetable(ctx, W, H, t) {
     ctx.lineTo(W - pad, gridTop + headerH + gridH);
     ctx.stroke();
     const rowTop = gridTop + headerH;
-    /* Hour grid lines + time labels */
     for (let h = minHour; h <= maxHour; h++) {
         const ly = rowTop + (h - minHour) * hourH;
         if (ly > H - H * 0.02)
@@ -394,7 +359,6 @@ function drawTimetable(ctx, W, H, t) {
         const lblW = ctx.measureText(lbl).width;
         ctx.fillText(lbl, pad + timeColW - lblW - 8 * scale, ly);
     }
-    /* Subject blocks */
     subjects.forEach(s => {
         const sMin = timeToMins(s.start);
         const eMin = timeToMins(s.end);
@@ -430,9 +394,7 @@ function drawTimetable(ctx, W, H, t) {
     ctx.textBaseline = 'alphabetic';
 }
 
-/* ══════════════════════════════════════════
-   EMPTY STATE
-   ══════════════════════════════════════════ */
+// EMPTY STATE
 
 function drawEmptyState(ctx, W, H, t, scale, y) {
     ctx.textBaseline = 'top';
@@ -446,9 +408,7 @@ function drawEmptyState(ctx, W, H, t, scale, y) {
     ctx.textBaseline = 'alphabetic';
 }
 
-/* ══════════════════════════════════════════
-   CANVAS HELPERS
-   ══════════════════════════════════════════ */
+// CANVAS HELPERS
 
 function timeToMins(t) {
     if (!t)
@@ -495,9 +455,7 @@ function truncateText(ctx, text, maxW) {
     return t + '…';
 }
 
-/* ══════════════════════════════════════════
-   DOWNLOAD
-   ══════════════════════════════════════════ */
+// DOWNLOAD
 
 function downloadWallpaper(format) {
     const canvas = document.getElementById('wpCanvas');

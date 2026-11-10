@@ -1,4 +1,4 @@
-/* ---------- TOASTS ---------- */
+// TOASTS
 const Toast = {
     container() {
         let c = document.getElementById('toastStack');
@@ -20,10 +20,6 @@ const Toast = {
         el.setAttribute('role', kind === 'danger' ? 'alert' : 'status');
         el.innerHTML = `<i class="bi ${icon} toast-item-icon" aria-hidden="true"></i><span class="toast-item-msg">${escHtml(msg)}</span>`;
         c.appendChild(el);
-        // Error/warning toasts (e.g. "Couldn't save ... to the server") stay up much
-        // longer and are tap-to-dismiss -- on mobile there's no DevTools console to
-        // fall back on to read what went wrong, so the toast IS the only error log
-        // the student has. A 2.6s auto-fade was effectively hiding real sync failures.
         const isUrgent = kind === 'danger' || kind === 'warning';
         el.addEventListener('click', () => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); });
         if (isUrgent) el.style.cursor = 'pointer';
@@ -32,7 +28,7 @@ const Toast = {
     confirmExport() { window.exportData ? window.exportData() : this.show('Open Settings to export data', 'accent', 'bi-download'); }
 };
 
-/* ---------- CONFETTI ---------- */
+// CONFETTI
 
 function fireConfetti() {
     const colors = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309'];
@@ -53,7 +49,7 @@ function fireConfetti() {
     }
 }
 
-/* ---------- CONFIRM ACTION MODAL ---------- */
+// CONFIRM ACTION MODAL
 
 function ensureConfirmModal() {
     if (document.getElementById('confirmActionModal'))
@@ -80,7 +76,6 @@ function ensureConfirmModal() {
     </div>
   </div>`;
     document.body.appendChild(wrap.firstElementChild);
-    // Close on Escape
     document.getElementById('confirmActionModal').addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const inst = bootstrap.Modal.getInstance(document.getElementById('confirmActionModal'));
@@ -90,9 +85,7 @@ function ensureConfirmModal() {
     });
 }
 
-/* opts.reasonField, when present ({ label, placeholder, required }), shows a textarea inline
-   in the popup instead of falling back to a native window.prompt() after the fact. onConfirm
-   is then called with the trimmed reason string (or '' if left blank and not required). */
+// opts.reasonField, when present ({ label, placeholder, required }), shows a textarea inline
 function confirmAction(opts) {
     const { title = 'Are you sure?', message = 'This action cannot be undone.', confirmLabel = 'Delete', danger = true, icon, reasonField = null, hideCloseButton = false, onConfirm } = opts;
     ensureConfirmModal();

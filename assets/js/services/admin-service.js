@@ -1,6 +1,4 @@
-/* Admin data service (ES module). Every read/write goes through Supabase and is subject to
-   RLS + the is_admin()/set_account_status() checks on the database side — this file does not
-   and cannot grant access on its own; it only calls what the database already allows. */
+// Admin data service (ES module). Every read/write goes through Supabase and is subject to
 
 import { getSupabase } from '../core/supabase-client.js';
 
@@ -15,18 +13,12 @@ function ok(data) {
 function readableDbError(error) {
     if (!error) return 'Something went wrong. Please try again.';
     if (error.code === '42501') return 'You are not authorized to perform this action.';
-    /* P0002 and 22023 are raised, by every SECURITY DEFINER function in this project, with a
-       specific human-readable message already attached (e.g. "Subject must be between 1 and
-       150 characters", "That account could not be found") -- surface it instead of a single
-       generic string that would otherwise flatten every validation error into the same text. */
     if (error.code === 'P0002') return error.message || 'That record could not be found.';
     if (error.code === '22023') return error.message || 'That value is not valid.';
     return 'The request could not be completed. Please try again.';
 }
 
 export const AdminService = {
-    /* Confirms the signed-in user is an approved admin by reading their own profile row
-       (allowed under profiles_select_own_or_admin). Never trust a client-side flag alone. */
     async verifyAdminAccess() {
         try {
             const supabase = getSupabase();
@@ -84,8 +76,6 @@ export const AdminService = {
                 const term = search.trim().replace(/[%_]/g, '');
                 query = query.or(`full_name.ilike.%${term}%,course.ilike.%${term}%,email.ilike.%${term}%`);
             }
-            // Registration-date range — dateTo is a calendar day, so push it to that
-            // day's end rather than midnight to keep the day itself inclusive.
             if (dateFrom) query = query.gte('created_at', new Date(`${dateFrom}T00:00:00`).toISOString());
             if (dateTo) query = query.lte('created_at', new Date(`${dateTo}T23:59:59.999`).toISOString());
 
@@ -124,9 +114,6 @@ export const AdminService = {
         }
     },
 
-    /* The only path that changes account_status. Runs server-side via set_account_status(),
-       which re-checks is_admin(), validates the status, blocks self-changes, and writes an
-       audit_log row in the same transaction. */
     async reviewAccount({ targetUserId, newStatus, reason = null }) {
         try {
             const supabase = getSupabase();
@@ -144,10 +131,6 @@ export const AdminService = {
         }
     },
 
-    /* Permanent deletion lives entirely behind the `admin-delete-account` Edge Function
-       (service_role never touches the browser). The function itself re-verifies admin
-       status and re-checks the target is 'rejected' server-side -- this call cannot
-       succeed just because the UI allowed it to be clicked. */
     async deleteAccountPermanently({ targetUserId, reason = null }) {
         try {
             const supabase = getSupabase();
@@ -156,9 +139,6 @@ export const AdminService = {
             });
 
             if (error) {
-                // supabase-js FunctionsHttpError carries the actual response on error.context;
-                // surface the server's exact message instead of a generic one, per the
-                // "never pretend it succeeded, never hide why it failed" requirement.
                 let message = error.message || 'Could not delete that account.';
                 try {
                     if (error.context && typeof error.context.json === 'function') {
@@ -179,12 +159,6 @@ export const AdminService = {
         }
     },
 
-    /* ---------- Admin Inbox (one-way admin -> student messaging) ---------- */
-
-    /* Student picker for the Compose form. Only ever returns role='student',
-       account_status='approved' rows -- the same audience admin_send_message()
-       re-derives server-side, so this list can never be out of sync with who a
-       message is actually allowed to reach. */
     async listApprovedStudents({ search = '' } = {}) {
         try {
             const supabase = getSupabase();
@@ -268,9 +242,6 @@ export const AdminService = {
         }
     },
 
-    /* Full message content + its recipient list with per-recipient read status
-       (never exposes anything beyond name/email, already visible elsewhere in
-       the admin panel). */
     async getMessage(id) {
         try {
             const supabase = getSupabase();
@@ -297,8 +268,6 @@ export const AdminService = {
         }
     },
 
-    /* ---------- Admin Support Tickets ---------- */
-
     async listTickets({ status = 'all', category = 'all', search = '', sort = 'created_desc', page = 1, pageSize = 20 } = {}) {
         try {
             const supabase = getSupabase();
@@ -322,9 +291,6 @@ export const AdminService = {
             const { data, error, count } = await query;
             if (error) return fail(readableDbError(error));
 
-            /* Email search needs a second pass: Postgres can't .or() across a joined
-               table's column in one query, so when the ticket-side filters above
-               return nothing, also try matching on the joined student's email. */
             if (search.trim() && data.length === 0) {
                 const term = search.trim().replace(/[%_]/g, '');
                 let emailQuery = supabase
@@ -397,10 +363,6 @@ export const AdminService = {
         }
     },
 
-    /* ---------- Overview Dashboard: messaging + ticket stats ----------
-       Message-level counts (admin_messages rows) are always kept separate from
-       recipient-level counts (admin_message_recipients rows) -- one message
-       sent to 50 students is one message, not 50. */
     async getCommsStats() {
         try {
             const supabase = getSupabase();
