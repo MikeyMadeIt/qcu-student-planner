@@ -3,7 +3,6 @@ import { getSupabase } from '../core/supabase-client.js';
 function fail(error) { throw new Error(error?.message || 'Database request failed'); }
 
 export const AiFlashcardStore = {
-    /** set = { title, cards:[{front,back}] } -> new deck id */
     async saveDeck(set, { topic = '', fileName = null } = {}) {
         const sb = await getSupabase();
         const { data, error } = await sb.rpc('save_ai_flashcard_deck', {
@@ -23,7 +22,6 @@ export const AiFlashcardStore = {
         return data || [];
     },
 
-    /** Returns { id, title, cards:[{front,back}] } - same shape afmValidateSet produces. */
     async getDeck(id) {
         const sb = await getSupabase();
         const [dk, cs] = await Promise.all([

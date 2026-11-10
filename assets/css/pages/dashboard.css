@@ -1,4 +1,4 @@
-/* ---------- DASHBOARD SPECIFIC ---------- */
+/* DASHBOARD SPECIFIC */
 
 .hero-clock {
     font-family: var(--font-mono);
@@ -160,8 +160,6 @@
     line-height: 1;
     margin-top: 1px;
 }
-
-/* ===== DASHBOARD REDESIGN ===== */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -403,7 +401,6 @@
 }
 
 /* grade-bar-val-wrap, .grade-bar-pct, .grade-bar-gwa defined in style.css */
-/* Donut chart */
 
 .donut-wrap svg {
     transform: rotate(-90deg);
@@ -760,7 +757,7 @@
     border-radius: 6px;
 }
 
-/* ---- Upcoming tasks section labels ---- */
+/* Upcoming tasks section labels */
 
 .upcoming-section-label {
     font-size: .62rem;
@@ -786,8 +783,6 @@
     background: rgba(251,113,133,.14) !important;
     color: #fb7185 !important;
 }
-
-/* ---- Mobile responsive refinements ---- */
 
 @media (max-width: 575px) {
     .dash-stats .dash-stat-link {
@@ -843,8 +838,6 @@
     }
 }
 
-/* ---- Prefers reduced motion ---- */
-
 @media (prefers-reduced-motion: reduce) {
     .dash-card-anim {
         animation: none !important;
@@ -857,11 +850,7 @@
     }
 }
 
-/* ============================================================
-   DASHBOARD LAYOUT (authoritative)
-   Self-contained grids so the overview does not depend on the
-   Bootstrap grid for its primary layout.
-   ============================================================ */
+/* DASHBOARD LAYOUT (authoritative) */
 
 .dash-stats {
     display: grid;

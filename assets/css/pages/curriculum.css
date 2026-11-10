@@ -1,7 +1,4 @@
-/* ============================================================
-CURRICULUM PAGE
-============================================================ */
-/* -- Toolbar: stats + search -- */
+/* CURRICULUM PAGE */
 
 .cur-toolbar {
     display: flex;
@@ -60,7 +57,7 @@ CURRICULUM PAGE
     white-space: nowrap;
 }
 
-/* -- Search -- */
+/* Search */
 
 .cur-search-wrap {
     position: relative;
@@ -83,7 +80,7 @@ CURRICULUM PAGE
     font-size: .88rem !important;
 }
 
-/* -- Year block -- */
+/* Year block */
 
 .cur-year-block {
     border-radius: var(--radius-md);
@@ -130,7 +127,7 @@ CURRICULUM PAGE
     margin-top: 1px;
 }
 
-/* -- Course list chevron -- */
+/* Course list chevron */
 
 .cur-list-chevron {
     font-size: .85rem;
@@ -139,7 +136,7 @@ CURRICULUM PAGE
     flex-shrink: 0;
 }
 
-/* -- Compact list table rows -- */
+/* Compact list table rows */
 
 .cur-list-num {
     font-family: var(--font-mono);
@@ -153,7 +150,7 @@ CURRICULUM PAGE
     font-weight: 500;
 }
 
-/* -- Semester accordion -- */
+/* Semester accordion */
 
 .cur-semester-accordion {
     border-radius: 0;
@@ -221,7 +218,7 @@ CURRICULUM PAGE
     border-top: 1px solid var(--border);
 }
 
-/* -- Desktop table -- */
+/* Desktop table */
 
 .cur-table-wrap {
     overflow-x: auto;
@@ -305,7 +302,7 @@ CURRICULUM PAGE
     display: inline-block;
 }
 
-/* -- Mobile subject cards -- */
+/* Mobile subject cards */
 
 .cur-mobile-cards {
     display: flex;
@@ -380,8 +377,6 @@ CURRICULUM PAGE
     flex-shrink: 0;
 }
 
-/* -- Responsive toolbar layout -- */
-
 @media (min-width: 768px) {
     .cur-toolbar {
         flex-direction: row;
@@ -399,7 +394,7 @@ CURRICULUM PAGE
     }
 }
 
-/* -- Course list: category header & total rows -- */
+/* Course list: category header & total rows */
 
 .cur-cat-row td.cur-cat-label {
     padding: 6px 14px 4px;
@@ -448,11 +443,7 @@ CURRICULUM PAGE
     overflow-x: auto;
 }
 
-/* ============================================================
-   CURRICULUM PDF VIEWER
-   Layout: preview, then chevrons with page count, then zoom/rotate
-   row, then Download and Open side by side. All controls share one height.
-   ============================================================ */
+/* CURRICULUM PDF VIEWER */
 
 .cur-picker {
     position: relative;

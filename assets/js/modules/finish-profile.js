@@ -1,6 +1,4 @@
-/* pages/auth/finish-profile.html entry point (ES module). Only reached by a Google sign-in
-   whose profile is still missing program/campus/year level -- password sign-ups always
-   collect these during register-wizard.js and never see this page. */
+// pages/auth/finish-profile.html entry point (ES module). Only reached by a Google sign-in
 
 import { AuthService } from '../services/auth-service.js';
 import { APP_CONFIG } from '../core/config.js';
@@ -84,7 +82,6 @@ function showSubmittedConfirmation() {
     try {
         sessionStorage.setItem(APP_CONFIG.registrationPreviewFlag, '1');
     } catch (error) {
-        /* pending.html falls back to its default message. */
     }
     location.href = APP_CONFIG.routes.pending;
 }
@@ -128,7 +125,6 @@ async function guardAndPrefill(form) {
     const profile = profileResult.data;
 
     if (profile.account_status !== 'pending') {
-        /* Already decided one way or another (or approved) -- this step no longer applies. */
         if (profile.account_status === 'approved') {
             location.replace(profile.role === 'admin' ? '../admin/dashboard.html' : APP_CONFIG.routes.dashboard);
         } else {
