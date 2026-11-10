@@ -477,6 +477,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--page-gap);
+    /* Mobile: each card hugs its own content — the history card should
+       only grow as tall as the quizzes actually in it. */
     align-items: start;
 }
 
@@ -490,7 +492,16 @@
 
 @media (min-width: 992px) {
     .aqm-layout {
-        grid-template-columns: minmax(0, 32rem) minmax(16rem, 22rem);
+        /* Equal-width columns so the form and the history list read as a
+           matching pair of cards, not a wide form next to a narrow strip. */
+        grid-template-columns: 1fr 1fr;
+        /* Desktop: both cards match the height of the taller one, instead
+           of the history card trailing off short. */
+        align-items: stretch;
+    }
+
+    .aqm-history {
+        height: 100%;
     }
 }
 
@@ -726,6 +737,15 @@
 }
 
 /* ---- Saved-quiz history ---- */
+
+/* The card itself is a column so the list below the heading can flex to
+   fill the card's height on desktop (where .aqm-history gets height:100%
+   to match the form card) while staying auto-height on mobile. */
+.aqm-history {
+    display: flex;
+    flex-direction: column;
+}
+
 .aqm-history-heading {
     display: flex;
     align-items: center;
@@ -747,15 +767,50 @@
 .aqm-history-list {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    flex: 1 1 auto;
+    gap: .6rem;
+}
+
+/* Loading / empty / error states — centered, so on desktop (where the
+   card is stretched to match the form's height) they sit in the middle
+   of the card instead of pinned to the top. */
+.aqm-history-empty {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    text-align: center;
+    padding: 1.75rem 1rem;
+    color: var(--text-soft);
+}
+
+.aqm-history-empty i {
+    font-size: 1.5rem;
+    color: var(--text-faint);
+    margin-bottom: .15rem;
+}
+
+.aqm-history-empty p {
+    margin: 0;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.aqm-history-empty span {
+    font-size: .78rem;
+    color: var(--text-faint);
+    max-width: 20rem;
 }
 
 .aqm-history-card {
     display: flex;
     align-items: center;
-    gap: .65rem;
-    padding: .65rem .75rem;
-    background: var(--surface);
+    gap: .75rem;
+    padding: 1rem .9rem;
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     transition: border-color var(--transition);
@@ -796,4 +851,26 @@
     align-items: center;
     gap: .4rem;
     flex-shrink: 0;
+}
+
+/* Smaller than the default .btn-icon.btn-sm glyph size so a row of two
+   icon buttons stays visually light next to a compact history card. */
+.aqm-history-card-actions .btn-icon {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: .85rem;
+}
+
+/* Delete reads as a distinct, danger-tinted action rather than a second
+   "Open"-looking button. */
+.aqm-history-card-actions .aqm-danger {
+    color: var(--danger);
+    background: rgba(214, 67, 60, .08);
+    border-color: rgba(214, 67, 60, .3);
+}
+
+.aqm-history-card-actions .aqm-danger:hover {
+    color: var(--danger);
+    background: rgba(214, 67, 60, .16);
+    border-color: rgba(214, 67, 60, .45);
 }
