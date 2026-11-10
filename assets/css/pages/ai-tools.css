@@ -20,14 +20,13 @@
     margin-bottom: .4rem;
 }
 
+/* Stacked at every width — including the two-column desktop layout, where
+   the Quiz Maker's "number of questions" slider and difficulty pills read
+   more cleanly one above the other than squeezed into a single narrow row. */
 .ai-field-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 1rem;
-}
-
-@media (max-width: 640px) {
-    .ai-field-row { grid-template-columns: 1fr; }
 }
 
 /* ---- File attachment control (shared) ---- */
@@ -464,4 +463,337 @@
 @keyframes ai-typing-bounce {
     0%, 60%, 100% { transform: translateY(0); opacity: .5; }
     30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ============================================================
+   AI QUIZ MAKER — page-specific layout
+   (classes prefixed "aqm-" are unique to this page; nothing
+   above this point is touched, so Flashcard Maker and the Study
+   Assistant are unaffected.) ============================================================ */
+
+/* ---- Two-column desktop layout: a comfortably-sized form next to a
+   scannable history list, instead of either stretching edge-to-edge. ---- */
+.aqm-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--page-gap);
+    align-items: start;
+}
+
+/* .aqm-layout replaces the old flat .glass + section pair, so it needs its
+   own top-margin rule mirroring the shared "stacked .glass/section" rhythm
+   in components/cards.css. */
+.main-content > .aqm-layout + .glass,
+.main-content > .aqm-layout + section {
+    margin-top: var(--page-gap);
+}
+
+@media (min-width: 992px) {
+    .aqm-layout {
+        grid-template-columns: minmax(0, 32rem) minmax(16rem, 22rem);
+    }
+}
+
+/* Quiz-taking / results cards keep a readable max width on desktop too. */
+.aqm-stage {
+    max-width: 42rem;
+    margin-inline: auto;
+}
+
+/* ---- File upload dropzone ---- */
+.aqm-dropzone {
+    position: relative;
+    width: 100%;
+    min-height: 6.5rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1rem;
+}
+
+.aqm-dropzone:hover,
+.aqm-dropzone:focus-visible {
+    border-color: rgb(var(--accent));
+    background: rgba(var(--accent), .06);
+}
+
+.aqm-dropzone:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.aqm-dropzone.is-dragover {
+    border-color: rgb(var(--accent));
+    border-style: solid;
+    background: rgba(var(--accent), .1);
+}
+
+.aqm-dropzone-empty {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    color: var(--text-soft);
+    text-align: left;
+}
+
+/* Our own classes set display:flex at the same specificity the browser's
+   default [hidden]{display:none} uses, and author rules always win that
+   tie — so toggling the "hidden" attribute alone wouldn't hide these.
+   Restate it explicitly for both toggled pieces of the dropzone. */
+.aqm-dropzone-empty[hidden],
+.aqm-dropzone-file[hidden] {
+    display: none;
+}
+
+.aqm-dropzone-empty > i {
+    flex-shrink: 0;
+    font-size: 1.6rem;
+    color: rgb(var(--accent));
+}
+
+.aqm-dropzone-copy {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.aqm-dropzone-title {
+    font-size: .88rem;
+    color: var(--text);
+}
+
+.aqm-dropzone-title strong {
+    font-weight: 700;
+}
+
+.aqm-dropzone-hint {
+    font-size: .76rem;
+    color: var(--text-faint);
+}
+
+/* Attached-file state fills the same dropzone footprint. */
+.aqm-dropzone-file {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.aqm-dropzone-file .ai-file-name {
+    max-width: none;
+}
+
+.aqm-file-remove {
+    flex-shrink: 0;
+}
+
+@media (max-width: 575.98px) {
+    .aqm-dropzone {
+        padding: 1rem .85rem;
+    }
+
+    .aqm-dropzone-empty {
+        gap: .65rem;
+    }
+}
+
+/* ---- Number-of-questions slider ---- */
+.aqm-range-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: .55rem;
+}
+
+.aqm-range-head label {
+    margin-bottom: 0;
+}
+
+.aqm-range-value {
+    font-family: var(--font-mono);
+    font-size: .95rem;
+    font-weight: 700;
+    color: rgb(var(--accent));
+    min-width: 1.6rem;
+    text-align: right;
+}
+
+.aqm-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.25rem;
+    background: transparent;
+    cursor: pointer;
+    margin: .3rem 0;
+}
+
+.aqm-range:focus { outline: none; }
+
+.aqm-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+}
+
+.aqm-range::-moz-range-track {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+}
+
+.aqm-range::-moz-range-progress {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: rgb(var(--accent));
+}
+
+.aqm-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px rgb(var(--accent));
+    transition: var(--transition-fast);
+}
+
+.aqm-range::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px rgb(var(--accent));
+    transition: var(--transition-fast);
+}
+
+.aqm-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 1px rgb(var(--accent)), var(--focus-ring);
+}
+
+.aqm-range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 1px rgb(var(--accent)), var(--focus-ring);
+}
+
+/* ---- Difficulty pill group: three equal, independent pills (not one
+   bordered rectangle with segments inside it). ---- */
+.aqm-pills {
+    display: flex;
+    gap: .5rem;
+}
+
+.aqm-pill {
+    flex: 1 1 0;
+    height: var(--input-height);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text-soft);
+    font-size: .84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.aqm-pill:hover {
+    color: var(--text);
+    border-color: rgba(var(--accent), .4);
+}
+
+.aqm-pill.is-selected {
+    background: rgb(var(--accent));
+    border-color: rgb(var(--accent));
+    color: var(--on-accent);
+}
+
+.aqm-pill:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.aqm-generate-btn {
+    margin-top: 1.5rem;
+}
+
+/* ---- Saved-quiz history ---- */
+.aqm-history-heading {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 0 var(--title-gap);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    color: var(--text-soft);
+}
+
+.aqm-history-heading i {
+    flex-shrink: 0;
+    font-size: .95rem;
+    color: rgb(var(--accent));
+    line-height: 1;
+}
+
+.aqm-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.aqm-history-card {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .65rem .75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition);
+}
+
+.aqm-history-card:hover {
+    border-color: rgba(var(--accent), .4);
+}
+
+.aqm-history-card-info {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.aqm-history-card-title {
+    font-weight: 700;
+    font-size: .86rem;
+    line-height: 1.3;
+    /* Single line with an ellipsis — defined here directly (not only via
+       Bootstrap's .text-truncate) so a long title can never force the
+       card taller. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aqm-history-card-meta {
+    font-size: .74rem;
+    color: var(--text-faint);
+    margin-top: .1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aqm-history-card-actions {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-shrink: 0;
 }

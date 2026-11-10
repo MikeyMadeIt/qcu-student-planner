@@ -42,7 +42,8 @@ function initAiQuizMaker() {
     try {
         aqmAttachment = initAiFileAttachment({
             inputEl: aqmEl('aqmFileInput'),
-            triggerEl: aqmEl('aqmAttachBtn'),
+            triggerEl: aqmEl('aqmDropzone'),
+            dropzoneEl: aqmEl('aqmDropzone'),
             infoEl: aqmEl('aqmFileInfo'),
             removeEl: aqmEl('aqmFileRemove'),
             emptyEl: aqmEl('aqmFileEmpty'),
@@ -62,6 +63,12 @@ function initAiQuizMaker() {
         console.error('AI Quiz Maker: question-count control setup failed', error);
     }
 
+    try {
+        aqmInitDifficultyPills();
+    } catch (error) {
+        console.error('AI Quiz Maker: difficulty selector setup failed', error);
+    }
+
     aqmSafeBind('aqmRetryBtn', 'click', aqmGenerate);
     aqmSafeBind('aqmRetakeBtn', 'click', aqmRetake);
     aqmSafeBind('aqmNewQuizBtn', 'click', aqmReset);
@@ -70,6 +77,39 @@ function initAiQuizMaker() {
     aqmSafeBind('aqmSubmitBtn', 'click', aqmSubmitQuiz);
 
     aqmLoadHistory();
+}
+
+/* Three-way "Easy / Medium / Hard" pill group. Keeps the hidden #aqmDifficulty
+   input (read by aqmGenerate) in sync and behaves like a radio group for
+   keyboard and screen-reader users. */
+function aqmInitDifficultyPills() {
+    const group = aqmEl('aqmDifficultyGroup');
+    const hiddenInput = aqmEl('aqmDifficulty');
+    if (!group || !hiddenInput) return;
+    const pills = Array.from(group.querySelectorAll('.aqm-pill'));
+    if (!pills.length) return;
+
+    function select(pill) {
+        pills.forEach(p => {
+            const isSelected = p === pill;
+            p.classList.toggle('is-selected', isSelected);
+            p.setAttribute('aria-checked', String(isSelected));
+            p.tabIndex = isSelected ? 0 : -1;
+        });
+        hiddenInput.value = pill.dataset.value;
+    }
+
+    pills.forEach((pill, i) => {
+        pill.tabIndex = pill.classList.contains('is-selected') ? 0 : -1;
+        pill.addEventListener('click', () => select(pill));
+        pill.addEventListener('keydown', event => {
+            if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+            event.preventDefault();
+            const next = pills[(i + (event.key === 'ArrowRight' ? 1 : pills.length - 1)) % pills.length];
+            next.focus();
+            select(next);
+        });
+    });
 }
 
 function aqmSetBusy(busy) {
@@ -372,16 +412,18 @@ async function aqmLoadHistory() {
     try {
         const list = await (await aqmStore()).listQuizzes();
         host.innerHTML = list.length ? list.map(q => `
-          <div class="glass card-pad mb-2 d-flex align-items-center gap-2">
-            <div class="flex-grow-1 min-w-0">
-              <div class="fw-bold">${escHtml(q.title)}</div>
-              <div class="text-faint" style="font-size:.78rem">
-                ${q.question_count} questions · ${q.attempts} attempt${q.attempts === 1 ? '' : 's'}
+          <div class="aqm-history-card">
+            <div class="aqm-history-card-info">
+              <div class="aqm-history-card-title text-truncate" title="${escHtml(q.title)}">${escHtml(q.title)}</div>
+              <div class="aqm-history-card-meta">
+                ${q.question_count} question${q.question_count === 1 ? '' : 's'} · ${q.attempts} attempt${q.attempts === 1 ? '' : 's'}
                 ${q.bestPercent !== null ? ' · best ' + q.bestPercent + '%' : ''}
               </div>
             </div>
-            <button class="btn btn-accent btn-sm" onclick="aqmOpenSaved('${q.id}')">Open</button>
-            <button class="btn btn-ghost btn-sm" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete quiz"><i class="bi bi-trash3"></i></button>
+            <div class="aqm-history-card-actions">
+              <button type="button" class="btn-icon btn-sm" onclick="aqmOpenSaved('${q.id}')" aria-label="Open ${escHtml(q.title)}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+            </div>
           </div>`).join('')
           : '<div class="text-faint" style="font-size:.85rem">No saved quizzes yet.</div>';
     } catch (error) {
