@@ -16,55 +16,60 @@
 <body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
-  <main class="main-content">
-    <div class="topbar">
-      <div><h1 class="page-title">AI Study Assistant</h1><p class="page-sub">Ask questions, get explanations, and study your materials.</p></div>
-      <button type="button" class="btn-ghost" id="asaClearBtn"><i class="bi bi-plus-lg" aria-hidden="true"></i> New chat</button>
-    </div>
+  <main class="main-content main-content--asa">
 
-    <!-- SAVED CONVERSATIONS (collapsible) -->
-    <div class="glass card-pad fade-in mb-3">
-      <button type="button" class="btn btn-ghost w-100 d-flex align-items-center justify-content-between" data-bs-toggle="collapse" data-bs-target="#asaHistoryPanel" aria-expanded="false" aria-controls="asaHistoryPanel">
-        <span><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Past conversations <span class="text-faint" id="asaHistoryCount"></span></span>
-        <i class="bi bi-chevron-down" aria-hidden="true"></i>
-      </button>
-      <div class="collapse" id="asaHistoryPanel">
-        <div class="mt-2" id="asaHistory" style="max-height:240px;overflow-y:auto" aria-live="polite">
-          <div class="text-faint" style="font-size:.85rem">Loading your conversations…</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="glass card-pad fade-in ai-chat-shell">
-      <div class="ai-chat-log" id="asaChatLog" aria-live="polite"></div>
-
-      <div class="ai-msg ai-msg-assistant ai-typing-row" id="asaTypingRow" hidden style="align-self:flex-start;width:fit-content;margin-bottom:.75rem">
-        <span class="ai-typing-dots"><span></span><span></span><span></span></span>
-      </div>
-
-      <div class="ai-state ai-state-error" id="asaErrorBanner" hidden style="padding:1rem">
-        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-        <p id="asaErrorMessage">Something went wrong.</p>
-      </div>
-
-      <form class="ai-chat-composer" id="asaForm" novalidate>
-        <div class="ai-chat-attach-bar">
-          <input type="file" id="asaFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
-          <div class="ai-attach">
-            <span class="ai-attach-empty" id="asaFileEmpty"><i class="bi bi-paperclip" aria-hidden="true"></i>No file attached</span>
-            <span class="ai-file-info" id="asaFileInfo" hidden></span>
-            <div class="ai-attach-actions">
-              <button type="button" class="btn-ghost" id="asaAttachBtn"><i class="bi bi-upload" aria-hidden="true"></i> Attach file</button>
-              <button type="button" class="btn-ghost" id="asaFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    <div class="asa-header">
+      <span class="asa-mode-label"><i class="bi bi-stars" aria-hidden="true"></i>Study mode</span>
+      <div class="asa-header-actions">
+        <div class="asa-dropdown" id="asaDropdown">
+          <button type="button" class="asa-dropdown-btn" id="asaDropdownToggle" aria-haspopup="true" aria-expanded="false" aria-controls="asaDropdownPanel">
+            <i class="bi bi-clock-history" aria-hidden="true"></i>
+            <span>Conversations</span>
+            <i class="bi bi-chevron-down asa-dropdown-caret" aria-hidden="true"></i>
+          </button>
+          <div class="asa-dropdown-panel" id="asaDropdownPanel" hidden>
+            <div class="asa-search">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input type="search" id="asaSearch" placeholder="Search conversations" aria-label="Search conversations">
+            </div>
+            <div class="asa-history" id="asaHistory" aria-live="polite">
+              <div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Loading your conversations…</div>
             </div>
           </div>
         </div>
-        <div class="ai-chat-input-row">
-          <textarea class="form-control" id="asaInput" rows="1" placeholder="Ask a question, request a summary, or get an explanation…" maxlength="6000" aria-label="Message"></textarea>
-          <button type="submit" class="ai-icon-btn" id="asaSendBtn" aria-label="Send message"><i class="bi bi-send-fill" aria-hidden="true"></i></button>
-        </div>
-      </form>
+        <button type="button" class="asa-new-chat-btn" id="asaClearBtn">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i> <span class="d-none d-sm-inline">New chat</span>
+        </button>
+      </div>
     </div>
+
+    <section class="asa-main">
+      <div class="ai-chat-shell" id="asaChatShell">
+        <div class="ai-chat-log" id="asaChatLog" aria-live="polite"></div>
+
+        <div class="ai-msg ai-msg-assistant ai-typing-row" id="asaTypingRow" hidden style="align-self:flex-start;width:fit-content;margin-bottom:.75rem">
+          <span class="ai-typing-dots"><span></span><span></span><span></span></span>
+        </div>
+
+        <div class="ai-state ai-state-error" id="asaErrorBanner" hidden style="padding:1rem">
+          <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+          <p id="asaErrorMessage">Something went wrong.</p>
+        </div>
+
+        <form class="ai-chat-composer" id="asaForm" novalidate>
+          <div class="ai-chat-attach-bar" id="asaAttachBar" hidden>
+            <input type="file" id="asaFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
+            <div class="ai-file-info" id="asaFileInfo" hidden></div>
+            <button type="button" class="btn-ghost" id="asaFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          </div>
+          <div class="ai-chat-input-row">
+            <button type="button" class="asa-icon-btn asa-attach-trigger" id="asaAttachBtn" aria-label="Attach file"><i class="bi bi-paperclip" aria-hidden="true"></i></button>
+            <textarea class="form-control" id="asaInput" rows="1" placeholder="Ask anything about your lessons…" maxlength="6000" aria-label="Message"></textarea>
+            <button type="submit" class="ai-icon-btn" id="asaSendBtn" aria-label="Send message"><i class="bi bi-send-fill" aria-hidden="true"></i></button>
+          </div>
+        </form>
+      </div>
+    </section>
 
   </main>
 </div>
