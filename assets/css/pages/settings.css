@@ -32,6 +32,30 @@
     line-height: 1.5;
 }
 
+
+/* CSS Styles for the settings navigation */
+.set-nav {
+    border-bottom:  2px solid rgb(var(--accent-2));
+}
+
+.set-nav:hover {
+    border-bottom:  2px solid rgb(var(--accent-2));
+}
+
+.set-nav-btn {
+    padding: 5px;
+}
+
+.set-nav-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.set-nav-btn.active {
+    background: rgba(var(--accent), .15);
+    color: rgb(var(--accent));
+}
+
 /* Fourteen accent swatches, always seven per row (two symmetrical rows),
    on every breakpoint down to small phones. */
 #accentPicker {
