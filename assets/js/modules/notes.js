@@ -584,8 +584,8 @@ function renderMarkdown(src, noteId, forEditor) {
         var code = [];
         var escaped = [];
         var links = [];
-        var html = escapeHtml(text).replace(/\\([\\`*_{}\[\]()#+.!>~-])/g, function (match, character) {
-            escaped.push(character);
+        var html = escapeHtml(text).replace(/\\(&gt;|[\\`*_{}\[\]()#+.!~-])/g, function (match, character) {
+            escaped.push(character === '&gt;' ? '>' : character);
             return '\u0002' + (escaped.length - 1) + '\u0002';
         }).replace(/`([^`]+)`/g, function (match, content) {
             code.push('<code class="md-inline-code">' + content + '</code>');
