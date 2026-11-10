@@ -1491,15 +1491,6 @@ function tkInitTimeField(field, cfg) {
 function tkInitTaskTimeFields(t) {
     TimeField.init(document.getElementById('taskModalBody'));
     var est = document.querySelector('.sch-time-field[data-time-key="Est"]');
-    if (due) tkInitTimeField(due, {
-        options: TK_DUE_OPTIONS,
-        value: tkHHMMToMins(t ? t.dueTime : '23:59'),
-        fallback: 1439,
-        allowEmpty: false,
-        format: tkFmtClock,
-        parse: tkParseClock,
-        sub: function (o) { return o === 0 ? 'Midnight' : o === 720 ? 'Noon' : o === 1439 ? 'End of day' : ''; }
-    });
     if (est) tkInitTimeField(est, {
         options: TK_EST_OPTIONS,
         value: t && t.timeEstimate ? t.timeEstimate : null,
@@ -1566,10 +1557,6 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
             '<div class="col-6 col-md-4"><label class="form-label">Repeat</label><select class="form-select" id="tRepeat" onchange="updateRepeatHint(this)">' + repeatOptions + '</select>' + repeatDescHtml + '</div>' +
             '<div class="col-6 col-md-4"><label class="form-label" for="tEst">Time Estimate</label>' +
             tkTimeFieldHtml('Est', 'tEst', 'e.g. 1h 30m', 'Choose time estimate') + '</div>' +
-            '<div class="tk-time-est-row">' +
-            '<input type="number" class="form-control tk-te-input" id="tTeHrs" min="0" max="99" placeholder="0" value="' + (te.hrs > 0 ? te.hrs : '') + '"><span class="tk-te-unit">hr</span>' +
-            '<input type="number" class="form-control tk-te-input" id="tTeMins" min="0" max="59" step="5" placeholder="0" value="' + (te.mins > 0 ? te.mins : '') + '"><span class="tk-te-unit">min</span>' +
-            '</div></div>' +
             (isEdit ? '<div class="col-6 col-md-4"><label class="form-label">Score (%)</label><input type="number" class="form-control" id="tScore" min="0" max="100" step="0.01" placeholder="Optional" value="' + escHtml(String(scoreVal)) + '"></div>' : '') +
             (isEdit ? '<div class="col-' + (isEdit ? '6 col-md-8' : '12') + '"><label class="form-label">Remarks</label><input type="text" class="form-control" id="tRemarks" placeholder="Optional feedback or remarks…" value="' + escHtml(remarksVal) + '"></div>' : '') +
             '<div class="col-12 mt-1"><label class="form-label">Checklist</label>' +
@@ -1621,7 +1608,6 @@ function saveTask() {
         estField.querySelector('.sch-time-input').focus();
         return;
     }
-    var timeEstimate = estField ? (estField._tkValue || null) : null;
     var timeEstimate = estField ? (estField._tkValue || null) : null;
     var checklist = Array.from(document.querySelectorAll('.tk-modal-cl-row')).map(function (row) {
         return { done: row.querySelector('input[type=checkbox]').checked, text: row.querySelector('input[type=text]').value.trim() };
