@@ -1,14 +1,4 @@
-/* Admin Rejected Accounts page (ES module). All data goes through AdminService,
-   which only ever calls the real Supabase tables -- nothing here is sample data.
-   This page always retrieves account_status = 'rejected' rows only.
-
-   Delete Permanently (Phase 3) calls AdminService.deleteAccountPermanently(), which
-   invokes the `admin-delete-account` Edge Function -- the only place the
-   service_role key is used, and it stays server-side there. This page is not
-   the security boundary: the database (admin_delete_rejected_account()) and the
-   Edge Function both independently re-check admin status and that the target
-   is still 'rejected' before doing anything irreversible. The UI only updates
-   after that round trip actually succeeds. */
+// Admin Rejected Accounts page (ES module). All data goes through AdminService,
 
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
@@ -91,8 +81,6 @@ async function deleteAccount(id, name, triggerBtn) {
         return;
     }
 
-    // Only touch the UI once the server has actually confirmed deletion --
-    // never optimistically, and never before the round trip resolves.
     Toast.show(`${name} was permanently deleted.`, 'accent', 'bi-check-circle-fill');
     loadRows();
 }

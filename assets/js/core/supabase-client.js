@@ -1,9 +1,4 @@
-/* Supabase client singleton (ES module).
-   Requires the supabase-js UMD bundle to be loaded first via a <script> tag:
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-   That exposes window.supabase.createClient(). This module wraps it so every
-   other module can `import { getSupabase } from '../core/supabase-client.js'`
-   and always get the same client instance (same auth session, no duplicate sockets). */
+// Supabase client singleton (ES module).
 
 import { APP_CONFIG } from './config.js';
 

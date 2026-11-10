@@ -1,5 +1,4 @@
-/* Animated grid background. Pure CSS, sits behind all content and never captures input.
-   Two layers move at the same speed: a fine grid and a wider amber-tinted grid. */
+/* Animated grid background. Pure CSS, sits behind all content and never captures input. */
 
 :root {
     --grid-size: 3rem;

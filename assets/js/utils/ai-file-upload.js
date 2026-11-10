@@ -1,15 +1,4 @@
-/* ============================================================
-   Shared file-attachment utility for the AI Tools pages
-   (AI Quiz Maker, AI Flashcard Maker, AI Study Assistant).
-
-   One reusable module instead of duplicating file validation /
-   base64 conversion / "selected file" UI on every page. Classic
-   script (same pattern as core/layout.js, utils/dom.js) so plain
-   <script>-tag pages can call it inline.
-
-   Files are NEVER persisted anywhere by this module — they are
-   only held in memory (as a base64 string) long enough to be sent
-   straight to the Supabase Edge Function by ai-client.js. ============================================================ */
+// Shared file-attachment utility for the AI Tools pages
 
 const AI_UPLOAD_MAX_BYTES = 8 * 1024 * 1024; /* 8 MB — matches the backend's limit */
 const AI_UPLOAD_ACCEPTED_TYPES = {
@@ -24,8 +13,7 @@ function aiUploadFormatSize(bytes) {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-/* Validates a File object against the shared rules. Returns { ok: true } or
-   { ok: false, message }. Never throws. */
+// Validates a File object against the shared rules. Returns { ok: true } or
 function aiUploadValidateFile(file) {
     if (!file) return { ok: false, message: 'No file was selected.' };
     if (file.size === 0) return { ok: false, message: 'That file is empty.' };
@@ -36,9 +24,7 @@ function aiUploadValidateFile(file) {
     return { ok: true };
 }
 
-/* Reads a File as a base64 string (no data: URI prefix), preserving MIME type
-   and filename. Resolves { base64, mimeType, fileName, fileSize } or rejects
-   with a plain Error for unreadable/corrupt files. */
+// Reads a File as a base64 string (no data: URI prefix), preserving MIME type
 function aiUploadToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -62,26 +48,7 @@ function aiUploadToBase64(file) {
     });
 }
 
-/**
- * Wires up a complete "attach a file" control: hidden <input type="file">,
- * a trigger button, a "selected file" info row (name + size), and a remove
- * button. Keeps the currently-attached file in memory only.
- *
- * opts:
- *   inputEl     - the <input type="file"> element
- *   triggerEl   - optional element that opens the file picker when clicked
- *   dropzoneEl  - optional element (often the same as triggerEl) that also
- *                 accepts drag-and-drop and Enter/Space-to-open for keyboard
- *                 users, and gets an "is-dragover" class while a file is
- *                 dragged over it
- *   infoEl      - element to show "filename.pdf · 1.2 MB" in
- *   removeEl    - element that clears the current attachment
- *   emptyEl     - optional element to toggle visible when nothing is attached
- *   onError     - called with a message string when validation fails
- *   onChange    - called with the File (or null when cleared)
- *
- * Returns an object: { getFile(), clear() }
- */
+// Wires up a complete "attach a file" control: hidden <input type="file">,
 function initAiFileAttachment(opts) {
     const { inputEl, triggerEl, dropzoneEl, infoEl, removeEl, emptyEl, onError, onChange } = opts;
     let currentFile = null;
