@@ -72,10 +72,13 @@
       </form>
 
       <!-- SAVED QUIZZES -->
-      <section class="aqm-history fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
+      <section class="glass card-pad aqm-history fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
         <h2 class="aqm-history-heading" id="aqmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved quizzes</span></h2>
         <div class="aqm-history-list" id="aqmHistory" aria-live="polite">
-          <div class="text-faint" style="font-size:.85rem">Loading your saved quizzes…</div>
+          <div class="aqm-history-empty">
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            <p>Loading your saved quizzes…</p>
+          </div>
         </div>
       </section>
     </div>
