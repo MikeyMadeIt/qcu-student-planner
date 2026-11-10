@@ -53,6 +53,25 @@ function saveProfile() {
     Toast.show('Profile saved');
 }
 
+/* Toggles which settings category is visible to the user */
+function selectCategory(category) {
+    document.getElementById('generalView').classList.toggle('d-none', category !== 'general');
+    document.getElementById('academicView').classList.toggle('d-none', category !== 'academic');
+    document.getElementById('personalizeView').classList.toggle('d-none', category !== 'personalize');
+    document.getElementById('dataView').classList.toggle('d-none', category !== 'data');
+    document.getElementById('privacyView').classList.toggle('d-none', category !== 'privacy');
+}
+
+/* Shows the settings navigation buttons toggled when clicked*/
+const buttons = document.querySelectorAll('.set-nav-btn');
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    button.classList.add('active');
+  });
+});
+
 /* ============================================================
    SEMESTER MANAGEMENT
    ============================================================ */
