@@ -19,39 +19,50 @@
   <main class="main-content">
     <div class="topbar"><div><h1 class="page-title">AI Flashcard Maker</h1><p class="page-sub">Turn your study materials into flashcards.</p></div></div>
 
-    <!-- CREATION FORM -->
-    <form class="glass card-pad fade-in" id="afmForm" novalidate>
-      <div class="ai-field">
-        <label for="afmTopic">Topic or subject</label>
-        <input type="text" class="form-control" id="afmTopic" placeholder="e.g. Cell Biology terms, Spanish vocabulary" maxlength="150">
-      </div>
-      <div class="ai-field">
-        <label for="afmNotes">Instructions or study notes <span class="text-soft fw-normal">(optional)</span></label>
-        <textarea class="form-control" id="afmNotes" rows="4" placeholder="Paste notes, or describe what the flashcards should cover…" maxlength="6000"></textarea>
-      </div>
-      <div class="ai-field">
-        <label for="afmFileInput">Attach a PDF or image <span class="text-soft fw-normal">(optional)</span></label>
-        <input type="file" id="afmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
-        <div class="ai-attach">
-          <span class="ai-attach-empty" id="afmFileEmpty"><i class="bi bi-paperclip" aria-hidden="true"></i>No file attached</span>
-          <span class="ai-file-info" id="afmFileInfo" hidden></span>
-          <div class="ai-attach-actions">
-            <button type="button" class="btn-ghost" id="afmAttachBtn"><i class="bi bi-upload" aria-hidden="true"></i> Attach file</button>
-            <button type="button" class="btn-ghost" id="afmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    <!-- CREATION FORM + HISTORY (two-column on desktop, stacked on mobile) -->
+    <div class="aqm-layout">
+      <form class="glass card-pad fade-in" id="afmForm" novalidate>
+        <div class="ai-field">
+          <label for="afmTopic">Topic or subject</label>
+          <input type="text" class="form-control" id="afmTopic" placeholder="e.g. Cell Biology terms, Spanish vocabulary" maxlength="150">
+        </div>
+        <div class="ai-field">
+          <label for="afmNotes">Instructions or study notes <span class="text-soft fw-normal">(optional)</span></label>
+          <textarea class="form-control" id="afmNotes" rows="4" placeholder="Paste notes, or describe what the flashcards should cover…" maxlength="6000"></textarea>
+        </div>
+
+        <div class="ai-field">
+          <label id="afmFileLabel">Attach a PDF or image <span class="text-soft fw-normal">(optional)</span></label>
+          <input type="file" id="afmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
+          <div class="aqm-dropzone" id="afmDropzone" tabindex="0" role="button" aria-labelledby="afmFileLabel" aria-describedby="afmDropzoneHint">
+            <div class="aqm-dropzone-empty" id="afmFileEmpty">
+              <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+              <div class="aqm-dropzone-copy">
+                <span class="aqm-dropzone-title"><strong>Click to upload</strong> or drag and drop</span>
+                <span class="aqm-dropzone-hint" id="afmDropzoneHint">PDF, JPG, or PNG — up to 8 MB</span>
+              </div>
+            </div>
+            <div class="ai-file-info aqm-dropzone-file" id="afmFileInfo" hidden>
+              <!-- filled in by initAiFileAttachment -->
+              <button type="button" class="btn-icon btn-sm aqm-file-remove" id="afmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </div>
           </div>
         </div>
-        <p class="text-soft mt-1 mb-0" style="font-size:.75rem">PDF, JPG, or PNG — up to 8 MB.</p>
-      </div>
-      <button type="submit" class="btn btn-accent mt-2" id="afmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Flashcards</button>
-    </form>
 
-    <!-- SAVED DECKS (shown only alongside the creation form) -->
-    <section class="mt-4 fade-in" id="afmHistorySection" aria-labelledby="afmHistoryHeading">
-      <h2 class="h6 mb-2" id="afmHistoryHeading"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Your saved decks</h2>
-      <div id="afmHistory" aria-live="polite">
-        <div class="text-faint" style="font-size:.85rem">Loading your saved decks…</div>
-      </div>
-    </section>
+        <button type="submit" class="btn btn-accent w-100 aqm-generate-btn" id="afmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Flashcards</button>
+      </form>
+
+      <!-- SAVED DECKS -->
+      <section class="glass card-pad aqm-history fade-in" id="afmHistorySection" aria-labelledby="afmHistoryHeading">
+        <h2 class="aqm-history-heading" id="afmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved decks</span></h2>
+        <div class="aqm-history-list" id="afmHistory" aria-live="polite">
+          <div class="aqm-history-empty">
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            <p>Loading your saved decks…</p>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- LOADING -->
     <div class="glass card-pad fade-in ai-state" id="afmLoadingState" hidden>
@@ -67,7 +78,7 @@
     </div>
 
     <!-- FLASHCARDS -->
-    <div class="glass card-pad fade-in" id="afmCardsPanel" hidden>
+    <div class="glass card-pad fade-in aqm-stage" id="afmCardsPanel" hidden>
       <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <h2 class="h5 mb-0" id="afmSetTitle"></h2>
         <button type="button" class="btn-ghost" id="afmNewSetBtn"><i class="bi bi-plus-lg" aria-hidden="true"></i> New Set</button>
