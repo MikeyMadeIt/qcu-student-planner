@@ -422,13 +422,24 @@ async function aqmLoadHistory() {
             </div>
             <div class="aqm-history-card-actions">
               <button type="button" class="btn-icon btn-sm" onclick="aqmOpenSaved('${q.id}')" aria-label="Open ${escHtml(q.title)}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
-              <button type="button" class="btn-icon btn-sm" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
             </div>
           </div>`).join('')
-          : '<div class="text-faint" style="font-size:.85rem">No saved quizzes yet.</div>';
+          : aqmHistoryEmptyMarkup('bi-journal-text', 'No saved quizzes yet', 'Generate a quiz below and it will show up here.');
     } catch (error) {
-        host.innerHTML = '<div class="text-faint">Couldn\'t load your saved quizzes.</div>';
+        host.innerHTML = aqmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved quizzes", 'Please refresh the page to try again.');
     }
+}
+
+/* Shared markup for the history list's loading / empty / error states —
+   centered icon + message, filling the card the same way whether it's
+   waiting, has nothing to show, or failed to load. */
+function aqmHistoryEmptyMarkup(icon, title, subtext) {
+    return `<div class="aqm-history-empty">
+        <i class="bi ${icon}" aria-hidden="true"></i>
+        <p>${escHtml(title)}</p>
+        ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
+    </div>`;
 }
 
 async function aqmOpenSaved(id) {
