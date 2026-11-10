@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    SETTINGS.JS — includes Academic Semester Management
    ============================================================ */
 
@@ -128,6 +128,17 @@ function renderSemesterManager() {
         const deleteBtn = e.target.closest('.sem-delete-btn');
         if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
     }, { once: true }); // { once: true } auto-removes listener on next renderSemesterManager call
+    if (!wrap._semBound) {
+    wrap._semBound = true;
+    wrap.addEventListener('click', function (e) {
+        const switchBtn = e.target.closest('.sem-switch-btn');
+        if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
+        const editBtn = e.target.closest('.sem-edit-btn');
+        if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
+        const deleteBtn = e.target.closest('.sem-delete-btn');
+        if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
+    });
+}
 }
 
 function switchActiveSemester(id) {
