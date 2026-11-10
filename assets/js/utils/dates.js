@@ -1,4 +1,4 @@
-/* Date and time helpers (classic script — exposes globals used by all modules) */
+// Date and time helpers (classic script — exposes globals used by all modules)
 
 function ymdLocal(d) {
     const y = d.getFullYear();
@@ -29,9 +29,7 @@ function isDateInSemester(date) {
     return !!(dateKey && startKey && endKey && startKey <= dateKey && dateKey <= endKey);
 }
 
-/**
- * Format "14:30" -> "2:30 PM"
- */
+// Format "14:30" -> "2:30 PM"
 
 function fmtTime(t) {
     if (!t)

@@ -1,12 +1,6 @@
-/* ---------- CUSTOM SELECT ----------
-   Progressively enhances native <select class="form-select"> elements into
-   a flat, Bootstrap-dropdown-driven custom listbox so menus are never
-   clipped by modal scroll containers and share one visual system with the
-   rest of the app's dropdowns (.dropdown-menu / .dropdown-item).
+// CUSTOM SELECT
 
-   The original <select> stays in the DOM (hidden, aria-hidden, tabindex -1)
-   so existing code that reads/writes `element.value` keeps working
-   unchanged, and native form submission/validation is preserved. */
+// The original <select> stays in the DOM (hidden, aria-hidden, tabindex -1)
 
 function enhanceSelects(root) {
     root = root || document;
@@ -103,22 +97,16 @@ function convertSelect(select) {
     wrap.appendChild(trigger);
     wrap.appendChild(menu);
 
-    // Keep an associated <label for="..."> clicking the trigger instead of
-    // the now-hidden native select.
     if (select.id) {
         const label = document.querySelector(`label[for="${CSS.escape(select.id)}"]`);
         if (label)
             label.addEventListener('click', (e) => { e.preventDefault(); trigger.focus(); trigger.click(); });
     }
 
-    // Keep in sync if code elsewhere sets select.value directly or rebuilds options.
     const observer = new MutationObserver(() => { renderOptions(); syncTrigger(); });
     observer.observe(select, { childList: true, attributes: true, attributeFilter: ['disabled'] });
     select.addEventListener('cs-refresh', () => { renderOptions(); syncTrigger(); });
 
-    // Fixed positioning avoids modal-body clipping. An absolute strategy can
-    // be selected for controls inside transformed page cards so the menu stays
-    // anchored to its trigger.
     if (window.bootstrap && bootstrap.Dropdown) {
         const strategy = select.dataset.dropdownStrategy === 'absolute' ? 'absolute' : 'fixed';
         bootstrap.Dropdown.getOrCreateInstance(trigger, {

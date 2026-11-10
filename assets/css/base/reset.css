@@ -1,6 +1,5 @@
 
-/* Border-box sizing everywhere: percentage widths must include padding,
-   otherwise cards with padding overflow their containers. */
+/* Border-box sizing everywhere: percentage widths must include padding, */
 *,
 *::before,
 *::after {
@@ -12,15 +11,6 @@ body {
     height: 100%;
     max-width: 100%;
     overflow-x: hidden;
-    /* Without an explicit overflow-y, the spec auto-promotes it to "auto" the
-       moment overflow-x isn't "visible" — silently turning <body> (height:100%,
-       i.e. exactly one viewport tall) into its own scrolling box nested inside
-       the real viewport. That extra scroll container is what made the sticky
-       .shell-bar/.sidebar vanish or lag on scroll: their "stuck" offset was
-       being measured against a box that resizes whenever the mobile browser's
-       address bar collapses/expands, instead of against the window itself.
-       Pinning overflow-y to visible keeps the window as the only scrolling
-       container, so position: sticky always has a stable 0 to stick to. */
     overflow-y: visible;
 }
 
