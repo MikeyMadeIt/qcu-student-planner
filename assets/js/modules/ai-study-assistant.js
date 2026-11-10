@@ -5,8 +5,17 @@ let asaMessages = [];   /* [{role:'user'|'assistant', content, fileName?}] */
 let asaBusy = false;
 let asaConvId = null;   /* saved conversation id, once the first turn is persisted */
 let asaSaveChain = Promise.resolve(); /* serializes saves so one chat never creates two conversations */
+let asaConversations = [];  /* cached list from the backend, for instant search filtering */
+let asaSearchTerm = '';
+let asaOpenMenuId = null;
 
 const ASA_HISTORY_LIMIT = 12;
+const ASA_SUGGESTIONS = [
+    'Explain a difficult concept',
+    'Summarize my study material',
+    'Give me an example',
+    'Help me prepare for an exam',
+];
 
 function asaEl(id) { return document.getElementById(id); }
 
@@ -33,8 +42,9 @@ function initAiStudyAssistant() {
             triggerEl: asaEl('asaAttachBtn'),
             infoEl: asaEl('asaFileInfo'),
             removeEl: asaEl('asaFileRemove'),
-            emptyEl: asaEl('asaFileEmpty'),
+            emptyEl: null,
             onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle-fill'),
+            onChange: file => asaUpdateAttachBar(file),
         });
     } catch (error) {
         console.error('AI Study Assistant: file attachment setup failed', error);
@@ -44,7 +54,7 @@ function initAiStudyAssistant() {
     asaSafeBind('asaInput', 'input', () => {
         const input = asaEl('asaInput');
         input.style.height = 'auto';
-        input.style.height = Math.min(input.scrollHeight, 128) + 'px';
+        input.style.height = Math.min(input.scrollHeight, 160) + 'px';
     });
     asaSafeBind('asaInput', 'keydown', event => {
         if (event.key === 'Enter' && !event.shiftKey) {
@@ -53,15 +63,112 @@ function initAiStudyAssistant() {
         }
     });
 
-    asaSafeBind('asaClearBtn', 'click', asaNewChat);
+    asaSafeBind('asaClearBtn', 'click', () => { asaNewChat(); asaCloseDropdown(); });
+
+    // Conversations dropdown (sits above the chat — the app already has its own sidebar)
+    asaSafeBind('asaDropdownToggle', 'click', event => {
+        event.stopPropagation();
+        asaDropdownOpen() ? asaCloseDropdown() : asaOpenDropdown();
+    });
+
+    asaSafeBind('asaSearch', 'input', e => { asaSearchTerm = e.target.value.trim().toLowerCase(); asaRenderHistoryLists(); });
+
+    document.addEventListener('click', event => {
+        asaCloseOpenMenu();
+        const dropdown = asaEl('asaDropdown');
+        const panel = asaEl('asaDropdownPanel');
+        const inside = (dropdown && dropdown.contains(event.target)) || (panel && panel.contains(event.target));
+        if (asaDropdownOpen() && !inside) asaCloseDropdown();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { asaCloseDropdown(); asaCloseOpenMenu(); }
+    });
+
+    // Move the panel to <body> once, so it's never a descendant of a
+    // transformed/filtered ancestor that would hijack its position:fixed
+    // containing block (see grid.css for the bug this used to hit).
+    const panel = asaEl('asaDropdownPanel');
+    if (panel && panel.parentElement !== document.body) document.body.appendChild(panel);
+
     asaRenderEmptyState();
     asaLoadHistory();
+}
+
+function asaDropdownOpen() {
+    const dropdown = asaEl('asaDropdown');
+    return !!(dropdown && dropdown.classList.contains('is-open'));
+}
+
+function asaOpenDropdown() {
+    const dropdown = asaEl('asaDropdown');
+    const panel = asaEl('asaDropdownPanel');
+    if (!dropdown || !panel) return;
+    dropdown.classList.add('is-open');
+    panel.hidden = false;
+    asaEl('asaDropdownToggle').setAttribute('aria-expanded', 'true');
+    asaPositionDropdown();
+    window.addEventListener('resize', asaPositionDropdown);
+    window.addEventListener('scroll', asaPositionDropdown, true);
+    const search = asaEl('asaSearch');
+    if (search) search.focus();
+}
+
+function asaCloseDropdown() {
+    const dropdown = asaEl('asaDropdown');
+    const panel = asaEl('asaDropdownPanel');
+    if (!dropdown || !panel || panel.hidden) return;
+    dropdown.classList.remove('is-open');
+    panel.hidden = true;
+    asaEl('asaDropdownToggle').setAttribute('aria-expanded', 'false');
+    window.removeEventListener('resize', asaPositionDropdown);
+    window.removeEventListener('scroll', asaPositionDropdown, true);
+}
+
+// The panel is position:fixed, so it floats above the chat workspace
+// regardless of any ancestor's overflow or stacking context — this just
+// places it under the toggle button and keeps it inside the viewport.
+function asaPositionDropdown() {
+    const toggle = asaEl('asaDropdownToggle');
+    const panel = asaEl('asaDropdownPanel');
+    if (!toggle || !panel || panel.hidden) return;
+
+    const margin = 12;
+    const rect = toggle.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || Math.min(352, window.innerWidth - margin * 2);
+    const panelHeight = panel.offsetHeight || 0;
+
+    let left = rect.right - panelWidth; /* align panel's right edge with the button's */
+    left = Math.min(Math.max(left, margin), window.innerWidth - panelWidth - margin);
+
+    let top = rect.bottom + 8;
+    if (top + panelHeight > window.innerHeight - margin) {
+        top = Math.max(rect.top - panelHeight - 8, margin); /* flip above if no room below */
+    }
+
+    panel.style.left = `${Math.round(left)}px`;
+    panel.style.top = `${Math.round(top)}px`;
+}
+
+function asaUpdateAttachBar(file) {
+    const bar = asaEl('asaAttachBar');
+    const trigger = asaEl('asaAttachBtn');
+    if (bar) { bar.hidden = !file; bar.classList.toggle('is-visible', !!file); }
+    if (trigger) trigger.classList.toggle('has-file', !!file);
 }
 
 function asaSetBusy(busy) {
     asaBusy = busy;
     asaEl('asaSendBtn').disabled = busy;
     asaEl('asaInput').disabled = busy;
+}
+
+function asaFillInput(text) {
+    const input = asaEl('asaInput');
+    if (!input) return;
+    input.value = text;
+    input.focus();
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
 }
 
 async function asaSend() {
@@ -156,25 +263,102 @@ function asaPersistTurn(userTurn, replyText) {
 }
 
 async function asaLoadHistory() {
-    const host = asaEl('asaHistory');
-    if (!host) return;
     try {
-        const list = await (await asaStore()).listConversations();
-        const count = asaEl('asaHistoryCount');
-        if (count) count.textContent = list.length ? `(${list.length})` : '';
-        host.innerHTML = list.length ? list.map(c => `
-          <div class="asa-history-item d-flex align-items-center gap-2 py-1 ${c.id === asaConvId ? 'fw-bold' : ''}">
-            <button type="button" class="btn btn-ghost btn-sm flex-grow-1 text-start text-truncate" onclick="asaOpenSaved('${c.id}')" title="${escHtml(c.title)}">
-              <i class="bi bi-chat-left-text me-1" aria-hidden="true"></i>${escHtml(c.title)}
-              <span class="text-faint ms-1" style="font-size:.72rem">${escHtml(new Date(c.updated_at).toLocaleDateString())}</span>
-            </button>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="asaDeleteSaved('${c.id}')" aria-label="Delete conversation"><i class="bi bi-trash3" aria-hidden="true"></i></button>
-          </div>`).join('')
-          : '<div class="text-faint" style="font-size:.85rem">No saved conversations yet.</div>';
+        asaConversations = await (await asaStore()).listConversations();
+        asaRenderHistoryLists();
     } catch (error) {
         console.warn('AI Study Assistant: could not load history', error);
-        host.innerHTML = '<div class="text-faint" style="font-size:.85rem">Couldn\'t load your conversations. ' + escHtml(error.message || '') + '</div>';
+        const msg = '<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Couldn\'t load your conversations. ' + escHtml(error.message || '') + '</div>';
+        const h = asaEl('asaHistory');
+        if (h) h.innerHTML = msg;
     }
+}
+
+// Groups the (optionally search-filtered) list into Today / Yesterday /
+// Previous 7 Days / Older buckets, then renders it into the dropdown.
+function asaRenderHistoryLists() {
+    let list = asaConversations;
+    if (asaSearchTerm) list = list.filter(c => (c.title || '').toLowerCase().includes(asaSearchTerm));
+
+    const groups = [
+        { label: 'Today', items: [] },
+        { label: 'Yesterday', items: [] },
+        { label: 'Previous 7 days', items: [] },
+        { label: 'Older', items: [] },
+    ];
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfYesterday = new Date(startOfToday); startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+    const sevenDaysAgo = new Date(startOfToday); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    list.forEach(c => {
+        const d = new Date(c.updated_at);
+        if (d >= startOfToday) groups[0].items.push(c);
+        else if (d >= startOfYesterday) groups[1].items.push(c);
+        else if (d >= sevenDaysAgo) groups[2].items.push(c);
+        else groups[3].items.push(c);
+    });
+
+    const html = list.length
+        ? groups.filter(g => g.items.length).map(g => `
+            <div class="asa-history-group-label">${g.label}</div>
+            ${g.items.map(c => asaHistoryItemHtml(c)).join('')}
+          `).join('')
+        : `<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">${asaSearchTerm ? 'No conversations match your search.' : 'No saved conversations yet.'}</div>`;
+
+    const host = asaEl('asaHistory');
+    if (host) host.innerHTML = html;
+
+    asaBindHistoryItems();
+}
+
+function asaHistoryItemHtml(c) {
+    return `
+      <div class="asa-history-item ${c.id === asaConvId ? 'is-active' : ''}" data-id="${escHtml(c.id)}">
+        <button type="button" class="asa-history-item-btn" data-action="open" title="${escHtml(c.title)}">
+          <span class="asa-history-item-title">${escHtml(c.title)}</span>
+          <span class="asa-history-item-date">${escHtml(new Date(c.updated_at).toLocaleDateString())}</span>
+        </button>
+        <button type="button" class="asa-history-menu-btn" data-action="menu" aria-label="Conversation options" aria-haspopup="true">
+          <i class="bi bi-three-dots" aria-hidden="true"></i>
+        </button>
+        <div class="asa-history-menu" hidden>
+          <button type="button" data-action="rename"><i class="bi bi-pencil" aria-hidden="true"></i>Rename</button>
+          <button type="button" class="text-danger" data-action="delete"><i class="bi bi-trash3" aria-hidden="true"></i>Delete</button>
+        </div>
+      </div>`;
+}
+
+function asaBindHistoryItems() {
+    document.querySelectorAll('.asa-history-item').forEach(item => {
+        const id = item.dataset.id;
+        const openBtn = item.querySelector('[data-action="open"]');
+        const menuBtn = item.querySelector('[data-action="menu"]');
+        const menu = item.querySelector('.asa-history-menu');
+        const renameBtn = item.querySelector('[data-action="rename"]');
+        const deleteBtn = item.querySelector('[data-action="delete"]');
+
+        if (openBtn) openBtn.addEventListener('click', () => { asaOpenSaved(id); asaCloseDropdown(); });
+        if (menuBtn) menuBtn.addEventListener('click', event => {
+            event.stopPropagation();
+            const isOpen = !menu.hidden;
+            asaCloseOpenMenu();
+            if (!isOpen) {
+                menu.hidden = false;
+                item.classList.add('is-menu-open');
+                asaOpenMenuId = id;
+            }
+        });
+        if (renameBtn) renameBtn.addEventListener('click', event => { event.stopPropagation(); asaCloseOpenMenu(); asaRenameSaved(id); });
+        if (deleteBtn) deleteBtn.addEventListener('click', event => { event.stopPropagation(); asaCloseOpenMenu(); asaDeleteSaved(id); });
+    });
+}
+
+function asaCloseOpenMenu() {
+    if (!asaOpenMenuId) return;
+    document.querySelectorAll('.asa-history-menu').forEach(m => m.hidden = true);
+    document.querySelectorAll('.asa-history-item.is-menu-open').forEach(i => i.classList.remove('is-menu-open'));
+    asaOpenMenuId = null;
 }
 
 async function asaOpenSaved(id) {
@@ -186,10 +370,28 @@ async function asaOpenSaved(id) {
         asaConvId = conv.id;
         asaHideError();
         asaRenderMessages();
-        asaLoadHistory();
+        asaRenderHistoryLists();
     } catch (error) {
         Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
     }
+}
+
+function asaRenameSaved(id) {
+    const conv = asaConversations.find(c => c.id === id);
+    const next = window.prompt('Rename conversation', conv ? conv.title : '');
+    if (next === null) return;
+    const title = next.trim();
+    if (!title) return;
+    (async () => {
+        try {
+            await asaSaveChain;
+            await (await asaStore()).renameConversation(id, title);
+            if (conv) conv.title = title;
+            asaRenderHistoryLists();
+        } catch (error) {
+            Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+        }
+    })();
 }
 
 function asaDeleteSaved(id) {
@@ -217,7 +419,7 @@ function asaNewChat() {
     asaConvId = null;
     asaHideError();
     asaRenderEmptyState();
-    asaLoadHistory();
+    asaRenderHistoryLists();
 }
 
 // The "ai-study" backend returns the assistant's reply as a plain string in
@@ -247,11 +449,18 @@ function asaRenderEmptyState() {
     const log = asaEl('asaChatLog');
     log.innerHTML = '';
     const empty = document.createElement('div');
-    empty.className = 'ai-state';
+    empty.className = 'asa-welcome';
     empty.id = 'asaEmptyState';
     empty.innerHTML = `<i class="bi bi-stars" aria-hidden="true"></i>
-        <p>Ask a question, request an explanation, summarize a lesson, or attach study material to get started.</p>`;
+        <h2>AI Study Assistant</h2>
+        <p>Ask questions, understand difficult topics, or study your materials.</p>
+        <div class="asa-suggestions">
+          ${ASA_SUGGESTIONS.map(s => `<button type="button" class="asa-suggestion-chip">${escHtml(s)}</button>`).join('')}
+        </div>`;
     log.appendChild(empty);
+    empty.querySelectorAll('.asa-suggestion-chip').forEach(btn => {
+        btn.addEventListener('click', () => asaFillInput(btn.textContent));
+    });
 }
 
 function asaScrollToBottom() {
