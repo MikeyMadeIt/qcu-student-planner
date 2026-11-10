@@ -337,10 +337,20 @@ td {
     }
 }
 
-/* Smooth page entrance */
-
+/* Smooth page entrance.
+   fill-mode is "backwards", not "both": "both" would leave the keyframe's
+   final `transform: translateY(0)` applied forever after the animation
+   ends, and ANY non-"none" transform — even an identity one — makes the
+   element a containing block for its `position: fixed` descendants. That
+   silently broke every fixed-position menu/popover nested anywhere under
+   a direct child of .main-content (e.g. the AI Study Assistant's
+   "Conversations" dropdown): instead of floating relative to the
+   viewport, it was pinned to this header and rendered off-canvas.
+   "backwards" still applies the entry state before the animation starts
+   (so nothing flashes in at full opacity), but reverts to the untouched,
+   transform-less style once it finishes. */
 .main-content > * {
-    animation: fadeIn .3s var(--ease) both;
+    animation: fadeIn .3s var(--ease) backwards;
 }
 
 .main-content > *:nth-child(1) {
