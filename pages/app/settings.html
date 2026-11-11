@@ -54,6 +54,13 @@
             <div id="notifToggles"></div>
             <button class="btn btn-ghost w-100 mt-2" onclick="requestNotifPermission()"><i class="bi bi-bell me-1"></i>Enable Browser Notifications</button>
           </div>
+
+          <!-- App Installation -->
+          <div class="glass card-pad fade-in mb-3" id="installCard">
+            <div class="section-title"><i class="bi bi-phone"></i>App Installation</div>
+            <p class="text-faint mb-2" style="font-size:.8rem" id="installMsg">Checking whether this device can install the app…</p>
+            <button class="btn btn-accent w-100" id="installBtn" onclick="installApp()" hidden><i class="bi bi-download me-1"></i>Install QCU Student Planner</button>
+          </div>
         </div>
 
         <!-- Acadamic View -->
