@@ -1,11 +1,10 @@
-// INIT ON EVERY PAGE
+/* ---------- INIT ON EVERY PAGE ---------- */
 
 document.addEventListener('DOMContentLoaded', () => {
     registerSW();
-    setupInstallPrompt();
 });
 
-// PWA
+/* ---------- PWA ---------- */
 
 function registerSW() {
     if ('serviceWorker' in navigator) {
@@ -13,31 +12,50 @@ function registerSW() {
     }
 }
 
+/* Install support. The browser's install prompt is captured silently on every
+   page; the only UI for it lives in Settings -> App Installation, which reads
+   and drives it through window.PWAInstall. */
+
 let deferredInstallPrompt = null;
+const installListeners = [];
+
+function isAppInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function notifyInstallChange() {
+    installListeners.forEach((fn) => { try { fn(); } catch (e) { /* ignore */ } });
+}
+
+window.PWAInstall = {
+    isInstalled: isAppInstalled,
+    canInstall: () => !!deferredInstallPrompt && !isAppInstalled(),
+    isIos: () => /iphone|ipad|ipod/i.test(window.navigator.userAgent),
+    onChange(fn) { installListeners.push(fn); },
+    async install() {
+        if (!deferredInstallPrompt)
+            return 'unavailable';
+        const promptEvent = deferredInstallPrompt;
+        deferredInstallPrompt = null;
+        promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        notifyInstallChange();
+        return choice.outcome;
+    },
+};
 
 function setupInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
-        let fab = document.getElementById('installFab');
-        if (!fab) {
-            fab = document.createElement('button');
-            fab.id = 'installFab';
-            fab.className = 'install-fab';
-            fab.setAttribute('aria-label', 'Install app');
-            fab.innerHTML = '<i class="bi bi-download" aria-hidden="true"></i> Install App';
-            fab.onclick = async () => {
-                fab.style.display = 'none';
-                if (deferredInstallPrompt) {
-                    deferredInstallPrompt.prompt();
-                    await deferredInstallPrompt.userChoice;
-                    deferredInstallPrompt = null;
-                }
-            };
-            document.body.appendChild(fab);
-        }
-        fab.style.display = 'flex';
+        notifyInstallChange();
     });
-    window.addEventListener('appinstalled', () => { const fab = document.getElementById('installFab'); if (fab)
-        fab.remove(); Toast.show('App installed'); });
+    window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        notifyInstallChange();
+        if (window.Toast)
+            Toast.show('App installed');
+    });
 }
+
+setupInstallPrompt();

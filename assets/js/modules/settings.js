@@ -12,6 +12,45 @@ function initSettings() {
     renderSemesterManager();
     initDisplayPrefs(s);
     renderSyncStatus();
+    initInstallCard();
+}
+
+// App Installation card. The install prompt is captured by core/pwa.js
+// (window.PWAInstall); this just reflects its state.
+function renderInstallCard() {
+    const msg = document.getElementById('installMsg');
+    const btn = document.getElementById('installBtn');
+    if (!msg || !btn || !window.PWAInstall)
+        return;
+    if (PWAInstall.isInstalled()) {
+        msg.textContent = 'QCU Student Planner is already installed on this device.';
+        btn.hidden = true;
+    }
+    else if (PWAInstall.canInstall()) {
+        msg.textContent = 'Install the planner for quick access from your home screen or desktop, with its own window.';
+        btn.hidden = false;
+    }
+    else if (PWAInstall.isIos()) {
+        msg.textContent = 'To install on iPhone or iPad, tap the Share button in Safari, then choose Add to Home Screen.';
+        btn.hidden = true;
+    }
+    else {
+        msg.textContent = 'Installation isn\u2019t available right now. Your browser may not support it, or the app may already be installed. You can also try Install or Add to Home Screen in your browser menu.';
+        btn.hidden = true;
+    }
+}
+
+function initInstallCard() {
+    renderInstallCard();
+    if (window.PWAInstall)
+        PWAInstall.onChange(renderInstallCard);
+}
+
+async function installApp() {
+    if (!window.PWAInstall)
+        return;
+    await PWAInstall.install();
+    renderInstallCard();
 }
 
 // Shows the last Supabase sync failure (grades, semesters, etc.) in plain
