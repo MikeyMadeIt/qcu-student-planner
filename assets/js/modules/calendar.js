@@ -968,13 +968,23 @@ function exportGoogleCalendar() {
         window.open(url, '_blank', 'noopener,noreferrer');
     }
     else {
-        const choice = confirm(`You have ${calEvents.length} events.\n\nClick OK to open the first event in Google Calendar,\nor Cancel to download the .ics file for bulk import.`);
-        if (choice) {
-            window.open(url, '_blank', 'noopener,noreferrer');
-        }
-        else {
-            exportICS();
-        }
+        chooseAction({
+            title: 'Multiple events found',
+            message: `You have ${calEvents.length} events. Open the first event in Google Calendar, or download the .ics file for bulk import.`,
+            icon: 'bi-calendar2-week-fill',
+            options: [
+                { label: 'Open first event in Google Calendar', value: 'google', primary: true },
+                { label: 'Download .ics file', value: 'ics' },
+            ],
+            onChoose: (value) => {
+                if (value === 'google') {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+                else {
+                    exportICS();
+                }
+            },
+        });
     }
 }
 
