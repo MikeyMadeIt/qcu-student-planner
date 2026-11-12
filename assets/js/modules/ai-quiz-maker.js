@@ -318,9 +318,20 @@ function aqmSubmitQuiz() {
     if (!aqmQuiz) return;
     const unanswered = aqmAnswers.filter(a => a === null).length;
     if (unanswered > 0) {
-        const proceed = window.confirm(`You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Submit anyway?`);
-        if (!proceed) return;
+        confirmAction({
+            title: 'Submit anyway?',
+            message: `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Submit anyway?`,
+            confirmLabel: 'Submit',
+            danger: false,
+            icon: 'bi-send-fill',
+            onConfirm: () => aqmFinishSubmit(),
+        });
+        return;
     }
+    aqmFinishSubmit();
+}
+
+function aqmFinishSubmit() {
     aqmSubmitted = true;
     aqmRenderQuestion();
     aqmShowResults();

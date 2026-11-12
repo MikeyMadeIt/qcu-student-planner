@@ -1257,17 +1257,26 @@ function addChecklistItemLive(taskId) {
     var t = tasks.find(function (x) { return x.id === taskId; });
     if (!t)
         return;
-    var text = prompt('New checklist item:');
-    if (!text || !text.trim())
-        return;
-    if (!t.checklist)
-        t.checklist = [];
-    t.checklist.push({ text: text.trim(), done: false });
-    t.progress = computeProgress(t);
-    t.updatedAt = Date.now();
-    DB.saveTasks(tasks);
-    tkExpandedId = taskId;
-    renderTasks();
+    promptAction({
+        title: 'New checklist item',
+        label: 'Item text',
+        confirmLabel: 'Add',
+        validate: function (val) { return !val ? 'Enter some text.' : null; },
+        onConfirm: function (text) {
+            var freshTasks = DB.getTasks();
+            var freshT = freshTasks.find(function (x) { return x.id === taskId; });
+            if (!freshT)
+                return;
+            if (!freshT.checklist)
+                freshT.checklist = [];
+            freshT.checklist.push({ text: text, done: false });
+            freshT.progress = computeProgress(freshT);
+            freshT.updatedAt = Date.now();
+            DB.saveTasks(freshTasks);
+            tkExpandedId = taskId;
+            renderTasks();
+        },
+    });
 }
 
 function deleteChecklistItem(taskId, idx) {
