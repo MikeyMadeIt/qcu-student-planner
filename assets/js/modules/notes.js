@@ -1306,20 +1306,26 @@ function mdInsertLink() {
     var editor = document.getElementById('nContent');
     if (!editor)
         return;
-    var href = prompt('Enter a link URL');
-    if (!href)
-        return;
-    if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(href)) {
-        Toast.show('Enter a valid http, https, or mailto link', 'warning');
-        return;
-    }
-    var selection = window.getSelection();
-    restoreNoteEditorSelection(editor);
-    if (selection && selection.isCollapsed)
-        document.execCommand('insertHTML', false, '<a href="' + escapeHtml(href) + '">' + escapeHtml(href) + '</a>');
-    else
-        document.execCommand('createLink', false, href);
-    updateNotePreview();
+    promptAction({
+        title: 'Insert link',
+        label: 'Link URL',
+        placeholder: 'https://example.com',
+        confirmLabel: 'Insert',
+        validate: function (val) {
+            if (!val) return 'Enter a link URL.';
+            if (!/^(https?:|mailto:|\/|#|\.{1,2}\/)/i.test(val)) return 'Enter a valid http, https, or mailto link.';
+            return null;
+        },
+        onConfirm: function (href) {
+            var selection = window.getSelection();
+            restoreNoteEditorSelection(editor);
+            if (selection && selection.isCollapsed)
+                document.execCommand('insertHTML', false, '<a href="' + escapeHtml(href) + '">' + escapeHtml(href) + '</a>');
+            else
+                document.execCommand('createLink', false, href);
+            updateNotePreview();
+        },
+    });
 }
 
 function mdInsertLine(prefix) {
@@ -1923,18 +1929,28 @@ function applyTemplate(key) {
     var ta = document.getElementById('nContent');
     if (!ta)
         return;
+    var doApply = function () {
+        ta.innerHTML = renderMarkdown(tmpl.content, null, true);
+        updateNotePreview();
+        ta.focus();
+        saveNoteEditorSelection(ta);
+        // Close template dropdown if open
+        var dd = document.getElementById('ntTemplateDropdown');
+        if (dd)
+            dd.style.display = 'none';
+    };
     if (serializeNoteEditor(ta).trim() && key !== 'blank') {
-        if (!confirm('Replace current content with the "' + tmpl.label + '" template?'))
-            return;
+        confirmAction({
+            title: 'Replace content?',
+            message: 'Replace current content with the "' + tmpl.label + '" template?',
+            confirmLabel: 'Replace',
+            danger: true,
+            icon: 'bi-file-earmark-text-fill',
+            onConfirm: doApply,
+        });
+        return;
     }
-    ta.innerHTML = renderMarkdown(tmpl.content, null, true);
-    updateNotePreview();
-    ta.focus();
-    saveNoteEditorSelection(ta);
-    // Close template dropdown if open
-    var dd = document.getElementById('ntTemplateDropdown');
-    if (dd)
-        dd.style.display = 'none';
+    doApply();
 }
 
 function toggleTemplateDropdown() {
