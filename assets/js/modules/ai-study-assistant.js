@@ -378,20 +378,25 @@ async function asaOpenSaved(id) {
 
 function asaRenameSaved(id) {
     const conv = asaConversations.find(c => c.id === id);
-    const next = window.prompt('Rename conversation', conv ? conv.title : '');
-    if (next === null) return;
-    const title = next.trim();
-    if (!title) return;
-    (async () => {
-        try {
-            await asaSaveChain;
-            await (await asaStore()).renameConversation(id, title);
-            if (conv) conv.title = title;
-            asaRenderHistoryLists();
-        } catch (error) {
-            Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
-        }
-    })();
+    promptAction({
+        title: 'Rename conversation',
+        label: 'Conversation title',
+        value: conv ? conv.title : '',
+        confirmLabel: 'Rename',
+        validate: (val) => !val ? 'Enter a title.' : null,
+        onConfirm: (title) => {
+            (async () => {
+                try {
+                    await asaSaveChain;
+                    await (await asaStore()).renameConversation(id, title);
+                    if (conv) conv.title = title;
+                    asaRenderHistoryLists();
+                } catch (error) {
+                    Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+                }
+            })();
+        },
+    });
 }
 
 function asaDeleteSaved(id) {
