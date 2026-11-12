@@ -359,26 +359,143 @@
     line-height: 1.5;
 }
 
-.ai-msg p { margin: 0 0 .5rem; }
-.ai-msg p:last-child { margin-bottom: 0; }
-.ai-msg ul, .ai-msg ol { margin: .25rem 0 .5rem 1.1rem; padding: 0; }
-.ai-msg pre {
+.ai-msg .md-content > *:first-child { margin-top: 0; }
+.ai-msg .md-content > *:last-child { margin-bottom: 0; }
+
+.ai-msg p.md-p { margin: 0 0 .6rem; }
+.ai-msg .md-ul, .ai-msg .md-ol { margin: .2rem 0 .65rem 1.2rem; padding: 0; }
+.ai-msg .md-ul { list-style-type: disc; }
+.ai-msg .md-ul .md-ul { list-style-type: circle; margin-bottom: 0; }
+.ai-msg .md-ol { list-style-type: decimal; }
+.ai-msg .md-content li { margin: .15rem 0; }
+.ai-msg .md-content li > .md-ul, .ai-msg .md-content li > .md-ol { margin-top: .2rem; }
+
+.ai-msg .md-content strong { font-weight: 700; }
+.ai-msg .md-content em { font-style: italic; }
+.ai-msg .md-content del { opacity: .7; }
+
+.ai-msg .md-content a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 2px;
+    word-break: break-word;
+}
+
+.ai-msg .md-content h1, .ai-msg .md-content h2, .ai-msg .md-content h3,
+.ai-msg .md-content h4, .ai-msg .md-content h5, .ai-msg .md-content h6 {
+    font-size: 1em;
+    margin: .7rem 0 .35rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+.ai-msg .md-content h1 { font-size: 1.2em; }
+.ai-msg .md-content h2 { font-size: 1.12em; }
+.ai-msg .md-content h3 { font-size: 1.05em; }
+
+.ai-msg .md-quote {
+    margin: .4rem 0 .6rem;
+    padding: .25rem .8rem;
+    border-left: 3px solid rgb(var(--accent));
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+.ai-msg .md-hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: .7rem 0;
+    opacity: .7;
+}
+
+.ai-msg .md-code-block {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
+    margin: .4rem 0 .6rem;
+    overflow: hidden;
+}
+.ai-msg .md-code-lang {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-faint, var(--text-soft));
+    padding: .35rem .75rem;
+    border-bottom: 1px solid var(--border);
+    opacity: .85;
+}
+.ai-msg .md-code-block pre {
     padding: .6rem .75rem;
     overflow-x: auto;
+    margin: 0;
     font-size: .8rem;
-    margin: .4rem 0;
+    line-height: 1.5;
 }
-.ai-msg code {
+.ai-msg .md-code-block code {
+    background: none;
+    padding: 0;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    white-space: pre;
+}
+.ai-msg .md-inline-code {
     background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 4px;
-    padding: .1rem .3rem;
+    padding: .1rem .35rem;
     font-size: .85em;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    word-break: break-word;
 }
-.ai-msg pre code { background: none; padding: 0; }
-.ai-msg h1, .ai-msg h2, .ai-msg h3 { font-size: 1em; margin: .5rem 0 .3rem; font-weight: 700; }
+
+/* Minimal, dependency-free syntax highlighting for fenced code blocks */
+.ai-msg .hl-keyword { color: #C792EA; font-weight: 600; }
+.ai-msg .hl-string { color: #9ECE6A; }
+.ai-msg .hl-number { color: #F78C6C; }
+.ai-msg .hl-comment { color: var(--text-faint, var(--text-soft)); font-style: italic; }
+
+.ai-msg .md-math-inline {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    background: rgba(var(--accent), .1);
+    border-radius: 4px;
+    padding: 0 .3rem;
+}
+.ai-msg .md-math-block {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    background: rgba(var(--accent), .08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .8rem;
+    margin: .4rem 0 .6rem;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.ai-msg .md-table-wrap {
+    overflow-x: auto;
+    margin: .4rem 0 .6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.ai-msg .md-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: .85rem;
+}
+.ai-msg .md-table th, .ai-msg .md-table td {
+    padding: .45rem .65rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+}
+.ai-msg .md-table tr:last-child td { border-bottom: none; }
+.ai-msg .md-table thead th {
+    background: var(--surface);
+    font-weight: 700;
+}
+
+@media (max-width: 560px) {
+    .ai-msg .md-table th, .ai-msg .md-table td { white-space: normal; }
+}
 
 .ai-msg-user {
     align-self: flex-end;
