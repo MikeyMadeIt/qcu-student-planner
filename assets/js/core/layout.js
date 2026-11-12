@@ -562,15 +562,24 @@ function wireModalDefaults() {
         const baseline = formBaselines.get(modal);
         return baseline !== undefined && baseline !== snapshotFormControls(modal);
     };
-    const askToDiscard = modal => window.confirm('Discard unsaved changes and close this dialog?');
+    const askToDiscard = (modal, onDiscard) => {
+        confirmAction({
+            title: 'Discard unsaved changes?',
+            message: 'Discard unsaved changes and close this dialog?',
+            confirmLabel: 'Discard',
+            danger: true,
+            icon: 'bi-exclamation-triangle-fill',
+            onConfirm: onDiscard,
+        });
+    };
     const dismissIfDirty = (modal, event) => {
         if (!modal || !hasUnsavedChanges(modal)) return false;
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (askToDiscard(modal)) {
+        askToDiscard(modal, () => {
             const instance = bootstrap.Modal.getInstance(modal);
             if (instance) instance.hide();
-        }
+        });
         return true;
     };
 
