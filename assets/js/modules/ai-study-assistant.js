@@ -505,91 +505,14 @@ function asaRenderMessages() {
     asaScrollToBottom();
 }
 
-// Safe markdown-lite renderer
+// Renders assistant/user message content as sanitized, formatted HTML.
+// renderChatMarkdown() (assets/js/core/markdown.js) escapes every piece of
+// literal text before wrapping it in markup, so setting innerHTML here can
+// never execute attacker- or AI-supplied script — it only ever contains
+// tags the renderer itself generated around already-escaped text.
 function asaRenderFormattedContent(text) {
     const wrapper = document.createElement('div');
-    const lines = String(text || '').replace(/\r\n/g, '\n').split('\n');
-
-    let i = 0;
-    let listEl = null;
-    let paraLines = [];
-
-    function flushParagraph() {
-        if (paraLines.length) {
-            const p = document.createElement('p');
-            p.textContent = paraLines.join(' ');
-            wrapper.appendChild(p);
-            paraLines = [];
-        }
-    }
-    function closeList() { listEl = null; }
-
-    while (i < lines.length) {
-        const line = lines[i];
-
-        if (/^```/.test(line.trim())) {
-            flushParagraph();
-            closeList();
-            const codeLines = [];
-            i++;
-            while (i < lines.length && !/^```/.test(lines[i].trim())) {
-                codeLines.push(lines[i]);
-                i++;
-            }
-            const pre = document.createElement('pre');
-            const code = document.createElement('code');
-            code.textContent = codeLines.join('\n');
-            pre.appendChild(code);
-            wrapper.appendChild(pre);
-            i++; /* skip closing fence */
-            continue;
-        }
-
-        const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
-        if (headingMatch) {
-            flushParagraph();
-            closeList();
-            const h = document.createElement(`h${Math.min(headingMatch[1].length, 3)}`);
-            h.textContent = headingMatch[2].trim();
-            wrapper.appendChild(h);
-            i++;
-            continue;
-        }
-
-        const bulletMatch = line.match(/^\s*[-*]\s+(.*)$/);
-        const orderedMatch = line.match(/^\s*\d+[.)]\s+(.*)$/);
-        if (bulletMatch || orderedMatch) {
-            flushParagraph();
-            const tag = orderedMatch ? 'ol' : 'ul';
-            if (!listEl || listEl.tagName.toLowerCase() !== tag) {
-                listEl = document.createElement(tag);
-                wrapper.appendChild(listEl);
-            }
-            const li = document.createElement('li');
-            li.textContent = (bulletMatch ? bulletMatch[1] : orderedMatch[1]).trim();
-            listEl.appendChild(li);
-            i++;
-            continue;
-        }
-
-        if (!line.trim()) {
-            flushParagraph();
-            closeList();
-            i++;
-            continue;
-        }
-
-        closeList();
-        paraLines.push(line.trim());
-        i++;
-    }
-    flushParagraph();
-
-    if (!wrapper.childNodes.length) {
-        const p = document.createElement('p');
-        p.textContent = String(text || '');
-        wrapper.appendChild(p);
-    }
-
+    wrapper.className = 'md-content';
+    wrapper.innerHTML = renderChatMarkdown(text);
     return wrapper;
 }
