@@ -4,7 +4,7 @@
     display: none !important;
 }
 
-/* Layout: one column on phones/tablets, content + quick-help rail on wide screens. */
+/* Layout: one column on phones/tablets (aside falls to the bottom), content + quick-help rail on wide screens. */
 .help-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -20,7 +20,7 @@
 }
 
 .help-aside {
-    display: none;
+    display: block;
 }
 
 @media (min-width: 1100px) {
@@ -29,9 +29,10 @@
     }
 
     .help-aside {
-        display: block;
         position: sticky;
         top: calc(var(--shell-bar-height) + var(--space-4));
+        max-height: calc(100vh - var(--shell-bar-height) - (var(--space-4) * 2));
+        overflow-y: auto;
     }
 }
 
@@ -256,29 +257,6 @@ a.help-tile:focus-visible {
     line-height: 1.45;
 }
 
-.help-tile.is-soon {
-    border-style: dashed;
-    background: transparent;
-}
-
-.help-tile.is-soon > i {
-    color: var(--text-faint);
-}
-
-.help-soon-pill {
-    display: inline-block;
-    margin-left: 0.3rem;
-    padding: 0.05rem 0.45rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    color: var(--text-faint);
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    vertical-align: middle;
-}
-
 /* ── FAQ topic pills ── */
 .help-pills {
     display: flex;
@@ -430,8 +408,7 @@ details.help-item[open] {
 .help-steps a,
 .help-lead a,
 .help-notice a,
-.help-empty a,
-.help-facts a {
+.help-empty a {
     color: rgb(var(--accent));
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -633,36 +610,14 @@ details.help-item[open] {
     line-height: 1.6;
 }
 
-/* ── About + disclaimer ── */
-.help-facts {
-    display: grid;
-    gap: var(--space-3);
-    margin: var(--space-3) 0 var(--space-4);
-}
-
-.help-facts > div {
-    display: grid;
-    grid-template-columns: 7rem minmax(0, 1fr);
-    gap: var(--space-3);
-    font-size: 0.86rem;
-}
-
-.help-facts dt {
-    color: var(--text-faint);
-    font-weight: 600;
-}
-
-.help-facts dd {
-    margin: 0;
-    color: var(--text-soft);
-    overflow-wrap: anywhere;
-}
-
-.help-disclaimer {
-    padding: var(--space-3) var(--space-4);
-    border-left: 3px solid var(--border);
-    background: var(--surface-2);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+/* ── Disclaimer (a section inside the quick-help card) ── */
+.help-aside-card .help-disclaimer {
+    margin-top: var(--space-3);
+    padding: var(--space-3) 0 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 .help-disclaimer h3 {
@@ -707,7 +662,7 @@ details.help-item[open] {
     font-size: 0.86rem;
 }
 
-/* ── Quick-help rail ── */
+/* ── Quick-help card ── */
 .help-aside-title {
     display: flex;
     align-items: center;
@@ -751,11 +706,6 @@ details.help-item[open] {
 
 /* ── Small screens ── */
 @media (max-width: 575.98px) {
-    .help-facts > div {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0.15rem;
-    }
-
     .help-tiles {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: var(--space-2);
