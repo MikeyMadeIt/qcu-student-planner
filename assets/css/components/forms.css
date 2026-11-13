@@ -63,14 +63,8 @@ input::placeholder {
 
 .form-select option,
 select option {
-    background-color: #121724 !important;
-    color: #eef0f8 !important;
-}
-
-[data-theme="light"] .form-select option,
-[data-theme="light"] select option {
-    background-color: #ffffff !important;
-    color: #161a26 !important;
+    background-color: var(--elevated) !important;
+    color: var(--text) !important;
 }
 
 input[type="checkbox"],
