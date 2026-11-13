@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Help · Student Planner</title>
+<title>Help Center · Student Planner</title>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
 <link rel="manifest" href="../../manifest.json">
@@ -16,42 +16,543 @@
 <body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
-  <main class="main-content">
-    <div class="topbar"><div><h1 class="page-title">Help</h1><p class="page-sub">Answers to common questions about the planner.</p></div></div>
+  <main class="main-content help-page">
+    <div class="topbar"><div><h1 class="page-title">Help Center</h1><p class="page-sub">Guides, answers and support for QCU Student Planner.</p></div></div>
 
-    <div class="glass card-pad fade-in mb-3">
-      <div class="section-title"><i class="bi bi-question-circle"></i>Frequently asked questions</div>
-      <div class="accordion" id="helpFaq">
-        <div class="accordion-item">
-          <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Where is my data stored?</button></h2>
-          <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#helpFaq">
-            <div class="accordion-body">Your schedule, tasks, grades, attendance and notes are stored locally in this browser. Your account (sign-in email and profile) is managed separately through your QCU Planner account.</div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">How do I add or export my tasks?</button></h2>
-          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
-            <div class="accordion-body">Use the <strong>Add Task</strong> button on the Tasks page to create a task. To back up or move your data, go to <a href="../app/settings.html">Settings &rarr; Backup &amp; Export</a> and choose Export All Data.</div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">How do I switch themes?</button></h2>
-          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
-            <div class="accordion-body">Open your profile menu (top right, or the bottom of the sidebar on mobile) and pick Light, Dark or AMOLED. Your choice is remembered on this device.</div>
-          </div>
-        </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">I found a problem or have feedback.</button></h2>
-          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#helpFaq">
-            <div class="accordion-body">Use the <a href="../app/report.html">Report</a> page to send details to the QCU Planner admins.</div>
-          </div>
-        </div>
-      </div>
+    <!-- SEARCH -->
+    <div class="help-search glass" role="search">
+      <i class="bi bi-search help-search-icon" aria-hidden="true"></i>
+      <input type="search" id="helpSearch" class="help-search-input" placeholder="Search questions, guides and troubleshooting…" aria-label="Search the Help Center" autocomplete="off" spellcheck="false">
+      <button type="button" id="helpSearchClear" class="help-search-clear" aria-label="Clear search" hidden><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </div>
+    <p class="help-search-status" id="helpSearchStatus" role="status" aria-live="polite" hidden></p>
 
-    <div class="glass card-pad fade-in">
-      <div class="section-title"><i class="bi bi-life-preserver"></i>Still need help?</div>
-      <p class="text-soft">Contact your program's administrator through the university, or use <a href="../app/report.html">Report a problem</a> to send a message that reaches the planner's admins.</p>
+    <nav class="help-chips" id="helpChips" aria-label="Help Center sections">
+      <a href="#help-start"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Getting started</a>
+      <a href="#help-features"><i class="bi bi-grid-1x2" aria-hidden="true"></i>Features</a>
+      <a href="#help-faq"><i class="bi bi-question-circle" aria-hidden="true"></i>FAQs</a>
+      <a href="#help-trouble"><i class="bi bi-wrench-adjustable" aria-hidden="true"></i>Troubleshooting</a>
+      <a href="#help-contact"><i class="bi bi-life-preserver" aria-hidden="true"></i>Contact &amp; support</a>
+      <a href="#help-feedback"><i class="bi bi-bug" aria-hidden="true"></i>Report a bug</a>
+    </nav>
+
+    <div class="help-layout">
+      <div class="help-main">
+
+        <!-- GETTING STARTED -->
+        <section class="glass card-pad help-section" id="help-start" data-help-section data-searchable aria-labelledby="help-start-title">
+          <h2 class="help-section-title" id="help-start-title"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Getting started</h2>
+          <p class="help-lead">New to the planner? These four steps get you set up.</p>
+          <ol class="help-steps">
+            <li data-help-item>
+              <strong>Sign in with Google.</strong>
+              <span>Use the Google account you registered with. New accounts wait for an administrator to approve them before the planner opens.</span>
+            </li>
+            <li data-help-item>
+              <strong>Complete your profile.</strong>
+              <span>If asked, add your course, year level and school. You can update them later in <a href="settings.html">Settings</a>.</span>
+            </li>
+            <li data-help-item>
+              <strong>Set up your semester and subjects.</strong>
+              <span>Add your subjects and class times in <a href="schedule.html">Schedule</a>. Each semester keeps its own subjects, attendance, grades, tasks and notes.</span>
+            </li>
+            <li data-help-item>
+              <strong>Start tracking.</strong>
+              <span>Add <a href="tasks.html">tasks</a>, log <a href="attendance.html">attendance</a>, record <a href="grades.html">grades</a> and write <a href="notes.html">notes</a>. Your <a href="dashboard.html">dashboard</a> pulls it all together.</span>
+            </li>
+          </ol>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="glass card-pad help-section" id="help-features" data-help-section data-searchable aria-labelledby="help-features-title">
+          <h2 class="help-section-title" id="help-features-title"><i class="bi bi-grid-1x2" aria-hidden="true"></i>What you can do</h2>
+          <p class="help-lead">A quick tour of the planner. Select a feature to open it.</p>
+          <div class="help-tiles">
+            <a class="help-tile" href="dashboard.html" data-help-item data-keywords="home overview summary">
+              <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Dashboard</span>
+              <span class="help-tile-desc">Semester progress, today's classes, upcoming tasks, attendance and grades at a glance.</span>
+            </a>
+            <a class="help-tile" href="schedule.html" data-help-item data-keywords="classes timetable subjects">
+              <i class="bi bi-calendar2-week-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Schedule</span>
+              <span class="help-tile-desc">Manage your subjects, classes and weekly timetable.</span>
+            </a>
+            <a class="help-tile" href="tasks.html" data-help-item data-keywords="deadlines homework to-do">
+              <i class="bi bi-check2-square" aria-hidden="true"></i>
+              <span class="help-tile-name">Tasks</span>
+              <span class="help-tile-desc">Track academic and personal work, with deadlines and status.</span>
+            </a>
+            <a class="help-tile" href="calendar.html" data-help-item data-keywords="events dates">
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              <span class="help-tile-name">Calendar</span>
+              <span class="help-tile-desc">Classes, tasks and events in one place.</span>
+            </a>
+            <a class="help-tile" href="grades.html" data-help-item data-keywords="gwa scores marks">
+              <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Grades</span>
+              <span class="help-tile-desc">Weighted per-subject grading and your GWA.</span>
+            </a>
+            <a class="help-tile" href="attendance.html" data-help-item data-keywords="absent present late excused">
+              <i class="bi bi-person-check-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Attendance</span>
+              <span class="help-tile-desc">Log attendance per subject and track your rate.</span>
+            </a>
+            <a class="help-tile" href="notes.html" data-help-item data-keywords="notebook markdown templates">
+              <i class="bi bi-journal-text" aria-hidden="true"></i>
+              <span class="help-tile-name">Notes</span>
+              <span class="help-tile-desc">Formatted notes with templates, tags, pins and checklists.</span>
+            </a>
+            <a class="help-tile" href="curriculum.html" data-help-item data-keywords="program subjects pdf">
+              <i class="bi bi-book-half" aria-hidden="true"></i>
+              <span class="help-tile-name">Curriculum</span>
+              <span class="help-tile-desc">View the curriculum for your program.</span>
+            </a>
+            <a class="help-tile" href="ai-study-assistant.html" data-help-item data-keywords="ai chat chatbot assistant">
+              <i class="bi bi-stars" aria-hidden="true"></i>
+              <span class="help-tile-name">AI Study Assistant</span>
+              <span class="help-tile-desc">Ask study questions and attach a PDF or image.</span>
+            </a>
+            <a class="help-tile" href="ai-quiz-maker.html" data-help-item data-keywords="ai practice quiz questions">
+              <i class="bi bi-patch-question-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">AI Quiz Maker</span>
+              <span class="help-tile-desc">Turn study material into a practice quiz.</span>
+            </a>
+            <a class="help-tile" href="ai-flashcard-maker.html" data-help-item data-keywords="ai flashcards review">
+              <i class="bi bi-layers-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">AI Flashcard Maker</span>
+              <span class="help-tile-desc">Turn study material into flashcards.</span>
+            </a>
+            <a class="help-tile" href="wallpaper.html" data-help-item data-keywords="lock screen phone image">
+              <i class="bi bi-phone-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Wallpaper</span>
+              <span class="help-tile-desc">Design a lock-screen wallpaper with your schedule.</span>
+            </a>
+            <a class="help-tile" href="inbox.html" data-help-item data-keywords="messages notifications reminders admin">
+              <i class="bi bi-inbox" aria-hidden="true"></i>
+              <span class="help-tile-name">Inbox &amp; Notifications</span>
+              <span class="help-tile-desc">Messages from administrators and reminders for tasks due soon.</span>
+            </a>
+            <a class="help-tile" href="settings.html" data-help-item data-keywords="theme profile backup export import install semesters">
+              <i class="bi bi-gear-fill" aria-hidden="true"></i>
+              <span class="help-tile-name">Settings</span>
+              <span class="help-tile-desc">Profile, semesters, themes, backup &amp; export, app install.</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="glass card-pad help-section" id="help-faq" data-help-section data-searchable aria-labelledby="help-faq-title">
+          <h2 class="help-section-title" id="help-faq-title"><i class="bi bi-question-circle" aria-hidden="true"></i>Frequently asked questions</h2>
+          <div class="help-pills" id="helpPills" role="group" aria-label="Filter questions by topic">
+            <button type="button" class="help-pill is-active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="help-pill" data-filter="start" aria-pressed="false">Getting started</button>
+            <button type="button" class="help-pill" data-filter="account" aria-pressed="false">Account</button>
+            <button type="button" class="help-pill" data-filter="tools" aria-pressed="false">Academic tools</button>
+            <button type="button" class="help-pill" data-filter="ai" aria-pressed="false">AI Study Assistant</button>
+            <button type="button" class="help-pill" data-filter="privacy" aria-pressed="false">Data &amp; privacy</button>
+            <button type="button" class="help-pill" data-filter="trouble" aria-pressed="false">Troubleshooting</button>
+          </div>
+
+          <!-- Getting started -->
+          <div class="help-cat" data-cat="start">
+            <h3 class="help-cat-title"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Getting started</h3>
+            <details class="help-item" data-help-item id="faq-what-is">
+              <summary>What is QCU Student Planner?</summary>
+              <div class="help-answer"><p>QCU Student Planner is a web app that helps students organize their academic life in one place: class schedule, tasks and deadlines, grades and GWA, attendance, notes, and AI-powered study tools. It is an independent student-developed project, not an official university system (see the <a href="#help-disclaimer">disclaimer</a>).</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-who">
+              <summary>Who can use the application?</summary>
+              <div class="help-answer"><p>Students who register with a Google account in the <code>lastname.firstname.middlename@gmail.com</code> format and whose account has been approved by an administrator. Other Google accounts are not accepted.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-access">
+              <summary>How do I access my account?</summary>
+              <div class="help-answer"><p>Open the log-in page and choose <strong>Continue with Google</strong>, then pick your registered account. Once you are signed in you can also install the planner on your device from <a href="settings.html">Settings</a> &rarr; App Installation, if your browser supports it.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-approval">
+              <summary>How does the account approval process work?</summary>
+              <div class="help-answer">
+                <ol>
+                  <li>You register and your details (including your program, campus and year level) are recorded.</li>
+                  <li>Your account stays <strong>pending</strong> while an administrator reviews it.</li>
+                  <li>If it is approved, you can log in and use the planner.</li>
+                  <li>If it is not approved, the log-in page tells you, and shows the reason when the administrator gave one.</li>
+                </ol>
+                <p>Approval is always decided by an administrator. The <strong>Check status</strong> button on the pending page tells you where your account stands.</p>
+              </div>
+            </details>
+          </div>
+
+          <!-- Account -->
+          <div class="help-cat" data-cat="account">
+            <h3 class="help-cat-title"><i class="bi bi-person-circle" aria-hidden="true"></i>Account &amp; sign-in</h3>
+            <details class="help-item" data-help-item id="faq-google">
+              <summary>How do I sign in using Google?</summary>
+              <div class="help-answer"><p>On the log-in page, select <strong>Continue with Google</strong> and choose the Google account registered under your <code>lastname.firstname.middlename@gmail.com</code> address. If Google shows several accounts, make sure you pick that one.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-pending">
+              <summary>Why is my account still pending approval?</summary>
+              <div class="help-answer">
+                <p>An administrator has to review every new account, and there is no fixed review time. In the meantime you can:</p>
+                <ul>
+                  <li>Select <strong>Check status</strong> on the pending page.</li>
+                  <li>Make sure your course, year level and school were filled in, because administrators use them to review your account.</li>
+                  <li>If it has been a long time, ask through the <a href="#help-contact">temporary support channels</a>.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-rejected">
+              <summary>What happens if my account is rejected or suspended?</summary>
+              <div class="help-answer">
+                <p>The log-in page shows a message instead of opening the planner:</p>
+                <ul>
+                  <li><strong>Rejected:</strong> "Your registration was not approved", with the reason if the administrator provided one.</li>
+                  <li><strong>Suspended:</strong> "Your account has been suspended. Contact an administrator for help."</li>
+                </ul>
+                <p>You cannot use the planner while an account is in either state. To ask about it, use the <a href="#help-contact">temporary support channels</a>.</p>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-no-access">
+              <summary>What should I do if I cannot access my account?</summary>
+              <div class="help-answer">
+                <ol>
+                  <li>Check that you are using the Google account you registered with.</li>
+                  <li>Read the message on the log-in page. It tells you if the account is pending, rejected or suspended.</li>
+                  <li>Follow the <a href="#guide-login">login troubleshooting guide</a>.</li>
+                  <li>If nothing works, contact support using the <a href="#help-contact">temporary channels</a>.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-theme" data-keywords="dark light amoled appearance colors">
+              <summary>How do I switch themes?</summary>
+              <div class="help-answer"><p>Open <a href="settings.html">Settings</a> &rarr; <strong>Theme</strong> and choose Dark, Light or AMOLED. Your choice is remembered on this device.</p></div>
+            </details>
+          </div>
+
+          <!-- Academic tools -->
+          <div class="help-cat" data-cat="tools">
+            <h3 class="help-cat-title"><i class="bi bi-mortarboard" aria-hidden="true"></i>Dashboard &amp; academic tools</h3>
+            <details class="help-item" data-help-item id="faq-dashboard">
+              <summary>How does the dashboard work?</summary>
+              <div class="help-answer"><p>The <a href="dashboard.html">Dashboard</a> summarizes your active semester: semester progress, your number of subjects, GWA, attendance and tasks, plus today's schedule, upcoming tasks, an attendance breakdown and grade performance. It is built from the information you enter elsewhere in the planner, so it fills up as you add subjects, tasks, attendance and grades.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-tasks">
+              <summary>How do I manage my tasks and deadlines?</summary>
+              <div class="help-answer"><p>Open <a href="tasks.html">Tasks</a> and choose <strong>Add Task</strong>. The counters at the top show how many tasks are active, done and overdue. Tasks that are due soon also appear as reminders on the <a href="notifications.html">Notifications</a> page and in the dashboard's upcoming tasks.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-notes">
+              <summary>How do I create and organize notes?</summary>
+              <div class="help-answer">
+                <p>Open <a href="notes.html">Notes</a> and choose <strong>Add Note</strong>. You can:</p>
+                <ul>
+                  <li>Pick a category, and optionally link a subject or task.</li>
+                  <li>Add tags by typing one and pressing <kbd>Enter</kbd>.</li>
+                  <li>Format text with the toolbar (bold, italic, headings, lists, checklists, quotes, code and links) or start from a template.</li>
+                  <li>Pin or favorite a note so it is easy to find.</li>
+                  <li>Search your notes and export a note as a PDF.</li>
+                </ul>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-schedule">
+              <summary>How do I manage my class schedule?</summary>
+              <div class="help-answer"><p>Add your subjects and class times in <a href="schedule.html">Schedule</a> for the active semester. The <a href="calendar.html">Calendar</a> then shows classes, tasks and events together. To start a new semester or switch between semesters, use <a href="settings.html">Settings</a> &rarr; Academic Semesters. Each semester keeps its own subjects, attendance, grades, tasks and notes.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-grades">
+              <summary>How do I record and track my grades?</summary>
+              <div class="help-answer"><p>Open <a href="grades.html">Grades</a>. For each subject, set up grading components (for example quizzes or exams) with their weights, then add your assessments with a score and the total number of items. The page calculates the subject's standing and your GWA as you enter scores. These figures are estimates based on what you enter and are not official records.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-gwa" data-keywords="grade point average computation formula 1.00 5.00">
+              <summary>How is my GWA calculated?</summary>
+              <div class="help-answer">
+                <ol>
+                  <li>Each assessment becomes a percentage: score &divide; total items.</li>
+                  <li>A component's percentage is the average of its assessments.</li>
+                  <li>A subject's final percentage combines its components using their weights. Components with no scores yet are left out until you add some.</li>
+                  <li>That percentage is converted to a grade point on the 1.00 to 5.00 scale. For example, 96.50&ndash;100 is 1.00, 80.50&ndash;84.49 is 2.00, 64.50&ndash;68.49 is 3.00, and anything below 64.50 is 5.00.</li>
+                  <li>Your overall GWA is the average of your graded subjects' grade points, weighted by each subject's units.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-attendance">
+              <summary>How do I manage attendance?</summary>
+              <div class="help-answer">
+                <p>In <a href="attendance.html">Attendance</a>, log each class as <strong>Present</strong>, <strong>Late</strong>, <strong>Excused</strong>, <strong>Absent</strong> or <strong>No Classes</strong>. Your attendance rate is (Present + Late + Excused) &divide; all records except No Classes. The page also tracks your absences against a limit for each subject, and your consecutive absences.</p>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="faq-curriculum">
+              <summary>How do I access the curriculum?</summary>
+              <div class="help-answer"><p>Open <a href="curriculum.html">Curriculum</a> to view the curriculum of your program as a PDF. If it says the curriculum is not available yet, it has not been added for your program.</p></div>
+            </details>
+          </div>
+
+          <!-- AI -->
+          <div class="help-cat" data-cat="ai">
+            <h3 class="help-cat-title"><i class="bi bi-stars" aria-hidden="true"></i>AI Study Assistant</h3>
+            <details class="help-item" data-help-item id="faq-ai-what">
+              <summary>What is the AI Study Assistant?</summary>
+              <div class="help-answer"><p>A chat assistant for study help. Ask it about your lessons, ask for explanations, or attach a file for it to review. It uses an AI model through the planner's backend, so it needs an internet connection and a signed-in session.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-ai-new">
+              <summary>How do I start a new conversation?</summary>
+              <div class="help-answer"><p>Open the <a href="ai-study-assistant.html">AI Study Assistant</a> and select <strong>New chat</strong>, then type your question in the message box.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-ai-history">
+              <summary>How do I access previous conversations?</summary>
+              <div class="help-answer"><p>Use the conversation menu at the top of the AI Study Assistant. It lists your most recent conversations (up to 50) and has a search box. Open one to continue it, or use the menu on a conversation to rename or delete it. Conversations are saved to your account.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-ai-files">
+              <summary>Can I upload files for AI assistance?</summary>
+              <div class="help-answer"><p>Yes. Select the paperclip to attach a PDF, JPG or PNG file of up to 8 MB. The <a href="ai-quiz-maker.html">AI Quiz Maker</a> accepts the same file types.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-ai-accuracy" data-keywords="hallucination wrong mistakes verify">
+              <summary>Why might AI-generated responses be inaccurate?</summary>
+              <div class="help-answer"><p>AI models generate answers from patterns, not from a verified source, so they can be wrong, incomplete or out of date, and they can sound confident when they are mistaken. Always check important answers against your class materials, textbooks and instructors.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-ai-limits">
+              <summary>Are there limitations to AI-generated content?</summary>
+              <div class="help-answer">
+                <ul>
+                  <li>Messages can be up to 6,000 characters.</li>
+                  <li>Attachments must be PDF, JPG or PNG files of 8 MB or less.</li>
+                  <li>Responses can take several seconds, and a request that takes too long shows an error you can retry.</li>
+                  <li>The AI is a study aid. It is not a substitute for your instructors or for official course materials.</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+
+          <!-- Privacy -->
+          <div class="help-cat" data-cat="privacy">
+            <h3 class="help-cat-title"><i class="bi bi-shield-lock" aria-hidden="true"></i>Data &amp; privacy</h3>
+            <details class="help-item" data-help-item id="faq-storage">
+              <summary>Where is my information stored?</summary>
+              <div class="help-answer"><p>When you are signed in, your planner data (semesters, subjects, schedule, tasks, calendar events, notes, attendance and grades) is saved to the planner's online database, and a copy is kept in your browser so pages load quickly. Your AI conversations and saved quizzes are saved to your account as well. Your display settings, such as theme, stay on the device.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-others">
+              <summary>Can other students see my personal records?</summary>
+              <div class="help-answer"><p>No. Inside the planner, your records belong to your account and other students cannot open them. Administrators manage account approvals and handle the reports and messages you send them. Do not share your account with anyone.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-signout">
+              <summary>What happens to my data when I sign out?</summary>
+              <div class="help-answer"><p>The planner first waits for any pending changes to finish syncing. It then signs you out and clears your planner data from that browser. Your data stays saved in your account and loads again the next time you sign in. Your display settings are kept.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-security-report">
+              <summary>How do I report a potential security or privacy issue?</summary>
+              <div class="help-answer"><p>Please do not post it publicly. Use <a href="report.html">Report a problem</a> inside the app (choose <em>Technical Problem</em>) or the <a href="#help-contact">temporary support email</a> once it is available. Describe what you noticed, and never include passwords or sign-in tokens.</p></div>
+            </details>
+          </div>
+
+          <!-- Troubleshooting -->
+          <div class="help-cat" data-cat="trouble">
+            <h3 class="help-cat-title"><i class="bi bi-wrench-adjustable" aria-hidden="true"></i>Troubleshooting</h3>
+            <details class="help-item" data-help-item id="faq-not-loading">
+              <summary>Why is the application not loading?</summary>
+              <div class="help-answer"><p>Usually a connection problem, an outdated browser or a content blocker. Follow the <a href="#guide-loading">"App not loading" guide</a>.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-not-saved">
+              <summary>Why are my changes not being saved?</summary>
+              <div class="help-answer"><p>Changes are saved to your account over the internet. If you are offline or the connection drops, they may not sync. Follow the <a href="#guide-sync">"Data not saving or syncing" guide</a>.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-page-error">
+              <summary>What should I do if a page displays an error?</summary>
+              <div class="help-answer"><p>Refresh the page first (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on Windows, <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on Mac). If the error returns, sign out and back in. If it still appears, send a report with the page name, what you were doing, and a screenshot. See <a href="#help-feedback">Report a bug</a>.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-mobile">
+              <summary>Why is the application not working properly on mobile?</summary>
+              <div class="help-answer"><p>The planner is built to work on phones. Update your browser, refresh the page, and turn off any content blocker for the site. If something still looks wrong, report it with your phone model and browser. See the <a href="#guide-browser">browser compatibility guide</a>.</p></div>
+            </details>
+            <details class="help-item" data-help-item id="faq-pwa">
+              <summary>What should I do if the PWA is not installing?</summary>
+              <div class="help-answer"><p>Not every browser supports installing web apps. Follow the <a href="#guide-install">"App installation" guide</a>.</p></div>
+            </details>
+          </div>
+        </section>
+
+        <!-- TROUBLESHOOTING GUIDES -->
+        <section class="glass card-pad help-section" id="help-trouble" data-help-section data-searchable aria-labelledby="help-trouble-title">
+          <h2 class="help-section-title" id="help-trouble-title"><i class="bi bi-wrench-adjustable" aria-hidden="true"></i>Troubleshooting guides</h2>
+          <p class="help-lead">Step-by-step fixes for the most common problems. Try them in order.</p>
+
+          <div class="help-guides">
+            <details class="help-item" data-help-item id="guide-loading" data-keywords="blank white screen slow stuck loading">
+              <summary><i class="bi bi-hourglass-split" aria-hidden="true"></i>App not loading</summary>
+              <div class="help-answer">
+                <p>The page stays blank, keeps spinning, or looks unstyled.</p>
+                <ol>
+                  <li>Check that your internet connection works. The planner needs it to load your data.</li>
+                  <li>Refresh the page. For a full refresh, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on Mac).</li>
+                  <li>Try a private or incognito window. If it works there, a browser extension (such as an ad or script blocker) may be blocking the app.</li>
+                  <li>Update your browser to the latest version.</li>
+                  <li>As a last step, clear this site's data in your browser settings and sign in again. Before you do, check <strong>Settings &rarr; Sync Status</strong> for errors, because changes that have not synced yet could be lost.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="guide-login" data-keywords="sign in google authentication pending rejected suspended">
+              <summary><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Login and authentication problems</summary>
+              <div class="help-answer">
+                <p>You cannot sign in, or you are sent back to the log-in page.</p>
+                <ol>
+                  <li>Use the Google account registered under <code>lastname.firstname.middlename@gmail.com</code>. Other accounts are not accepted.</li>
+                  <li>If Google offers several accounts, pick the correct one in the account chooser.</li>
+                  <li>Read the message shown on the log-in page. It tells you if the account is awaiting approval, was not approved, or is suspended.</li>
+                  <li>If your account is pending, use <strong>Check status</strong> on the pending page.</li>
+                  <li>Try a private window, or clear this site's cookies and cache, and sign in again.</li>
+                  <li>Still stuck? Contact support through the <a href="#help-contact">temporary channels</a>.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="guide-sync" data-keywords="saving synchronization cloud offline lost data backup export">
+              <summary><i class="bi bi-cloud-slash" aria-hidden="true"></i>Data not saving or syncing</summary>
+              <div class="help-answer">
+                <p>Your changes disappear after a refresh, or you see a "could not sync" message.</p>
+                <ol>
+                  <li>Check your internet connection.</li>
+                  <li>Open <a href="settings.html">Settings</a> &rarr; <strong>Sync Status</strong> and select <strong>Refresh &amp; Retry</strong>.</li>
+                  <li>Wait a few seconds after making a change before you close the tab or sign out, so it has time to sync.</li>
+                  <li>Check that you are viewing the right semester. Each semester has its own data.</li>
+                  <li>Create a backup from <strong>Settings &rarr; Data &amp; Storage &rarr; Export All Data (JSON)</strong> before clearing browser data or using Reset All Data.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="guide-ai" data-keywords="assistant chatbot quiz flashcard upload file too large timeout">
+              <summary><i class="bi bi-stars" aria-hidden="true"></i>AI Study Assistant errors</summary>
+              <div class="help-answer">
+                <p>The assistant shows an error, does not reply, or rejects your file.</p>
+                <ol>
+                  <li><strong>Session expired:</strong> sign out and sign in again.</li>
+                  <li><strong>Taking too long:</strong> wait a moment and send it again, or shorten your message (up to 6,000 characters).</li>
+                  <li><strong>File problem:</strong> attach a PDF, JPG or PNG that is 8 MB or smaller.</li>
+                  <li><strong>Connection problem:</strong> check that you are online, then retry.</li>
+                  <li>If the same error keeps appearing, <a href="#help-feedback">report it</a> with the exact message and the time it happened.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="guide-install" data-keywords="pwa install home screen app add">
+              <summary><i class="bi bi-download" aria-hidden="true"></i>App installation (PWA) issues</summary>
+              <div class="help-answer">
+                <p>You cannot find an install option for the planner.</p>
+                <ol>
+                  <li>Open <a href="settings.html">Settings</a> &rarr; <strong>App Installation</strong>. It tells you whether your device can install the app right now, or whether it is already installed.</li>
+                  <li>On Chrome, Edge or Brave, use the <strong>Install</strong> button there, or the install icon in the address bar.</li>
+                  <li>On iPhone or iPad, open the planner in Safari, tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong>.</li>
+                  <li>Some browsers cannot install web apps. You can keep using the planner in the browser.</li>
+                </ol>
+              </div>
+            </details>
+            <details class="help-item" data-help-item id="guide-browser" data-keywords="chrome firefox safari edge brave compatibility extension adblock javascript private mode">
+              <summary><i class="bi bi-window-stack" aria-hidden="true"></i>Browser compatibility problems</summary>
+              <div class="help-answer">
+                <p>Parts of the page look broken or buttons do nothing.</p>
+                <ol>
+                  <li>Use an up-to-date version of Chrome, Edge, Brave, Firefox or Safari.</li>
+                  <li>Make sure JavaScript is on and site data (cookies and local storage) is not blocked for this site.</li>
+                  <li>Turn off content or script blockers for the planner, since the app loads some files from public CDNs.</li>
+                  <li>Avoid private browsing for regular use, because it clears site data when the window closes.</li>
+                  <li>Do a full refresh (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>), then try again.</li>
+                </ol>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="glass card-pad help-section" id="help-contact" data-help-section aria-labelledby="help-contact-title">
+          <h2 class="help-section-title" id="help-contact-title"><i class="bi bi-life-preserver" aria-hidden="true"></i>Contact &amp; support</h2>
+          <div class="help-notice" role="note">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            <p><strong>Temporary channels.</strong> Official support channels are still being set up. The contact options below are temporary and may change.</p>
+          </div>
+          <ul class="help-contact-list">
+            <li>
+              <i class="bi bi-flag" aria-hidden="true"></i>
+              <div>
+                <strong>Report a problem in the app</strong>
+                <p>Best for account, data and anything private. Reports go to the planner's administrators, and you can follow their status on the same page.</p>
+                <a class="help-link-btn" href="report.html">Open Report a problem</a>
+              </div>
+            </li>
+            <li>
+              <i class="bi bi-github" aria-hidden="true"></i>
+              <div>
+                <strong>GitHub Issues</strong>
+                <p>Best for public bug reports and feature requests. Anyone can see what you post there.</p>
+                <a class="help-link-btn" href="https://github.com/MikeyMadeIt/qcu-student-planner/issues" target="_blank" rel="noopener noreferrer">View issues <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
+              </div>
+            </li>
+            <li>
+              <i class="bi bi-envelope" aria-hidden="true"></i>
+              <div>
+                <strong>Temporary support email</strong>
+                <p data-help-email>[Temporary support email: to be announced]</p>
+              </div>
+            </li>
+            <li>
+              <i class="bi bi-clock" aria-hidden="true"></i>
+              <div>
+                <strong>Support availability</strong>
+                <p>Support is provided by the student team on a best-effort basis, and replies are not guaranteed within a fixed time.</p>
+                <p data-help-hours>[Support hours: to be announced]</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <!-- FEEDBACK -->
+        <section class="glass card-pad help-section" id="help-feedback" data-help-section data-searchable aria-labelledby="help-feedback-title">
+          <h2 class="help-section-title" id="help-feedback-title"><i class="bi bi-bug" aria-hidden="true"></i>Feedback &amp; bug reporting</h2>
+          <div class="help-two">
+            <div class="help-mini" data-help-item>
+              <h3><i class="bi bi-bug" aria-hidden="true"></i>Bug report</h3>
+              <p>Something is broken or behaves differently from what you expect, for example a button that does nothing or a wrong number.</p>
+            </div>
+            <div class="help-mini" data-help-item>
+              <h3><i class="bi bi-lightbulb" aria-hidden="true"></i>Feature request</h3>
+              <p>An idea for something new or a way to improve something that already works.</p>
+            </div>
+          </div>
+          <h3 class="help-sub">What to include</h3>
+          <ul class="help-list" data-help-item data-keywords="report issue bug feature request github screenshot">
+            <li>What you were trying to do, what you expected, and what happened instead.</li>
+            <li>The page you were on and the steps to repeat the problem.</li>
+            <li>Your device, browser and theme (Light, Dark or AMOLED).</li>
+            <li>A screenshot, with any personal details hidden.</li>
+            <li>The exact text of any error message.</li>
+          </ul>
+          <div class="help-notice is-caution" role="note">
+            <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+            <p><strong>Keep it safe.</strong> Never share passwords, sign-in or authentication tokens, or sensitive personal information in a public report. For anything private, use <a href="report.html">Report a problem</a> inside the app instead of GitHub.</p>
+          </div>
+          <div class="help-actions">
+            <a class="help-link-btn is-primary" href="https://github.com/MikeyMadeIt/qcu-student-planner/issues/new" target="_blank" rel="noopener noreferrer"><i class="bi bi-github" aria-hidden="true"></i>New GitHub issue <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>
+            <a class="help-link-btn" href="report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report in the app</a>
+          </div>
+        </section>
+
+        <!-- EMPTY SEARCH STATE -->
+        <div class="help-empty glass card-pad" id="helpEmpty" hidden>
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <h2>No results found</h2>
+          <p>Try different words, or check the spelling. You can also <a href="#help-contact">contact support</a> or <a href="report.html">report a problem</a>.</p>
+          <button type="button" class="help-link-btn" id="helpEmptyClear">Clear search</button>
+        </div>
+
+      </div>
+
+      <!-- QUICK HELP + DISCLAIMER (one card; falls to the bottom on phones) -->
+      <aside class="help-aside" aria-label="Quick help">
+        <div class="glass card-pad-md help-aside-card">
+          <h2 class="help-aside-title"><i class="bi bi-life-preserver" aria-hidden="true"></i>Need more help?</h2>
+          <p class="help-aside-note">Support channels are temporary while official ones are set up.</p>
+          <a class="help-aside-link" href="report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report a problem</a>
+          <a class="help-aside-link" href="https://github.com/MikeyMadeIt/qcu-student-planner/issues" target="_blank" rel="noopener noreferrer"><i class="bi bi-github" aria-hidden="true"></i>GitHub Issues</a>
+          <a class="help-aside-link" href="#help-contact"><i class="bi bi-envelope" aria-hidden="true"></i>All contact options</a>
+
+          <div class="help-disclaimer" id="help-disclaimer" role="note">
+            <h3><i class="bi bi-info-circle" aria-hidden="true"></i>Disclaimer</h3>
+            <p>QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). The application is designed to assist students with academic organization, planning, and productivity. It is not a substitute for official university services, announcements, or academic records.</p>
+          </div>
+        </div>
+      </aside>
     </div>
 
   </main>
@@ -65,6 +566,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/modules/help.js"></script>
 <script>
   renderShell('help');
 </script>
