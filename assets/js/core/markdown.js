@@ -16,9 +16,11 @@
 // code blocks (with light, built-in syntax highlighting), ordered/
 // unordered/nested lists, blockquotes, horizontal rules, GFM-style pipe
 // tables, links, and paragraph/line-break spacing. Inline and block math
-// ($...$ / $$...$$) is preserved verbatim in a styled "math" block rather
-// than true LaTeX rendering, since no math-typesetting library is bundled
-// with the app.
+// ($...$ / $$...$$) gets a lightweight LaTeX-to-HTML pass (exponents,
+// subscripts, fractions, square roots, Greek letters and common operators)
+// rather than a full TeX layout engine, since no math-typesetting library
+// is bundled with the app — good enough for the numbers/equations an AI
+// study answer typically contains without needing a network fetch.
 //
 // Usage: renderChatMarkdown(text) -> HTML string. Call repeatedly with the
 // full message text (not just a delta) — it always rebuilds the whole
@@ -46,6 +48,82 @@
             .replace(/~~(\S(?:[^\n]*?\S)?)~~/g, '<del>$1</del>');
     }
 
+    // --- Lightweight LaTeX-ish math → HTML --------------------------------
+    // Operates on text that has ALREADY been through esc() (callers below
+    // guarantee this), so backslashes/braces/^/_ are all still literal and
+    // safe to pattern-match on; no new unescaped text is ever introduced.
+    // Command names are matched with a "not followed by another letter"
+    // lookahead rather than \b, because \b treats "_" and digits as word
+    // characters too — "\sum_{i}" has no \b between "m" and "_", which
+    // would silently leave "\sum" unconverted right when a limit follows it.
+    function mathCmd(name) { return new RegExp('\\\\' + name + '(?![a-zA-Z])', 'g'); }
+    const MATH_SYMBOLS = [
+        [mathCmd('neq'), '≠'], [mathCmd('leq'), '≤'], [mathCmd('geq'), '≥'], [mathCmd('approx'), '≈'],
+        [mathCmd('equiv'), '≡'], [mathCmd('sim'), '∼'], [mathCmd('propto'), '∝'],
+        [mathCmd('times'), '×'], [mathCmd('cdot'), '·'], [mathCmd('div'), '÷'], [mathCmd('pm'), '±'], [mathCmd('mp'), '∓'],
+        [mathCmd('infty'), '∞'], [mathCmd('partial'), '∂'], [mathCmd('nabla'), '∇'],
+        [mathCmd('sum'), '∑'], [mathCmd('prod'), '∏'], [mathCmd('oint'), '∮'], [mathCmd('int'), '∫'],
+        [mathCmd('notin'), '∉'], [mathCmd('in'), '∈'], [mathCmd('subseteq'), '⊆'], [mathCmd('subset'), '⊂'], [mathCmd('supset'), '⊃'],
+        [mathCmd('cup'), '∪'], [mathCmd('cap'), '∩'], [mathCmd('emptyset'), '∅'],
+        [mathCmd('forall'), '∀'], [mathCmd('exists'), '∃'],
+        [mathCmd('Leftrightarrow'), '⇔'], [mathCmd('Rightarrow'), '⇒'], [mathCmd('Leftarrow'), '⇐'],
+        [mathCmd('leftrightarrow'), '↔'], [mathCmd('rightarrow'), '→'], [mathCmd('leftarrow'), '←'], [mathCmd('to'), '→'], [mathCmd('mapsto'), '↦'],
+        [mathCmd('cdots'), '⋯'], [mathCmd('ldots'), '…'], [mathCmd('dots'), '…'], [mathCmd('vdots'), '⋮'], [mathCmd('ddots'), '⋱'],
+        [mathCmd('degree'), '°'], [mathCmd('angle'), '∠'], [mathCmd('perp'), '⊥'], [mathCmd('parallel'), '∥'],
+        [mathCmd('Delta'), 'Δ'], [mathCmd('delta'), 'δ'], [mathCmd('alpha'), 'α'], [mathCmd('beta'), 'β'], [mathCmd('Gamma'), 'Γ'], [mathCmd('gamma'), 'γ'],
+        [mathCmd('varepsilon'), 'ε'], [mathCmd('epsilon'), 'ε'], [mathCmd('zeta'), 'ζ'], [mathCmd('eta'), 'η'],
+        [mathCmd('Theta'), 'Θ'], [mathCmd('theta'), 'θ'], [mathCmd('iota'), 'ι'], [mathCmd('kappa'), 'κ'], [mathCmd('Lambda'), 'Λ'], [mathCmd('lambda'), 'λ'],
+        [mathCmd('mu'), 'μ'], [mathCmd('nu'), 'ν'], [mathCmd('Xi'), 'Ξ'], [mathCmd('xi'), 'ξ'], [mathCmd('Pi'), 'Π'], [mathCmd('pi'), 'π'],
+        [mathCmd('rho'), 'ρ'], [mathCmd('Sigma'), 'Σ'], [mathCmd('sigma'), 'σ'], [mathCmd('tau'), 'τ'], [mathCmd('upsilon'), 'υ'],
+        [mathCmd('varphi'), 'φ'], [mathCmd('Phi'), 'Φ'], [mathCmd('phi'), 'φ'], [mathCmd('chi'), 'χ'], [mathCmd('Psi'), 'Ψ'], [mathCmd('psi'), 'ψ'],
+        [mathCmd('Omega'), 'Ω'], [mathCmd('omega'), 'ω'],
+    ];
+
+    function mathApplySymbolsAndScripts(s) {
+        MATH_SYMBOLS.forEach(function (pair) { s = s.replace(pair[0], pair[1]); });
+        s = s
+            .replace(/\^\{([^{}]*)\}/g, '<sup class="md-math-sup">$1</sup>')
+            .replace(/\^(\S)/g, '<sup class="md-math-sup">$1</sup>')
+            .replace(/_\{([^{}]*)\}/g, '<sub class="md-math-sub">$1</sub>')
+            .replace(/_(\S)/g, '<sub class="md-math-sub">$1</sub>');
+        // Any grouping braces left over from an unrecognized command are just
+        // noise visually, so drop them rather than show raw "{" / "}".
+        return s.replace(/[{}]/g, '');
+    }
+
+    // src must already be HTML-escaped. Returns HTML (never introduces
+    // unescaped text — every substitution below only inserts fixed markup
+    // or unicode symbol characters around text that was already escaped).
+    function mathToHtml(src) {
+        let s = String(src || '')
+            .replace(/\\left/g, '').replace(/\\right/g, '')
+            .replace(/\\(?:,|;|!|:|quad|qquad)/g, ' ')
+            .replace(/\\(?:text|mathrm|mathbf|mathit|operatorname)\{([^{}]*)\}/g, '$1');
+
+        // \sqrt is resolved first — its replacement contains no braces, so
+        // a \sqrt{...} nested inside a \frac{...}{...} argument (very common
+        // in e.g. the quadratic formula) no longer blocks the frac regex
+        // below, which only matches a brace group with no braces inside it.
+        s = s.replace(/\\sqrt\[(\d+)\]\{([^{}]*)\}/g, function (m, n, a) {
+            return '<sup class="md-math-sup">' + n + '</sup><span class="md-math-sqrt-sign">√</span><span class="md-math-sqrt">' + mathApplySymbolsAndScripts(a) + '</span>';
+        });
+        s = s.replace(/\\sqrt\{([^{}]*)\}/g, function (m, a) {
+            return '<span class="md-math-sqrt-sign">√</span><span class="md-math-sqrt">' + mathApplySymbolsAndScripts(a) + '</span>';
+        });
+
+        // \frac{a}{b} -> a stacked fraction. Handles one level of brace
+        // nesting inside a or b (e.g. a \sqrt already resolved above) —
+        // good enough for the typical algebra/stats expressions an AI
+        // study answer produces; a \frac nested inside another \frac's
+        // argument is the one case this won't unwrap.
+        s = s.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, function (m, num, den) {
+            return '<span class="md-math-frac"><span class="md-math-num">' + mathApplySymbolsAndScripts(num) +
+                '</span><span class="md-math-den">' + mathApplySymbolsAndScripts(den) + '</span></span>';
+        });
+
+        return mathApplySymbolsAndScripts(s);
+    }
+
     // Parses inline spans (code, links, math, emphasis) for one logical line.
     function inline(text) {
         const code = [];
@@ -63,11 +141,11 @@
                 return '\u0001' + (code.length - 1) + '\u0001';
             })
             .replace(/\$\$([^$]+)\$\$/g, function (match, content) {
-                math.push('<span class="md-math-inline" title="Math expression">' + content + '</span>');
+                math.push('<span class="md-math-inline" title="Math expression">' + mathToHtml(content) + '</span>');
                 return '\u0004' + (math.length - 1) + '\u0004';
             })
             .replace(/\$([^\s$](?:[^$\n]*[^\s$])?)\$/g, function (match, content) {
-                math.push('<span class="md-math-inline" title="Math expression">' + content + '</span>');
+                math.push('<span class="md-math-inline" title="Math expression">' + mathToHtml(content) + '</span>');
                 return '\u0004' + (math.length - 1) + '\u0004';
             })
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (match, label, href) {
@@ -246,7 +324,7 @@
                 index++;
                 while (index < lines.length && !/^\s*\$\$\s*$/.test(lines[index])) { mathLines.push(lines[index]); index++; }
                 if (index < lines.length) index++;
-                output.push('<div class="md-math-block" title="Math expression">' + esc(mathLines.join('\n')) + '</div>');
+                output.push('<div class="md-math-block" title="Math expression">' + mathToHtml(esc(mathLines.join('\n'))) + '</div>');
                 continue;
             }
 
