@@ -424,7 +424,7 @@
 }
 
 .grade-pass-badge.no-data {
-    background: rgba(255,255,255,.06);
+    background: rgba(var(--tint-rgb),.06);
     color: var(--text-faint);
     border: 1px solid var(--border);
 }
@@ -446,7 +446,7 @@
 
 .grade-trend-wrap {
     border-radius: 4px;
-    background: rgba(255,255,255,.03);
+    background: rgba(var(--tint-rgb),.03);
     border: 1px solid var(--border);
     padding: 8px 4px 4px;
     overflow: hidden;
@@ -470,7 +470,7 @@
 }
 
 .tg-info-box {
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     border: 1px solid var(--border);
     border-radius: 5px;
     padding: 12px 14px;
@@ -626,7 +626,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,.06);
+    background: rgba(var(--tint-rgb),.06);
     border: 1px solid var(--border);
     color: var(--text-soft);
     cursor: pointer;
@@ -829,7 +829,7 @@
 }
 
 .tg-info-example {
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 10px 12px;
@@ -1084,9 +1084,9 @@
     bottom: 80px;
     left: 50%;
     transform: translateX(-50%) translateY(12px);
-    background: rgba(30, 33, 55, .95);
+    background: var(--elevated);
     border: 1px solid rgba(var(--accent), .3);
-    color: #fff;
+    color: var(--text);
     padding: 9px 22px;
     border-radius: 6px;
     font-size: .82rem;
@@ -1107,7 +1107,8 @@
 
 .gwa-toast.gwa-toast-error {
     border-color: rgba(251,113,133,.4);
-    background: rgba(40,15,20,.95);
+    background: var(--elevated);
+    color: var(--danger);
 }
 
 /* Feature 2: GWA Target Planner */
@@ -1124,7 +1125,7 @@
 }
 
 .gwa-target-result-box {
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     border: 1px solid var(--border);
     border-radius: 5px;
     padding: 12px 14px;
@@ -1138,7 +1139,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid rgba(var(--tint-rgb),.05);
     font-size: .82rem;
     gap: 8px;
 }
