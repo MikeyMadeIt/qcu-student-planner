@@ -9,7 +9,6 @@
        Leave a value empty until it is confirmed. Empty values show a clearly
        marked placeholder instead of an invented contact. */
     var HELP_CONFIG = {
-        appVersion: '3.0.0',
         supportEmail: '',          // e.g. 'support@example.com' once a temporary address exists
         supportHours: ''           // e.g. 'Mon-Fri, 9 AM-5 PM' once confirmed
     };
@@ -41,9 +40,6 @@
             } else {
                 el.classList.add('help-placeholder');
             }
-        });
-        $$('[data-help-version]').forEach(function (el) {
-            el.textContent = HELP_CONFIG.appVersion;
         });
     }
 
@@ -135,10 +131,10 @@
         emptyState.hidden = !(searching && matches === 0);
     }
 
-    function clearSearch() {
+    function clearSearch(keepFocus) {
         input.value = '';
         runSearch();
-        input.focus();
+        if (keepFocus !== false) input.focus();
     }
 
     function setupSearch() {
@@ -157,9 +153,9 @@
                 clearSearch();
             }
         });
-        clearBtn.addEventListener('click', clearSearch);
+        clearBtn.addEventListener('click', function () { clearSearch(); });
         var emptyClear = $('#helpEmptyClear');
-        if (emptyClear) emptyClear.addEventListener('click', clearSearch);
+        if (emptyClear) emptyClear.addEventListener('click', function () { clearSearch(); });
 
         pills.forEach(function (pill) {
             pill.addEventListener('click', function () {
@@ -171,17 +167,25 @@
 
     /* ── Deep links: open the question or guide a link points to ── */
     function openFromHash() {
-        var id = decodeURIComponent((location.hash || '').slice(1));
-        if (!id) return;
+        var raw = (location.hash || '').slice(1);
+        if (!raw) return;
+        var id;
+        try {
+            id = decodeURIComponent(raw);
+        } catch (e) {
+            return; // malformed link such as "#%"
+        }
         var target = document.getElementById(id);
         if (!target) return;
-        var details = target.tagName === 'DETAILS' ? target : null;
-        if (details) {
-            if (input && input.value) clearSearch();
+
+        // If the search or topic filter is hiding the target, reset them so it shows.
+        if (input && (target.hidden || target.closest('[hidden]'))) {
+            if (input.value) clearSearch(false);
             setTopic('all');
             runSearch();
-            details.open = true;
         }
+
+        if (target.tagName === 'DETAILS') target.open = true;
         target.scrollIntoView({ block: 'start' });
     }
 
