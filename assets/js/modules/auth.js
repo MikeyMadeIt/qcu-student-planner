@@ -6,6 +6,7 @@ import { initRegisterWizard } from './register-wizard.js';
 import { initStatusPage } from './auth-status.js';
 import { initAuthCallback } from './auth-callback.js';
 import { initFinishProfile } from './finish-profile.js';
+import { initAuthSessionGuard } from './auth-session-guard.js';
 
 setupPasswordToggles();
 initAuthForms();
@@ -14,3 +15,4 @@ initRegisterWizard();
 initStatusPage();
 initAuthCallback();
 initFinishProfile();
+initAuthSessionGuard();
