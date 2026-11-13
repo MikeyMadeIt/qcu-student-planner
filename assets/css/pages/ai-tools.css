@@ -340,11 +340,18 @@
     display: flex;
     flex-direction: column;
     height: min(70vh, 42rem);
+    /* Flex items default to min-width:auto on their cross axis too, which
+       lets wide content several levels down (a table, a long code line)
+       grow this container — and everything stretched to it — past the
+       page's width instead of staying put and scrolling internally. */
+    min-width: 0;
 }
 
 .ai-chat-log {
     flex: 1;
+    min-width: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: .25rem .25rem 1rem;
     display: flex;
     flex-direction: column;
@@ -352,11 +359,26 @@
 }
 
 .ai-msg {
+    /* Flex items default to min-width:auto, which lets wide content (a
+       table with nowrap cells, a long code line) force the bubble past
+       max-width instead of scrolling inside it. min-width:0 is the
+       standard flexbox fix so max-width/overflow below actually apply. */
+    min-width: 0;
     max-width: 85%;
+    box-sizing: border-box;
     padding: .7rem .95rem;
     border-radius: var(--radius-md);
     font-size: .9rem;
     line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* Assistant replies use the full chat width (like this app's own
+   responses) since they're the content being read; the user's own
+   messages stay as a smaller, right-aligned bubble. */
+.ai-msg-assistant {
+    max-width: 100%;
+    width: 100%;
 }
 
 .ai-msg .md-content > *:first-child { margin-top: 0; }
@@ -413,6 +435,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     margin: .4rem 0 .6rem;
+    max-width: 100%;
     overflow: hidden;
 }
 .ai-msg .md-code-lang {
@@ -460,18 +483,37 @@
     padding: 0 .3rem;
 }
 .ai-msg .md-math-block {
-    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    display: block;
+    text-align: center;
+    font-size: 1.05em;
     background: rgba(var(--accent), .08);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: .6rem .8rem;
     margin: .4rem 0 .6rem;
+    max-width: 100%;
     overflow-x: auto;
-    white-space: pre;
 }
+.ai-msg .md-math-sup { font-size: .72em; vertical-align: super; }
+.ai-msg .md-math-sub { font-size: .72em; vertical-align: sub; }
+.ai-msg .md-math-sqrt-sign { padding-left: .05em; }
+.ai-msg .md-math-sqrt { border-top: 1.2px solid currentColor; padding-top: .05em; }
+.ai-msg .md-math-frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    text-align: center;
+    margin: 0 .2em;
+    font-size: .92em;
+    line-height: 1.15;
+}
+.ai-msg .md-math-frac .md-math-num { padding: 0 .2em .1em; }
+.ai-msg .md-math-frac .md-math-den { padding: .1em .2em 0; border-top: 1.2px solid currentColor; }
 
 .ai-msg .md-table-wrap {
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin: .4rem 0 .6rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
