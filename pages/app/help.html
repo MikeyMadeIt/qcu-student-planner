@@ -34,7 +34,6 @@
       <a href="#help-trouble"><i class="bi bi-wrench-adjustable" aria-hidden="true"></i>Troubleshooting</a>
       <a href="#help-contact"><i class="bi bi-life-preserver" aria-hidden="true"></i>Contact &amp; support</a>
       <a href="#help-feedback"><i class="bi bi-bug" aria-hidden="true"></i>Report a bug</a>
-      <a href="#help-about"><i class="bi bi-info-circle" aria-hidden="true"></i>About</a>
     </nav>
 
     <div class="help-layout">
@@ -139,11 +138,6 @@
               <span class="help-tile-name">Settings</span>
               <span class="help-tile-desc">Profile, semesters, themes, backup &amp; export, app install.</span>
             </a>
-            <div class="help-tile is-soon" data-help-item data-keywords="coming soon announcements summarizer reviewer legal policies">
-              <i class="bi bi-hourglass-split" aria-hidden="true"></i>
-              <span class="help-tile-name">Coming soon <span class="help-soon-pill">Soon</span></span>
-              <span class="help-tile-desc">Announcements, AI Summarizer, AI Reviewer and Legal &amp; Policies are not available yet.</span>
-            </div>
           </div>
         </section>
 
@@ -165,7 +159,7 @@
             <h3 class="help-cat-title"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i>Getting started</h3>
             <details class="help-item" data-help-item id="faq-what-is">
               <summary>What is QCU Student Planner?</summary>
-              <div class="help-answer"><p>QCU Student Planner is a web app that helps students organize their academic life in one place: class schedule, tasks and deadlines, grades and GWA, attendance, notes, and AI-powered study tools. It is an independent student-developed project, not an official university system (see the <a href="#help-about">disclaimer</a>).</p></div>
+              <div class="help-answer"><p>QCU Student Planner is a web app that helps students organize their academic life in one place: class schedule, tasks and deadlines, grades and GWA, attendance, notes, and AI-powered study tools. It is an independent student-developed project, not an official university system (see the <a href="#help-disclaimer">disclaimer</a>).</p></div>
             </details>
             <details class="help-item" data-help-item id="faq-who">
               <summary>Who can use the application?</summary>
@@ -534,20 +528,6 @@
           </div>
         </section>
 
-        <!-- ABOUT -->
-        <section class="glass card-pad help-section" id="help-about" data-help-section aria-labelledby="help-about-title">
-          <h2 class="help-section-title" id="help-about-title"><i class="bi bi-info-circle" aria-hidden="true"></i>About, version &amp; updates</h2>
-          <dl class="help-facts">
-            <div><dt>Version</dt><dd data-help-version>3.0.0</dd></div>
-            <div><dt>Updates</dt><dd>The planner updates itself. Reload the page to get the latest version, and use a full refresh if something looks outdated. See the <a href="https://github.com/MikeyMadeIt/qcu-student-planner/releases" target="_blank" rel="noopener noreferrer">GitHub releases</a> for changes.</dd></div>
-            <div><dt>Source code</dt><dd><a href="https://github.com/MikeyMadeIt/qcu-student-planner" target="_blank" rel="noopener noreferrer">github.com/MikeyMadeIt/qcu-student-planner</a></dd></div>
-          </dl>
-          <div class="help-disclaimer" role="note">
-            <h3><i class="bi bi-info-circle" aria-hidden="true"></i>Disclaimer</h3>
-            <p>QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). The application is designed to assist students with academic organization, planning, and productivity. It is not a substitute for official university services, announcements, or academic records.</p>
-          </div>
-        </section>
-
         <!-- EMPTY SEARCH STATE -->
         <div class="help-empty glass card-pad" id="helpEmpty" hidden>
           <i class="bi bi-search" aria-hidden="true"></i>
@@ -558,7 +538,7 @@
 
       </div>
 
-      <!-- QUICK CONTACT (wide screens) -->
+      <!-- QUICK HELP + DISCLAIMER (one card; falls to the bottom on phones) -->
       <aside class="help-aside" aria-label="Quick help">
         <div class="glass card-pad-md help-aside-card">
           <h2 class="help-aside-title"><i class="bi bi-life-preserver" aria-hidden="true"></i>Need more help?</h2>
@@ -566,6 +546,11 @@
           <a class="help-aside-link" href="report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report a problem</a>
           <a class="help-aside-link" href="https://github.com/MikeyMadeIt/qcu-student-planner/issues" target="_blank" rel="noopener noreferrer"><i class="bi bi-github" aria-hidden="true"></i>GitHub Issues</a>
           <a class="help-aside-link" href="#help-contact"><i class="bi bi-envelope" aria-hidden="true"></i>All contact options</a>
+
+          <div class="help-disclaimer" id="help-disclaimer" role="note">
+            <h3><i class="bi bi-info-circle" aria-hidden="true"></i>Disclaimer</h3>
+            <p>QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). The application is designed to assist students with academic organization, planning, and productivity. It is not a substitute for official university services, announcements, or academic records.</p>
+          </div>
         </div>
       </aside>
     </div>
