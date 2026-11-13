@@ -129,11 +129,22 @@ function initThemeSwitches() {
     document.querySelectorAll('[data-theme-switch] .theme-switch-btn').forEach(btn => {
         if (btn.dataset.wired) return;
         btn.dataset.wired = '1';
-        btn.addEventListener('click', () => {
-            setTheme(btn.dataset.themeValue);
+        btn.addEventListener('click', (event) => {
+            setTheme(btn.dataset.themeValue, event);
             syncThemeSwitches();
             syncThemeOptions();
         });
+    });
+}
+// Belt-and-suspenders: when the view-transition path is used, setTheme's
+// write actually lands a frame or two after this click handler returns, so
+// the calls above can sync against the OLD data-theme and leave the active
+// outline stuck on the previous choice. Re-sync once the write is confirmed.
+if (!window.__themeSwitchSyncWired) {
+    window.__themeSwitchSyncWired = true;
+    document.addEventListener('sp:themechange', () => {
+        syncThemeSwitches();
+        syncThemeOptions();
     });
 }
 
@@ -160,8 +171,8 @@ function initThemeOptions() {
     document.querySelectorAll('[data-theme-options] .theme-option').forEach(btn => {
         if (btn.dataset.wired) return;
         btn.dataset.wired = '1';
-        btn.addEventListener('click', () => {
-            setTheme(btn.dataset.themeValue);
+        btn.addEventListener('click', (event) => {
+            setTheme(btn.dataset.themeValue, event);
             syncThemeOptions();
             syncThemeSwitches();
         });

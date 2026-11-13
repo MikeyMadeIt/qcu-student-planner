@@ -313,7 +313,7 @@ function ymdLocalFuture(days) { return ymdLocal(new Date(Date.now() + 1000 * 60 
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 // THEME / ACCENT / NOTIF
 
-function chooseTheme(theme) { setTheme(theme); highlightTheme(theme); }
+function chooseTheme(theme) { setTheme(theme, window.event); highlightTheme(theme); }
 
 function highlightTheme(theme) {
     ['dark', 'light', 'amoled'].forEach(t => document.getElementById('theme_' + t).classList.toggle('btn-accent', t === theme));
