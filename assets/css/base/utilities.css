@@ -120,6 +120,56 @@
     }
 }
 
+/* Smooth theme switch: animate surfaces instead of flickering when the
+   data-theme attribute changes. Gated by the same motion preferences as
+   everything else, and only active for the brief window JS toggles it.
+   This is the fallback path for browsers without the View Transitions API
+   (see theme-switch-reveal below for the primary, nicer path). */
+@media (prefers-reduced-motion: no-preference) {
+    html.theme-transition:not([data-motion="reduced"]) *,
+    html.theme-transition:not([data-motion="reduced"]) *::before,
+    html.theme-transition:not([data-motion="reduced"]) *::after {
+        transition: background-color .32s var(--ease), color .32s var(--ease),
+            border-color .32s var(--ease), box-shadow .32s var(--ease),
+            fill .32s var(--ease), stroke .32s var(--ease) !important;
+    }
+}
+
+/* Primary theme-switch animation (supporting browsers): the new theme washes
+   in as a soft circle anchored at --theme-switch-x/-y (the point the person
+   tapped), growing to --theme-switch-radius. No cross-fade/ghosting on the
+   old frame — it just sits still while the new one reveals over it, which
+   reads as a clean "paint" rather than a flash.
+   Timing note: var(--ease) is a snappy micro-interaction curve (~90% of the
+   distance covered in the first ~20% of the duration) — fine for a button,
+   but for a radius that has to sweep the whole screen it meant the circle
+   was already brushing past the viewport edges almost immediately, then
+   crawling through its last few percent for the rest of the animation. That
+   mismatch between "edge reached" and "animation still running" is what
+   read as a flick. --ease-reveal grows the radius evenly across the full
+   duration instead, so the edge arrives in step with the motion. */
+@media (prefers-reduced-motion: no-preference) {
+    html.theme-switch-reveal::view-transition-group(root) {
+        animation-duration: .6s;
+    }
+    html.theme-switch-reveal::view-transition-old(root) {
+        animation: none;
+    }
+    html.theme-switch-reveal::view-transition-new(root) {
+        animation: theme-switch-reveal-grow .6s var(--ease-reveal, cubic-bezier(.45, 0, .2, 1));
+        animation-fill-mode: both;
+        will-change: clip-path;
+    }
+    @keyframes theme-switch-reveal-grow {
+        from {
+            clip-path: circle(0px at var(--theme-switch-x, 50%) var(--theme-switch-y, 50%));
+        }
+        to {
+            clip-path: circle(var(--theme-switch-radius, 150%) at var(--theme-switch-x, 50%) var(--theme-switch-y, 50%));
+        }
+    }
+}
+
 [data-motion="reduced"] *,
 [data-motion="reduced"] *::before,
 [data-motion="reduced"] *::after {

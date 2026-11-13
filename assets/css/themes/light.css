@@ -12,5 +12,6 @@
     --text-faint: #8A909B;
     --shadow: 0 1px 2px rgba(23,25,29,.06), 0 1px 1px rgba(23,25,29,.04);
     --nav-bg: #FFFFFF;
+    --tint-rgb: 23, 25, 29;
     --input-placeholder-color: #8A909B;
 }
