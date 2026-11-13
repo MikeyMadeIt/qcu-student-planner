@@ -15,8 +15,8 @@
     }
 
     document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
-        button.addEventListener('click', function () {
-            window.setTheme(isDark() ? 'light' : 'dark');
+        button.addEventListener('click', function (event) {
+            window.setTheme(isDark() ? 'light' : 'dark', event);
             syncButtons();
         });
     });

@@ -25,8 +25,8 @@
     justify-content: center;
     padding: var(--card-pad-xs);
     border-radius: 5px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(var(--tint-rgb),.04);
+    border: 1px solid rgba(var(--tint-rgb),.08);
     text-align: center;
     min-height: 76px;
 }
@@ -189,7 +189,7 @@
     padding: 8px 12px;
     border: 1px solid var(--border);
     border-radius: 4px;
-    background: rgba(255,255,255,.02);
+    background: rgba(var(--tint-rgb),.02);
 }
 
 .att-log-form .att-subject-select {
@@ -345,7 +345,7 @@
     padding: var(--card-pad-xs);
     border-radius: 4px;
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.02);
+    background: rgba(var(--tint-rgb),.02);
     margin-bottom: 8px;
     transition: border-color .18s;
 }
@@ -390,7 +390,7 @@
     text-align: center;
     padding: 4px 2px;
     border-radius: 4px;
-    background: rgba(255,255,255,.03);
+    background: rgba(var(--tint-rgb),.03);
 }
 
 .att-bd-val {
@@ -476,7 +476,7 @@
 }
 
 .att-log-row:hover {
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     border-color: rgba(var(--accent),.2);
 }
 
@@ -649,7 +649,7 @@
     padding: 0 10px;
     border-radius: var(--radius, 10px);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     font-size: .84rem;
     font-weight: 600;
     color: var(--text-soft);
@@ -690,7 +690,7 @@
     padding: 12px;
     border-radius: 5px;
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.02);
+    background: rgba(var(--tint-rgb),.02);
     margin-bottom: 10px;
     transition: border-color .18s;
 }
@@ -807,7 +807,7 @@
 }
 
 .att-log-card:hover {
-    background: rgba(255,255,255,.03);
+    background: rgba(var(--tint-rgb),.03);
     border-color: rgba(var(--accent),.18);
 }
 
@@ -877,7 +877,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,.05);
+    background: rgba(var(--tint-rgb),.05);
     border: 1px solid var(--border);
     color: var(--text-soft);
     cursor: pointer;
@@ -1036,7 +1036,7 @@
     padding: 0 10px;
     border-radius: var(--radius, 10px);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     font-size: .84rem;
     font-weight: 600;
     color: var(--text-soft);
@@ -1048,8 +1048,8 @@
 /* Hover: subtle only — must not look selected */
 
 .att-online-pill:hover .att-online-pill-inner {
-    border-color: rgba(255,255,255,.2);
-    background: rgba(255,255,255,.07);
+    border-color: rgba(var(--tint-rgb),.2);
+    background: rgba(var(--tint-rgb),.07);
     color: var(--text);
 }
 
@@ -1095,7 +1095,7 @@
 }
 
 .att-log-row:hover {
-    background: rgba(255,255,255,.03);
+    background: rgba(var(--tint-rgb),.03);
 }
 
 .att-log-header-row {
@@ -1297,7 +1297,7 @@
     padding: 0.25rem 0.5rem;
     border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     font-size: .875rem;
     font-weight: 600;
     line-height: 1.5;
@@ -1310,8 +1310,8 @@
 /* Hover — subtle, clearly different from active */
 
 .att-online-pill:hover .att-online-pill-inner {
-    border-color: rgba(255,255,255,.22);
-    background: rgba(255,255,255,.07);
+    border-color: rgba(var(--tint-rgb),.22);
+    background: rgba(var(--tint-rgb),.07);
     color: var(--text);
 }
 
@@ -1343,7 +1343,7 @@
     padding: 7px 6px;
     border-radius: 0;
     border: none;
-    border-bottom: 1px solid rgba(255,255,255,.07);
+    border-bottom: 1px solid rgba(var(--tint-rgb),.07);
     background: transparent;
     font-size: .78rem;
     transition: background .12s;
@@ -1505,7 +1505,7 @@
     font-weight: 600;
     border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.04);
+    background: rgba(var(--tint-rgb),.04);
     color: var(--text-soft);
     transition: background .18s, border-color .18s, color .18s;
     user-select: none;
@@ -1575,7 +1575,7 @@
     min-height: 31px !important;
     border-radius: 4px !important;
     border: 1px solid var(--border) !important;
-    background: rgba(255,255,255,.04) !important;
+    background: rgba(var(--tint-rgb),.04) !important;
     color: var(--text-soft) !important;
     transition: background .18s, border-color .18s, color .18s !important;
     user-select: none;
@@ -1584,8 +1584,8 @@
 }
 
 .att-online-pill:hover .att-online-pill-inner {
-    border-color: rgba(255,255,255,.22) !important;
-    background: rgba(255,255,255,.07) !important;
+    border-color: rgba(var(--tint-rgb),.22) !important;
+    background: rgba(var(--tint-rgb),.07) !important;
     color: var(--text) !important;
 }
 
@@ -1636,8 +1636,8 @@
 /* Hover — subtle */
 
 .att-online-toggle-btn:hover {
-    border-color: rgba(255,255,255,.25) !important;
-    background-color: rgba(255,255,255,.07) !important;
+    border-color: rgba(var(--tint-rgb),.25) !important;
+    background-color: rgba(var(--tint-rgb),.07) !important;
     color: var(--text) !important;
 }
 
@@ -1712,7 +1712,7 @@
 
 .att-tbl-row td {
     padding: 8px 6px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(var(--tint-rgb),.06);
     vertical-align: middle;
     font-size: .78rem;
 }
@@ -1722,7 +1722,7 @@
 }
 
 .att-tbl-row:hover td {
-    background: rgba(255,255,255,.03);
+    background: rgba(var(--tint-rgb),.03);
 }
 
 /* Dot cell */
@@ -2397,7 +2397,7 @@
     padding: 0 10px;
     border-radius: 4px;
     border: 1px solid var(--border);
-    background: rgba(255,255,255,.06);
+    background: rgba(var(--tint-rgb),.06);
     color: var(--text-soft);
     font-size: .84rem;
     font-weight: 600;
@@ -2426,7 +2426,7 @@
     width: 28px;
     height: 16px;
     border-radius: 4px;
-    background: rgba(255,255,255,.15);
+    background: rgba(var(--tint-rgb),.15);
     position: relative;
     flex-shrink: 0;
     transition: background .2s;
@@ -2681,7 +2681,7 @@
 }
 
 .att-hm-none {
-    background: var(--hm-none-bg, rgba(255,255,255,.07));
+    background: var(--hm-none-bg, rgba(var(--tint-rgb),.07));
 }
 
 /* Legend "No record" swatch: gray picked from the reference cell color (rgb 27,28,30) */
@@ -2873,7 +2873,7 @@
     color: var(--text-faint);
     font-size: .67rem;
     margin-top: 3px;
-    border-top: 1px solid rgba(255,255,255,.08);
+    border-top: 1px solid rgba(var(--tint-rgb),.08);
     padding-top: 3px;
 }
 
@@ -2931,7 +2931,7 @@
     min-width: 30px;
     height: 6px;
     border-radius: 4px;
-    background: rgba(255,255,255,.12);
+    background: rgba(var(--tint-rgb),.12);
     overflow: hidden;
 }
 
@@ -2975,7 +2975,7 @@
 .att-bd-limit-row {
     margin-top: 8px;
     padding-top: 7px;
-    border-top: 1px solid rgba(255,255,255,.07);
+    border-top: 1px solid rgba(var(--tint-rgb),.07);
 }
 
 .att-bd-limit-info {
