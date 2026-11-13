@@ -258,12 +258,8 @@
     padding: 12px 14px;
 }
 
-[data-theme="dark"] .tk-panel {
-    background: #1c1f2e;
-}
-
-[data-theme="light"] .tk-panel {
-    background: #f4f5f7;
+.tk-panel {
+    background: var(--surface-2);
 }
 
 .tk-panel-cols {
@@ -2005,8 +2001,8 @@
 /* Close button in drawer */
 
 .tkd-close-btn {
-    background: rgba(255,255,255,.06) !important;
-    border-color: rgba(255,255,255,.1) !important;
+    background: rgba(var(--tint-rgb),.06) !important;
+    border-color: rgba(var(--tint-rgb),.1) !important;
     color: #9aa0c0 !important;
 }
 
@@ -2018,7 +2014,7 @@
 
 .tkd-close-btn:hover {
     color: #e8eaf6 !important;
-    background: rgba(255,255,255,.1) !important;
+    background: rgba(var(--tint-rgb),.1) !important;
 }
 
 [data-theme="light"] .tkd-close-btn:hover {
