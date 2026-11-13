@@ -13,6 +13,10 @@
     --radius-sm: 4px;
     --radius-pill: 999px;
     --ease: cubic-bezier(.22,.9,.35,1);
+    /* Slower, more even ramp than --ease — for animations that cover real
+       screen distance (like the theme-switch circle) rather than a small
+       UI element, where --ease's fast-start/long-tail reads as a flick. */
+    --ease-reveal: cubic-bezier(.45,0,.2,1);
     --transition-fast: .12s var(--ease);
     --transition: .18s var(--ease);
     --success: #1F9254;
