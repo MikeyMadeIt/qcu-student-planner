@@ -75,19 +75,26 @@
       <!-- SAVED QUIZZES -->
       <section class="glass card-pad aqm-history fade-in" id="aqmHistorySection" aria-labelledby="aqmHistoryHeading">
         <h2 class="aqm-history-heading" id="aqmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved quizzes</span></h2>
-        <div class="aqm-history-list" id="aqmHistory" aria-live="polite">
-          <div class="aqm-history-empty">
-            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
-            <p>Loading your saved quizzes…</p>
-          </div>
-        </div>
+        <div class="aqm-history-list" id="aqmHistory" aria-live="polite" aria-busy="true"></div>
       </section>
     </div>
 
-    <!-- LOADING -->
-    <div class="glass card-pad fade-in ai-state" id="aqmLoadingState" hidden>
-      <i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i>
-      <p>Generating your quiz… this can take a few seconds.</p>
+    <!-- LOADING: a skeleton of the quiz card itself (not a generic spinner), -->
+    <!-- plus an indeterminate progress bar — real progress isn't available. -->
+    <div class="glass card-pad fade-in ai-state ai-gen-state" id="aqmLoadingState" hidden aria-busy="true">
+      <div class="ai-gen-skel" aria-hidden="true">
+        <div class="skel skel-title" style="width:60%;margin:0 auto 1rem"></div>
+        <div class="skel skel-text" style="width:90%;margin:0 auto .5rem"></div>
+        <div class="skel skel-text" style="width:70%;margin:0 auto 1.1rem"></div>
+        <div class="ai-gen-skel-choices">
+          <div class="skel skel-text" style="width:100%;height:2.4rem"></div>
+          <div class="skel skel-text" style="width:100%;height:2.4rem"></div>
+          <div class="skel skel-text" style="width:100%;height:2.4rem"></div>
+          <div class="skel skel-text" style="width:100%;height:2.4rem"></div>
+        </div>
+      </div>
+      <p role="status">Generating your quiz&hellip; this can take a few seconds.</p>
+      <div id="aqmGenProgress"></div>
     </div>
 
     <!-- ERROR -->
@@ -139,6 +146,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/core/loading.js"></script>
 <script src="../../assets/js/modules/ai-quiz-maker.js"></script>
 <script>
   renderShell('ai-quiz-maker');
