@@ -38,7 +38,10 @@
     <p class="notification-status" id="notificationStatus" role="status" aria-live="polite">Loading notifications…</p>
     <div class="notification-layout" id="notificationLayout" hidden>
       <section class="notification-list glass" aria-label="Notification list">
-        <div class="notification-list-items" id="notificationList" role="list"></div>
+        <div class="notification-list-items" id="notificationList" role="list" aria-busy="true">
+          <div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-75"></div><div class="skel skel-text w-25"></div></div></div>
+          <div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-60"></div><div class="skel skel-text w-25"></div></div></div>
+        </div>
         <div class="notification-list-empty" id="notificationListEmpty" hidden>
           <i class="bi bi-bell-slash" aria-hidden="true"></i>
           <strong>No notifications here</strong>

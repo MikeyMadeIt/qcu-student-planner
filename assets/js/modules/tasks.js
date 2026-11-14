@@ -1075,6 +1075,7 @@ function renderTasks() {
     Array.from(tkSelected).forEach(function (id) { if (!visibleIds.includes(id))
         tkSelected.delete(id); });
     var wrap = document.getElementById('tkGroups');
+    if (wrap) wrap.removeAttribute('aria-busy');
     var old = document.getElementById('tkBulkToolbar');
     if (old)
         old.remove();
@@ -1585,7 +1586,13 @@ function modalAddClItem() {
     wrap.lastElementChild.querySelector('input[type=text]').focus();
 }
 
+let tkSaving = false;
 function saveTask() {
+    // Re-entrancy guard: the Save button is a plain onclick, and
+    // bootstrap's modal hide() is a non-blocking fade, so a rapid
+    // double-click can invoke this function twice before the modal is
+    // actually gone — which would push two new tasks for one click.
+    if (tkSaving) return;
     var title = document.getElementById('tTitle').value.trim();
     if (!title) {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
@@ -1597,6 +1604,7 @@ function saveTask() {
         estField.querySelector('.sch-time-input').focus();
         return;
     }
+    tkSaving = true;
     var timeEstimate = estField ? (estField._tkValue || null) : null;
     var checklist = Array.from(document.querySelectorAll('.tk-modal-cl-row')).map(function (row) {
         return { done: row.querySelector('input[type=checkbox]').checked, text: row.querySelector('input[type=text]').value.trim() };
@@ -1651,6 +1659,7 @@ function saveTask() {
     bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
     Toast.show(id ? 'Task updated' : 'Task added');
     renderTasks();
+    tkSaving = false;
 }
 
 function computeProgressFromChecklist(cl, fallback) {

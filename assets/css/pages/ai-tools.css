@@ -106,6 +106,23 @@
     to { transform: rotate(360deg); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .ai-spin { animation-duration: 2s; }
+    .ai-typing-dots span { animation-duration: 2s; }
+}
+html[data-motion="reduced"] .ai-spin { animation-duration: 2s; }
+html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
+
+/* AI generation state: a skeleton of the thing being produced (quiz card /
+   flashcard), not a generic spinner, plus an honest indeterminate progress
+   bar — we never fabricate a percentage for AI generation or uploads. */
+.ai-gen-state { padding-top: 2rem; }
+.ai-gen-skel { max-width: 28rem; margin: 0 auto 1.25rem; }
+.ai-gen-skel-choices { display: grid; gap: .5rem; }
+.ai-gen-state p { margin-bottom: 1rem; }
+.ai-gen-state #aqmGenProgress,
+.ai-gen-state #afmGenProgress { max-width: 20rem; margin: 0 auto; }
+
 /* Quiz taking */
 .ai-quiz-progress {
     display: flex;
