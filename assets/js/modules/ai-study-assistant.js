@@ -263,14 +263,22 @@ function asaPersistTurn(userTurn, replyText) {
 }
 
 async function asaLoadHistory() {
+    const h = asaEl('asaHistory');
+    if (h && window.Loading) h.innerHTML = window.Loading.skeletonRows(4, { lines: 1, widths: ['75%', '55%', '65%'] });
     try {
         asaConversations = await (await asaStore()).listConversations();
+        if (h) h.removeAttribute('aria-busy');
         asaRenderHistoryLists();
     } catch (error) {
         console.warn('AI Study Assistant: could not load history', error);
-        const msg = '<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Couldn\'t load your conversations. ' + escHtml(error.message || '') + '</div>';
-        const h = asaEl('asaHistory');
-        if (h) h.innerHTML = msg;
+        if (h) {
+            h.removeAttribute('aria-busy');
+            h.innerHTML = '<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Couldn\'t load your conversations. '
+                + escHtml(error.message || '')
+                + '<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="asaHistoryRetryBtn">Try again</button></div>';
+            const retryBtn = document.getElementById('asaHistoryRetryBtn');
+            if (retryBtn) retryBtn.addEventListener('click', asaLoadHistory);
+        }
     }
 }
 

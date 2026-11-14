@@ -79,7 +79,9 @@ function renderNotifications() {
         const shown = filtered.slice(0, notificationVisibleCount);
         status.hidden = true;
         layout.hidden = false;
-        document.getElementById('notificationList').innerHTML = shown.map(item => {
+        const listEl = document.getElementById('notificationList');
+        listEl.removeAttribute('aria-busy');
+        listEl.innerHTML = shown.map(item => {
             const read = Boolean(readMap[item.id]);
             const label = item.overdue ? 'Overdue' : 'Due soon';
             return `<button type="button" class="notification-row ${read ? 'is-read' : 'is-unread'} ${item.id === notificationSelection ? 'is-selected' : ''}"

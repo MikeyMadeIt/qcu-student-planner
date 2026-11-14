@@ -233,6 +233,7 @@ function renderCalendar() {
     const body = document.getElementById('calBody');
     if (!body)
         return;
+    body.removeAttribute('aria-busy');
     if (calMode === 'month')
         body.innerHTML = monthHtml();
     else if (calMode === 'week')
@@ -1073,7 +1074,11 @@ function selectScheduleColor(c) {
     });
 }
 
+let csSaving = false;
 function saveScheduleEntry() {
+    // Re-entrancy guard against a rapid double-click duplicating the
+    // record before the modal's fade-out finishes.
+    if (csSaving) return;
     const id = document.getElementById('csId').value;
     const code = document.getElementById('csCode').value.trim();
     if (!code) {
@@ -1081,6 +1086,7 @@ function saveScheduleEntry() {
         return;
     }
     if (!TimeField.validate(['csStart', 'csEnd'])) return;
+    csSaving = true;
     const days = [...document.querySelectorAll('.cs-day-check:checked')].map(c => c.value);
     const semId = DB.getActiveSemesterId();
     const data = {
@@ -1108,6 +1114,7 @@ function saveScheduleEntry() {
     renderCalendar();
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
+    csSaving = false;
 }
 
 function deleteScheduleEntry(id) {
@@ -1151,13 +1158,16 @@ function openTaskModal(id, presetDate) {
     new bootstrap.Modal(document.getElementById('calTaskModal')).show();
 }
 
+let ctSaving = false;
 function saveCalTask() {
+    if (ctSaving) return;
     const title = document.getElementById('ctTitle').value.trim();
     if (!title) {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
         return;
     }
     if (!TimeField.validate(['ctDueTime'])) return;
+    ctSaving = true;
     const data = {
         title, description: document.getElementById('ctDesc').value.trim(),
         subjectId: document.getElementById('ctSubject').value || null,
@@ -1185,6 +1195,7 @@ function saveCalTask() {
     renderCalendar();
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
+    ctSaving = false;
 }
 
 function deleteCalTask(id) {
@@ -1233,7 +1244,9 @@ function updateCalEventColor(cat) {
     calEventModalColor = EVENT_CAT_COLORS[cat] || EVENT_CAT_COLORS['Event'];
 }
 
+let ceSaving = false;
 function saveCalEvent() {
+    if (ceSaving) return;
     const title = document.getElementById('ceTitle').value.trim();
     if (!title) {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
@@ -1245,6 +1258,7 @@ function saveCalEvent() {
         Toast.show('Please select a date', 'high', 'bi-exclamation-triangle');
         return;
     }
+    ceSaving = true;
     const cat = document.getElementById('ceCategory').value;
     const data = {
         title, date, category: cat, color: EVENT_CAT_COLORS[cat] || calEventModalColor,
@@ -1268,6 +1282,7 @@ function saveCalEvent() {
     renderCalendar();
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
+    ceSaving = false;
 }
 
 function deleteCalEvent(id) {
@@ -1380,7 +1395,9 @@ function collectUnivDates() {
     }
 }
 
+let ueSaving = false;
 function saveUnivEvent() {
+    if (ueSaving) return;
     const title = document.getElementById('ueTitle').value.trim();
     if (!title) {
         Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
@@ -1391,6 +1408,7 @@ function saveUnivEvent() {
         Toast.show('Please add at least one valid date', 'high', 'bi-exclamation-triangle');
         return;
     }
+    ueSaving = true;
     const note = document.getElementById('ueNote').value.trim();
     const events = DB.getUniversityEvents();
     if (univEditingId) {
@@ -1411,6 +1429,7 @@ function saveUnivEvent() {
     renderCalendar();
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
+    ueSaving = false;
 }
 
 function deleteUnivEvent(id) {
