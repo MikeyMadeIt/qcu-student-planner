@@ -1,11 +1,13 @@
 import { requireAdmin } from './admin-guard.js';
 import { AdminService } from '../services/admin-service.js';
-import { escHtml, formatDate, statusBadge, mountAdminTopbar, renderError, renderAccountDetail } from './admin-shared.js';
+import { escHtml, formatDate, statusBadge, mountAdminTopbar, renderErrorWithRetry, renderAccountDetail } from './admin-shared.js';
 
 const PAGE_SIZE = 20;
 let currentPage = 1;
+let loadSeq = 0;
 
 async function loadRows() {
+    const seq = ++loadSeq;
     const body = document.getElementById('admBody');
     const loading = document.getElementById('admLoading');
     const empty = document.getElementById('admEmpty');
@@ -23,10 +25,12 @@ async function loadRows() {
 
     const result = await AdminService.listAccounts({ status, search, dateFrom, dateTo, sort, page: currentPage, pageSize: PAGE_SIZE });
 
+    if (seq !== loadSeq) return; // a newer request superseded this one
+
     loading.hidden = true;
 
     if (!result.ok) {
-        renderError(body.closest('.glass'), result.message);
+        renderErrorWithRetry(body.closest('.glass'), result.message, loadRows);
         return;
     }
 

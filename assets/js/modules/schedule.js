@@ -1108,6 +1108,7 @@ function computeOverlaps(classes) {
 
 function renderListView() {
     const wrap = document.getElementById('schSubjectList');
+    if (wrap) wrap.removeAttribute('aria-busy');
     const q = (document.getElementById('schSearchInput')?.value || '').toLowerCase().trim();
     const semId = DB.getActiveSemesterId();
     let list = DB.getSubjects().filter(s => {
@@ -1716,7 +1717,11 @@ function selectColor(c) {
     });
 }
 
+let subSaving = false;
 function saveSubject() {
+    // Re-entrancy guard against a rapid double-click duplicating the
+    // subject before the modal's fade-out finishes.
+    if (subSaving) return;
     const id = document.getElementById('subId').value;
     const codeInput = document.getElementById('subCode');
     const code = codeInput.value.trim();
@@ -1769,6 +1774,7 @@ function saveSubject() {
         semesterId: sem ? sem.id : DB.getActiveSemesterId(),
         archived: false,
     };
+    subSaving = true;
     const conflicts = checkSaveConflict(data, id || null);
     const warnEl = document.getElementById('subConflictWarning');
     if (conflicts.length) {
@@ -1789,11 +1795,13 @@ function saveSubject() {
         subjects.push({ id: DB.uid(), ...data });
     if (DB.saveSubjects(subjects) === false) {
         Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+        subSaving = false;
         return;
     }
     bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
     Toast.show(id ? 'Subject updated' : 'Subject added');
     renderAllViews();
+    subSaving = false;
 }
 
 function deleteSubject(id) {

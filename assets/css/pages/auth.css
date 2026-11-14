@@ -448,6 +448,21 @@ body.auth-page {
     }
 }
 
+/* Slow the button/page spinners rather than removing the loading feedback,
+   matching the convention in components/skeleton.css. */
+@media (prefers-reduced-motion: reduce) {
+    .auth-submit.is-loading::after,
+    .auth-page .btn-google.is-loading::after,
+    .auth-spin {
+        animation-duration: 2s;
+    }
+}
+html[data-motion="reduced"] .auth-submit.is-loading::after,
+html[data-motion="reduced"] .auth-page .btn-google.is-loading::after,
+html[data-motion="reduced"] .auth-spin {
+    animation-duration: 2s;
+}
+
 .auth-page .btn-ghost {
     min-height: 3rem;
     border-radius: var(--btn-radius);

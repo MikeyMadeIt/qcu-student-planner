@@ -56,19 +56,19 @@
       <!-- SAVED DECKS -->
       <section class="glass card-pad aqm-history fade-in" id="afmHistorySection" aria-labelledby="afmHistoryHeading">
         <h2 class="aqm-history-heading" id="afmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved decks</span></h2>
-        <div class="aqm-history-list" id="afmHistory" aria-live="polite">
-          <div class="aqm-history-empty">
-            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
-            <p>Loading your saved decks…</p>
-          </div>
-        </div>
+        <div class="aqm-history-list" id="afmHistory" aria-live="polite" aria-busy="true"></div>
       </section>
     </div>
 
-    <!-- LOADING -->
-    <div class="glass card-pad fade-in ai-state" id="afmLoadingState" hidden>
-      <i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i>
-      <p>Generating your flashcards… this can take a few seconds.</p>
+    <!-- LOADING: a skeleton of the flashcard itself (not a generic spinner), -->
+    <!-- plus an indeterminate progress bar — real progress isn't available. -->
+    <div class="glass card-pad fade-in ai-state ai-gen-state" id="afmLoadingState" hidden aria-busy="true">
+      <div class="ai-gen-skel" aria-hidden="true">
+        <div class="skel skel-title" style="width:50%;margin:0 auto 1rem"></div>
+        <div class="skel skel-card" style="height:9rem;border-radius:var(--radius-lg,14px);margin:0 auto;max-width:26rem"></div>
+      </div>
+      <p role="status">Generating your flashcards&hellip; this can take a few seconds.</p>
+      <div id="afmGenProgress"></div>
     </div>
 
     <!-- ERROR -->
@@ -117,6 +117,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/core/loading.js"></script>
 <script src="../../assets/js/modules/ai-flashcard-maker.js"></script>
 <script>
   renderShell('ai-flashcard-maker');
