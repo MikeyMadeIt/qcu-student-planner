@@ -2,16 +2,36 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// Restrict which origins may call this function from a browser. '*' would let
+// any site's JavaScript read the response to a credentialed request. Set the
+// ALLOWED_ORIGIN env var (Edge Functions -> Secrets) to your deployed app's
+// origin(s) (comma-separated for more than one, e.g. prod + preview URLs).
+// Note: this only stops browser JS running on other sites from reading the
+// response — it does not stop a direct curl/script call with a valid bearer
+// token, which is why the server-side admin/approval checks below are the
+// real access control, not this header.
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGIN') || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
-function jsonResponse(status, body) {
+function corsHeaders(req) {
+    const origin = req.headers.get('Origin') || '';
+    const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : (ALLOWED_ORIGINS[0] || 'null');
+    return {
+        'Access-Control-Allow-Origin': allowOrigin,
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Vary': 'Origin',
+    };
+}
+
+// jsonResponse/handle take `req` so the CORS header reflects the actual
+// request's Origin rather than a single hardcoded '*'.
+function jsonResponse(req, status, body) {
     return new Response(JSON.stringify(body), {
         status,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     });
 }
 
@@ -22,17 +42,17 @@ Deno.serve(async (req) => {
         return await handle(req);
     } catch (err) {
         console.error('admin-delete-account: unhandled error', err);
-        return jsonResponse(500, { error: `Unexpected server error: ${err?.message || String(err)}` });
+        return jsonResponse(req, 500, { error: `Unexpected server error: ${err?.message || String(err)}` });
     }
 });
 
 async function handle(req) {
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: CORS_HEADERS });
+        return new Response('ok', { headers: corsHeaders(req) });
     }
 
     if (req.method !== 'POST') {
-        return jsonResponse(405, { error: 'Method not allowed.' });
+        return jsonResponse(req, 405, { error: 'Method not allowed.' });
     }
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
@@ -45,7 +65,7 @@ async function handle(req) {
             !SERVICE_ROLE_KEY && 'SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)',
             !ANON_KEY && 'SUPABASE_ANON_KEY',
         ].filter(Boolean).join(', ');
-        return jsonResponse(500, {
+        return jsonResponse(req, 500, {
             error: `Server misconfiguration: missing required Edge Function secret(s): ${missing}. ` +
                 `SUPABASE_URL/SUPABASE_ANON_KEY are normally auto-provisioned; SERVICE_ROLE_KEY must be set ` +
                 `manually under Edge Functions -> Secrets, using a secret key (Project Settings -> API Keys) with ` +
@@ -55,7 +75,7 @@ async function handle(req) {
 
     const authHeader = req.headers.get('Authorization') || '';
     if (!authHeader.toLowerCase().startsWith('bearer ')) {
-        return jsonResponse(401, { error: 'Missing or invalid Authorization header.' });
+        return jsonResponse(req, 401, { error: 'Missing or invalid Authorization header.' });
     }
     const callerJwt = authHeader.slice(7).trim();
 
@@ -63,14 +83,14 @@ async function handle(req) {
     try {
         body = await req.json();
     } catch {
-        return jsonResponse(400, { error: 'Request body must be valid JSON.' });
+        return jsonResponse(req, 400, { error: 'Request body must be valid JSON.' });
     }
 
     const targetUserId = typeof body?.target_user_id === 'string' ? body.target_user_id.trim() : '';
     const reason = typeof body?.reason === 'string' ? body.reason.trim().slice(0, 500) || null : null;
 
     if (!UUID_RE.test(targetUserId)) {
-        return jsonResponse(400, { error: 'target_user_id must be a valid UUID.' });
+        return jsonResponse(req, 400, { error: 'target_user_id must be a valid UUID.' });
     }
 
     const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
@@ -89,12 +109,12 @@ async function handle(req) {
             status: callerErr?.status,
             name: callerErr?.name,
         });
-        return jsonResponse(401, { error: 'Your session is invalid or has expired. Please sign in again.' });
+        return jsonResponse(req, 401, { error: 'Your session is invalid or has expired. Please sign in again.' });
     }
     const callerId = callerUser.user.id;
 
     if (callerId === targetUserId) {
-        return jsonResponse(403, { error: 'You cannot delete your own account through this action.' });
+        return jsonResponse(req, 403, { error: 'You cannot delete your own account through this action.' });
     }
 
     const { data: callerProfile, error: callerProfileErr } = await adminClient
@@ -110,7 +130,7 @@ async function handle(req) {
             code: callerProfileErr?.code,
             details: callerProfileErr?.details,
         });
-        return jsonResponse(403, { error: 'Could not verify your admin status.' });
+        return jsonResponse(req, 403, { error: 'Could not verify your admin status.' });
     }
     if (callerProfile.role !== 'admin' || callerProfile.account_status !== 'approved') {
         console.error('admin-delete-account: caller is not an approved admin', {
@@ -118,7 +138,7 @@ async function handle(req) {
             role: callerProfile.role,
             account_status: callerProfile.account_status,
         });
-        return jsonResponse(403, { error: 'This action is restricted to approved administrators.' });
+        return jsonResponse(req, 403, { error: 'This action is restricted to approved administrators.' });
     }
 
     const { data: targetProfile } = await adminClient
@@ -130,7 +150,7 @@ async function handle(req) {
     let dbCleanupNeeded = !!targetProfile;
 
     if (dbCleanupNeeded && targetProfile.account_status !== 'rejected') {
-        return jsonResponse(409, {
+        return jsonResponse(req, 409, {
             error: `Only rejected accounts can be permanently deleted. This account's current status is "${targetProfile.account_status}".`,
         });
     }
@@ -145,14 +165,14 @@ async function handle(req) {
             if (rpcError.code === 'P0002') {
                 dbCleanupNeeded = false;
             } else if (rpcError.code === '42501') {
-                return jsonResponse(403, { error: rpcError.message });
+                return jsonResponse(req, 403, { error: rpcError.message });
             } else if (rpcError.code === '42883' || /function .* does not exist/i.test(rpcError.message || '')) {
-                return jsonResponse(500, {
+                return jsonResponse(req, 500, {
                     error: 'Server is missing required setup: the admin_delete_rejected_account() database function ' +
                         'was not found. Apply supabase/migrations/0006_account_permanent_deletion.sql before using this feature.',
                 });
             } else {
-                return jsonResponse(500, { error: `Database cleanup failed: ${rpcError.message}` });
+                return jsonResponse(req, 500, { error: `Database cleanup failed: ${rpcError.message}` });
             }
         }
     }
@@ -173,7 +193,7 @@ async function handle(req) {
                 target_full_name: targetProfile?.full_name ?? null,
             });
 
-            return jsonResponse(500, {
+            return jsonResponse(req, 500, {
                 error: `The account's database records were removed, but deleting the Auth login failed: ` +
                     `${authDeleteError.message}. The account can no longer sign in to the app, but a developer must ` +
                     `clear the orphaned Auth user manually. Retrying this action is safe.`,
@@ -192,5 +212,5 @@ async function handle(req) {
         target_full_name: targetProfile?.full_name ?? null,
     });
 
-    return jsonResponse(200, { ok: true });
+    return jsonResponse(req, 200, { ok: true });
 }
