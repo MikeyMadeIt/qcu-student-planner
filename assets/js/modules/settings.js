@@ -111,6 +111,7 @@ function renderSemesterManager() {
     const wrap = document.getElementById('semesterManager');
     if (!wrap)
         return;
+    wrap.removeAttribute('aria-busy');
     const semesters = DB.getSemesters();
     const activeId = DB.getActiveSemesterId();
     const byYear = {};

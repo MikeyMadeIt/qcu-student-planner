@@ -272,6 +272,7 @@ function computeGwaTarget() {
 
 function renderGradeCards() {
     const wrap = document.getElementById('gradesWrap');
+    if (wrap) wrap.removeAttribute('aria-busy');
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
     const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
@@ -599,7 +600,13 @@ function refreshGradePreview() {
     }
 }
 
+let gcSaving = false;
 function saveGradeComponents() {
+    // Re-entrancy guard against a rapid double-click: the modal hide()
+    // below is a non-blocking fade, so a second click could otherwise
+    // push a duplicate grade record before the first one commits.
+    if (gcSaving) return;
+    gcSaving = true;
     const cleaned = gradeDraft.components
         .map((c, i) => ({
         id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
@@ -632,6 +639,7 @@ function saveGradeComponents() {
     gradeDraftSubjectId = null;
     renderGradesOverview();
     renderGradeCards();
+    gcSaving = false;
 }
 
 // Grade reference table
