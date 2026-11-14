@@ -122,6 +122,8 @@ async function aqmGenerate() {
 
     aqmShowView('loading');
     aqmSetBusy(true);
+    const genProgress = aqmEl('aqmGenProgress');
+    if (genProgress && window.Loading) genProgress.innerHTML = window.Loading.progressHTML(null);
 
     try {
         const { AiService } = await import('../services/ai-service.js');
@@ -400,8 +402,11 @@ async function aqmPersistAttempt(correct, total, percent) {
 async function aqmLoadHistory() {
     const host = aqmEl('aqmHistory');
     if (!host) return;
+    host.setAttribute('aria-busy', 'true');
+    if (window.Loading) host.innerHTML = window.Loading.skeletonCards(2, { lines: 2 });
     try {
         const list = await (await aqmStore()).listQuizzes();
+        host.removeAttribute('aria-busy');
         host.innerHTML = list.length ? list.map(q => `
           <div class="aqm-history-card">
             <div class="aqm-history-card-info">
@@ -418,16 +423,20 @@ async function aqmLoadHistory() {
           </div>`).join('')
           : aqmHistoryEmptyMarkup('bi-journal-text', 'Generate a quiz and it will show up here.');
     } catch (error) {
-        host.innerHTML = aqmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved quizzes", 'Please refresh the page to try again.');
+        host.removeAttribute('aria-busy');
+        host.innerHTML = aqmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved quizzes", null, true);
+        const retryBtn = document.getElementById('aqmHistoryRetryBtn');
+        if (retryBtn) retryBtn.addEventListener('click', aqmLoadHistory);
     }
 }
 
-// Shared markup for the history list's loading / empty / error states —
-function aqmHistoryEmptyMarkup(icon, title, subtext) {
+// Shared markup for the history list's empty / error states —
+function aqmHistoryEmptyMarkup(icon, title, subtext, withRetry) {
     return `<div class="aqm-history-empty">
         <i class="bi ${icon}" aria-hidden="true"></i>
         <p>${escHtml(title)}</p>
         ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
+        ${withRetry ? `<button type="button" class="btn btn-ghost btn-sm mt-2" id="aqmHistoryRetryBtn">Retry</button>` : ''}
     </div>`;
 }
 
