@@ -166,8 +166,27 @@ function setupForm(form) {
     });
 }
 
+// Surfaces the reason a guard (app-guard.js on pages/app/*, admin-guard.js on
+// pages/admin/*) just bounced the person back here — e.g. "your session has
+// expired" or "your account is still awaiting review" — instead of silently
+// dropping them on the login screen with no explanation.
+function showGuardDenialIfAny() {
+    const loginForm = $('[data-auth-form="login"]');
+    if (!loginForm) return;
+
+    let reason = null;
+    try {
+        reason = sessionStorage.getItem('qcu.appGuardDeniedReason') || sessionStorage.getItem('qcu.adminDeniedReason');
+        sessionStorage.removeItem('qcu.appGuardDeniedReason');
+        sessionStorage.removeItem('qcu.adminDeniedReason');
+    } catch (error) { /* ignore */ }
+
+    if (reason) showAlert(loginForm, reason, 'info');
+}
+
 export function initAuthForms() {
     $$('[data-auth-form]').forEach(setupForm);
+    showGuardDenialIfAny();
 }
 
 // "Continue with Google" button on login.html / register.html. Clicking it redirects the
