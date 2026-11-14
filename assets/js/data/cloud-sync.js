@@ -505,6 +505,16 @@
             if (localDirtyAtt.length) pushAttendance(attendance.slice());
             if (localDirtyGrades.length) pushGrades(grades.slice());
             if (localOnlySemesters.length) pushSemesters(semesters.slice());
+            // Re-validate the GWA calculator on every load. A push only ever
+            // runs when a row is edited, so a past failure (e.g. a blank row
+            // that used to violate gwa_calculator_grade_check) stayed stuck
+            // in the Settings "Sync Status" card forever, even after the
+            // code that caused it was fixed — it only cleared once you
+            // happened to touch the calculator again. Pushing the
+            // already-valid, already-synced rows here is a harmless no-op
+            // when nothing is actually wrong, but it means a resolved error
+            // clears itself instead of waiting on the user.
+            pushGwaCalc(gwaRows.slice());
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
