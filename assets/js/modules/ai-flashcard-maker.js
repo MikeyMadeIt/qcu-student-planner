@@ -80,6 +80,8 @@ async function afmGenerate() {
 
     afmShowView('loading');
     afmSetBusy(true);
+    const genProgress = afmEl('afmGenProgress');
+    if (genProgress && window.Loading) genProgress.innerHTML = window.Loading.progressHTML(null);
 
     try {
         const { AiService } = await import('../services/ai-service.js');
@@ -145,8 +147,11 @@ function afmPersistDeck(set, meta) {
 async function afmLoadHistory() {
     const host = afmEl('afmHistory');
     if (!host) return;
+    host.setAttribute('aria-busy', 'true');
+    if (window.Loading) host.innerHTML = window.Loading.skeletonCards(2, { lines: 2 });
     try {
         const list = await (await afmStore()).listDecks();
+        host.removeAttribute('aria-busy');
         host.innerHTML = list.length ? list.map(d => `
           <div class="aqm-history-card">
             <div class="aqm-history-card-info">
@@ -163,16 +168,20 @@ async function afmLoadHistory() {
           : afmHistoryEmptyMarkup('bi-journal-text', 'Generate a flashcard set and it will show up here.');
     } catch (error) {
         console.warn('AI Flashcard Maker: could not load history', error);
-        host.innerHTML = afmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved decks", 'Please refresh the page to try again.');
+        host.removeAttribute('aria-busy');
+        host.innerHTML = afmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved decks", null, true);
+        const retryBtn = document.getElementById('afmHistoryRetryBtn');
+        if (retryBtn) retryBtn.addEventListener('click', afmLoadHistory);
     }
 }
 
 // Mirrors aqmHistoryEmptyMarkup in ai-quiz-maker.js — same centered
-function afmHistoryEmptyMarkup(icon, title, subtext) {
+function afmHistoryEmptyMarkup(icon, title, subtext, withRetry) {
     return `<div class="aqm-history-empty">
         <i class="bi ${icon}" aria-hidden="true"></i>
         <p>${escHtml(title)}</p>
         ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
+        ${withRetry ? `<button type="button" class="btn btn-ghost btn-sm mt-2" id="afmHistoryRetryBtn">Retry</button>` : ''}
     </div>`;
 }
 

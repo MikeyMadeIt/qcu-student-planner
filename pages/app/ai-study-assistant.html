@@ -33,9 +33,7 @@
               <i class="bi bi-search" aria-hidden="true"></i>
               <input type="search" id="asaSearch" placeholder="Search conversations" aria-label="Search conversations">
             </div>
-            <div class="asa-history" id="asaHistory" aria-live="polite">
-              <div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Loading your conversations…</div>
-            </div>
+            <div class="asa-history" id="asaHistory" aria-live="polite" aria-busy="true"></div>
           </div>
         </div>
         <button type="button" class="asa-new-chat-btn" id="asaClearBtn">
@@ -84,6 +82,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/core/loading.js"></script>
 <script src="../../assets/js/core/markdown.js"></script>
 <script src="../../assets/js/modules/ai-study-assistant.js"></script>
 <script>
