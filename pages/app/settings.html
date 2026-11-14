@@ -70,7 +70,7 @@
           <div class="glass card-pad fade-in mb-3">
             <div class="section-title"><i class="bi bi-calendar3"></i>Academic Semesters</div>
             <p class="text-faint mb-3" style="font-size:.8rem">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, notes, and syllabi.</p>
-            <div id="semesterManager">Loading…</div>
+            <div id="semesterManager" aria-busy="true"></div>
           </div>
 
           <!-- Sync Status view -->
@@ -166,10 +166,15 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/core/loading.js"></script>
 <script src="../../assets/js/modules/settings.js"></script>
 <script>
   renderShell('settings');
   applyTheme();
+  if (window.Loading) {
+    Loading.showSkeleton(document.getElementById('semesterManager'),
+      Loading.skeletonRows(2, { lines: 2, widths: ['55%', '35%'] }));
+  }
   DB.whenCloudReady(initSettings);
 </script>
 </body>

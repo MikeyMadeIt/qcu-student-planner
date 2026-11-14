@@ -375,6 +375,7 @@ function renderNotes() {
     populateNoteLinkFilters();
     renderNtBulkToolbar();
     var wrap = document.getElementById('notesGrid');
+    if (wrap) wrap.removeAttribute('aria-busy');
     var list = getFilteredNotes();
     if (!list.length) {
         var semId = DB.getActiveSemesterId();
@@ -2103,7 +2104,13 @@ function updateNotePreview() {
 
 /* ── Save note ── */
 
+let ntSaving = false;
 function saveNote() {
+    // Re-entrancy guard: a rapid double-click could otherwise fire this
+    // handler twice before the modal's fade-out hides the button,
+    // creating two new notes for one click.
+    if (ntSaving) return;
+    ntSaving = true;
     var title = (document.getElementById('nTitle').value.trim()) || 'Untitled';
     var content = serializeNoteEditor(document.getElementById('nContent'));
     var category = document.getElementById('nCategory').value;
@@ -2128,6 +2135,7 @@ function saveNote() {
     bootstrap.Modal.getInstance(document.getElementById('noteModal')).hide();
     Toast.show(id ? 'Note updated' : 'Note added');
     renderNotes();
+    ntSaving = false;
 }
 
 /* ── Delete note ── */
