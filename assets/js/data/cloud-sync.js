@@ -688,20 +688,36 @@
         }
     }
 
+    // A freshly added row (or one whose grade was just cleared) starts out as
+    // { label: '', units: '', grade: '' } — that's a local-only draft, not
+    // real data yet. The grading scale here is 1.00–5.00 (see gwa.js), so 0
+    // is never a valid grade; pushing it as a placeholder tripped the
+    // database's gwa_calculator_grade_check constraint on every sync, and
+    // since the old loop threw on the first error, one blank row blocked
+    // every other (valid) row from syncing too. Only sync rows that actually
+    // have a real grade entered; a row that regresses back to blank is
+    // treated as deleted from the cloud, same as removing it outright.
+    function isSyncableGwaRow(r) {
+        if (r.grade === '' || r.grade == null) return false;
+        const n = +r.grade;
+        return !isNaN(n) && n > 0;
+    }
+
     async function pushGwaCalc(newList) {
         const userId = await getUserId();
         if (!userId) return;
         const supabase = await getClient();
-        const newIds = new Set(newList.map(r => r.id));
+        const syncable = newList.filter(isSyncableGwaRow);
+        const newIds = new Set(syncable.map(r => r.id));
         const toDelete = [...last.gwaCalc.keys()].filter(id => !newIds.has(id));
         try {
             if (toDelete.length) await supabase.from('gwa_calculator').delete().in('id', toDelete);
-            for (const r of newList) {
+            for (const r of syncable) {
                 if (!isUuid(r.id)) continue;
                 const { error } = await supabase.from('gwa_calculator').upsert(gwaLocalToRow(r, userId), { onConflict: 'id' });
                 if (error) throw error;
             }
-            last.gwaCalc = new Map(newList.map(r => [r.id, true]));
+            last.gwaCalc = new Map(syncable.map(r => [r.id, true]));
             clearSyncError('gwa');
         } catch (err) {
             console.warn('Cloud sync (GWA calculator) failed', err);
