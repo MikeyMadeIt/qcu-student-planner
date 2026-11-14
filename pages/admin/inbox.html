@@ -70,7 +70,13 @@
           </button>
         </div>
       </div>
-      <div id="admLoading" class="adm-loading"><i class="bi bi-hourglass-split"></i> Loading…</div>
+      <div id="admLoading" class="adm-loading" aria-busy="true" role="status">
+        <div class="skel-card" aria-hidden="true">
+          <div class="skel-row"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-75"></div><div class="skel skel-text w-50"></div></div></div>
+          <div class="skel-row"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-60"></div><div class="skel skel-text w-40"></div></div></div>
+          <div class="skel-row"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-90"></div><div class="skel skel-text w-50"></div></div></div>
+        </div>
+      </div>
       <div class="msg-list" id="admBody" hidden></div>
       <div id="admEmpty" class="empty-state" hidden>No messages have been sent yet.</div>
       <div id="admError" hidden></div>

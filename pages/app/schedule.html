@@ -87,7 +87,11 @@
           <input class="form-control sch-list-search" id="schSearchInput" placeholder="Search…" oninput="renderListView()" aria-label="Search subjects">
           <button class="btn btn-ghost btn-sm sch-list-archive-btn" id="schArchiveBtn" onclick="toggleArchivedView()" aria-label="Toggle archived subjects" aria-pressed="false"><i class="bi bi-archive me-1" aria-hidden="true"></i>Archived</button>
         </div>
-        <div id="schSubjectList" class="row g-3 stagger" role="list"></div>
+        <div id="schSubjectList" class="row g-3 stagger" role="list" aria-busy="true">
+          <div class="col-12 col-md-6 col-lg-4" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-60"></div><div class="skel skel-text w-40"></div></div></div>
+          <div class="col-12 col-md-6 col-lg-4" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-60"></div><div class="skel skel-text w-40"></div></div></div>
+          <div class="col-12 col-md-6 col-lg-4" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-60"></div><div class="skel skel-text w-40"></div></div></div>
+        </div>
       </div>
     </div>
 
