@@ -115,14 +115,29 @@ check whether `SERVICE_ROLE_KEY` is set at all. If it instead reports
 `permission denied for table ...`, that means the key resolves fine but
 0007 above has not been applied yet.
 
-No CORS allow-list is hard-coded beyond `*`, because this is a static site
-with no fixed deployment origin (see the root `README.md` — GitHub Pages,
-Netlify, Vercel, etc. are all supported). The real access boundary is not CORS
-here, it's: a valid signed-in session JWT, re-verified admin status, and the
+The CORS allow-list is configured via the `ALLOWED_ORIGIN` secret (Edge
+Functions → Secrets), not hard-coded, since this is a static site that can be
+deployed to more than one place (see the root `README.md` — GitHub Pages,
+Netlify, Vercel, etc. are all supported). Set it to the exact origin(s) you
+actually deploy to — comma-separated if there's more than one (e.g. a
+production domain plus a Vercel preview URL) — for example:
+
+```
+ALLOWED_ORIGIN=https://qcu-planner.vercel.app,https://your-custom-domain.com
+```
+
+If unset, the function falls back to `null` as the allowed origin, which
+blocks all browser-based cross-origin calls rather than defaulting open.
+
+The real access boundary is not CORS, though — CORS only stops *browser
+JavaScript on other sites* from reading the response; it does nothing against
+a direct `curl`/script call with a stolen or forged bearer token. That
+boundary is: a valid signed-in session JWT, re-verified admin status, and the
 database-side `is_admin()` + `'rejected'`-only checks inside the RPC the
-function calls. If you deploy this behind a single known domain, you may
-tighten `Access-Control-Allow-Origin` in `index.ts` accordingly, but it is not
-required for the security model to hold.
+function calls. Restricting `ALLOWED_ORIGIN` is still worth doing (defense in
+depth, and it keeps a compromised third-party site from silently proxying
+authenticated admin requests through a signed-in admin's browser), it's just
+not the thing actually keeping this endpoint safe.
 
 ## 3. What the deletion flow actually does, end to end
 
