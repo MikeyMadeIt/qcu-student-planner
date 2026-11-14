@@ -39,7 +39,7 @@
         <button type="button" class="btn btn-ghost btn-sm active" id="inboxFilterAll" data-filter="all">All</button>
         <button type="button" class="btn btn-ghost btn-sm" id="inboxFilterUnread" data-filter="unread">Unread</button>
       </div>
-      <div id="inboxLoading" class="adm-loading" hidden><i class="bi bi-hourglass-split"></i> Loading…</div>
+      <div id="inboxLoading" class="msg-list" hidden aria-hidden="true"></div>
       <div class="msg-list-empty" id="inboxListState" role="status" aria-live="polite" hidden>
         <i class="bi bi-chat-square-text" aria-hidden="true"></i>
         <strong>No messages</strong>
@@ -73,6 +73,7 @@
 <script src="../../assets/js/core/custom-select.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
+<script src="../../assets/js/core/loading.js"></script>
 <script>renderShell('inbox');</script>
 <script type="module" src="../../assets/js/modules/student-inbox.js"></script>
 </body>

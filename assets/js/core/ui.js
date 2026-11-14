@@ -115,6 +115,7 @@ function confirmAction(opts) {
     btn.style.background = danger ? '#fb7185' : 'linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)))';
     const freshBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(freshBtn, btn);
+    let confirmed = false;
     freshBtn.addEventListener('click', () => {
         const reasonValue = reasonInput.value.trim();
         if (reasonField && reasonField.required && !reasonValue) {
@@ -123,6 +124,12 @@ function confirmAction(opts) {
             reasonInput.focus();
             return;
         }
+        // Guard against a rapid double-click firing this listener twice
+        // before the modal's hide animation actually removes the button
+        // from view — without this, onConfirm (often an async DB/network
+        // call) could run twice for a single intended action.
+        if (confirmed) return;
+        confirmed = true;
         bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
         if (onConfirm)
             onConfirm(reasonValue);

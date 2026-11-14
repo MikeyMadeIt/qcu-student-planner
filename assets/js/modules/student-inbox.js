@@ -159,18 +159,41 @@ async function toggleRead(messageId) {
     Toast.show(row.read_at ? 'Marked as read.' : 'Marked as unread.', 'accent', 'bi-check-circle-fill');
 }
 
+// Skeleton rows shaped like the real .msg-row buttons (icon + two lines +
+// a time slot) so the list doesn't jump when real messages replace them.
+function renderInboxSkeleton() {
+    const loading = document.getElementById('inboxLoading');
+    if (!window.Loading) { loading.innerHTML = ''; return; }
+    let html = '';
+    for (let i = 0; i < 5; i++) {
+        html += `<div class="msg-row msg-row-skel" aria-hidden="true">
+            <span class="msg-row-icon"><span class="skel skel-circle" style="width:1.6rem;height:1.6rem"></span></span>
+            <span class="msg-row-body">
+                <span class="skel skel-text" style="width:${i % 2 ? '30%' : '45%'};height:.7rem"></span>
+                <span class="skel skel-text" style="width:${70 - i * 6}%"></span>
+            </span>
+            <span class="msg-row-side"><span class="skel skel-text" style="width:2.5rem;height:.7rem"></span></span>
+        </div>`;
+    }
+    loading.innerHTML = html;
+}
+
 async function loadInbox() {
     const loading = document.getElementById('inboxLoading');
     const list = document.getElementById('inboxList');
     const state = document.getElementById('inboxListState');
 
     loading.hidden = false;
+    loading.setAttribute('aria-busy', 'true');
+    renderInboxSkeleton();
     list.hidden = true;
     state.hidden = true;
 
     const result = await StudentService.listInboxMessages({ pageSize: 100 });
 
     loading.hidden = true;
+    loading.removeAttribute('aria-busy');
+    loading.innerHTML = '';
 
     if (!result.ok) {
         if (result.message === 'Not signed in.') {
@@ -178,7 +201,9 @@ async function loadInbox() {
             return;
         }
         state.hidden = false;
-        state.innerHTML = `<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><strong>Could not load your inbox</strong><span>${escHtml(result.message)}</span>`;
+        state.innerHTML = `<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><strong>Could not load your inbox</strong><span>${escHtml(result.message)}</span><button type="button" class="btn btn-ghost btn-sm mt-2" id="inboxRetryBtn">Retry</button>`;
+        const retryBtn = document.getElementById('inboxRetryBtn');
+        if (retryBtn) retryBtn.addEventListener('click', loadInbox);
         return;
     }
 
