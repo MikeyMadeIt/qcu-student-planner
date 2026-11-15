@@ -78,9 +78,8 @@ Everything listed under Students and Administrators is implemented. Pages that e
 
 ### Not implemented yet
 
-- AI Reviewer and AI Summarizer (student pages show a coming-soon notice).
-- Student Announcements and Legal Policies pages (coming-soon notice).
-- Administrator Announcements, Email, Reports and Settings pages (placeholder pages).
+- Legal and Policies page (coming-soon notice).
+- Administrator Email, Reports and Settings pages (placeholder pages).
 - Curriculum PDFs for BSMA and BSCpE. Both programs are listed but have no file yet.
 
 ## Screenshots
