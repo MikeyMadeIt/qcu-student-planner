@@ -59,9 +59,9 @@ qcu-student-planner/
 │   ├── auth/   login, register, forgot/reset password, verify, pending, callback, finish-profile
 │   ├── app/    dashboard, schedule, calendar, tasks, grades, attendance, notes, syllabus,
 │   │           curriculum, university, wallpaper, inbox, notifications, settings,
-│   │           AI tools (flashcards, quiz, study assistant, reviewer, summarizer), help, report
+│   │           AI tools (flashcards, quiz, study assistant), help, report
 │   └── admin/  dashboard, verification, users, rejected, activity-log, inbox, tickets,
-│               announcements, email, settings, reports
+│               email, settings, reports
 ├── assets/
 │   ├── css/    base/ (reset, typography, variables, utilities)  layout/  components/
 │   │           pages/ (one stylesheet per page)  themes/ (light, dark, amoled, accents)
