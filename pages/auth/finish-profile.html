@@ -24,7 +24,7 @@
     </button>
 
     <main class="auth-main" id="main">
-        <div class="auth-card">
+        <div class="auth-card auth-card-wide">
             <a class="auth-brand" href="login.html">
                 <span class="dot" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
                 <span>QCU Student Planner</span>
@@ -69,10 +69,54 @@
                     <p class="auth-error" id="yearLevel-err" hidden></p>
                 </div>
 
+                <p class="step-sub">Before you continue, please read the Terms and Conditions and Privacy Notice below.</p>
+
+                <section class="legal-block" aria-labelledby="terms-box-title">
+                    <h3 class="legal-title" id="terms-box-title">Terms and Conditions</h3>
+                    <div class="legal-box" id="terms-box" tabindex="0" role="region" aria-labelledby="terms-box-title">
+                        <div class="legal-text">
+                            <h4>1. Draft notice</h4>
+                            <p>These Terms and Conditions are a draft prepared for the QCU Student Planner. They must be reviewed and approved by the responsible university offices before the application is deployed to students.</p>
+                            <h4>2. Purpose of the application</h4>
+                            <p>The planner helps students organize class schedules, tasks, grades, attendance records and notes. It is a personal productivity tool and is not an official record of the university.</p>
+                            <h4>3. Acceptable use</h4>
+                            <p>You agree to use the planner only for lawful, personal academic purposes. You must not attempt to access another person's account or records, interfere with the operation of the service, or submit false or misleading information.</p>
+                            <h4>4. Account responsibility</h4>
+                            <p>You are responsible for keeping your Google account secure and for activity that takes place under your account. Notify an administrator if you believe your account has been accessed without permission.</p>
+                            <h4>5. Academic information</h4>
+                            <p>Schedules, grades, attendance and notes that you enter remain your own responsibility. You should check them against official university records, because the planner may contain errors or omissions that you introduced or that result from a software fault.</p>
+                            <h4>6. Account approval</h4>
+                            <p>New accounts are not active until an administrator has reviewed the program, campus and year level you submitted. An account may be declined, suspended or removed if the information cannot be verified or if these terms are not followed.</p>
+                            <h4>7. Changes to these terms</h4>
+                            <p>These terms may be revised before and after launch. Continued use of the planner after a revision means you accept the updated terms.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="legal-block" aria-labelledby="privacy-box-title">
+                    <h3 class="legal-title" id="privacy-box-title">Privacy Notice</h3>
+                    <div class="legal-box" id="privacy-box" tabindex="0" role="region" aria-labelledby="privacy-box-title">
+                        <div class="legal-text">
+                            <h4>1. Draft notice</h4>
+                            <p>This Privacy Notice is a draft that describes the intended handling of information. It has not been reviewed by the university's data protection officer and must be confirmed before production deployment.</p>
+                            <h4>2. Information the system is intended to collect</h4>
+                            <p>To create an account the system collects the name and email address from your Google account, along with your academic program, campus and year level. Your student number is not collected.</p>
+                            <h4>3. Why the information is collected</h4>
+                            <p>Your Google account identifies your account. Your name, program, campus and year level help administrators tell student accounts apart and verify that each account belongs to an enrolled student before access is granted.</p>
+                            <h4>4. Handling and access</h4>
+                            <p>Registration details are intended to be visible only to authorized administrators who review accounts, and to you. They are not intended to be sold or used for advertising. The exact storage, retention period and security safeguards will be described here once they are decided and verified.</p>
+                            <h4>5. Your choices</h4>
+                            <p>You may ask to view, correct or delete the information tied to your account. The procedure and the contact details for these requests will be published by the university before launch.</p>
+                            <h4>6. Questions</h4>
+                            <p>Until the final contact details are published, direct questions about this notice to the administrators responsible for the QCU Student Planner.</p>
+                        </div>
+                    </div>
+                </section>
+
                 <div class="auth-field">
                     <label class="auth-check" for="acceptTerms">
                         <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false">
-                        <span>I have read and agree to the <a class="auth-link" href="register.html#terms-box-title">Terms and Conditions</a> and <a class="auth-link" href="register.html#privacy-box-title">Privacy Notice</a>.</span>
+                        <span>I have read and agree to the <a class="auth-link" href="#terms-box-title">Terms and Conditions</a> and <a class="auth-link" href="#privacy-box-title">Privacy Notice</a>.</span>
                     </label>
                     <p class="auth-error" id="acceptTerms-err" hidden></p>
                 </div>
