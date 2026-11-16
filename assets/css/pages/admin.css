@@ -378,6 +378,8 @@ a.adm-stat-card:focus-visible {
 .adm-recipient-list {
     max-height: 13rem;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 4px;
