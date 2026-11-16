@@ -41,9 +41,8 @@ Everything listed under Students and Administrators is implemented. Pages that e
 
 ### Accounts and access
 
-- Registration with email and password through a multi-step form (name, email, password, program, campus, year level).
-- Sign in with Google. Google users who are missing profile details finish them on a "finish profile" page.
-- Email confirmation links, forgot password and reset password pages.
+- Sign in and sign up with Google (Supabase Auth). There is no email/password login, registration, or password reset — Google handles identity.
+- Users who are missing profile details (full name, program, campus, year level) finish them on a "finish profile" page after their first Google sign-in, including accepting the Terms and Conditions and Privacy Notice shown there.
 - Every new account starts as pending. A pending account sees a waiting page until an administrator approves or rejects it. Rejected accounts see the rejection reason. Suspended accounts are blocked.
 
 ### Students
@@ -78,7 +77,7 @@ Everything listed under Students and Administrators is implemented. Pages that e
 
 ### Not implemented yet
 
-- Legal and Policies page (coming-soon notice).
+- Student Legal Policies page (coming-soon notice).
 - Administrator Email, Reports and Settings pages (placeholder pages).
 - Curriculum PDFs for BSMA and BSCpE. Both programs are listed but have no file yet.
 
@@ -129,7 +128,7 @@ Screenshots live in `docs/screenshots/`.
 | Bootstrap Icons 1.11.3 | Icons across the app, loaded from jsDelivr. |
 | Chart.js 4.4.4 | Charts on the admin dashboard, loaded from jsDelivr. |
 | PDF.js 3.11.174 | Renders curriculum PDFs in the browser, loaded from cdnjs. |
-| Supabase Authentication | Email and password sign-in, Google sign-in, sessions, email confirmation and password reset, through `supabase-js` 2.45.4. |
+| Supabase Authentication | Google sign-in and session management, through `supabase-js` 2.45.4. |
 | Supabase PostgreSQL | Stores profiles, planner data, AI history, messages, support tickets and the audit log. Admin actions run as database functions. |
 | Supabase Row Level Security | Limits every table to the signed-in, approved owner, and gives administrators their own access. See [Database and security](#database-and-security). |
 | Supabase Edge Functions | `admin-delete-account` deletes rejected accounts. `ai-study` serves the AI tools. |
@@ -245,7 +244,7 @@ qcu-student-planner/
 ├── vercel.json           Redirects, security headers and cache rules for Vercel
 ├── package.json          `start` script only, no dependencies
 ├── pages/
-│   ├── auth/             Login, register, verify, pending, callback, finish-profile, forgot and reset password
+│   ├── auth/             Login, pending, callback, finish-profile (Google OAuth only)
 │   ├── app/              Student pages (dashboard, schedule, tasks, notes, calendar, grades,
 │   │                     attendance, curriculum, AI tools, inbox, notifications, report, help,
 │   │                     wallpaper, settings, and the coming-soon pages)
@@ -267,8 +266,7 @@ qcu-student-planner/
 │   │   ├── modules/      One script per page, plus shared admin and messaging helpers
 │   │   └── utils/        DOM, dates, validation, sanitizing, auth routing, AI file upload
 │   ├── data/             Registration dropdown options (programs, campuses)
-│   ├── icons/            PWA icons (regular and maskable)
-│   └── images/           Branding, campus and college images
+│   └── icons/            PWA icons (regular and maskable)
 ├── supabase/
 │   ├── migrations/       Numbered SQL migrations (0001 to 0025)
 │   ├── functions/        admin-delete-account Edge Function
@@ -292,7 +290,6 @@ These are safe to ship in browser code.
 |---|---|---|
 | `supabaseUrl` | `assets/js/core/config.js` | Your Supabase project URL. |
 | `supabaseAnonKey` | `assets/js/core/config.js` | The anon (public) key. Access is limited by Row Level Security. |
-| `passwordMinLength` | `assets/js/core/config.js` | Minimum password length on the forms (8). |
 | `studentEmailPattern` | `assets/js/core/config.js` | Email format that admins see checked on the pending approvals page. |
 | `registrationOptionsUrl` | `assets/js/core/config.js` | Path to the registration dropdown data. |
 
@@ -339,7 +336,7 @@ Supabase PostgreSQL stores everything the app saves.
 
 There are two roles, `student` and `admin`, and four account statuses: `pending`, `approved`, `rejected` and `suspended`.
 
-1. A student registers with email and password or signs in with Google. A database trigger creates the profile.
+1. A student signs in with Google. A database trigger creates the profile.
 2. If profile details are missing, the student completes them on the finish-profile page.
 3. The account stays `pending` and the student sees the waiting page.
 4. An administrator approves or rejects it from Pending approvals. Every status change goes through the `set_account_status` database function and is written to the audit log.
