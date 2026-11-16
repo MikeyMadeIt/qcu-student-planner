@@ -1,7 +1,6 @@
 // Front-end configuration (ES module). Contains no secrets.
 export const APP_CONFIG = Object.freeze({
     appName: 'QCU Student Planner',
-    passwordMinLength: 8,
     registrationOptionsUrl: '../../assets/data/registration-options.json',
     registrationPreviewFlag: 'qcu.registrationPreview',
     supabaseUrl: 'https://pjafmgabajqqozdxhzvz.supabase.co',
@@ -9,13 +8,9 @@ export const APP_CONFIG = Object.freeze({
     studentEmailPattern: /^[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*\.[a-z]+(?:-[a-z]+)*@gmail\.com$/i,
     routes: Object.freeze({
         login: 'login.html',
-        register: 'register.html',
         pending: 'pending.html',
-        verify: 'verify.html',
         callback: 'callback.html',
         finishProfile: 'finish-profile.html',
-        forgotPassword: 'forgot-password.html',
-        resetPassword: 'reset-password.html',
         dashboard: '../app/dashboard.html',
     }),
     adminRoutes: Object.freeze({
