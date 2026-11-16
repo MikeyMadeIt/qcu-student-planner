@@ -528,7 +528,7 @@ function renderDayEventRow(e, dateStr) {
     onkeydown="if(event.key==='Enter')handleDayEventClick('${e.type}','${e.id}','${dateStr || ''}')">
     <div class="day-detail-color" style="background:${e.color}" aria-hidden="true"></div>
     <div class="flex-grow-1">
-      <div style="font-weight:700;font-size:.85rem;${e.type === 'task' && e._obj && e._obj.status === 'completed' ? 'text-decoration:line-through;opacity:.6' : ''}">${escapeHtml(e.title)}</div>
+      <div style="font-weight:700;font-size:.85rem;${e.type === 'task' && e._obj && computeStatus(e._obj) === 'completed' ? 'text-decoration:line-through;opacity:.6' : ''}">${escapeHtml(e.title)}</div>
       <div class="text-faint" style="font-size:.73rem">
         ${timeStart ? `<span>${timeStart}</span>` : ''}
         ${timeEnd ? `<span style="display:block">${timeEnd}</span>` : ''}
@@ -616,7 +616,7 @@ function renderAgendaItem(e, dateStr) {
     onkeydown="if(event.key==='Enter')handleDayEventClick('${e.type}','${e.id}','${dateStr}')">
     <div class="agenda-item-time">${_aTimeStart ? _aTimeStart + (_aTimeEnd ? '<br>' + _aTimeEnd : '') : 'All day'}</div>
     <div class="agenda-item-body">
-      <div class="agenda-item-title ${e.type === 'task' && e._obj && e._obj.status === 'completed' ? 'completed-item' : ''}">${escapeHtml(e.title)}</div>
+      <div class="agenda-item-title ${e.type === 'task' && e._obj && computeStatus(e._obj) === 'completed' ? 'completed-item' : ''}">${escapeHtml(e.title)}</div>
       ${e.room ? `<div class="agenda-item-meta">${escapeHtml(e.room)}</div>` : (e.sub ? `<div class="agenda-item-meta">${escapeHtml(e.sub)}</div>` : '')}
     </div>
 
