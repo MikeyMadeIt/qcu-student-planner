@@ -91,44 +91,16 @@ function logQuickAttendance(subjectId, dateStr, status) {
 // Grade helpers
 
 function getSubjectGradeAvg(subjectId) {
-    const grades = DB.getGrades();
-    const g = grades.find(x => x.subjectId === subjectId);
-    if (!g || !g.components || !g.components.length)
+    // Same formula as the Grades page (services/gwa.js). Returns the final percentage or null.
+    const g = DB.getGrades().find(x => x.subjectId === subjectId);
+    if (!g)
         return null;
-    let totalWeight = 0, weightedSum = 0;
-    g.components.forEach(c => {
-        const w = parseFloat(c.weight) || 0;
-        let score = null;
-        if (Array.isArray(c.assessments) && c.assessments.length) {
-            const scored = c.assessments.filter(a => a.score != null);
-            if (scored.length) {
-                const avg = scored.reduce((s, a) => {
-                    const maxItems = a.totalItems || 100;
-                    return s + (a.score / maxItems * 100);
-                }, 0) / scored.length;
-                score = avg;
-            }
-        }
-        else if (c.score != null && c.score !== '') {
-            score = parseFloat(c.score);
-        }
-        if (score != null && w > 0) {
-            weightedSum += score * (w / 100);
-            totalWeight += w;
-        }
-    });
-    if (totalWeight === 0)
-        return null;
-    return Math.round((weightedSum / totalWeight) * 100) / 100;
+    return computeSubjectFinalPct(normalizeGradeRecord(g).components);
 }
 
 function getSubjectAttendanceRate(subjectId) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId && r.status !== 'No Classes');
-    if (!records.length)
-        return null;
-    const present = records.filter(r => r.status === 'Present' || r.status === 'Late' || r.status === 'Excused').length;
-    return Math.round(present / records.length * 100);
+    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId)).rate;
 }
 
 // Init
@@ -1164,7 +1136,7 @@ function renderListView() {
         <div class="sch-subject-stats">
           <div class="sch-subject-stat">
             <span class="sch-subject-stat-lbl">Grade</span>
-            <span class="sch-subject-stat-val ${gradeAvg !== null && gradeAvg >= 75 ? 'stat-good' : gradeAvg !== null && gradeAvg < 75 ? 'stat-bad' : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : '—'}</span>
+            <span class="sch-subject-stat-val ${gradeAvg !== null ? (isPassingPct(gradeAvg) ? 'stat-good' : 'stat-bad') : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : '—'}</span>
           </div>
           <div class="sch-subject-stat-div" aria-hidden="true"></div>
           <div class="sch-subject-stat">
@@ -1241,7 +1213,7 @@ function showSubjectDetail(id) {
     <div class="sch-subject-stats mb-3">
       <div class="sch-subject-stat">
         <span class="sch-subject-stat-lbl">Grade</span>
-        <span class="sch-subject-stat-val ${gradeAvg !== null && gradeAvg >= 75 ? 'stat-good' : gradeAvg !== null && gradeAvg < 75 ? 'stat-bad' : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : 'Not available'}</span>
+        <span class="sch-subject-stat-val ${gradeAvg !== null ? (isPassingPct(gradeAvg) ? 'stat-good' : 'stat-bad') : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : 'Not available'}</span>
       </div>
       <div class="sch-subject-stat-div" aria-hidden="true"></div>
       <div class="sch-subject-stat">

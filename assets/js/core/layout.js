@@ -206,7 +206,7 @@ function getTaskNotifications() {
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const horizon = new Date(todayStart.getTime() + 1000 * 60 * 60 * 24 * 3);
     return DB.getActiveTasks()
-        .filter(t => t && t.status !== 'completed' && t.dueDate)
+        .filter(t => t && t.dueDate && (typeof computeStatus === 'function' ? computeStatus(t) !== 'completed' : t.status !== 'completed'))
         .map(t => ({ task: t, due: new Date(t.dueDate + 'T' + (t.dueTime || '23:59')) }))
         .filter(x => !isNaN(x.due) && x.due <= horizon)
         .sort((a, b) => a.due - b.due)
