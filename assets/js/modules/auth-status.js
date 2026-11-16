@@ -1,4 +1,4 @@
-// Status pages: pending verification and email verification.
+// Status page: pending account approval.
 
 import { AuthService } from '../services/auth-service.js';
 import { APP_CONFIG } from '../core/config.js';
@@ -31,25 +31,6 @@ async function checkVerification(button, output) {
     setLoading(button, false);
 }
 
-async function initVerifyPage(output) {
-    const title = $('[data-status-title]');
-    const token = new URLSearchParams(location.search).get('token');
-
-    if (!token) {
-        title.textContent = 'Verification link is missing';
-        output.hidden = false;
-        output.textContent = 'Open the verification link from your email, or request a new one after signing in.';
-        return;
-    }
-
-    const result = await AuthService.confirmEmail({ token });
-
-    title.textContent = 'Verification unavailable';
-    output.hidden = false;
-    output.className = 'auth-alert info';
-    output.textContent = result.message;
-}
-
 export function initStatusPage() {
     const page = document.body.dataset.statusPage;
 
@@ -57,11 +38,6 @@ export function initStatusPage() {
 
     const output = $('[data-status-message]');
     const button = $('[data-status-action]');
-
-    if (page === 'verify') {
-        initVerifyPage(output);
-        return;
-    }
 
     if (page === 'pending' && consumeRegistrationPreviewFlag()) {
         showSubmittedState();
