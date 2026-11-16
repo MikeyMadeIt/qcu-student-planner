@@ -3,12 +3,11 @@
    - Cache-first only for images, icons and pinned CDN files.
    - Auth and admin pages and non-GET requests are never cached. */
 
-const CACHE = 'qcu-planner-v7';
+const CACHE = 'qcu-planner-v8';
 const PRECACHE = [
     'manifest.json',
     'assets/icons/icon-192.png',
     'assets/icons/icon-512.png',
-    'assets/images/branding/qcu-logo.webp',
 ];
 const NEVER_CACHE = ['/pages/auth/', '/pages/admin/'];
 self.addEventListener('install', (event) => {

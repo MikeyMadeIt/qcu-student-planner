@@ -20,10 +20,6 @@ function readableAuthError(error) {
 
     const msg = String(error.message || '').toLowerCase();
 
-    if (msg.includes('invalid login credentials')) return 'Incorrect email or password.';
-    if (msg.includes('email not confirmed')) return 'Please confirm your email before logging in.';
-    if (msg.includes('user already registered') || msg.includes('already registered')) return 'An account with this email already exists.';
-    if (msg.includes('password should be at least')) return 'Your password does not meet the minimum requirements.';
     if (msg.includes('rate limit')) return 'Too many attempts. Please wait a moment and try again.';
     if (msg.includes('failed to fetch') || msg.includes('network')) return 'Could not reach the server. Check your connection and try again.';
     if (msg.includes('permission denied') || error.code === '42501') {
@@ -67,64 +63,6 @@ function readableOAuthError(error) {
 }
 
 export const AuthService = {
-    async signIn({ email, password }) {
-        try {
-            const supabase = getSupabase();
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) return fail(readableAuthError(error), 'AUTH_ERROR');
-
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('role, account_status, full_name, rejection_reason, course, year_level, school')
-                .eq('id', data.user.id)
-                .maybeSingle();
-
-            if (profileError || !profile) {
-                await supabase.auth.signOut();
-                return fail('We could not load your account. Please try again or contact an administrator.', 'PROFILE_ERROR');
-            }
-
-            const profileIncomplete = !profile.course || !profile.year_level || !profile.school;
-
-            return ok({
-                userId: data.user.id,
-                role: profile.role,
-                accountStatus: profile.account_status,
-                fullName: profile.full_name,
-                rejectionReason: profile.rejection_reason,
-                needsProfileDetails: profile.account_status === 'pending' && profileIncomplete,
-            });
-        } catch (error) {
-            return fail(readableAuthError(error), 'AUTH_ERROR');
-        }
-    },
-
-    async signUp({ fullName, email, password, program, campus, yearLevel }) {
-        try {
-            const supabase = getSupabase();
-
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        full_name: fullName || null,
-                        course: program || null,
-                        year_level: yearLevel || null,
-                        school: campus || null,
-                    },
-                },
-            });
-
-            if (error) return fail(readableAuthError(error), 'AUTH_ERROR');
-
-            return ok({ userId: data.user ? data.user.id : null, detailsSaved: true });
-        } catch (error) {
-            return fail(readableAuthError(error), 'AUTH_ERROR');
-        }
-    },
-
     async signInWithGoogle() {
         try {
             const supabase = getSupabase();
@@ -190,34 +128,6 @@ export const AuthService = {
         }
     },
 
-    async requestPasswordReset({ email }) {
-        try {
-            const supabase = getSupabase();
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${location.origin}${location.pathname.replace(/forgot-password\.html$/, 'reset-password.html')}`,
-            });
-
-            if (error) return fail(readableAuthError(error), 'AUTH_ERROR');
-
-            return ok({ message: 'If an account exists for that email, a reset link has been sent.' });
-        } catch (error) {
-            return fail(readableAuthError(error), 'AUTH_ERROR');
-        }
-    },
-
-    async updatePassword({ password }) {
-        try {
-            const supabase = getSupabase();
-            const { error } = await supabase.auth.updateUser({ password });
-
-            if (error) return fail(readableAuthError(error), 'AUTH_ERROR');
-
-            return ok({});
-        } catch (error) {
-            return fail(readableAuthError(error), 'AUTH_ERROR');
-        }
-    },
-
     async checkVerificationStatus() {
         try {
             const supabase = getSupabase();
@@ -250,19 +160,6 @@ export const AuthService = {
             return { ok: true, message: 'Your account is still awaiting administrator review.' };
         } catch (error) {
             return { ok: true, message: 'We could not check your status right now. Please try again shortly.' };
-        }
-    },
-
-    async confirmEmail({ token }) {
-        try {
-            const supabase = getSupabase();
-            const { error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'email' });
-
-            if (error) return { ok: true, message: 'This verification link is invalid or has expired.' };
-
-            return { ok: true, message: 'Your email is verified. Your account still needs administrator approval before you can log in.' };
-        } catch (error) {
-            return { ok: true, message: 'This verification link is invalid or has expired.' };
         }
     },
 
