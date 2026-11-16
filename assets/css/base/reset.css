@@ -6,12 +6,28 @@
     box-sizing: border-box;
 }
 
-html,
+html {
+    max-width: 100%;
+    /* No explicit height/overflow-y here: the root element must be left to
+       its default sizing so the browser's "overflow propagation" rule (CSS
+       Overflow Module §3) applies — the body's overflow is what actually
+       scrolls the viewport. Explicitly setting height:100% + overflow-y on
+       BOTH html and body turns the body into its own independent scroll
+       container instead of the one that drives the visual viewport; on
+       touch devices that extra, slightly-mismatched scroll box is what
+       produces the "scrolls, stops dead, needs a second swipe" feel at
+       whatever element happens to sit at the container's inner edge. */
+}
+
 body {
-    height: 100%;
     max-width: 100%;
     overflow-x: hidden;
-    overflow-y: visible;
+    /* Stops the rubber-band/bounce overscroll effect at the top and bottom
+       of the page (Chrome/Edge/Firefox everywhere, and Mobile Safari too
+       once the matching viewport-fit meta + env() handling is in place).
+       This only removes the bounce; it does not create a second scroll
+       container and does not reintroduce the earlier stuck-scroll bug. */
+    overscroll-behavior-y: none;
 }
 
 body {
@@ -23,6 +39,23 @@ body {
     min-height: 100vh;
     transition: background .4s var(--ease), color .3s var(--ease);
     -webkit-font-smoothing: antialiased;
+}
+
+/* `background-attachment: fixed` forces the browser to repaint the whole
+   viewport-sized background on every scroll frame instead of letting it
+   scroll with the compositor, since a fixed background can't live on its
+   own GPU layer the way a fixed *element* can. Desktop GPUs absorb that
+   cost invisibly; on touch devices it is the single biggest cause of the
+   "scroll pauses, then catches up" stutter users feel mid-swipe — the
+   repaint can't keep up with one continuous touch gesture, so the frame
+   appears to stick until the browser finishes catching up, which reads as
+   getting stuck on whatever card happens to be in view at that moment.
+   Touch/coarse-pointer devices get a plain scrolling background instead;
+   the visual (the gradient itself) is unchanged, only how it's painted. */
+@media (pointer: coarse) {
+    body {
+        background-attachment: scroll;
+    }
 }
 
 img,
@@ -39,21 +72,10 @@ a {
     background: rgba(var(--accent),.35);
 }
 
-/* scrollbar */
-
-::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(var(--accent),.35);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
+/* Scrollbars are hidden everywhere (see the global rule in layout/grid.css,
+   loaded after this file so it wins the cascade) while scrolling itself —
+   wheel, trackpad, touch and keyboard — stays fully enabled; nothing here
+   sets `overflow: hidden` or otherwise blocks scrolling. */
 
 a:focus-visible,
 button:focus-visible,

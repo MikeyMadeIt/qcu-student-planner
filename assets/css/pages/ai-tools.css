@@ -369,6 +369,8 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     min-width: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding: .25rem .25rem 1rem;
     display: flex;
     flex-direction: column;
@@ -662,6 +664,8 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
 
     .aqm-history-list {
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         min-height: 0;
     }
 }
@@ -1193,6 +1197,8 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: .15rem;
