@@ -20,8 +20,11 @@ function renderSemesterOverview() {
     if (labelEl)
         labelEl.textContent = sem.schoolYear + ' \u00B7 ' + sem.name;
     const start = new Date(sem.startDate + 'T00:00:00');
-    const end = new Date(sem.endDate + 'T00:00:00');
+    // The end date is the last day of the semester, so it runs until the end of that day.
+    const end = new Date(sem.endDate + 'T23:59:59');
     const now = new Date();
+    if (isNaN(start.getTime()) || isNaN(end.getTime()))
+        return;
     const totalMs = end - start;
     const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
     const pct = totalMs > 0 ? Math.round(elapsedMs / totalMs * 100) : 0;
@@ -84,14 +87,16 @@ function renderStatCards() {
     const semId = DB.getActiveSemesterId();
     const subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
     const tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
-    const done = tasks.filter(function (t) { return t.status === 'completed'; }).length;
+    const taskCounts = computeTaskCounts(tasks);
+    const done = taskCounts.completed;
     const syllabusCoverage = computeSyllabusCoverage(semId);
+    const totalUnits = subjects.reduce(function (sum, s) { return sum + (+s.units || 0); }, 0);
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
     var subjectsHint = document.getElementById('statSubjectsHint');
     if (subjectsHint)
         subjectsHint.textContent = !subjects.length ? 'No data yet'
-            : syllabusCoverage !== null ? 'Syllabus ' + syllabusCoverage + '% covered'
-                : 'Active this semester';
+            : syllabusCoverage !== null ? totalUnits + ' units \u00B7 Syllabus ' + syllabusCoverage + '%'
+                : totalUnits + ' units this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
@@ -149,63 +154,13 @@ function animateCountUp(id, from, to, duration, fmt) {
     requestAnimationFrame(step);
 }
 
-var GRADE_TABLE_DASH = [
-    { point: 1.00, min: 99 }, { point: 1.25, min: 96 }, { point: 1.50, min: 93 },
-    { point: 1.75, min: 90 }, { point: 2.00, min: 87 }, { point: 2.25, min: 84 },
-    { point: 2.50, min: 81 }, { point: 2.75, min: 78 }, { point: 3.00, min: 75 },
-    { point: 5.00, min: 0 },
-];
-
-function pctToGWAPoint(pct) {
-    if (pct === null || isNaN(pct))
-        return null;
-    for (var i = 0; i < GRADE_TABLE_DASH.length; i++) {
-        if (pct >= GRADE_TABLE_DASH[i].min)
-            return GRADE_TABLE_DASH[i].point;
-    }
-    return 5.00;
-}
-
-function compAvgDash(c) {
-    if (Array.isArray(c.assessments) && c.assessments.length) {
-        var valid = c.assessments.filter(function (a) { return a.score !== null && a.score !== undefined && a.totalItems; });
-        if (!valid.length)
-            return null;
-        return valid.reduce(function (s, a) { return s + (a.score / a.totalItems * 100); }, 0) / valid.length;
-    }
-    if (c.score !== null && c.score !== undefined && c.score !== '')
-        return +c.score;
-    return null;
-}
-
+// Grade math comes from services/gwa.js (same table and formula as the Grades page).
 function computeDashSubjectGrades(semId, subjects) {
-    var allGrades = DB.getGrades();
-    return subjects.map(function (s) {
-        var g = allGrades.find(function (x) { return x.subjectId === s.id; });
-        if (!g || !Array.isArray(g.components) || !g.components.length)
-            return { subject: s, pct: null, point: null };
-        var scored = g.components.filter(function (c) { return compAvgDash(c) !== null && c.weight; });
-        if (!scored.length)
-            return { subject: s, pct: null, point: null };
-        var pct = scored.reduce(function (sum, c) { return sum + (compAvgDash(c) * (+c.weight || 0) / 100); }, 0);
-        return { subject: s, pct: pct, point: pctToGWAPoint(pct) };
-    });
+    return computeSemesterGWA(subjects, DB.getGrades()).rows;
 }
 
 function computeDashGWA(semId, subjects) {
-    var rows = computeDashSubjectGrades(semId, subjects).filter(function (r) { return r.point !== null; });
-    if (!rows.length)
-        return null;
-    var tu = rows.reduce(function (s, r) { return s + (+r.subject.units || 0); }, 0);
-    if (!tu)
-        return null;
-    return rows.reduce(function (s, r) { return s + r.point * (+r.subject.units || 0); }, 0) / tu;
-}
-
-function gwaToPerformancePct(gwaPoint) {
-    if (gwaPoint === null)
-        return null;
-    return Math.max(0, Math.round(((5 - gwaPoint) / 4) * 100));
+    return computeSemesterGWA(subjects, DB.getGrades()).gwa;
 }
 
 function renderGradePerformance() {
@@ -226,10 +181,11 @@ function renderGradePerformance() {
     }
     var display = withGrades.slice(0, 7);
     var html = display.map(function (r, i) {
-        var perfPct = gwaToPerformancePct(r.point);
-        var barColor = perfPct >= 90 ? 'linear-gradient(90deg,#34d399,#22d3ee)'
-            : perfPct >= 80 ? 'linear-gradient(90deg,rgb(var(--accent)),rgb(var(--accent-2)))'
-                : perfPct >= 75 ? 'linear-gradient(90deg,#b45309,#f472b6)'
+        var perfPct = Math.max(0, Math.min(100, Math.round(r.pct * 10) / 10));
+        r.perfPct = perfPct;
+        var barColor = r.point <= 1.75 ? 'linear-gradient(90deg,#34d399,#22d3ee)'
+            : r.point <= 2.75 ? 'linear-gradient(90deg,rgb(var(--accent)),rgb(var(--accent-2)))'
+                : r.point <= 3.00 ? 'linear-gradient(90deg,#b45309,#f472b6)'
                     : 'linear-gradient(90deg,#fb7185,#92400e)';
         var tooltip = escHtml(r.subject.desc || r.subject.code) + ' — ' + (r.pct !== null ? r.pct.toFixed(1) + '% raw · GWA ' + (r.point !== null ? r.point.toFixed(2) : '–') : '–');
         return '<div class="grade-bar-row" title="' + tooltip + '">' +
@@ -244,7 +200,7 @@ function renderGradePerformance() {
     wrap.innerHTML = html;
     setTimeout(function () {
         display.forEach(function (r, i) {
-            var perfPct = gwaToPerformancePct(r.point);
+            var perfPct = r.perfPct;
             var el = document.getElementById('gbar' + i);
             var pctEl = document.getElementById('gbarpct' + i);
             if (el)
@@ -258,25 +214,16 @@ function renderGradePerformance() {
 // 4. ATTENDANCE DONUT
 
 function computeAttendanceRate(semId) {
-    var records = DB.getAttendance().filter(function (r) { return r.semesterId === semId && r.status !== 'No Classes'; });
-    if (!records.length)
-        return null;
-    var present = records.filter(function (r) { return r.status === 'Present' || r.status === 'Excused'; }).length;
-    return Math.round(present / records.length * 100);
+    // Shared counting (services/attendance-stats.js): Present, Late and Excused all count as attended.
+    return summarizeAttendance(getLiveSemesterAttendance(semId)).rate;
 }
 
 function renderAttendanceDonut() {
     var semId = DB.getActiveSemesterId();
-    var all = DB.getAttendance().filter(function (r) { return r.semesterId === semId; });
-    var recs = all.filter(function (r) { return r.status !== 'No Classes'; });
-    var counts = {
-        Present: all.filter(function (r) { return r.status === 'Present'; }).length,
-        Late: all.filter(function (r) { return r.status === 'Late'; }).length,
-        Excused: all.filter(function (r) { return r.status === 'Excused'; }).length,
-        Absent: all.filter(function (r) { return r.status === 'Absent'; }).length,
-    };
-    var total = recs.length;
-    var pctNum = total ? Math.round((counts.Present + counts.Excused) / total * 100) : null;
+    var sum = summarizeAttendance(getLiveSemesterAttendance(semId));
+    var counts = { Present: sum.present, Late: sum.late, Excused: sum.excused, Absent: sum.absent };
+    var total = sum.counted;
+    var pctNum = sum.rate;
     var pctEl = document.getElementById('donutPct');
     if (pctEl)
         pctEl.textContent = pctNum !== null ? pctNum + '%' : '\u2013';
@@ -392,12 +339,14 @@ function renderUpcomingTasks() {
     var semId = DB.getActiveSemesterId();
     var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
     var today = todayKey();
-    var overdueTasks = DB.getTasks()
-        .filter(function (t) { return t.semesterId === semId && t.status !== 'completed' && t.dueDate < today; })
+    // Same status rules as the Tasks page: a task is overdue once its due date AND time have passed.
+    var semTasks = DB.getTasks().filter(function (t) { return t.semesterId === semId && t.dueDate; });
+    var overdueTasks = semTasks
+        .filter(function (t) { return computeStatus(t) === 'overdue'; })
         .sort(function (a, b) { return b.dueDate.localeCompare(a.dueDate); })
         .slice(0, 2);
-    var upcomingTasks = DB.getTasks()
-        .filter(function (t) { return t.semesterId === semId && t.status !== 'completed' && t.dueDate > today; })
+    var upcomingTasks = semTasks
+        .filter(function (t) { var st = computeStatus(t); return st !== 'completed' && st !== 'overdue' && t.dueDate >= today; })
         .sort(function (a, b) { return (a.dueDate + (a.dueTime || '')).localeCompare(b.dueDate + (b.dueTime || '')); })
         .slice(0, 3);
     if (!overdueTasks.length && !upcomingTasks.length) {
@@ -428,7 +377,7 @@ function renderUpcomingTasks() {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var daysLeft = Math.ceil((new Date(t.dueDate + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
             var dayClass = daysLeft <= 1 ? 'days-urgent' : daysLeft <= 3 ? 'days-soon' : 'days-ok';
-            var dayLabel = daysLeft === 1 ? '1 day left' : daysLeft + ' days left';
+            var dayLabel = daysLeft <= 0 ? 'Due today' : daysLeft === 1 ? '1 day left' : daysLeft + ' days left';
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash">' +
