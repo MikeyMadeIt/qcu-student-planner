@@ -408,33 +408,7 @@ function generateNextOccurrence(completedTask) {
 
 /* ── Status / Progress ── */
 
-function computeStatus(t) {
-    if (t.status === 'completed')
-        return 'completed';
-    var prog = computeProgress(t);
-    var now = new Date();
-    var due = t.dueDate ? new Date(t.dueDate + 'T' + (t.dueTime || '23:59') + ':00') : null;
-    var isOverdue = due && due < now;
-    if (t.status === 'not-started') {
-        if (isOverdue)
-            return 'overdue';
-        return 'not-started';
-    }
-    if (isOverdue && prog < 100)
-        return 'overdue';
-    if (prog === 100)
-        return 'completed';
-    if (prog > 0)
-        return 'in-progress';
-    return 'not-started';
-}
-
-function computeProgress(t) {
-    if (!t.checklist || t.checklist.length === 0)
-        return t.progress || 0;
-    var done = t.checklist.filter(function (c) { return c.done; }).length;
-    return Math.round((done / t.checklist.length) * 100);
-}
+// computeStatus / computeProgress live in services/task-stats.js (shared with Dashboard)
 
 function getDueBucket(t) {
     var status = computeStatus(t);
@@ -1003,7 +977,8 @@ function executeBulkMove() {
 
 function renderTasks() {
     var semId = DB.getActiveSemesterId();
-    var allTasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var storedTasks = DB.getTasks();
+    var allTasks = storedTasks.filter(function (t) { return t.semesterId === semId; });
     var changed = false;
     allTasks.forEach(function (t) {
         if (t.status === 'not-started')
@@ -1016,15 +991,14 @@ function renderTasks() {
             changed = true;
         }
     });
+    // allTasks holds the same objects as storedTasks, so saving storedTasks persists the auto-completions.
     if (changed)
-        DB.saveTasks(DB.getTasks());
-    var doneStat = allTasks.filter(function (t) { return computeStatus(t) === 'completed'; }).length;
-    var overdueStat = allTasks.filter(function (t) { return computeStatus(t) === 'overdue'; }).length;
-    var activeStat = allTasks.filter(function (t) { var s = computeStatus(t); return s !== 'completed'; }).length;
-    document.getElementById('statTotal').textContent = allTasks.length;
-    document.getElementById('statActive').textContent = activeStat;
-    document.getElementById('statDone').textContent = doneStat;
-    document.getElementById('statOverdue').textContent = overdueStat;
+        DB.saveTasks(storedTasks);
+    var counts = computeTaskCounts(allTasks);
+    document.getElementById('statTotal').textContent = counts.total;
+    document.getElementById('statActive').textContent = counts.active;
+    document.getElementById('statDone').textContent = counts.completed;
+    document.getElementById('statOverdue').textContent = counts.overdue;
     var q = document.getElementById('tkSearch').value.toLowerCase().trim();
     var filtered = allTasks.filter(function (t) {
         if (q) {
