@@ -1,69 +1,97 @@
-// SETTINGS.JS — includes Academic Semester Management
+// SETTINGS.JS — profile summary, appearance, notifications, academic
+// semester management, data/storage and sign-out. ES module (for
+// AuthService); every handler referenced from inline HTML attributes is
+// re-exposed on window at the bottom of the file.
+
+import { AuthService } from '../services/auth-service.js';
+import { getSupabase } from '../core/supabase-client.js';
 
 function initSettings() {
     const s = DB.getSettings();
-    document.getElementById('sName').value = s.name || '';
-    document.getElementById('sCourse').value = s.course || '';
-    document.getElementById('sYear').value = s.yearLevel || '';
-    document.getElementById('sSchool').value = s.school || '';
     highlightTheme(s.theme);
     renderAccentPicker(s.accent);
     renderNotifToggles(s.notifications);
     renderSemesterManager();
     initDisplayPrefs(s);
     renderSyncStatus();
-    initInstallCard();
+    loadProfileSummary();
 }
 
-// App Installation card. The install prompt is captured by core/pwa.js
-// (window.PWAInstall); this just reflects its state.
-function renderInstallCard() {
-    const msg = document.getElementById('installMsg');
-    const btn = document.getElementById('installBtn');
-    if (!msg || !btn || !window.PWAInstall)
+// PROFILE SUMMARY (read-only) — the authenticated Supabase user plus the
+// matching `profiles` row. No editing here; profile details are set once
+// during onboarding (finish-profile.html) via submit_profile_details().
+async function loadProfileSummary() {
+    const nameEl = document.getElementById('settingsFullName');
+    const emailEl = document.getElementById('settingsEmail');
+    const metaEl = document.getElementById('settingsProfileMeta');
+    const avatarEl = document.getElementById('settingsAvatar');
+    const wrap = document.getElementById('settingsProfile');
+    if (!nameEl || !emailEl)
         return;
-    if (PWAInstall.isInstalled()) {
-        msg.textContent = 'QCU Student Planner is already installed on this device.';
-        btn.hidden = true;
-    }
-    else if (PWAInstall.canInstall()) {
-        msg.textContent = 'Install the planner for quick access from your home screen or desktop, with its own window.';
-        btn.hidden = false;
-    }
-    else if (PWAInstall.isIos()) {
-        msg.textContent = 'To install on iPhone or iPad, tap the Share button in Safari, then choose Add to Home Screen.';
-        btn.hidden = true;
-    }
-    else {
-        msg.textContent = 'Installation isn\u2019t available right now. Your browser may not support it, or the app may already be installed. You can also try Install or Add to Home Screen in your browser menu.';
-        btn.hidden = true;
-    }
-}
+    try {
+        const supabase = getSupabase();
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData && sessionData.session && sessionData.session.user ? sessionData.session.user : null;
+        if (!user) {
+            if (wrap) wrap.removeAttribute('aria-busy');
+            emailEl.textContent = 'Not signed in';
+            return;
+        }
+        const email = user.email || '';
+        const metadata = user.user_metadata || {};
+        const photoUrl = metadata.avatar_url || metadata.picture || '';
 
-function initInstallCard() {
-    renderInstallCard();
-    if (window.PWAInstall)
-        PWAInstall.onChange(renderInstallCard);
-}
+        let fullName = '';
+        let course = '';
+        let yearLevel = '';
+        let school = '';
+        const profileResult = await AuthService.getCurrentProfile();
+        if (profileResult.ok && profileResult.data) {
+            fullName = profileResult.data.full_name || '';
+            course = profileResult.data.course || '';
+            yearLevel = profileResult.data.year_level || '';
+            school = profileResult.data.school || '';
+        }
 
-async function installApp() {
-    if (!window.PWAInstall)
-        return;
-    await PWAInstall.install();
-    renderInstallCard();
+        nameEl.textContent = fullName || email || 'Student';
+        emailEl.textContent = email;
+
+        const metaParts = [course, yearLevel, school].filter(Boolean);
+        if (metaEl) metaEl.textContent = metaParts.join(' • ');
+
+        if (avatarEl) {
+            const initial = ((fullName || email).charAt(0) || 'S').toUpperCase();
+            if (photoUrl) {
+                const img = document.createElement('img');
+                img.src = photoUrl;
+                img.alt = '';
+                img.loading = 'lazy';
+                img.referrerPolicy = 'no-referrer';
+                img.onerror = () => { avatarEl.textContent = initial; };
+                avatarEl.replaceChildren(img);
+            } else {
+                avatarEl.textContent = initial;
+            }
+        }
+    } catch (error) {
+        console.error('Could not load profile summary.', error);
+    } finally {
+        if (wrap) wrap.removeAttribute('aria-busy');
+    }
 }
 
 // Shows the last Supabase sync failure (grades, semesters, etc.) in plain
+// language, under Data & Storage.
 function renderSyncStatus() {
-    const card = document.getElementById('syncStatusCard');
+    const row = document.getElementById('syncStatusRow');
     const msgEl = document.getElementById('syncStatusMsg');
-    if (!card || !msgEl) return;
+    if (!row || !msgEl) return;
     const err = (window.CloudSync && typeof window.CloudSync.getLastSyncError === 'function')
         ? window.CloudSync.getLastSyncError() : null;
-    if (!err) { card.hidden = true; return; }
+    if (!err) { row.hidden = true; return; }
     const when = err.at ? new Date(err.at).toLocaleString() : '';
     msgEl.textContent = `${err.message}${when ? ' (' + when + ')' : ''}`;
-    card.hidden = false;
+    row.hidden = false;
 }
 
 function initDisplayPrefs(s) {
@@ -77,35 +105,7 @@ function initDisplayPrefs(s) {
     motion.addEventListener('change', () => { const st = DB.getSettings(); st.reduceMotion = motion.checked; DB.saveSettings(st); applyTheme(); });
 }
 
-function saveProfile() {
-    const s = DB.getSettings();
-    s.name = document.getElementById('sName').value.trim();
-    s.course = document.getElementById('sCourse').value.trim();
-    s.yearLevel = document.getElementById('sYear').value.trim();
-    s.school = document.getElementById('sSchool').value.trim();
-    DB.saveSettings(s);
-    Toast.show('Profile saved');
-}
-
-// Toggles which settings category is visible to the user
-function selectCategory(category) {
-    document.getElementById('generalView').classList.toggle('d-none', category !== 'general');
-    document.getElementById('academicView').classList.toggle('d-none', category !== 'academic');
-    document.getElementById('personalizeView').classList.toggle('d-none', category !== 'personalize');
-    document.getElementById('dataView').classList.toggle('d-none', category !== 'data');
-    document.getElementById('privacyView').classList.toggle('d-none', category !== 'privacy');
-}
-
-const buttons = document.querySelectorAll('.set-nav-btn');
-buttons.forEach(button => {
-  button.addEventListener('click', () => {
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
-    button.classList.add('active');
-  });
-});
-
-// SEMESTER MANAGEMENT
+// SEMESTER MANAGEMENT (Academic Preferences)
 
 function renderSemesterManager() {
     const wrap = document.getElementById('semesterManager');
@@ -150,32 +150,24 @@ function renderSemesterManager() {
     <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
   </div>`;
     wrap.innerHTML = html;
-    wrap.addEventListener('click', function _semClick(e) {
-        const switchBtn = e.target.closest('.sem-switch-btn');
-        if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
-        const editBtn = e.target.closest('.sem-edit-btn');
-        if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
-        const deleteBtn = e.target.closest('.sem-delete-btn');
-        if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
-    }, { once: true });
     if (!wrap._semBound) {
-    wrap._semBound = true;
-    wrap.addEventListener('click', function (e) {
-        const switchBtn = e.target.closest('.sem-switch-btn');
-        if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
-        const editBtn = e.target.closest('.sem-edit-btn');
-        if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
-        const deleteBtn = e.target.closest('.sem-delete-btn');
-        if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
-    });
-}
+        wrap._semBound = true;
+        wrap.addEventListener('click', function (e) {
+            const switchBtn = e.target.closest('.sem-switch-btn');
+            if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
+            const editBtn = e.target.closest('.sem-edit-btn');
+            if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
+            const deleteBtn = e.target.closest('.sem-delete-btn');
+            if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
+        });
+    }
 }
 
 function switchActiveSemester(id) {
     DB.setActiveSemester(id);
     renderSemesterManager();
     const sem = DB.getActiveSemester();
-    Toast.show(`Switched to ${sem.schoolYear} \u2022 ${sem.name}`);
+    Toast.show(`Switched to ${sem.schoolYear} • ${sem.name}`);
 }
 
 function openAddSemesterModal() {
@@ -312,6 +304,7 @@ function ymdLocalNow() { return ymdLocal(new Date()); }
 function ymdLocalFuture(days) { return ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * days)); }
 // ymdLocal defined in storage.js
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
 // THEME / ACCENT / NOTIF
 
 function chooseTheme(theme) { setTheme(theme, window.event); highlightTheme(theme); }
@@ -320,11 +313,21 @@ function highlightTheme(theme) {
     ['dark', 'light', 'amoled'].forEach(t => document.getElementById('theme_' + t).classList.toggle('btn-accent', t === theme));
 }
 
+// Keep in sync with assets/css/themes/accents.css — swatches need each
+// accent's own --accent value, not the currently-applied one, so the
+// colors are duplicated here rather than read off the live CSS variable.
+const ACCENT_SWATCH_RGB = {
+    blue: '36,87,214', violet: '95,76,189', indigo: '59,79,166', teal: '16,116,125',
+    emerald: '27,128,94', olive: '107,122,31', ochre: '166,107,15', rust: '184,81,31',
+    crimson: '178,40,40', rose: '189,51,83', maroon: '122,43,61', slate: '74,85,104',
+    graphite: '55,61,74', steel: '62,102,128'
+};
+
 function renderAccentPicker(current) {
-    const accents = ['blue', 'violet', 'indigo', 'teal', 'emerald', 'olive', 'ochre', 'rust', 'crimson', 'rose', 'maroon', 'slate', 'graphite', 'steel'];
+    const accents = Object.keys(ACCENT_SWATCH_RGB);
     const wrap = document.getElementById('accentPicker');
     wrap.innerHTML = accents.map(accent => `
-    <button onclick="chooseAccent('${accent}')" data-accent="${accent}" data-accent-swatch="${accent}" aria-label="${accent} accent color" aria-pressed="${accent === current}" class="accent-swatch-btn" style="background:rgb(var(--accent))"></button>`).join('');
+    <button onclick="chooseAccent('${accent}')" data-accent="${accent}" data-accent-swatch="${accent}" aria-label="${accent} accent color" aria-pressed="${accent === current}" class="accent-swatch-btn" style="background:rgb(${ACCENT_SWATCH_RGB[accent]})"></button>`).join('');
 }
 
 function chooseAccent(a) {
@@ -333,11 +336,17 @@ function chooseAccent(a) {
 }
 
 function renderNotifToggles(n) {
-    const labels = { upcomingClass: 'Upcoming Class', assignmentDue: 'Assignment Due', examReminder: 'Exam Reminder', pomodoroFinished: 'Pomodoro Finished', dailyReview: 'Daily Review Reminder' };
-    document.getElementById('notifToggles').innerHTML = Object.entries(labels).map(([k, label]) => `
-    <div class="form-check form-switch mb-2">
-      <input class="form-check-input" type="checkbox" role="switch" id="notif_${k}" ${n[k] ? 'checked' : ''} onchange="updateNotifSetting('${k}', this.checked)">
-      <label class="form-check-label" for="notif_${k}">${label}</label>
+    const items = {
+        upcomingClass: ['Upcoming Class', 'Notify me shortly before a scheduled class starts.'],
+        assignmentDue: ['Assignment Due', 'Alert me as an assignment deadline approaches.'],
+        examReminder: ['Exam Reminder', 'Notify me ahead of upcoming exams.'],
+        pomodoroFinished: ['Pomodoro Finished', 'Notify me when a focus timer session ends.'],
+        dailyReview: ['Daily Review Reminder', 'Remind me to do my daily review.']
+    };
+    document.getElementById('notifToggles').innerHTML = Object.entries(items).map(([k, [label, help]]) => `
+    <div class="pref-row">
+      <div><div class="pref-label">${label}</div><div class="pref-help">${help}</div></div>
+      <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="notif_${k}" aria-label="${label}" ${n[k] ? 'checked' : ''} onchange="updateNotifSetting('${k}', this.checked)"></div>
     </div>`).join('');
 }
 
@@ -371,7 +380,6 @@ function exportData() {
     Toast.show('Data exported');
 }
 
-window.exportData = exportData;
 // IMPORT — with validation, preview, and overwrite confirmation
 
 function importData(file) {
@@ -439,3 +447,39 @@ function confirmReset() {
         }
     });
 }
+
+// SIGN OUT — same AuthService.signOut() call used across the app, with a
+// confirm dialog, a toast on failure, and a redirect to login on success.
+function confirmSignOut() {
+    confirmAction({
+        title: 'Sign out?',
+        message: 'You will need to sign in again to access your planner.',
+        confirmLabel: 'Sign out', danger: true, icon: 'bi-box-arrow-right',
+        async onConfirm() {
+            const btn = document.getElementById('settingsSignOutBtn');
+            if (btn) btn.disabled = true;
+            const result = await AuthService.signOut();
+            if (!result.ok) {
+                Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'bi-exclamation-triangle');
+                if (btn) btn.disabled = false;
+                return;
+            }
+            location.href = '../auth/login.html';
+        }
+    });
+}
+
+// Inline HTML attributes (onclick=...) and DB.whenCloudReady(initSettings)
+// resolve against window, not this module's scope — expose everything
+// they call.
+window.initSettings = initSettings;
+window.openAddSemesterModal = openAddSemesterModal;
+window.saveSemesterModal = saveSemesterModal;
+window.chooseTheme = chooseTheme;
+window.chooseAccent = chooseAccent;
+window.updateNotifSetting = updateNotifSetting;
+window.requestNotifPermission = requestNotifPermission;
+window.exportData = exportData;
+window.importData = importData;
+window.confirmReset = confirmReset;
+window.confirmSignOut = confirmSignOut;
