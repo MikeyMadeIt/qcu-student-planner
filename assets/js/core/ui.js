@@ -176,9 +176,14 @@ function ensurePromptModal() {
     });
 }
 
-// opts: { title, message, label, placeholder, value, confirmLabel, cancelLabel, validate(value) -> errorString|null, onConfirm(value), onCancel }
+// opts: { title, message, label, placeholder, value, confirmLabel, cancelLabel, validate(value) -> errorString|null, requireExact, danger, onConfirm(value), onCancel }
+// requireExact: if set, the confirm button stays disabled (and visually
+// inert) until the input's trimmed value matches it exactly — for
+// "type X to confirm" destructive actions where the button must not be
+// clickable at all until the text matches, rather than only rejecting the
+// submit after a click.
 function promptAction(opts) {
-    const { title = 'Enter value', message = '', label = '', placeholder = '', value = '', confirmLabel = 'OK', validate, onConfirm, onCancel } = opts;
+    const { title = 'Enter value', message = '', label = '', placeholder = '', value = '', confirmLabel = 'OK', validate, requireExact, danger, onConfirm, onCancel } = opts;
     ensurePromptModal();
     document.getElementById('promptActionTitle').textContent = title;
     const msgEl = document.getElementById('promptActionMessage');
@@ -204,13 +209,22 @@ function promptAction(opts) {
     const btn = staleBtn.cloneNode(true);
     staleBtn.parentNode.replaceChild(btn, staleBtn);
     btn.textContent = confirmLabel;
-    btn.style.background = 'linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)))';
+    btn.style.background = danger ? '#fb7185' : 'linear-gradient(135deg, rgb(var(--accent)), rgb(var(--accent-2)))';
 
     const modalElement = document.getElementById('promptActionModal');
     let confirmed = false;
 
+    if (requireExact) {
+        const syncDisabled = () => { btn.disabled = input.value.trim() !== requireExact; };
+        syncDisabled();
+        input.addEventListener('input', syncDisabled);
+    }
+
     const submit = () => {
         const val = input.value.trim();
+        if (requireExact && val !== requireExact) {
+            return;
+        }
         if (validate) {
             const err = validate(val);
             if (err) {
