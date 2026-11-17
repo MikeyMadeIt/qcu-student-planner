@@ -885,6 +885,7 @@
     overflow-y: auto;
     max-height: 520px;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: thin;
 }
 
@@ -1214,6 +1215,8 @@
     .cal-agenda-panel {
         max-height: calc(100vh - 160px);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         scrollbar-width: thin;
     }
 }
