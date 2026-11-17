@@ -85,6 +85,8 @@
     color: var(--text-soft);
     max-height: 22rem;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .msg-detail-footer {
