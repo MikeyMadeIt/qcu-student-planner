@@ -17,7 +17,6 @@ const DB_KEYS = {
     activeSemesterId: 'sp_active_semester_id',
 };
 
-const EXPORT_SCHEMA_VERSION = 1;
 // Real UUIDs are required now that subjects/tasks/calendar events are persisted to
 const uid = () => {
     if (window.crypto && typeof window.crypto.randomUUID === 'function')
@@ -55,10 +54,25 @@ function writeKey(key, value) {
     }
 }
 
+// Appearance/notification preferences only. Name, student number, course,
+// year level and school used to live here too, but nothing in the app has
+// ever let the user set them through this object — the real values for
+// name/course/year level/school live in the `profiles` table (see
+// AuthService.getCurrentProfile / loadProfileSummary in settings.js), and
+// student number isn't collected anywhere at all. Keeping dead copies
+// here just meant every settings save re-pushed stale placeholder values
+// ("Student", "") to Supabase's user_preferences table, where they'd
+// wrongly look like real data (e.g. in an export). Display code that used
+// to read settings.name already falls back to the literal "Student" when
+// it's missing, so dropping it here changes nothing visible.
 const DEFAULT_SETTINGS = {
-    name: 'Student', studentNumber: '', course: '', yearLevel: '', school: '',
     theme: 'dark', accent: 'blue',
-    notifications: { upcomingClass: true, assignmentDue: true, examReminder: true, pomodoroFinished: true, dailyReview: false },
+    compact: false, reduceMotion: false,
+    notifications: {
+        upcomingClass: true, upcomingClassMinutes: 10,
+        taskReminders: true, taskReminderMinutes: 60,
+        lowAttendance: true,
+    },
 };
 
 const SUBJECT_COLORS = ['#2457D6', '#1F9254', '#B45309', '#D6433C', '#6D5BD6', '#0E8C8C', '#C2498A', '#4B5563'];
@@ -201,47 +215,17 @@ function initIfEmpty() {
     localStorage.setItem('sp_semester_migrated', '1');
 }
 
-// IMPORT VALIDATION
-
-function validateImport(obj) {
-    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
-        return { valid: false, error: 'File does not contain a valid backup object.' };
-    }
-    const isNewFormat = ('schemaVersion' in obj) && ('data' in obj);
-    const isLegacyFormat = !isNewFormat && ('subjects' in obj || 'tasks' in obj || 'semesters' in obj);
-    if (!isNewFormat && !isLegacyFormat) {
-        return { valid: false, error: 'File does not appear to be a Student Planner backup.' };
-    }
-    if (isNewFormat) {
-        const ver = obj.schemaVersion;
-        if (typeof ver !== 'number' || ver < 1) {
-            return { valid: false, error: `Unsupported backup schema version (${ver}). Please export a fresh backup.` };
-        }
-        if (ver > EXPORT_SCHEMA_VERSION) {
-            return { valid: false, error: `Backup was created with a newer version of the app (schema v${ver}). Please update the app.` };
-        }
-        const data = obj.data;
-        if (!data || typeof data !== 'object') {
-            return { valid: false, error: 'Backup "data" section is missing or malformed.' };
-        }
-        const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'semesters', 'calendarEvents', 'syllabusCourses'];
-        for (const f of arrayFields) {
-            if (data[f] !== undefined && !Array.isArray(data[f])) {
-                return { valid: false, error: `Field "${f}" must be an array but got ${typeof data[f]}.` };
-            }
-        }
-    }
-    if (isLegacyFormat) {
-        const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'semesters', 'calendarEvents', 'syllabusCourses'];
-        for (const f of arrayFields) {
-            if (obj[f] !== undefined && !Array.isArray(obj[f])) {
-                return { valid: false, error: `Field "${f}" must be an array but got ${typeof obj[f]}.` };
-            }
-        }
-    }
-    return { valid: true, isNewFormat, isLegacyFormat };
-}
-
+// IMPORT ID NORMALIZATION — cloud-sync.js silently refuses to push any
+// subject/task/note/attendance/grade/calendar-event/GWA-calculator row
+// whose id isn't a real UUID (Supabase's column type for all of those is
+// uuid; only a semester's id is plain text there, so semesters are left
+// untouched). A backup built or edited outside the app's own Export button
+// can easily carry readable ids like "subj-1" instead of a UUID — those
+// rows would import fine locally, then vanish the moment the page reloads
+// and re-pulls from the server, because they were never actually accepted
+// by Supabase in the first place. Giving every such id a fresh UUID here,
+// before anything is written or pushed, means an import always survives a
+// reload no matter where the file came from.
 const DB = {
     init() {
         if (localStorage.getItem('sp_seeded') && !localStorage.getItem('sp_initialized')) {
@@ -252,7 +236,6 @@ const DB = {
     },
     uid,
     colors: SUBJECT_COLORS,
-    EXPORT_SCHEMA_VERSION,
     get(key, fallback) { return readKey(DB_KEYS[key], fallback); },
     set(key, value) { return writeKey(DB_KEYS[key], value); },
     getSemesters() { return readKey(DB_KEYS.semesters, []); },
@@ -346,70 +329,36 @@ const DB = {
     getSyllabusCourses() { return readKey(DB_KEYS.syllabusCourses, []); },
     saveSyllabusCourses(list) { return writeKey(DB_KEYS.syllabusCourses, list); },
     getSyllabusCourse(id) { return this.getSyllabusCourses().find(c => c.id === id); },
+    // Only ever returns the known schema (DEFAULT_SETTINGS' keys) even if
+    // `stored` (local cache, or whatever was last pulled from Supabase's
+    // user_preferences row) still has old fields like name/studentNumber/
+    // course/yearLevel/school from before those were removed — so a
+    // legacy value can't leak back in via the `...stored` spread and
+    // doesn't get re-pushed to Supabase on the next save.
     getSettings() {
         const stored = readKey(DB_KEYS.settings, DEFAULT_SETTINGS);
-        return {
+        const merged = {
             ...DEFAULT_SETTINGS,
             ...stored,
             notifications: { ...DEFAULT_SETTINGS.notifications, ...(stored.notifications || {}) }
         };
+        const clean = {};
+        Object.keys(DEFAULT_SETTINGS).forEach(k => { clean[k] = merged[k]; });
+        return clean;
     },
-    saveSettings(s) { return writeKey(DB_KEYS.settings, s); },
+    // Sanitizes the same way getSettings() does, in case a caller is
+    // holding an older object (or one hand-built from scratch) that still
+    // carries a since-removed legacy key.
+    saveSettings(s) {
+        const clean = {};
+        Object.keys(DEFAULT_SETTINGS).forEach(k => { clean[k] = (s && k in s) ? s[k] : DEFAULT_SETTINGS[k]; });
+        if (s && s.notifications) clean.notifications = { ...DEFAULT_SETTINGS.notifications, ...s.notifications };
+        return writeKey(DB_KEYS.settings, clean);
+    },
     getSemester() { return this.getActiveSemester() || readKey(DB_KEYS.semester, { name: '1st Semester', schoolYear: '2026-2027', startDate: ymdLocal(new Date()), endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)), finalsDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 100)), totalWeeks: 15 }); },
     saveSemester(s) { return writeKey(DB_KEYS.semester, s); },
     getPomo() { return readKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] }); },
     savePomo(p) { return writeKey(DB_KEYS.pomodoro, p); },
-    exportAll() {
-        return {
-            schemaVersion: EXPORT_SCHEMA_VERSION,
-            exportedAt: new Date().toISOString(),
-            appVersion: '2.1.0',
-            data: {
-                semesters: readKey(DB_KEYS.semesters, []),
-                activeSemesterId: readKey(DB_KEYS.activeSemesterId, null),
-                subjects: readKey(DB_KEYS.subjects, []),
-                tasks: readKey(DB_KEYS.tasks, []),
-                notes: readKey(DB_KEYS.notes, []),
-                attendance: readKey(DB_KEYS.attendance, []),
-                grades: readKey(DB_KEYS.grades, []),
-                gwaCalc: readKey(DB_KEYS.gwaCalc, []),
-                calendarEvents: readKey(DB_KEYS.calendarEvents, []),
-                syllabusCourses: readKey(DB_KEYS.syllabusCourses, []),
-                universityEvents: readKey(DB_KEYS.universityEvents, []),
-                settings: readKey(DB_KEYS.settings, DEFAULT_SETTINGS),
-                pomodoro: readKey(DB_KEYS.pomodoro, null),
-            }
-        };
-    },
-    importAll(obj) {
-        let data;
-        if (obj.schemaVersion && obj.data) {
-            data = obj.data;
-        }
-        else {
-            data = obj;
-        }
-        const arrayFields = ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'gwaCalc', 'calendarEvents', 'syllabusCourses', 'universityEvents', 'semesters'];
-        arrayFields.forEach(k => {
-            if (Array.isArray(data[k]))
-                writeKey(DB_KEYS[k], data[k]);
-        });
-        if (data.activeSemesterId !== undefined)
-            writeKey(DB_KEYS.activeSemesterId, data.activeSemesterId);
-        if (data.settings && typeof data.settings === 'object')
-            writeKey(DB_KEYS.settings, data.settings);
-        if (data.pomodoro && typeof data.pomodoro === 'object')
-            writeKey(DB_KEYS.pomodoro, data.pomodoro);
-        const sems = readKey(DB_KEYS.semesters, []);
-        if (!sems.length) {
-            const fallbackSem = makeSemesterObject('2026-2027', '1st Semester', {});
-            writeKey(DB_KEYS.semesters, [fallbackSem]);
-            writeKey(DB_KEYS.activeSemesterId, fallbackSem.id);
-        }
-        localStorage.setItem('sp_initialized', '1');
-        localStorage.setItem('sp_semester_migrated', '1');
-        return true;
-    },
     clearPrivateCacheOnSignOut() {
         Object.keys(DB_KEYS).forEach(k => {
             if (k === 'settings') return;
@@ -420,7 +369,6 @@ const DB = {
          'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
             .forEach(k => localStorage.removeItem(k));
     },
-    validateImport,
     resetAll() {
         Object.values(DB_KEYS).forEach(k => localStorage.removeItem(k));
         localStorage.removeItem('sp_seeded');

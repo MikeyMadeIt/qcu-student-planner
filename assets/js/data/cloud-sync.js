@@ -49,10 +49,14 @@
     }
 
     const LAST_ERROR_KEY = 'sp_cloud_last_error';
+    function notifySyncStatusChanged() {
+        try { window.dispatchEvent(new CustomEvent('planner:sync-status-changed')); } catch (e) { /* ignore */ }
+    }
     function recordSyncError(area, message) {
         try {
             localStorage.setItem(LAST_ERROR_KEY, JSON.stringify({ area, message: String(message || 'Unknown error'), at: Date.now() }));
         } catch (e) { /* ignore */ }
+        notifySyncStatusChanged();
     }
     function clearSyncError(area) {
         try {
@@ -62,6 +66,7 @@
             }
             localStorage.removeItem(LAST_ERROR_KEY);
         } catch (e) { /* ignore */ }
+        notifySyncStatusChanged();
     }
     function getLastSyncError() {
         try { return JSON.parse(localStorage.getItem(LAST_ERROR_KEY)); } catch (e) { return null; }
@@ -405,7 +410,7 @@
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes] = await Promise.all([
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes, prefRes] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -418,8 +423,15 @@
                 supabase.from('gwa_calculator').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('cancelled_occurrences').select('occurrences').eq('user_id', userId).maybeSingle(),
                 supabase.from('semesters').select('*').eq('user_id', userId).not('client_id', 'is', null).order('created_at', { ascending: true }),
+                supabase.from('user_preferences').select('prefs').eq('user_id', userId).maybeSingle(),
             ]);
 
+            // user_preferences is new (migration 0026): on a project where it
+            // hasn't been applied yet, Supabase returns a 42P01 "relation
+            // does not exist" error for that one query. Don't let a missing
+            // table block the whole hydrate — everything else still loads,
+            // settings just stay local-only (same as before this feature).
+            const prefsTableMissing = prefRes && prefRes.error && /relation .* does not exist/i.test(prefRes.error.message || '');
             const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
@@ -489,6 +501,27 @@
             if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
                 DB.saveCancelledOccurrences(coRes.data.occurrences);
                 _lastCancelledJson = JSON.stringify(coRes.data.occurrences);
+            }
+
+            if (!prefsTableMissing) {
+                if (prefRes && prefRes.data && prefRes.data.prefs && typeof prefRes.data.prefs === 'object') {
+                    // Server has a saved copy: it wins (same last-write-wins
+                    // rule as cancelled occurrences) since settings are a
+                    // single blob with no per-field conflict tracking.
+                    // Sanitize to the known schema so a row saved before
+                    // legacy fields (name/studentNumber/course/yearLevel/
+                    // school) were removed doesn't bring them back into
+                    // the local cache.
+                    const rawMerged = { ...DEFAULT_SETTINGS, ...prefRes.data.prefs, notifications: { ...DEFAULT_SETTINGS.notifications, ...(prefRes.data.prefs.notifications || {}) } };
+                    const merged = {};
+                    Object.keys(DEFAULT_SETTINGS).forEach(k => { merged[k] = rawMerged[k]; });
+                    DB.set('settings', merged);
+                    _lastPrefsJson = JSON.stringify(merged);
+                } else {
+                    // Nothing saved for this user yet — push what's on this
+                    // device now so the row exists for next time.
+                    pushSettings(DB.getSettings());
+                }
             }
 
             last.subjects = new Map(serverSubjects.map(s => [s.id, true]));
@@ -736,6 +769,40 @@
         }
     }
 
+    // Settings (Appearance + Notifications, incl. reminder timing) —
+    // single JSONB row (upsert) keyed by user_id, same shape as
+    // cancelled occurrences below. Debounced: toggles/selects in the
+    // Settings UI can fire several saves in quick succession.
+    let _lastPrefsJson = null;
+    let _prefsPushTimer = null;
+    function pushSettings(settings) {
+        if (_prefsPushTimer) clearTimeout(_prefsPushTimer);
+        _prefsPushTimer = setTimeout(() => { doPushSettings(settings); }, 400);
+    }
+    async function doPushSettings(settings) {
+        const userId = await getUserId();
+        if (!userId) return;
+        const json = JSON.stringify(settings);
+        if (json === _lastPrefsJson) return;
+        try {
+            const supabase = await getClient();
+            const { error } = await supabase.from('user_preferences').upsert(
+                { user_id: userId, prefs: settings, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+            );
+            if (error) throw error;
+            _lastPrefsJson = json;
+            clearSyncError('settings');
+        } catch (err) {
+            console.warn('Cloud sync (settings) failed', err);
+            // Don't alarm the user over a migration that just hasn't been
+            // applied to this Supabase project yet (see hydrate()) — settings
+            // simply stay local-only until it is.
+            if (err && /relation .* does not exist/i.test(err.message || '')) return;
+            toast("Couldn't save your settings to the server: " + ((err && err.message) || 'please check your connection.'), 'high', 'settings');
+        }
+    }
+
     // AJ-08: cancelled occurrences — single JSONB row (upsert) keyed by user_id.
     async function pushCancelledOccurrences(list) {
         const userId = await getUserId();
@@ -978,6 +1045,12 @@
         trackPush(pushCancelledOccurrences(Array.isArray(list) ? list.slice() : []));
         return r;
     };
+    const _saveSettings = DB.saveSettings.bind(DB);
+    DB.saveSettings = function (s) {
+        const r = _saveSettings(s);
+        pushSettings(s);
+        return r;
+    };
 
     showLoader();
     DB.cloudReady = hydrate().finally(hideLoader);
@@ -987,10 +1060,35 @@
         DB.cloudReady.then(fn, fn);
     };
 
-    // Settings page: Reset Data / Import Backup
+    // Settings page: Reset All Data.
+    //
+    // Primary path is the atomic `reset_my_planner_data()` Postgres
+    // function (supabase/migrations/0027_reset_my_planner_data.sql) run
+    // under the signed-in user's own privileges — one transaction, all
+    // or nothing, authorized by auth.uid() inside the function rather
+    // than any id the client sends. If that migration hasn't been
+    // applied yet to a given project (function missing: Postgres error
+    // 42883), this falls back to the same per-table deletes the RPC
+    // itself runs, same order, still scoped to this user's id and still
+    // subject to every table's own RLS policy — just not wrapped in a
+    // single transaction.
+    async function wipeCloudDataFallback(supabase, userId) {
+        const { data: myQuizzes } = await supabase.from('ai_quizzes').select('id').eq('user_id', userId);
+        if ((myQuizzes || []).length) {
+            await supabase.from('ai_quiz_questions').delete().eq('user_id', userId);
+            await supabase.from('ai_quiz_attempts').delete().eq('user_id', userId);
+        }
+        await supabase.from('ai_quizzes').delete().eq('user_id', userId);
+        await supabase.from('ai_flashcards').delete().eq('user_id', userId);
+        await supabase.from('ai_flashcard_decks').delete().eq('user_id', userId);
+        await supabase.from('ai_chat_messages').delete().eq('user_id', userId);
+        await supabase.from('ai_chat_conversations').delete().eq('user_id', userId);
 
-    async function wipeCloudData(userId) {
-        const supabase = await getClient();
+        const { data: myTasks } = await supabase.from('tasks').select('id').eq('user_id', userId);
+        const taskIds = (myTasks || []).map(t => t.id);
+        if (taskIds.length) await supabase.from('task_checklist_items').delete().in('task_id', taskIds);
+        await supabase.from('tasks').delete().eq('user_id', userId);
+
         const { data: myGrades } = await supabase.from('grades').select('id').eq('user_id', userId);
         const gradeIds = (myGrades || []).map(g => g.id);
         if (gradeIds.length) {
@@ -999,21 +1097,34 @@
             if (compIds.length) await supabase.from('grade_assessments').delete().in('component_id', compIds);
             await supabase.from('grade_components').delete().in('grade_id', gradeIds);
         }
-        const { data: myTasks } = await supabase.from('tasks').select('id').eq('user_id', userId);
-        const taskIds = (myTasks || []).map(t => t.id);
-        if (taskIds.length) await supabase.from('task_checklist_items').delete().in('task_id', taskIds);
+        await supabase.from('grades').delete().eq('user_id', userId);
 
-        await Promise.all([
-            supabase.from('subjects').delete().eq('user_id', userId),
-            supabase.from('tasks').delete().eq('user_id', userId),
-            supabase.from('calendar_events').delete().eq('user_id', userId),
+        const results = await Promise.all([
             supabase.from('notes').delete().eq('user_id', userId),
+            supabase.from('calendar_events').delete().eq('user_id', userId),
             supabase.from('attendance').delete().eq('user_id', userId),
-            supabase.from('grades').delete().eq('user_id', userId),
             supabase.from('gwa_calculator').delete().eq('user_id', userId),
             supabase.from('cancelled_occurrences').delete().eq('user_id', userId),
-            supabase.from('semesters').delete().eq('user_id', userId).not('client_id', 'is', null),
+            supabase.from('cancelled_class_occurrences').delete().eq('user_id', userId),
+            supabase.from('subjects').delete().eq('user_id', userId),
+            supabase.from('user_preferences').delete().eq('user_id', userId),
+            supabase.from('semesters').delete().eq('user_id', userId),
         ]);
+        const firstError = results.map(r => r && r.error).find(Boolean);
+        if (firstError) throw firstError;
+    }
+
+    async function wipeCloudData(userId) {
+        const supabase = await getClient();
+        const { error: rpcError } = await supabase.rpc('reset_my_planner_data');
+        if (rpcError) {
+            // 42883: function does not exist yet (migration not applied).
+            // Anything else is a real failure (e.g. not signed in,
+            // network) and should surface rather than be papered over.
+            const fnMissing = rpcError.code === '42883' || /function .* does not exist/i.test(rpcError.message || '');
+            if (!fnMissing) throw rpcError;
+            await wipeCloudDataFallback(supabase, userId);
+        }
         try { localStorage.removeItem(DIRTY_SEM_KEY); localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
         Object.keys(last).forEach(k => last[k] = new Map());
         _lastCancelledJson = '[]';
@@ -1024,31 +1135,14 @@
         clearSyncError();
     }
 
-    const _resetAll = DB.resetAll.bind(DB);
-    DB.resetAll = function () {
-        const r = _resetAll();
-        getUserId().then(userId => {
-            if (!userId) return;
-            wipeCloudData(userId).catch(err => {
-                console.warn('Cloud sync (reset) failed', err);
-                toast("Local data was reset, but the server copy could not be cleared. Please check your connection.", 'high', 'reset');
-            });
-        });
-        return r;
+    // Exposed so Settings can actually await the server-side deletion
+    // and show a real success/error state instead of firing it and
+    // hoping.
+    window.CloudSync.resetAllData = async function () {
+        const userId = await getUserId();
+        if (!userId) throw new Error('You need to be signed in to reset your data.');
+        await wipeCloudData(userId);
+        DB.resetAll();
     };
 
-    const _importAll = DB.importAll.bind(DB);
-    DB.importAll = function (obj) {
-        const r = _importAll(obj);
-        pushSubjects(DB.getSubjects());
-        pushTasks(DB.getTasks());
-        pushCalendarEvents(DB.getCalendarEvents());
-        pushNotes(DB.getNotes());
-        pushAttendance(DB.getAttendance());
-        pushGrades(DB.getGrades());
-        pushGwaCalc(DB.getGwaCalcRows());
-        pushSemesters(DB.getSemesters());
-        pushCancelledOccurrences(DB.getCancelledOccurrences());
-        return r;
-    };
 })();
