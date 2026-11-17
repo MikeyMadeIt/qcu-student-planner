@@ -20,8 +20,6 @@ function toMins(t) { if (!t)
 
 function fromMins(m) { const h = Math.floor(m / 60), mm = m % 60; return String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); }
 
-function minsDiff(a, b) { return toMins(b) - toMins(a); }
-
 function nowMins() { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
 
 function isoDate(d) { return ymdLocal(d); }
@@ -188,12 +186,6 @@ function shiftWeek(dir) {
     renderAllViews();
 }
 
-function shiftDay(dir) {
-    _selectedDate = dateAddDays(_selectedDate, dir);
-    renderNav();
-    renderAllViews();
-}
-
 function goToday() {
     _weekOffset = 0;
     _selectedDate = new Date();
@@ -263,13 +255,6 @@ function getSemesterEmptyState(date) {
     if (semester.endDate && dateKey > semester.endDate)
         return { title: 'Semester has ended', detail: '' };
     return null;
-}
-
-// All semester subjects
-
-function getSemesterSubjects() {
-    const semId = DB.getActiveSemesterId();
-    return DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
 }
 
 // Tasks helpers
