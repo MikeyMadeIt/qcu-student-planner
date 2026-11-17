@@ -33,6 +33,8 @@
         top: calc(var(--shell-bar-height) + var(--space-4));
         max-height: calc(100vh - var(--shell-bar-height) - (var(--space-4) * 2));
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 }
 
