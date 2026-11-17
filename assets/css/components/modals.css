@@ -194,6 +194,7 @@ select.cs-native-hidden {
     max-height: min(15rem, 45vh);
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
 }
 
 .cs-option {
