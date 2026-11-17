@@ -140,12 +140,6 @@ textarea:focus-visible {
     color: var(--text-faint);
 }
 
-/* Responsive modal body no horizontal overflow */
-
-.modal-body {
-    overflow-x: hidden;
-}
-
 /* Syllabus card dropdown — lift open card above siblings so menu isn't clipped */
 
 .syl-list-card:has(.dropdown-menu.show) {
