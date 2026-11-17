@@ -102,6 +102,170 @@
     z-index: 2;
 }
 
+/* ==========================================================================
+   Modal layout standard (single source for every modal)
+   Header / body / footer rhythm, labels, form grid, action row and the
+   small-screen behaviour. Page CSS should only add content-specific rules.
+   ========================================================================== */
+
+.modal {
+    --modal-pad-x: 18px;
+    --modal-pad-y: 16px;
+    --modal-gap: .75rem;
+}
+
+.modal-header {
+    align-items: center;
+    gap: 12px;
+    padding: 14px var(--modal-pad-x);
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    min-width: 0;
+    margin: 0;
+    font-size: .96rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.modal-body,
+.modal-body.card-pad {
+    padding: var(--modal-pad-y) var(--modal-pad-x);
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-content.card-pad {
+    padding: var(--modal-pad-y) var(--modal-pad-x);
+}
+
+.modal-footer {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 12px var(--modal-pad-x);
+    border-top: 1px solid var(--border);
+}
+
+.modal-footer > * {
+    margin: 0;
+}
+
+/* In-body titles (modals whose header lives inside .modal-body) */
+.modal-body > h5:first-child,
+.modal-content.card-pad > h5:first-child,
+.modal-content > .modal-header .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-body > h5:first-child,
+.modal-content.card-pad > h5:first-child {
+    margin: 0 40px var(--modal-gap) 0;
+    font-size: .96rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* Form grid: same gutters in every modal */
+.modal-body .row {
+    --bs-gutter-x: var(--modal-gap);
+    --bs-gutter-y: var(--modal-gap);
+}
+
+/* Labels: always above the control, one style everywhere */
+.modal-body .form-label,
+.modal-body label:not([class]) {
+    display: block;
+    margin-bottom: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-soft);
+}
+
+.modal-body textarea.form-control {
+    height: auto;
+    min-height: 5rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.modal-body .form-check-input {
+    flex-shrink: 0;
+    background-color: var(--surface-2);
+    border-color: var(--border);
+}
+
+.modal-body .form-check-input:checked {
+    background-color: rgb(var(--accent));
+    border-color: rgb(var(--accent));
+}
+
+.modal-body .form-check-input:focus-visible {
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 .2rem rgba(var(--accent), .25);
+}
+
+/* Validation / error text */
+.modal-body .invalid-feedback,
+.modal-body .sch-subject-error {
+    margin-top: 4px;
+    font-size: .76rem;
+}
+
+/* Primary action row. Sticks to the bottom of a scrolling modal so Save is
+   always reachable, and sits flush with the modal edges. */
+.modal-body > .modal-actions {
+    position: sticky;
+    bottom: calc(-1 * var(--modal-pad-y));
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin: var(--modal-gap) calc(-1 * var(--modal-pad-x)) calc(-1 * var(--modal-pad-y));
+    padding: 12px var(--modal-pad-x);
+    background: var(--elevated);
+    border-top: 1px solid var(--border);
+}
+
+.modal-actions > .btn {
+    margin: 0;
+}
+
+.modal-actions > .btn-accent {
+    flex: 1 1 auto;
+}
+
+.modal-actions > .btn:not(.btn-accent) {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 575.98px) {
+    .modal {
+        --modal-pad-x: 14px;
+        --modal-pad-y: 14px;
+    }
+
+    .modal-dialog {
+        margin: var(--space-3);
+    }
+
+    .modal-dialog-scrollable .modal-content {
+        max-height: calc(100dvh - 2 * var(--space-3));
+    }
+
+    .modal-footer > .btn {
+        flex: 1 1 0%;
+    }
+}
+
 /* dropdown */
 
 .dropdown-menu {

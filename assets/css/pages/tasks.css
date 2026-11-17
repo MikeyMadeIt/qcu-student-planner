@@ -1988,16 +1988,6 @@
 }
 
 /* Modal form-label */
-
-.modal-body .form-label {
-    font-size: .74rem;
-    font-weight: 700;
-    color: var(--text-soft);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
-
 /* Close button in drawer */
 
 .tkd-close-btn {

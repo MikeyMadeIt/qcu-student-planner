@@ -1482,8 +1482,8 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle) {
             '</div><button type="button" class="tk-cl-add-btn mt-1" onclick="modalAddClItem()"><i class="bi bi-plus"></i> Add item</button></div>' +
             createdNote + parentNote +
             '</div>' +
-            '<button class="btn btn-accent w-100 mt-3" onclick="saveTask()">' +
-            '<i class="bi bi-check2 me-1"></i>' + (t ? 'Update Task' : 'Save Task') + '</button>'; 
+            '<div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveTask()">' +
+            '<i class="bi bi-check2 me-1"></i>' + (t ? 'Update Task' : 'Save Task') + '</button></div>'; 
 
     tkInitTaskTimeFields(t);
     new bootstrap.Modal(document.getElementById('taskModal')).show();

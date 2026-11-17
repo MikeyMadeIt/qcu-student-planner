@@ -420,14 +420,9 @@ ol ol,
 }
 
 @media (max-width: 575.98px) {
+    /* Wrap instead of scrolling sideways so no formatting button is hidden. */
     .note-md-toolbar {
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .note-md-toolbar::-webkit-scrollbar {
-        display: none;
+        flex-wrap: wrap;
     }
     .note-editor-ta {
         min-height: 160px;
