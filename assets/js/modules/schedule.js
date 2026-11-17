@@ -633,7 +633,7 @@ function openCancelModal(subjectId, dateStr) {
           ${info && info.reason ? `<div class="text-faint" style="font-size:.8rem">${esc(info.reason)}</div>` : ''}
         </div>
       </div>
-      <div class="d-flex gap-2 mt-3">
+      <div class="modal-actions">
         <button class="btn btn-accent flex-grow-1" onclick="doRestoreOccurrence('${subjectId}','${dateStr}')"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore Class</button>
         <button class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
       </div>`;
@@ -1607,7 +1607,7 @@ function openSubjectModal(id) {
         </div>
         <p class="sch-time-hint" id="subTimeHint" aria-live="polite"></p>
       </div>
-        <div class="form-check form-switch mb-1">
+        <div class="col-12"><div class="form-check form-switch mb-1">
           <input class="form-check-input" type="checkbox" id="subOnline" ${isOnline ? 'checked' : ''} aria-label="Online class">
           <label class="form-check-label" for="subOnline" style="font-size:.82rem"><i class="bi bi-wifi me-1" aria-hidden="true"></i>Online Class</label>
         </div>
@@ -1625,7 +1625,7 @@ function openSubjectModal(id) {
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Notes</label><textarea class="form-control" id="subNotes" rows="2" aria-label="Notes">${s ? esc(s.notes) : ''}</textarea></div>
     </div>
     <div id="subConflictWarning" class="sch-conflict-warning d-none" role="alert"></div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
