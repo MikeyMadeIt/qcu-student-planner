@@ -199,6 +199,8 @@
     min-height: 200px;
     max-height: min(52vh, 560px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     white-space: normal;
     overflow-wrap: anywhere;
     cursor: text;
@@ -1975,6 +1977,7 @@ ol ol,
     min-width: 220px;
     max-height: 290px;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 6px;
     background-color: var(--elevated) !important;
     border: 1px solid var(--border) !important;

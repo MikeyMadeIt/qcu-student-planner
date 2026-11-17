@@ -120,6 +120,7 @@
     width: min(20rem, calc(100vw - 2rem));
     max-height: min(26rem, calc(100vh - 6rem));
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: var(--space-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
