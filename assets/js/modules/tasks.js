@@ -1227,46 +1227,6 @@ function toggleChecklistItem(taskId, idx) {
     renderTasks();
 }
 
-function addChecklistItemLive(taskId) {
-    var tasks = DB.getTasks();
-    var t = tasks.find(function (x) { return x.id === taskId; });
-    if (!t)
-        return;
-    promptAction({
-        title: 'New checklist item',
-        label: 'Item text',
-        confirmLabel: 'Add',
-        validate: function (val) { return !val ? 'Enter some text.' : null; },
-        onConfirm: function (text) {
-            var freshTasks = DB.getTasks();
-            var freshT = freshTasks.find(function (x) { return x.id === taskId; });
-            if (!freshT)
-                return;
-            if (!freshT.checklist)
-                freshT.checklist = [];
-            freshT.checklist.push({ text: text, done: false });
-            freshT.progress = computeProgress(freshT);
-            freshT.updatedAt = Date.now();
-            DB.saveTasks(freshTasks);
-            tkExpandedId = taskId;
-            renderTasks();
-        },
-    });
-}
-
-function deleteChecklistItem(taskId, idx) {
-    var tasks = DB.getTasks();
-    var t = tasks.find(function (x) { return x.id === taskId; });
-    if (!t || !t.checklist)
-        return;
-    t.checklist.splice(idx, 1);
-    t.progress = computeProgress(t);
-    t.updatedAt = Date.now();
-    DB.saveTasks(tasks);
-    tkExpandedId = taskId;
-    renderTasks();
-}
-
 // Delete task
 
 function deleteTask(id) {
@@ -1289,13 +1249,6 @@ function deleteTask(id) {
 }
 
 // Time estimate helpers
-
-function parseTimeEstimate(hrs, mins) {
-    var h = parseInt(hrs) || 0;
-    var m = parseInt(mins) || 0;
-    var total = h * 60 + m;
-    return total > 0 ? total : null;
-}
 
 function teHrsMins(te) {
     if (!te)
