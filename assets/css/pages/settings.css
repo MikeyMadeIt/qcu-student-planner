@@ -88,14 +88,37 @@
 /* ── Preference rows (shared by Appearance / Notifications / Data) ── */
 .pref-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-4);
     padding: var(--space-3) 0;
     border-bottom: 1px solid var(--border);
 }
 
-.settings-section .pref-row:last-child {
+/* The label+help text wraps and shrinks; the switch/button on the right
+   never does, and never wraps onto its own line below the text — that's
+   what made toggles land on the left on narrow screens. */
+.pref-row > :first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 26rem;
+}
+
+/* Notification toggle rows: a narrower, fixed cap (rather than 26rem,
+   which never actually gets hit on a narrow phone screen) tuned so every
+   description — including the longest, Low Attendance Warning's — wraps
+   to exactly two lines instead of three. */
+#notifToggles > .pref-row > :first-child {
+    max-width: 18.5rem;
+}
+
+.pref-row > :last-child {
+    flex: 0 0 auto;
+    margin-top: .1rem;
+}
+
+.settings-section .pref-row:last-child,
+.settings-section .pref-stack:last-child {
     border-bottom: 0;
 }
 
@@ -133,10 +156,40 @@
     margin-top: var(--space-2);
 }
 
+/* bi-download sits flush at the left of its glyph box (unlike most bootstrap
+   icons, which have built-in breathing room), so it reads as touching the
+   button text even with the same gap as other buttons — nudge it over to
+   match. */
+#settingsExportBtn i {
+    margin-right: .5rem !important;
+}
+
 .settings-disclaimer {
-    margin-top: var(--space-3);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--border);
+    margin-bottom: 0;
+}
+
+/* ── Sync status (Data & Storage): always visible — a quiet dot + message
+   when synced, an accent-colored row + timestamp when something failed. ── */
+.sync-status-dot {
+    display: inline-block;
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    margin-right: .4rem;
+    background: var(--text-faint);
+    vertical-align: middle;
+}
+
+.sync-status-row.is-ok .sync-status-dot {
+    background: #34d399;
+}
+
+.sync-status-row.is-error .sync-status-dot {
+    background: #fb7185;
+}
+
+.sync-status-row.is-error .pref-help {
+    color: #fb7185;
 }
 
 /* ── Account actions: sign out spans the full card ── */
@@ -216,11 +269,52 @@
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, .6));
 }
 
-@media (max-width: 575.98px) {
-    .pref-row {
-        flex-wrap: wrap;
-    }
+/* ── Notification "Remind me": one shared block for every toggle that has
+   a timing choice (Upcoming Classes, Task Reminders), laid out the same
+   way as Theme/Accent color above — title+help on top, full-width
+   controls below — instead of a separate "Remind me" row squeezed next
+   to a stack of selects. ── */
+.notif-remind-selects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
 
+.notif-remind-select-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.notif-remind-select-label {
+    font-size: .85rem;
+    color: var(--text-soft);
+}
+
+.notif-timing-select {
+    width: auto;
+    min-width: 9.5rem;
+}
+
+/* The custom-select wrapper (assets/js/core/custom-select.js) replaces
+   the native <select> in place but doesn't inherit its width classes, and
+   by default sizes itself to whichever option's text is currently shown —
+   so the box visibly grows/shrinks as the person picks a different
+   option. Fix it to the width of the longest option ("At the scheduled
+   time") instead, so it never changes size. */
+.notif-remind-select-group .custom-select {
+    flex: 0 0 12rem;
+    width: 12rem;
+}
+
+.notif-remind-select-group .cs-trigger {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 575.98px) {
     #accentPicker {
         gap: 6px;
         max-width: 100%;
