@@ -2343,6 +2343,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     max-width: calc(100vw - 16px);
     max-height: min(240px, calc(100vh - 16px));
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 5px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -3216,6 +3217,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     min-width: 200px;
     max-height: 280px;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 6px;
     background-color: var(--elevated) !important;
     border: 1px solid var(--border) !important;
