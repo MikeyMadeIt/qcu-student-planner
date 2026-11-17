@@ -37,7 +37,7 @@
         <!-- Academic preferences -->
         <section class="settings-section" aria-labelledby="settingsAcademicTitle">
           <div class="section-title" id="settingsAcademicTitle"><i class="bi bi-calendar3"></i>Academic Preferences</div>
-          <p class="pref-help-lg text-faint">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, notes, and syllabi.</p>
+          <p class="pref-help-lg text-faint">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, and notes.</p>
           <div id="semesterManager" aria-busy="true"></div>
         </section>
 
@@ -86,22 +86,30 @@
         <section class="settings-section" aria-labelledby="settingsDataTitle">
           <div class="section-title" id="settingsDataTitle"><i class="bi bi-hdd-fill"></i>Data &amp; Storage</div>
 
-          <div class="pref-row" id="syncStatusRow" hidden>
-            <div><div class="pref-label">Sync status</div><div class="pref-help" id="syncStatusMsg"></div></div>
-            <button class="btn btn-ghost btn-sm" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Retry</button>
+          <div class="pref-row sync-status-row" id="syncStatusRow">
+            <div>
+              <div class="pref-label"><span class="sync-status-dot" id="syncStatusDot" aria-hidden="true"></span>Sync status</div>
+              <div class="pref-help" id="syncStatusMsg">Checking…</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="syncStatusRetryBtn" onclick="location.reload()" hidden><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Retry</button>
           </div>
 
-          <div class="settings-action-list">
-            <button class="btn btn-ghost" onclick="exportData()"><i class="bi bi-download me-1" aria-hidden="true"></i>Export all data (JSON)</button>
-            <label class="btn btn-ghost mb-0">
-              <i class="bi bi-upload me-1" aria-hidden="true"></i>Import data
-              <input type="file" accept=".json" id="importFile" hidden onchange="importData(event.target.files[0])">
-            </label>
-            <button class="btn btn-ghost btn-danger-ghost" onclick="confirmReset()"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Reset all data</button>
+          <div class="pref-stack">
+            <div><div class="pref-label">Backup &amp; delete data</div><div class="pref-help">Export a copy of your planner data, or permanently erase it from your account.</div></div>
+            <div class="settings-action-list">
+              <button class="btn btn-ghost" id="settingsExportBtn" onclick="exportData()"><i class="bi bi-download me-1" aria-hidden="true"></i>Export all data (JSON)</button>
+              <button class="btn btn-ghost btn-danger-ghost" id="settingsResetBtn" onclick="confirmReset()"><i class="bi bi-trash3 me-1" aria-hidden="true"></i>Delete all data</button>
+            </div>
           </div>
         </section>
 
-        <p class="text-faint pref-help settings-disclaimer">QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). It is not a substitute for official university services, announcements, or academic records.</p>
+        <hr class="divider">
+
+        <!-- About -->
+        <section class="settings-section" aria-labelledby="settingsAboutTitle">
+          <div class="section-title" id="settingsAboutTitle"><i class="bi bi-info-circle-fill"></i>About</div>
+          <p class="text-faint pref-help-lg settings-disclaimer">QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). It is not a substitute for official university services, announcements, or academic records.</p>
+        </section>
 
       </div>
 
@@ -135,6 +143,7 @@
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/notification-engine.js"></script>
 <script src="../../assets/js/data/cloud-sync.js"></script>
 <script src="../../assets/js/core/ui.js"></script>
 <script src="../../assets/js/core/custom-select.js"></script>
