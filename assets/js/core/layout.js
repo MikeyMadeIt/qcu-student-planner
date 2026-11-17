@@ -202,7 +202,7 @@ const NOTIFICATION_READ_KEY = 'sp_notification_read';
 function getTaskNotifications() {
     if (typeof DB === 'undefined') return [];
     const settings = DB.getSettings();
-    if (settings.notifications && settings.notifications.assignmentDue === false) return [];
+    if (settings.notifications && settings.notifications.taskReminders === false) return [];
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const horizon = new Date(todayStart.getTime() + 1000 * 60 * 60 * 24 * 3);
     return DB.getActiveTasks()
@@ -736,6 +736,14 @@ function renderShell(activeKey, admin) {
     wireModalDefaults();
     hydrateProfileIdentity();
     if (isAdminArea) refreshAdminNavBadges();
+    // Upcoming Classes / Task Reminders / Low Attendance Warning (Settings >
+    // Notifications): started once per page load from here, since every
+    // signed-in app page calls renderShell(). See notification-engine.js
+    // for why this runs on a foreground timer instead of real push.
+    if (!isAdminArea && typeof DB !== 'undefined' && window.ReminderEngine) {
+        if (typeof DB.whenCloudReady === 'function') DB.whenCloudReady(function () { window.ReminderEngine.start(); });
+        else window.ReminderEngine.start();
+    }
 }
 
 // Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer

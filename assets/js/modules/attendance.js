@@ -196,12 +196,6 @@ function setAbsenceLimitForSubject(subjectId, limit) {
     DB.saveSettings(settings);
 }
 
-function setDefaultAbsenceLimit(limit) {
-    const settings = DB.getSettings();
-    settings.defaultAbsenceLimit = limit;
-    DB.saveSettings(settings);
-}
-
 /* ---- Init ---- */
 
 function setupAttendanceResponsiveAbsenceLimits() {
@@ -1614,7 +1608,3 @@ ${subRows.length ? `<h2>Subject Summary</h2>
     setTimeout(() => { win.print(); }, 400);
     Toast.show('PDF report opened for printing');
 }
-
-/* ---- Compat alias ---- */
-
-function renderRanking() { renderSubjectBreakdown(); }
