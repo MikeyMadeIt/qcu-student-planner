@@ -20,8 +20,6 @@ function toMins(t) { if (!t)
 
 function fromMins(m) { const h = Math.floor(m / 60), mm = m % 60; return String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); }
 
-function minsDiff(a, b) { return toMins(b) - toMins(a); }
-
 function nowMins() { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
 
 function isoDate(d) { return ymdLocal(d); }
@@ -91,44 +89,16 @@ function logQuickAttendance(subjectId, dateStr, status) {
 // Grade helpers
 
 function getSubjectGradeAvg(subjectId) {
-    const grades = DB.getGrades();
-    const g = grades.find(x => x.subjectId === subjectId);
-    if (!g || !g.components || !g.components.length)
+    // Same formula as the Grades page (services/gwa.js). Returns the final percentage or null.
+    const g = DB.getGrades().find(x => x.subjectId === subjectId);
+    if (!g)
         return null;
-    let totalWeight = 0, weightedSum = 0;
-    g.components.forEach(c => {
-        const w = parseFloat(c.weight) || 0;
-        let score = null;
-        if (Array.isArray(c.assessments) && c.assessments.length) {
-            const scored = c.assessments.filter(a => a.score != null);
-            if (scored.length) {
-                const avg = scored.reduce((s, a) => {
-                    const maxItems = a.totalItems || 100;
-                    return s + (a.score / maxItems * 100);
-                }, 0) / scored.length;
-                score = avg;
-            }
-        }
-        else if (c.score != null && c.score !== '') {
-            score = parseFloat(c.score);
-        }
-        if (score != null && w > 0) {
-            weightedSum += score * (w / 100);
-            totalWeight += w;
-        }
-    });
-    if (totalWeight === 0)
-        return null;
-    return Math.round((weightedSum / totalWeight) * 100) / 100;
+    return computeSubjectFinalPct(normalizeGradeRecord(g).components);
 }
 
 function getSubjectAttendanceRate(subjectId) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId && r.status !== 'No Classes');
-    if (!records.length)
-        return null;
-    const present = records.filter(r => r.status === 'Present' || r.status === 'Late' || r.status === 'Excused').length;
-    return Math.round(present / records.length * 100);
+    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId)).rate;
 }
 
 // Init
@@ -216,12 +186,6 @@ function shiftWeek(dir) {
     renderAllViews();
 }
 
-function shiftDay(dir) {
-    _selectedDate = dateAddDays(_selectedDate, dir);
-    renderNav();
-    renderAllViews();
-}
-
 function goToday() {
     _weekOffset = 0;
     _selectedDate = new Date();
@@ -291,13 +255,6 @@ function getSemesterEmptyState(date) {
     if (semester.endDate && dateKey > semester.endDate)
         return { title: 'Semester has ended', detail: '' };
     return null;
-}
-
-// All semester subjects
-
-function getSemesterSubjects() {
-    const semId = DB.getActiveSemesterId();
-    return DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
 }
 
 // Tasks helpers
@@ -676,7 +633,7 @@ function openCancelModal(subjectId, dateStr) {
           ${info && info.reason ? `<div class="text-faint" style="font-size:.8rem">${esc(info.reason)}</div>` : ''}
         </div>
       </div>
-      <div class="d-flex gap-2 mt-3">
+      <div class="modal-actions">
         <button class="btn btn-accent flex-grow-1" onclick="doRestoreOccurrence('${subjectId}','${dateStr}')"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore Class</button>
         <button class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
       </div>`;
@@ -1164,7 +1121,7 @@ function renderListView() {
         <div class="sch-subject-stats">
           <div class="sch-subject-stat">
             <span class="sch-subject-stat-lbl">Grade</span>
-            <span class="sch-subject-stat-val ${gradeAvg !== null && gradeAvg >= 75 ? 'stat-good' : gradeAvg !== null && gradeAvg < 75 ? 'stat-bad' : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : '—'}</span>
+            <span class="sch-subject-stat-val ${gradeAvg !== null ? (isPassingPct(gradeAvg) ? 'stat-good' : 'stat-bad') : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : '—'}</span>
           </div>
           <div class="sch-subject-stat-div" aria-hidden="true"></div>
           <div class="sch-subject-stat">
@@ -1241,7 +1198,7 @@ function showSubjectDetail(id) {
     <div class="sch-subject-stats mb-3">
       <div class="sch-subject-stat">
         <span class="sch-subject-stat-lbl">Grade</span>
-        <span class="sch-subject-stat-val ${gradeAvg !== null && gradeAvg >= 75 ? 'stat-good' : gradeAvg !== null && gradeAvg < 75 ? 'stat-bad' : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : 'Not available'}</span>
+        <span class="sch-subject-stat-val ${gradeAvg !== null ? (isPassingPct(gradeAvg) ? 'stat-good' : 'stat-bad') : ''}">${gradeAvg !== null ? gradeAvg.toFixed(1) + '%' : 'Not available'}</span>
       </div>
       <div class="sch-subject-stat-div" aria-hidden="true"></div>
       <div class="sch-subject-stat">
@@ -1650,7 +1607,7 @@ function openSubjectModal(id) {
         </div>
         <p class="sch-time-hint" id="subTimeHint" aria-live="polite"></p>
       </div>
-        <div class="form-check form-switch mb-1">
+        <div class="col-12"><div class="form-check form-switch mb-1">
           <input class="form-check-input" type="checkbox" id="subOnline" ${isOnline ? 'checked' : ''} aria-label="Online class">
           <label class="form-check-label" for="subOnline" style="font-size:.82rem"><i class="bi bi-wifi me-1" aria-hidden="true"></i>Online Class</label>
         </div>
@@ -1668,7 +1625,7 @@ function openSubjectModal(id) {
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Notes</label><textarea class="form-control" id="subNotes" rows="2" aria-label="Notes">${s ? esc(s.notes) : ''}</textarea></div>
     </div>
     <div id="subConflictWarning" class="sch-conflict-warning d-none" role="alert"></div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;

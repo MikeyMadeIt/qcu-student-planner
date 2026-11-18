@@ -528,7 +528,7 @@ function renderDayEventRow(e, dateStr) {
     onkeydown="if(event.key==='Enter')handleDayEventClick('${e.type}','${e.id}','${dateStr || ''}')">
     <div class="day-detail-color" style="background:${e.color}" aria-hidden="true"></div>
     <div class="flex-grow-1">
-      <div style="font-weight:700;font-size:.85rem;${e.type === 'task' && e._obj && e._obj.status === 'completed' ? 'text-decoration:line-through;opacity:.6' : ''}">${escapeHtml(e.title)}</div>
+      <div style="font-weight:700;font-size:.85rem;${e.type === 'task' && e._obj && computeStatus(e._obj) === 'completed' ? 'text-decoration:line-through;opacity:.6' : ''}">${escapeHtml(e.title)}</div>
       <div class="text-faint" style="font-size:.73rem">
         ${timeStart ? `<span>${timeStart}</span>` : ''}
         ${timeEnd ? `<span style="display:block">${timeEnd}</span>` : ''}
@@ -616,7 +616,7 @@ function renderAgendaItem(e, dateStr) {
     onkeydown="if(event.key==='Enter')handleDayEventClick('${e.type}','${e.id}','${dateStr}')">
     <div class="agenda-item-time">${_aTimeStart ? _aTimeStart + (_aTimeEnd ? '<br>' + _aTimeEnd : '') : 'All day'}</div>
     <div class="agenda-item-body">
-      <div class="agenda-item-title ${e.type === 'task' && e._obj && e._obj.status === 'completed' ? 'completed-item' : ''}">${escapeHtml(e.title)}</div>
+      <div class="agenda-item-title ${e.type === 'task' && e._obj && computeStatus(e._obj) === 'completed' ? 'completed-item' : ''}">${escapeHtml(e.title)}</div>
       ${e.room ? `<div class="agenda-item-meta">${escapeHtml(e.room)}</div>` : (e.sub ? `<div class="agenda-item-meta">${escapeHtml(e.sub)}</div>` : '')}
     </div>
 
@@ -1056,7 +1056,7 @@ function openScheduleModal(id, presetDay) {
       </div>
       <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
     </div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
@@ -1149,7 +1149,7 @@ function openTaskModal(id, presetDate) {
       <div class="col-md-4">${TimeField.html({ id: 'ctDueTime', label: 'Due Time', value: t ? (t.dueTime || '23:59') : '23:59', placeholder: '11:59 PM', fallback: '23:59' })}</div>
       <div class="col-md-4"><label>Status</label><select class="form-select" id="ctStatus">${['not-started', 'in-progress', 'completed'].map(s => `<option value="${s}" ${t && t.status === s ? 'selected' : ''}>${s.replace('-', ' ')}</option>`).join('')}</select></div>
     </div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveCalTask()"><i class="bi bi-check2 me-1"></i>${t ? 'Update' : 'Save'} Task</button>
       ${t ? `<button class="btn btn-ghost" onclick="deleteCalTask('${t.id}')" aria-label="Delete task"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
@@ -1231,7 +1231,7 @@ function openCalEventModal(id, presetDate) {
       <div class="col-12"><p class="sch-time-hint mb-0" data-start="ceStart" data-end="ceEnd" aria-live="polite"></p></div>
       <div class="col-12"><label>Description (optional)</label><textarea class="form-control" id="ceDesc" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.description || '') : ''}</textarea></div>
     </div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1"></i>${existing ? 'Update' : 'Save'} Event</button>
       ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;
@@ -1336,7 +1336,7 @@ function openUnivEventModal(id, presetDate) {
       </div>
       <button type="button" class="btn btn-ghost btn-sm mt-1" onclick="addUnivDateRow()"><i class="bi bi-plus-lg me-1"></i>Add Another Date</button>
     </div>
-    <div class="d-flex gap-2 mt-3">
+    <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveUnivEvent()"><i class="bi bi-check2 me-1"></i>Save Event</button>
       ${existing ? `<button class="btn btn-ghost" onclick="deleteUnivEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
     </div>`;

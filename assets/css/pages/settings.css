@@ -1,13 +1,124 @@
-.pref-row {
+/* SETTINGS — Swiss editorial: one flowing card of sections separated by
+   subtle dividers, rather than a card-per-setting grid. Uses the shared
+   theme tokens, so Light, Dark and AMOLED all work without overrides. */
+
+.settings-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--page-gap);
+    max-width: 42rem;
+}
+
+/* ── Profile (read-only identity header) ── */
+.settings-profile {
     display: flex;
     align-items: center;
+    gap: var(--space-4);
+}
+
+.settings-profile-avatar {
+    flex-shrink: 0;
+    align-self: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--accent), .15);
+    color: rgb(var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-weight: 700;
+    font-size: 1.15rem;
+    overflow: hidden;
+}
+
+.settings-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.settings-profile-info {
+    min-width: 0;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.settings-profile-name {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.settings-profile-email {
+    font-size: .82rem;
+    color: var(--text-soft);
+}
+
+.settings-profile-meta {
+    font-size: .76rem;
+    color: var(--text-faint);
+    margin-top: .1rem;
+}
+
+/* ── Sections within the one flowing card ── */
+.settings-groups {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-section {
+    padding: var(--space-3) 0;
+}
+
+.settings-groups > .settings-section:first-child {
+    padding-top: 0;
+}
+
+.settings-groups > .settings-section:last-child {
+    padding-bottom: 0;
+}
+
+.settings-groups .divider {
+    margin: var(--space-2) 0;
+}
+
+/* ── Preference rows (shared by Appearance / Notifications / Data) ── */
+.pref-row {
+    display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-4);
-    padding: var(--space-4) 0;
+    padding: var(--space-3) 0;
     border-bottom: 1px solid var(--border);
 }
 
-.pref-row:last-child {
+/* The label+help text wraps and shrinks; the switch/button on the right
+   never does, and never wraps onto its own line below the text — that's
+   what made toggles land on the left on narrow screens. */
+.pref-row > :first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 26rem;
+}
+
+/* Notification toggle rows: a narrower, fixed cap (rather than 26rem,
+   which never actually gets hit on a narrow phone screen) tuned so every
+   description — including the longest, Low Attendance Warning's — wraps
+   to exactly two lines instead of three. */
+#notifToggles > .pref-row > :first-child {
+    max-width: 18.5rem;
+}
+
+.pref-row > :last-child {
+    flex: 0 0 auto;
+    margin-top: .1rem;
+}
+
+.settings-section .pref-row:last-child,
+.settings-section .pref-stack:last-child {
     border-bottom: 0;
 }
 
@@ -26,46 +137,103 @@
 
 .pref-help-lg {
     font-size: .85rem;
+    margin-bottom: var(--space-3);
 }
 
+.main-content .section-title + .pref-help-lg,
 .main-content .section-title + .text-faint {
     line-height: 1.5;
 }
 
-/* CSS Styles for the settings navigation */
-.set-nav {
-    border-bottom:  2px solid rgb(var(--accent-2));
+.settings-inline-btn {
+    margin-top: var(--space-3);
 }
 
-.set-nav:hover {
-    border-bottom:  2px solid rgb(var(--accent-2));
+.settings-action-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
 }
 
-.set-nav-btn {
-    padding: 5px;
+/* bi-download sits flush at the left of its glyph box (unlike most bootstrap
+   icons, which have built-in breathing room), so it reads as touching the
+   button text even with the same gap as other buttons — nudge it over to
+   match. */
+#settingsExportBtn i {
+    margin-right: .5rem !important;
 }
 
-.set-nav-btn:hover {
-    background: var(--surface-2);
-    color: var(--text);
+.settings-disclaimer {
+    margin-bottom: 0;
 }
 
-.set-nav-btn.active {
-    background: rgba(var(--accent), .15);
-    color: rgb(var(--accent));
+/* ── Sync status (Data & Storage): always visible — a quiet dot + message
+   when synced, an accent-colored row + timestamp when something failed. ── */
+.sync-status-dot {
+    display: inline-block;
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    margin-right: .4rem;
+    background: var(--text-faint);
+    vertical-align: middle;
 }
 
-/* Fourteen accent swatches, always seven per row (two symmetrical rows), */
+.sync-status-row.is-ok .sync-status-dot {
+    background: #34d399;
+}
+
+.sync-status-row.is-error .sync-status-dot {
+    background: #fb7185;
+}
+
+.sync-status-row.is-error .pref-help {
+    color: #fb7185;
+}
+
+/* ── Account actions: sign out spans the full card ── */
+.settings-account-actions .btn {
+    width: 100%;
+}
+
+/* ── Appearance rows that stack a title/description above a full-width
+   control (Theme, Accent color), instead of the label-left/control-right
+   layout used by the simple on/off rows below them. ── */
+.pref-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ── Theme buttons: three equal-width rectangles ── */
+.theme-btn-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+}
+
+.theme-opt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+/* ── Accent swatches: fourteen colors, seven per row ── */
 #accentPicker {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: var(--space-2);
-    max-width: 22rem;
+    width: 100%;
+    max-width: 24rem;
 }
 
 #accentPicker .accent-swatch-btn {
+    aspect-ratio: 1 / 1;
     width: 100%;
-    height: 2.25rem;
     position: relative;
     border: 1px solid rgba(0, 0, 0, .18);
     border-radius: var(--radius-sm);
@@ -101,27 +269,54 @@
     filter: drop-shadow(0 0 1px rgba(0, 0, 0, .6));
 }
 
+/* ── Notification "Remind me": one shared block for every toggle that has
+   a timing choice (Upcoming Classes, Task Reminders), laid out the same
+   way as Theme/Accent color above — title+help on top, full-width
+   controls below — instead of a separate "Remind me" row squeezed next
+   to a stack of selects. ── */
+.notif-remind-selects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.notif-remind-select-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.notif-remind-select-label {
+    font-size: .85rem;
+    color: var(--text-soft);
+}
+
+.notif-timing-select {
+    width: auto;
+    min-width: 9.5rem;
+}
+
+/* The custom-select wrapper (assets/js/core/custom-select.js) replaces
+   the native <select> in place but doesn't inherit its width classes, and
+   by default sizes itself to whichever option's text is currently shown —
+   so the box visibly grows/shrinks as the person picks a different
+   option. Fix it to the width of the longest option ("At the scheduled
+   time") instead, so it never changes size. */
+.notif-remind-select-group .custom-select {
+    flex: 0 0 12rem;
+    width: 12rem;
+}
+
+.notif-remind-select-group .cs-trigger {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 @media (max-width: 575.98px) {
     #accentPicker {
         gap: 6px;
         max-width: 100%;
     }
-
-    #accentPicker .accent-swatch-btn {
-        height: 2rem;
-    }
-}
-
-.glass .btn.w-100 + .btn.w-100 {
-    margin-top: var(--space-3);
-}
-
-#themeGrid button,
-[id^="theme_"] {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: 4rem;
 }

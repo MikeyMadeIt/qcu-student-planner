@@ -20,35 +20,7 @@ function gradeEquivBadgeHtml(point) {
     return `<span class="grade-equiv-badge ${cls}">${escapeHtml(row.label)}</span>`;
 }
 
-// Data normalization
-
-function normalizeGradeRecord(g) {
-    if (!Array.isArray(g.components))
-        g.components = [];
-    g.components.forEach(c => {
-        if (!c.id)
-            c.id = DB.uid();
-        if (!c.name)
-            c.name = '';
-        if (c.weight === undefined || c.weight === null || isNaN(+c.weight))
-            c.weight = 0;
-        if (!Array.isArray(c.assessments)) {
-            const oldScore = (c.rawScore !== null && c.rawScore !== undefined && c.rawScore !== '')
-                ? { id: DB.uid(), name: 'Score', score: +c.rawScore, totalItems: c.totalItems != null ? +c.totalItems : null }
-                : (c.score !== null && c.score !== undefined && c.score !== '')
-                    ? { id: DB.uid(), name: 'Score', score: +c.score, totalItems: 100 }
-                    : null;
-            c.assessments = oldScore ? [oldScore] : [];
-        }
-        c.assessments.forEach(a => {
-            if (!a.id)
-                a.id = DB.uid();
-            a.score = (a.score === '' || a.score === undefined) ? null : +a.score;
-            a.totalItems = (a.totalItems === '' || a.totalItems === undefined || a.totalItems === null) ? null : +a.totalItems;
-        });
-    });
-    return g;
-}
+// Data normalization lives in services/gwa.js (normalizeGradeRecord)
 
 function syncGradesWithSubjects() {
     const semId = DB.getActiveSemesterId();
@@ -121,21 +93,9 @@ function renderGradesOverview() {
     const semId = DB.getActiveSemesterId();
     const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
     const grades = syncGradesWithSubjects();
-    const rows = subjects.map(s => {
-        const g = grades.find(x => x.subjectId === s.id) || { components: [] };
-        const pct = computeSubjectFinalPct(g.components);
-        const point = pct !== null ? percentToGWA(pct) : null;
-        return { subject: s, pct, point };
-    });
-    const scoredRows = rows.filter(r => r.pct !== null);
+    const { rows, scoredRows, gwa } = computeSemesterGWA(subjects, grades);
     const totalSubjects = subjects.length;
     const scoredSubjects = scoredRows.length;
-    let gwa = null;
-    if (scoredRows.length) {
-        const tu = scoredRows.reduce((s, r) => s + (+r.subject.units || 0), 0);
-        if (tu > 0)
-            gwa = scoredRows.reduce((s, r) => s + r.point * (+r.subject.units || 0), 0) / tu;
-    }
     let highestRow = null, lowestRow = null;
     if (scoredRows.length) {
         highestRow = scoredRows.reduce((best, r) => r.point < best.point ? r : best, scoredRows[0]);
@@ -181,91 +141,6 @@ function renderGradesOverview() {
         loNumEl.textContent = lowestRow ? lowestRow.point.toFixed(2) : '--';
     if (loSubEl)
         loSubEl.textContent = lowestRow ? `${lowestRow.subject.code} · ${lowestRow.pct.toFixed(1)}%` : '—';
-    const gwaTargetCurrentEl = document.getElementById('gwaTargetCurrent');
-    if (gwaTargetCurrentEl)
-        gwaTargetCurrentEl.value = gwa === null ? '—' : gwa.toFixed(2);
-}
-
-// GWA TARGET PLANNER (semester-level)
-
-function renderGwaTargetPlanner() {
-    computeGwaTarget();
-}
-
-function computeGwaTarget() {
-    const targetInput = document.getElementById('gwaTargetInput');
-    const resultEl = document.getElementById('gwaTargetResult');
-    if (!resultEl)
-        return;
-    const targetStr = targetInput ? targetInput.value.trim() : '';
-    if (!targetStr) {
-        resultEl.innerHTML = '';
-        return;
-    }
-    const targetGwa = parseFloat(targetStr);
-    if (isNaN(targetGwa) || targetGwa < 1 || targetGwa > 5) {
-        resultEl.innerHTML = `<div class="tg-result-box tg-warn"><i class="bi bi-exclamation-triangle me-1"></i>Enter a valid GWA between 1.00 and 5.00.</div>`;
-        return;
-    }
-    const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const grades = DB.getGrades().map(normalizeGradeRecord);
-    if (!subjects.length) {
-        resultEl.innerHTML = `<div class="tg-result-box tg-info"><i class="bi bi-info-circle me-1"></i>Add subjects to use the GWA Target Planner.</div>`;
-        return;
-    }
-    const rows = subjects.map(s => {
-        const g = grades.find(x => x.subjectId === s.id) || { components: [] };
-        const pct = computeSubjectFinalPct(g.components);
-        const point = pct !== null ? percentToGWA(pct) : null;
-        const units = +s.units || 0;
-        return { subject: s, pct, point, units, graded: point !== null };
-    });
-    const gradedRows = rows.filter(r => r.graded);
-    const ungradedRows = rows.filter(r => !r.graded);
-    const gradedWeightedSum = gradedRows.reduce((s, r) => s + r.point * r.units, 0);
-    const gradedUnits = gradedRows.reduce((s, r) => s + r.units, 0);
-    const ungradedUnits = ungradedRows.reduce((s, r) => s + r.units, 0);
-    const totalUnits = gradedUnits + ungradedUnits;
-    const currentGwa = gradedUnits > 0 ? gradedWeightedSum / gradedUnits : null;
-    if (currentGwa !== null && currentGwa <= targetGwa) {
-        resultEl.innerHTML = `
-      <div class="gwa-target-result-box">
-        <div class="gwa-target-info-row"><span class="text-faint">Target GWA</span><span class="gwa-target-val">${targetGwa.toFixed(2)}</span></div>
-        <div class="gwa-target-info-row"><span class="text-faint">Current GWA</span><span class="gwa-target-val" style="color:#34d399">${currentGwa.toFixed(2)}</span></div>
-        <div class="tg-result-box tg-pass mt-2"><i class="bi bi-trophy-fill me-1"></i>Target already achieved! Your current GWA of ${currentGwa.toFixed(2)} meets or beats your target of ${targetGwa.toFixed(2)}.</div>
-      </div>`;
-        return;
-    }
-    if (!ungradedRows.length) {
-        resultEl.innerHTML = `
-      <div class="gwa-target-result-box">
-        <div class="gwa-target-info-row"><span class="text-faint">Target GWA</span><span class="gwa-target-val">${targetGwa.toFixed(2)}</span></div>
-        <div class="gwa-target-info-row"><span class="text-faint">Current GWA</span><span class="gwa-target-val" style="color:#fb7185">${currentGwa !== null ? currentGwa.toFixed(2) : '—'}</span></div>
-        <div class="tg-result-box tg-fail mt-2"><i class="bi bi-x-circle-fill me-1"></i>All subjects are graded and your GWA of ${currentGwa !== null ? currentGwa.toFixed(2) : '—'} did not reach the target of ${targetGwa.toFixed(2)}.</div>
-      </div>`;
-        return;
-    }
-    const requiredPointAvg = (targetGwa * totalUnits - gradedWeightedSum) / ungradedUnits;
-    let html = `<div class="gwa-target-result-box">`;
-    html += `<div class="gwa-target-info-row"><span class="text-faint">Target GWA</span><span class="gwa-target-val">${targetGwa.toFixed(2)}</span></div>`;
-    html += `<div class="gwa-target-info-row"><span class="text-faint">Current GWA</span><span class="gwa-target-val">${currentGwa !== null ? currentGwa.toFixed(2) : 'No grades yet'}</span></div>`;
-    html += `<div class="gwa-target-info-row"><span class="text-faint">Graded subjects</span><span class="gwa-target-val">${gradedRows.length} of ${rows.length}</span></div>`;
-    html += `<div class="gwa-target-info-row"><span class="text-faint">Ungraded units</span><span class="gwa-target-val">${ungradedUnits}</span></div>`;
-    if (requiredPointAvg < 1.0) {
-        html += `<div class="tg-result-box tg-pass mt-2"><i class="bi bi-trophy-fill me-1"></i>Your current grades are strong enough — even a 1.00 GWA on remaining subjects ensures you hit the target.</div>`;
-    }
-    else if (requiredPointAvg > 5.0) {
-        html += `<div class="gwa-target-info-row"><span class="text-faint">Required avg GWA on ungraded</span><span class="gwa-target-val" style="color:#fb7185">${requiredPointAvg.toFixed(2)} (impossible)</span></div>`;
-        html += `<div class="tg-result-box tg-fail mt-2"><i class="bi bi-x-circle-fill me-1"></i>Target not achievable — you would need an average GWA of ${requiredPointAvg.toFixed(2)} across remaining subjects, which exceeds the 5.00 scale.</div>`;
-    }
-    else {
-        const reqLabel = gwaLabel(requiredPointAvg);
-        html += `<div class="gwa-target-info-row"><span class="text-faint">Required avg GWA on ungraded</span><span class="gwa-target-val" style="color:#34d399;font-weight:800">${requiredPointAvg.toFixed(2)} <span class="text-faint" style="font-weight:400;font-size:.8em">(${reqLabel})</span></span></div>`;
-        html += `<div class="tg-result-box tg-pass mt-2"><i class="bi bi-check-circle-fill me-1"></i>You need an average GWA of <strong>${requiredPointAvg.toFixed(2)}</strong> (${reqLabel}) across your ${ungradedRows.length} remaining subject${ungradedRows.length !== 1 ? 's' : ''} to reach a GWA of ${targetGwa.toFixed(2)}.</div>`;
-    }
-    html += `</div>`;
-    resultEl.innerHTML = html;
 }
 
 // SUBJECT CARDS — sparkline + inline grade badge
@@ -293,7 +168,7 @@ function renderGradeCards() {
         const hasComponents = g.components.length > 0;
         const hasAnyScores = hasComponents && g.components.some(c => c.assessments && c.assessments.some(a => assessmentPct(a) !== null));
         if (pct !== null) {
-            if (pct >= PASSING_PCT) {
+            if (isPassingPct(pct)) {
                 statusBadge = `<span class="grade-pass-badge passing"><i class="bi bi-check-circle-fill"></i> Passing</span>`;
             }
             else {
@@ -325,7 +200,7 @@ function renderGradeCards() {
           </div>
         </div>
         ${hasSparkline ? renderSparklineHtml(sparkPoints) : ''}
-        <div class="progress grade-card-bar"><div class="progress-bar" style="width:${Math.min(pct || 0, 100)}%;background:${pct !== null && pct < PASSING_PCT ? '#fb7185' : ''}"></div></div>
+        <div class="progress grade-card-bar"><div class="progress-bar" style="width:${Math.min(pct || 0, 100)}%;background:${pct !== null && !isPassingPct(pct) ? '#fb7185' : ''}"></div></div>
         <!-- Expanded detail -->
         <div class="collapse" id="${collapseId}">
           <div class="grade-card-detail">
@@ -335,7 +210,7 @@ function renderGradeCards() {
                 ${g.components.map(c => {
             const ws = componentWeightedScore(c);
             const avg = componentAvgPct(c);
-            const cPassing = avg !== null ? avg >= PASSING_PCT : null;
+            const cPassing = avg !== null ? isPassingPct(avg) : null;
             return `<div class="d-flex justify-content-between align-items-center" style="font-size:.75rem">
                     <span class="text-soft">${escapeHtml(c.name)} <span class="text-faint">(${c.weight}%)</span></span>
                     <div class="d-flex gap-2 align-items-center">
@@ -345,7 +220,7 @@ function renderGradeCards() {
                   </div>`;
         }).join('')}
               </div>
-              ${pct !== null && pct < PASSING_PCT ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
+              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
               ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="bi bi-exclamation-triangle me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
             ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="bi bi-pencil"></i> to add.</div>`}
           </div>
@@ -371,7 +246,7 @@ function renderSparklineHtml(points) {
     const toY = v => PT + (1 - (v - minV) / range) * chartH;
     const dir = trendDirection(points);
     const lineColor = dir === 'up' ? '#34d399' : dir === 'down' ? '#fb7185' : '#94a3b8';
-    const dotColorFn = (pct) => pct >= PASSING_PCT ? '#34d399' : '#fb7185';
+    const dotColorFn = (pct) => isPassingPct(pct) ? '#34d399' : '#fb7185';
     const polyPts = points.map((p, i) => `${toX(i).toFixed(1)},${toY(p.pct).toFixed(1)}`).join(' ');
     let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="grade-sparkline-svg" role="img" aria-label="Grade trend sparkline">`;
     svg += `<polyline points="${polyPts}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>`;
@@ -410,7 +285,7 @@ function renderGradeModalBody() {
     const finalPct = computeSubjectFinalPct(gradeDraft.components);
     const totalWeight = sumWeights(gradeDraft.components);
     const weightWarn = totalWeight !== 100 && totalWeight !== 0;
-    const isPassing = finalPct !== null ? finalPct >= PASSING_PCT : null;
+    const isPassing = finalPct !== null ? isPassingPct(finalPct) : null;
     body.innerHTML = `
     <p class="text-faint mb-3" style="font-size:.8rem">
       <strong>How it works:</strong> Create components (e.g., Quizzes 30%, Midterm 25%).
@@ -439,9 +314,9 @@ function renderGradeModalBody() {
         : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle-fill"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
         </div>` : ''}
     </div>
-    <button class="btn btn-accent w-100 mt-3" onclick="saveGradeComponents()">
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
       <i class="bi bi-check2 me-1"></i>Save Grading Breakdown
-    </button>`;
+    </button></div>`;
 }
 
 function componentBlockHtml(c, ci) {
@@ -494,7 +369,7 @@ function compSummaryHtml(avg, ws) {
 
 function assessmentRowHtml(ci, ai, a) {
     const pct = assessmentPct(a);
-    const pctColor = pct === null ? 'var(--text-faint)' : pct >= PASSING_PCT ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
+    const pctColor = pct === null ? 'var(--text-faint)' : isPassingPct(pct) ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
     return `<div id="assessRow-${ci}-${ai}" style="display:grid;grid-template-columns:${ASSESS_GRID};gap:5px;padding:3px 10px;align-items:center">
     <input class="form-control form-control-sm" placeholder="e.g., Quiz 1"
       value="${escapeHtml(a.name || '')}"
@@ -521,7 +396,7 @@ function onAssessInput(ci, ai, field, value) {
     const pctEl = document.getElementById(`assessPct-${ci}-${ai}`);
     if (pctEl) {
         pctEl.textContent = pct === null ? '—' : pct.toFixed(1) + '%';
-        pctEl.style.color = pct === null ? 'var(--text-faint)' : pct >= PASSING_PCT ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
+        pctEl.style.color = pct === null ? 'var(--text-faint)' : isPassingPct(pct) ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
     }
     updateCompSummary(ci);
     refreshGradePreview();
@@ -570,7 +445,7 @@ function removeComponent(ci) {
 
 function refreshGradePreview() {
     const finalPct = computeSubjectFinalPct(gradeDraft.components);
-    const isPassing = finalPct !== null ? finalPct >= PASSING_PCT : null;
+    const isPassing = finalPct !== null ? isPassingPct(finalPct) : null;
     const totalWeight = sumWeights(gradeDraft.components);
     const weightWarnEl = document.getElementById('modalWeightWarn');
     if (weightWarnEl) {
@@ -656,146 +531,6 @@ function renderGradeReferenceTable() {
     </div>`).join('');
 }
 
-// TARGET GRADE CALCULATOR
-
-function openTargetGradeInfo() {
-    new bootstrap.Modal(document.getElementById('targetGradeInfoModal')).show();
-}
-
-function renderTargetGradeSection() {
-    const wrap = document.getElementById('targetGradeWrap');
-    if (!wrap)
-        return;
-    const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    if (!subs.length) {
-        wrap.innerHTML = `<div class="text-faint text-center py-3" style="font-size:.82rem">Add subjects to use the Target Grade calculator.</div>`;
-        return;
-    }
-    const subOptions = subs.map(s => `<option value="${s.id}">${escapeHtml(s.code)}</option>`).join('');
-    wrap.innerHTML = `
-    <div class="tg-form-grid">
-      <div class="tg-form-field">
-        <label class="tg-label">Subject</label>
-        <select class="form-select form-select-sm" id="tgSubject" onchange="updateTargetGradeComponents()">
-          ${subOptions}
-        </select>
-      </div>
-      <div class="tg-form-field">
-        <label class="tg-label">Desired Final Grade <span class="tg-label-sub">(%)</span></label>
-        <input type="number" min="0" max="100" step="0.1" class="form-control form-control-sm" id="tgTarget" placeholder="e.g. 90" oninput="computeTargetGrade()">
-      </div>
-      <div class="tg-form-field">
-        <label class="tg-label">Remaining Component <span class="tg-label-sub">(to compute)</span></label>
-        <select class="form-select form-select-sm" id="tgComponent" onchange="computeTargetGrade()">
-          <option value="">Select component…</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-accent w-100 tg-calc-btn" onclick="computeTargetGrade()">
-      <i class="bi bi-calculator me-1"></i>Calculate Target Grade
-    </button>
-    <div id="tgResult" class="mt-2"></div>`;
-    updateTargetGradeComponents();
-}
-
-function updateTargetGradeComponents() {
-    const subId = document.getElementById('tgSubject')?.value;
-    if (!subId)
-        return;
-    const grades = DB.getGrades().map(normalizeGradeRecord);
-    const g = grades.find(x => x.subjectId === subId) || { components: [] };
-    const sel = document.getElementById('tgComponent');
-    if (!sel)
-        return;
-    sel.innerHTML = `<option value="">Select component</option>` +
-        g.components.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${c.weight}%)</option>`).join('');
-    document.getElementById('tgResult').innerHTML = '';
-}
-
-function computeTargetGrade() {
-    const subId = document.getElementById('tgSubject')?.value;
-    const targetStr = document.getElementById('tgTarget')?.value;
-    const compId = document.getElementById('tgComponent')?.value;
-    const resultEl = document.getElementById('tgResult');
-    if (!resultEl)
-        return;
-    if (!subId || !targetStr || !compId) {
-        resultEl.innerHTML = '';
-        return;
-    }
-    const target = parseFloat(targetStr);
-    if (isNaN(target) || target < 0 || target > 100) {
-        resultEl.innerHTML = `<div class="tg-result-box tg-warn"><i class="bi bi-exclamation-triangle me-1"></i>Enter a valid target between 0 and 100.</div>`;
-        return;
-    }
-    const grades = DB.getGrades().map(normalizeGradeRecord);
-    const g = grades.find(x => x.subjectId === subId) || { components: [] };
-    const targetComp = g.components.find(c => c.id === compId);
-    if (!targetComp) {
-        resultEl.innerHTML = `<div class="tg-result-box tg-warn">Component not found.</div>`;
-        return;
-    }
-    const remainingWeight = +targetComp.weight || 0;
-    if (!remainingWeight) {
-        resultEl.innerHTML = `<div class="tg-result-box tg-warn">Selected component has 0% weight — cannot calculate.</div>`;
-        return;
-    }
-    const otherComponents = g.components.filter(c => c.id !== compId);
-    let scoredWeightedSum = 0;
-    let scoredOtherWeight = 0;
-    let unscoredOtherWeight = 0;
-    otherComponents.forEach(c => {
-        const avg = componentAvgPct(c);
-        const w = +c.weight || 0;
-        if (avg !== null) {
-            scoredWeightedSum += (avg * w / 100);
-            scoredOtherWeight += w;
-        }
-        else {
-            unscoredOtherWeight += w;
-        }
-    });
-    const requiredPct = (target - scoredWeightedSum) / (remainingWeight / 100);
-    let resultHtml = '';
-    if (scoredOtherWeight === 0 && otherComponents.length > 0) {
-        resultHtml = `<div class="tg-info-box">
-      <div class="tg-info-row"><span class="text-faint">Target Grade</span><span class="tg-val">${target}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Current Grade</span><span class="tg-val text-faint">No data yet</span></div>
-      <div class="tg-info-row"><span class="text-faint">${escapeHtml(targetComp.name)} Weight</span><span class="tg-val">${remainingWeight}%</span></div>
-      <div class="tg-result-box tg-info mt-2"><i class="bi bi-info-circle me-1"></i>Enter scores for other components first to get an accurate required score.</div>
-    </div>`;
-    }
-    else if (requiredPct > 100) {
-        resultHtml = `<div class="tg-info-box">
-      <div class="tg-info-row"><span class="text-faint">Target Grade</span><span class="tg-val">${target}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Current Weighted Score</span><span class="tg-val">${scoredWeightedSum.toFixed(2)} pts</span></div>
-      <div class="tg-info-row"><span class="text-faint">${escapeHtml(targetComp.name)} Weight</span><span class="tg-val">${remainingWeight}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Required Score</span><span class="tg-val" style="color:#fb7185">${requiredPct.toFixed(1)}% <span class="text-faint">(impossible)</span></span></div>
-      ${unscoredOtherWeight > 0 ? `<div class="tg-result-box tg-warn mt-2"><i class="bi bi-info-circle me-1"></i>${unscoredOtherWeight}% in unscored components — adding scores may improve achievability.</div>` : ''}
-      <div class="tg-result-box tg-fail mt-2"><i class="bi bi-x-circle-fill me-1"></i>Target not achievable — requires ${requiredPct.toFixed(1)}% on ${escapeHtml(targetComp.name)}.</div>
-    </div>`;
-    }
-    else if (requiredPct <= 0) {
-        resultHtml = `<div class="tg-info-box">
-      <div class="tg-info-row"><span class="text-faint">Target Grade</span><span class="tg-val">${target}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Current Weighted Score</span><span class="tg-val" style="color:#34d399">${scoredWeightedSum.toFixed(2)} pts</span></div>
-      <div class="tg-result-box tg-pass mt-2"><i class="bi bi-trophy-fill me-1"></i>Target already achieved — even with 0% on ${escapeHtml(targetComp.name)} you will meet the target.</div>
-    </div>`;
-    }
-    else {
-        resultHtml = `<div class="tg-info-box">
-      <div class="tg-info-row"><span class="text-faint">Target Grade</span><span class="tg-val">${target}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Current Weighted Score</span><span class="tg-val">${scoredWeightedSum.toFixed(2)} pts <span class="text-faint">of ${(scoredOtherWeight + remainingWeight)}% available</span></span></div>
-      <div class="tg-info-row"><span class="text-faint">${escapeHtml(targetComp.name)} Weight</span><span class="tg-val">${remainingWeight}%</span></div>
-      <div class="tg-info-row"><span class="text-faint">Required Score</span><span class="tg-val" style="color:#34d399;font-size:1.1em;font-weight:800">${requiredPct.toFixed(1)}%</span></div>
-      ${unscoredOtherWeight > 0 ? `<div class="tg-info-row"><span class="text-faint">Unscored components</span><span class="tg-val text-faint">${unscoredOtherWeight}% weight not yet entered</span></div>` : ''}
-      <div class="tg-result-box tg-pass mt-2"><i class="bi bi-check-circle-fill me-1"></i>You need at least <strong>${requiredPct.toFixed(1)}%</strong> on ${escapeHtml(targetComp.name)} to reach ${target}%.</div>
-    </div>`;
-    }
-    resultEl.innerHTML = resultHtml;
-}
-
 // GWA CALCULATOR — clearly labeled as manual utility
 
 function renderGwaCalculator() {
@@ -808,34 +543,7 @@ function renderGwaCalculator() {
         DB.saveGwaCalcRows(rows);
     }
     wrap.innerHTML = rows.map((r, i) => gwaCalcRowHtml(r, i)).join('');
-    let totalUnits = 0, weightedSum = 0, courseCount = 0;
-    rows.forEach(r => {
-        const u = +r.units || 0, gr = +r.grade || 0;
-        if (r.units !== '' && r.grade !== '') {
-            totalUnits += u;
-            weightedSum += u * gr;
-            courseCount++;
-        }
-    });
-    const result = courseCount > 0 && totalUnits > 0 ? weightedSum / totalUnits : null;
-    const passed = result !== null ? result <= 3.00 : null;
-    document.getElementById('gwaCalcResult').textContent = result === null ? '--' : result.toFixed(2);
-    const meaningEl = document.getElementById('gwaCalcResultMeaning');
-    if (meaningEl) {
-        meaningEl.textContent = result === null ? '' : gwaLabel(result);
-        meaningEl.style.color = result === null ? 'var(--text-faint)' : passed ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
-    }
-    const statusEl = document.getElementById('gwaCalcResultStatus');
-    if (statusEl) {
-        statusEl.textContent = result === null ? '' : passed ? 'PASSED' : 'FAILED';
-        statusEl.style.color = result === null ? 'var(--text-faint)' : passed ? 'rgba(52,211,153,.7)' : 'rgba(251,113,133,.7)';
-    }
-    const totUnitsEl = document.getElementById('gwaTotalUnits');
-    if (totUnitsEl)
-        totUnitsEl.textContent = totalUnits;
-    const totCoursesEl = document.getElementById('gwaTotalCourses');
-    if (totCoursesEl)
-        totCoursesEl.textContent = courseCount;
+    refreshGwaTotals(rows);
 }
 
 function gwaCalcRowHtml(r, i) {
@@ -874,8 +582,10 @@ function refreshGwaTotals(rows) {
         rows = DB.getGwaCalcRows();
     let totalUnits = 0, weightedSum = 0, courseCount = 0;
     rows.forEach(r => {
+        // A row counts only when it has real units and a real grade. Cloud sync stores blank
+        // cells as 0, so a blank row must not be counted as a course after a round-trip.
         const u = +r.units || 0, gr = +r.grade || 0;
-        if (r.units !== '' && r.grade !== '') {
+        if (u > 0 && gr > 0) {
             totalUnits += u;
             weightedSum += u * gr;
             courseCount++;

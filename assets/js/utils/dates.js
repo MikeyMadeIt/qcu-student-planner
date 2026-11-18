@@ -40,11 +40,6 @@ function fmtTime(t) {
     return `${hh}:${String(m).padStart(2, '0')} ${ap}`;
 }
 
-function minutesUntil(dateStr, timeStr) {
-    const target = new Date(`${dateStr}T${timeStr}:00`);
-    return Math.round((target - new Date()) / 60000);
-}
-
 function fmtDuration(mins) {
     if (mins < 0)
         return 'Overdue';

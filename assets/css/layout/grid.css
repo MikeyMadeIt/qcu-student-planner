@@ -55,29 +55,6 @@ label {
     border-radius: 0 4px 4px 0;
 }
 
-/* Modal polish */
-
-.modal-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-}
-
-.modal-body {
-    padding: 18px;
-}
-
-.modal-footer {
-    padding: 12px 18px;
-    border-top: 1px solid var(--border);
-    gap: 8px;
-}
-
-.modal-title {
-    font-size: .96rem;
-    font-weight: 800;
-    font-family: var(--font-display);
-}
-
 /* Chips / badges consistent size */
 
 .chip {
@@ -271,16 +248,24 @@ label {
     font-weight: 600;
 }
 
-/* Scrollbars */
-
-::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+/* Scrollbars — hidden globally, on every scrolling element (the
+   document, the sidebar nav, modal bodies, the dashboard panes, kanban
+   columns, calendar/schedule grids, dropdowns, etc.), while the element
+   stays fully scrollable by wheel, trackpad, touch and keyboard: hiding
+   the scrollbar only removes its painted track/thumb, it never sets
+   `overflow: hidden` or `pointer-events: none`. Firefox and IE/Edge use
+   the `scrollbar-width`/`-ms-overflow-style` properties on the scrolling
+   element itself; WebKit/Blink (Chrome, Safari, Edge Chromium) use the
+   `::-webkit-scrollbar` pseudo-element instead, so both are declared. */
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-::-webkit-scrollbar-thumb {
-    background: rgba(var(--accent),.25);
-    border-radius: 4px;
+*::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 /* Focus ring */
@@ -329,11 +314,6 @@ td {
     }
     .page-title {
         font-size: 1.15rem;
-    }
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: 12px;
     }
 }
 

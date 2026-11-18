@@ -181,10 +181,11 @@ function formatShortDate(ymd) {
 
 function getAbsenceLimitForSubject(subjectId) {
     const settings = DB.getSettings();
-    if (settings.absenceLimits && settings.absenceLimits[subjectId] != null) {
+    const valid = v => v != null && v !== '' && isFinite(+v) && +v >= 0;
+    if (settings.absenceLimits && valid(settings.absenceLimits[subjectId])) {
         return +settings.absenceLimits[subjectId];
     }
-    return settings.defaultAbsenceLimit != null ? +settings.defaultAbsenceLimit : DEFAULT_ABSENCE_LIMIT;
+    return valid(settings.defaultAbsenceLimit) ? +settings.defaultAbsenceLimit : DEFAULT_ABSENCE_LIMIT;
 }
 
 function setAbsenceLimitForSubject(subjectId, limit) {
@@ -192,12 +193,6 @@ function setAbsenceLimitForSubject(subjectId, limit) {
     if (!settings.absenceLimits)
         settings.absenceLimits = {};
     settings.absenceLimits[subjectId] = limit;
-    DB.saveSettings(settings);
-}
-
-function setDefaultAbsenceLimit(limit) {
-    const settings = DB.getSettings();
-    settings.defaultAbsenceLimit = limit;
     DB.saveSettings(settings);
 }
 
@@ -622,10 +617,7 @@ function renderAttendanceAll() {
 
 function renderOverallRate() {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
-    const relevant = records.filter(r => r.status !== 'No Classes');
-    const present = relevant.filter(r => r.status === 'Present' || r.status === 'Late' || r.status === 'Excused').length;
-    const rate = relevant.length ? Math.round(present / relevant.length * 100) : null;
+    const rate = summarizeAttendance(getLiveSemesterAttendance(semId)).rate;
     document.getElementById('aRate').textContent = rate === null ? '--%' : rate + '%';
     const bar = document.getElementById('aRateBar');
     if (bar) {
@@ -638,7 +630,7 @@ function renderOverallRate() {
 
 function renderStatistics() {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const records = getLiveSemesterAttendance(semId);
     const wrap = document.getElementById('attendanceStats');
     if (!records.length) {
         wrap.innerHTML = `
@@ -1154,14 +1146,11 @@ function renderSubjectBreakdown() {
     }
     const subData = subs.map(s => {
         const recs = records.filter(r => r.subjectId === s.id);
-        const present = recs.filter(r => r.status === 'Present').length;
+        const sum = summarizeAttendance(recs);
+        const { present, late, excused, absent, noClass } = sum;
         const presentOnline = recs.filter(r => r.status === 'Present' && r.online).length;
-        const late = recs.filter(r => r.status === 'Late').length;
-        const excused = recs.filter(r => r.status === 'Excused').length;
-        const absent = recs.filter(r => r.status === 'Absent').length;
-        const noClass = recs.filter(r => r.status === 'No Classes').length;
-        const relevant = present + late + excused + absent;
-        const rate = relevant > 0 ? Math.round((present + late + excused) / relevant * 100) : null;
+        const relevant = sum.counted;
+        const rate = sum.rate;
         const limit = getAbsenceLimitForSubject(s.id);
         const limitPct = limit > 0 ? Math.min(Math.round(absent / limit * 100), 100) : (absent > 0 ? 100 : 0);
         const limitColor = absent >= limit ? '#fb7185' : absent >= limit - 1 && limit > 1 ? '#b45309' : '#34d399';
@@ -1536,9 +1525,9 @@ function exportAttendancePDF() {
         return;
     }
     // Calculate overall stats
-    const relevant = records.filter(r => r.status !== 'No Classes');
-    const presentAll = relevant.filter(r => r.status === 'Present' || r.status === 'Late' || r.status === 'Excused').length;
-    const overallRate = relevant.length ? Math.round(presentAll / relevant.length * 100) : 0;
+    // Same counting as the Attendance page (shared helper) so the printed report matches the screen.
+    const overall = summarizeAttendance(getLiveSemesterAttendance(semId));
+    const overallRate = overall.rate === null ? '—' : overall.rate + '%';
     const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'Current Semester';
     const settings = DB.getSettings();
     const studentName = settings.name || '';
@@ -1580,12 +1569,12 @@ function exportAttendancePDF() {
 <div class="sub">${semLabel}${studentName ? ' · ' + studentName : ''}</div>
 <h2>Overall Attendance</h2>
 <div class="stat-row">
-  <div class="stat-box"><div class="val">${overallRate}%</div><div class="lbl">Overall Rate</div></div>
-  <div class="stat-box"><div class="val">${relevant.filter(r => r.status === 'Present').length}</div><div class="lbl">Present</div></div>
-  <div class="stat-box"><div class="val">${relevant.filter(r => r.status === 'Late').length}</div><div class="lbl">Late</div></div>
-  <div class="stat-box"><div class="val">${relevant.filter(r => r.status === 'Excused').length}</div><div class="lbl">Excused</div></div>
-  <div class="stat-box"><div class="val">${relevant.filter(r => r.status === 'Absent').length}</div><div class="lbl">Absent</div></div>
-  <div class="stat-box"><div class="val">${records.filter(r => r.status === 'No Classes').length}</div><div class="lbl">No Class</div></div>
+  <div class="stat-box"><div class="val">${overallRate}</div><div class="lbl">Overall Rate</div></div>
+  <div class="stat-box"><div class="val">${overall.present}</div><div class="lbl">Present</div></div>
+  <div class="stat-box"><div class="val">${overall.late}</div><div class="lbl">Late</div></div>
+  <div class="stat-box"><div class="val">${overall.excused}</div><div class="lbl">Excused</div></div>
+  <div class="stat-box"><div class="val">${overall.absent}</div><div class="lbl">Absent</div></div>
+  <div class="stat-box"><div class="val">${overall.noClass}</div><div class="lbl">No Class</div></div>
 </div>
 ${subRows.length ? `<h2>Subject Summary</h2>
 <table><thead><tr><th>Subject</th><th>Present</th><th>Late</th><th>Excused</th><th>Absent</th><th>No Class</th><th>Rate</th></tr></thead>
@@ -1619,7 +1608,3 @@ ${subRows.length ? `<h2>Subject Summary</h2>
     setTimeout(() => { win.print(); }, 400);
     Toast.show('PDF report opened for printing');
 }
-
-/* ---- Compat alias ---- */
-
-function renderRanking() { renderSubjectBreakdown(); }

@@ -2,7 +2,6 @@
 const NAV_ITEMS = [
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
-    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'announcements', base: 'app', soon: true },
     { href: 'dashboard.html', icon: 'bi-grid-1x2-fill', label: 'Dashboard', key: 'dashboard', base: 'app' },
     { href: 'schedule.html', icon: 'bi-calendar2-week-fill', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
@@ -14,8 +13,6 @@ const NAV_ITEMS = [
     { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
     { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
     { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
-    { href: 'ai-summarizer.html', icon: 'bi-file-earmark-text-fill', label: 'AI Summarizer', key: 'ai-summarizer', base: 'app', soon: true },
-    { href: 'ai-reviewer.html', icon: 'bi-clipboard2-check-fill', label: 'AI Reviewer', key: 'ai-reviewer', base: 'app', soon: true },
     { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
@@ -28,7 +25,6 @@ const NAV_ITEMS = [
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
     { href: 'tickets.html', icon: 'bi-life-preserver', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
     { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin', soon: true },
-    { href: 'announcements.html', icon: 'bi-megaphone', label: 'Announcements', key: 'admin-announcements', base: 'admin', soon: true },
     { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin', soon: true },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
@@ -43,7 +39,6 @@ const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 const PAGE_SECTIONS = {
     inbox: 'Communication',
     notifications: 'Communication',
-    announcements: 'Communication',
     dashboard: 'Overview',
     schedule: 'Academics',
     tasks: 'Academics',
@@ -55,8 +50,6 @@ const PAGE_SECTIONS = {
     'ai-quiz-maker': 'AI Tools',
     'ai-flashcard-maker': 'AI Tools',
     'ai-study-assistant': 'AI Tools',
-    'ai-summarizer': 'AI Tools',
-    'ai-reviewer': 'AI Tools',
     wallpaper: 'Personalization',
     settings: 'Safety & Support',
     help: 'Safety & Support',
@@ -69,7 +62,6 @@ const PAGE_SECTIONS = {
     'admin-inbox': 'Communications',
     'admin-tickets': 'Communications',
     'admin-email': 'Communications',
-    'admin-announcements': 'Communications',
     'admin-reports': 'System',
     'admin-activity': 'System',
     'admin-settings': 'System',
@@ -210,11 +202,11 @@ const NOTIFICATION_READ_KEY = 'sp_notification_read';
 function getTaskNotifications() {
     if (typeof DB === 'undefined') return [];
     const settings = DB.getSettings();
-    if (settings.notifications && settings.notifications.assignmentDue === false) return [];
+    if (settings.notifications && settings.notifications.taskReminders === false) return [];
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const horizon = new Date(todayStart.getTime() + 1000 * 60 * 60 * 24 * 3);
     return DB.getActiveTasks()
-        .filter(t => t && t.status !== 'completed' && t.dueDate)
+        .filter(t => t && t.dueDate && (typeof computeStatus === 'function' ? computeStatus(t) !== 'completed' : t.status !== 'completed'))
         .map(t => ({ task: t, due: new Date(t.dueDate + 'T' + (t.dueTime || '23:59')) }))
         .filter(x => !isNaN(x.due) && x.due <= horizon)
         .sort((a, b) => a.due - b.due)
@@ -677,14 +669,14 @@ function renderShell(activeKey, admin) {
             ? [
                 { label: 'Overview', keys: ['admin-dashboard'] },
                 { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
-                { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email', 'admin-announcements'] },
+                { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
                 { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
             ]
             : [
-                { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
+                { label: 'Communication', keys: ['inbox', 'notifications'] },
                 { label: 'Overview', keys: ['dashboard'] },
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
-                { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
+                { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
                 { label: 'Personalization', keys: ['wallpaper'] },
                 { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
             ];
@@ -744,6 +736,14 @@ function renderShell(activeKey, admin) {
     wireModalDefaults();
     hydrateProfileIdentity();
     if (isAdminArea) refreshAdminNavBadges();
+    // Upcoming Classes / Task Reminders / Low Attendance Warning (Settings >
+    // Notifications): started once per page load from here, since every
+    // signed-in app page calls renderShell(). See notification-engine.js
+    // for why this runs on a foreground timer instead of real push.
+    if (!isAdminArea && typeof DB !== 'undefined' && window.ReminderEngine) {
+        if (typeof DB.whenCloudReady === 'function') DB.whenCloudReady(function () { window.ReminderEngine.start(); });
+        else window.ReminderEngine.start();
+    }
 }
 
 // Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer
@@ -892,17 +892,17 @@ async function hydrateProfileIdentity() {
     }
 }
 const DRAWER_GROUPS = [
-    { label: 'Communication', keys: ['inbox', 'notifications', 'announcements'] },
+    { label: 'Communication', keys: ['inbox', 'notifications'] },
     { label: 'Overview', keys: ['dashboard'] },
     { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
-    { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant', 'ai-summarizer', 'ai-reviewer'] },
+    { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
     { label: 'Personalization', keys: ['wallpaper'] },
     { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
 ];
 const ADMIN_DRAWER_GROUPS = [
     { label: 'Overview', keys: ['admin-dashboard'] },
     { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
-    { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email', 'admin-announcements'] },
+    { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
     { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
 ];
 function ensureNavDrawer(activeKey) {

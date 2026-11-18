@@ -296,77 +296,6 @@ body.auth-page {
     font-weight: 700;
 }
 
-.pw-wrap {
-    position: relative;
-}
-
-.pw-wrap .form-control {
-    padding-right: 3.25rem;
-}
-
-.pw-toggle {
-    position: absolute;
-    top: 50%;
-    right: 0.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    color: var(--auth-text-soft);
-    font-size: 1.05rem;
-    transform: translateY(-50%);
-    transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.pw-toggle:hover {
-    color: var(--auth-text);
-    background: var(--auth-elevated);
-}
-
-.pw-toggle:focus-visible {
-    outline: 2px solid var(--auth-link);
-    outline-offset: 2px;
-}
-
-/* Row beneath the password field: "Remember me" on the left, "Forgot */
-.auth-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-top: var(--space-1);
-    margin-bottom: var(--space-4);
-}
-
-.auth-remember {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--auth-text-soft);
-    cursor: pointer;
-}
-
-.auth-remember input {
-    width: var(--checkbox-size);
-    height: var(--checkbox-size);
-    accent-color: rgb(var(--accent));
-    cursor: pointer;
-}
-
-.auth-forgot {
-    display: inline-block;
-    flex: 0 0 auto;
-    font-size: 0.85rem;
-}
-
 .auth-link {
     color: var(--auth-link);
     font-weight: 600;
@@ -626,148 +555,13 @@ html[data-motion="reduced"] .auth-spin {
     color: var(--auth-text-soft);
 }
 
-/* Password requirements */
-
-.req-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-2) var(--space-4);
-    margin: 0 0 var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    list-style: none;
-    background: var(--auth-elevated);
-    border: var(--auth-rule) solid var(--auth-border);
-    border-radius: var(--radius-sm);
-}
-
-.req-list li {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: 0.78rem;
-    color: var(--auth-text-soft);
-}
-
-.req-list li.met {
-    color: var(--auth-success);
-    font-weight: 600;
-}
-
-/* Registration stepper */
-
-.stepper {
-    counter-reset: step;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-3);
-    margin: 0 0 var(--space-6);
-    padding: 0;
-    list-style: none;
-}
-
-.stepper-item {
-    counter-increment: step;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-/* The marker is not shown in this layout step state reads from the label */
-.stepper-marker {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-}
-
-.stepper-item::before {
-    content: counter(step, decimal-leading-zero);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--auth-text-faint);
-}
-
-.stepper-item.is-current::before,
-.stepper-item.is-complete::before {
-    color: rgb(var(--accent));
-}
-
-.stepper-label {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--auth-text-faint);
-}
-
-.stepper-item.is-current .stepper-label {
-    color: var(--auth-text);
-}
-
-.stepper-item.is-complete .stepper-label {
-    color: var(--auth-text-soft);
-}
-
-/* Progress track: the ruled bar does the work a row of circles used to. */
-.stepper-item::after {
-    content: "";
-    display: block;
-    height: 3px;
-    margin-top: auto;
-    background: var(--auth-border);
-}
-
-.stepper-item.is-current::after,
-.stepper-item.is-complete::after {
-    background: rgb(var(--accent));
-}
-
-/* Wizard steps */
-
-.wizard-step {
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-}
-
-.wizard-step[hidden] {
-    display: none;
-}
-
-.step-title {
-    margin: 0 0 var(--space-2);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--auth-text);
-    scroll-margin-top: 5rem;
-}
-
-.step-title:focus {
-    outline: none;
-}
+/* Legal content intro (finish-profile.html) */
 
 .step-sub {
     margin: 0 0 var(--space-5);
     font-size: 0.9rem;
     line-height: 1.6;
     color: var(--auth-text-soft);
-}
-
-.wizard-actions {
-    display: grid;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
-}
-
-.wizard-actions.two {
-    grid-template-columns: 1fr 1.4fr;
 }
 
 /* Legal text boxes */
@@ -890,10 +684,6 @@ html[data-motion="reduced"] .auth-spin {
     color: var(--auth-text-soft);
 }
 
-.auth-preview-notice {
-    text-align: left;
-}
-
 .auth-actions {
     display: grid;
     gap: var(--space-3);
@@ -905,18 +695,6 @@ html[data-motion="reduced"] .auth-spin {
     align-items: center;
     justify-content: center;
     border-radius: var(--btn-radius);
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
 }
 
 @media (max-width: 575.98px) {
@@ -937,28 +715,11 @@ html[data-motion="reduced"] .auth-spin {
         margin-bottom: var(--space-5);
         padding-bottom: var(--space-4);
     }
-
-    .stepper-item::before,
-    .stepper-label {
-        font-size: 0.6rem;
-    }
 }
 
 @media (max-width: 399.98px) {
     .auth-title {
         font-size: 1.3rem;
-    }
-
-    .req-list {
-        grid-template-columns: 1fr;
-    }
-
-    .wizard-actions.two {
-        grid-template-columns: 1fr;
-    }
-
-    .wizard-actions.two .btn-ghost {
-        order: 2;
     }
 }
 
