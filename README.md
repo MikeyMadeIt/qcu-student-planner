@@ -4,8 +4,6 @@
 ![Frontend: HTML, CSS, JavaScript](https://img.shields.io/badge/frontend-HTML%20%7C%20CSS%20%7C%20JavaScript-informational)
 ![Backend: Supabase](https://img.shields.io/badge/backend-Supabase-3ECF8E)
 
-<meta name="launchindex-verification" content="qcu-student-planner" />
-
 QCU Student Planner is a web app where Quezon City University students keep their class schedule, tasks, notes, grades and attendance in one place. It also has AI tools that generate quizzes and flashcards and answer study questions. It runs in the browser and can be installed as a Progressive Web App.
 
 > QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). The application is designed to assist students with academic organization, planning, and productivity. It is not a substitute for official university services, announcements, or academic records.
