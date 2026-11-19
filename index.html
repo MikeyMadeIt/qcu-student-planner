@@ -1,18 +1,274 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-accent="blue">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="0; url=pages/auth/login.html">
-    <title>QCU Student Planner</title>
-    <script src="assets/js/core/theme.js"></script>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="assets/icons/icon-192.png">
-    <script>
-        location.replace('pages/auth/login.html');
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QCU Student Planner</title>
+<meta name="description" content="QCU Student Planner is an independent student-built planner for schedules, tasks, grades, attendance, notes and AI study tools.">
+<meta property="og:title" content="QCU Student Planner">
+<meta property="og:description" content="Plan your schedule, track tasks, grades and attendance, keep notes, and study with AI tools. An independent student-built project.">
+<meta property="og:type" content="website">
+<script src="assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="assets/css/main.css" rel="stylesheet">
+<link href="assets/css/pages/landing.css" rel="stylesheet">
 </head>
-<body>
-    <p><a href="pages/auth/login.html">Continue to the log in page</a></p>
+<body class="lp">
+<a class="lp-skip" href="#main">Skip to content</a>
+
+<header class="lp-header" id="lpHeader">
+  <div class="lp-wrap lp-header-row">
+    <a class="lp-brand" href="#top" aria-label="QCU Student Planner, back to top">
+      <span class="lp-brand-mark" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+      <span class="lp-brand-name">QCU Student Planner</span>
+    </a>
+
+    <nav class="lp-nav" id="lpNav" aria-label="Main">
+      <ul class="lp-nav-list">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#pages">Pages</a></li>
+        <li><a href="#support">Support</a></li>
+      </ul>
+      <a class="btn btn-accent lp-nav-cta" href="pages/auth/login.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Sign in</a>
+    </nav>
+
+    <div class="lp-header-tools">
+      <button type="button" class="lp-icon-btn" data-theme-toggle aria-label="Switch to light theme">
+        <i class="bi bi-sun theme-icon-sun" aria-hidden="true"></i>
+        <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="lp-icon-btn lp-menu-btn" id="lpMenuBtn" aria-controls="lpNav" aria-expanded="false" aria-label="Open menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="lp-hero" id="top" aria-labelledby="lpHeroTitle">
+    <div class="lp-wrap lp-hero-grid">
+      <div class="lp-hero-copy">
+        <p class="lp-eyebrow">Independent student project</p>
+        <h1 class="lp-hero-title" id="lpHeroTitle">QCU Student Planner</h1>
+        <p class="lp-hero-lead">Keep your schedule, tasks, grades, attendance and notes in one place, and study faster with built-in AI tools.</p>
+        <div class="lp-hero-actions">
+          <a class="btn btn-accent lp-btn-lg" href="pages/auth/login.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Sign in with Google</a>
+          <a class="btn btn-ghost lp-btn-lg" href="#features">See what's inside</a>
+        </div>
+        <p class="lp-hero-note">Use your registered QCU student Google account. New accounts need administrator approval.</p>
+      </div>
+
+      <aside class="lp-access" aria-labelledby="lpAccessTitle">
+        <h2 class="lp-access-title" id="lpAccessTitle">How to get access</h2>
+        <ol class="lp-steps">
+          <li>
+            <span class="lp-step-num" aria-hidden="true">1</span>
+            <div><strong>Sign in with Google</strong><span>Use the account registered under your QCU student email.</span></div>
+          </li>
+          <li>
+            <span class="lp-step-num" aria-hidden="true">2</span>
+            <div><strong>Finish your profile</strong><span>Add your name, program, campus and year level on first sign-in.</span></div>
+          </li>
+          <li>
+            <span class="lp-step-num" aria-hidden="true">3</span>
+            <div><strong>Wait for approval</strong><span>An administrator reviews new accounts before the planner opens up.</span></div>
+          </li>
+        </ol>
+      </aside>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="lp-section" id="features" aria-labelledby="lpFeaturesTitle">
+    <div class="lp-wrap">
+      <header class="lp-section-head">
+        <p class="lp-kicker">Features</p>
+        <h2 class="lp-h2" id="lpFeaturesTitle">Everything for your semester, in one planner</h2>
+        <p class="lp-section-sub">These tools are available now, right after you sign in.</p>
+      </header>
+
+      <ul class="lp-grid" role="list">
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-columns-gap"></i></span>
+          <h3 class="lp-h3">Dashboard</h3>
+          <p>Semester progress, GWA, attendance, tasks and today's schedule on one screen.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-table"></i></span>
+          <h3 class="lp-h3">Subjects and schedule</h3>
+          <p>Manage your subjects and view classes by day, as a list, or on a timetable.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-check2-square"></i></span>
+          <h3 class="lp-h3">Tasks and assignments</h3>
+          <p>Track deadlines in list or board view, filter and group tasks, and add checklists.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-calendar3"></i></span>
+          <h3 class="lp-h3">Calendar</h3>
+          <p>See classes, tasks, events and university dates by month, week or day.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-person-check"></i></span>
+          <h3 class="lp-h3">Attendance</h3>
+          <p>Log Present, Late, Excused or Absent for each class and watch your absence limit.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
+          <h3 class="lp-h3">Grades and GWA</h3>
+          <p>Enter grade components per subject and get your GWA on the 1.00 to 5.00 scale.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-journal-text"></i></span>
+          <h3 class="lp-h3">Notes</h3>
+          <p>Write rich-text notes with checklists, mark favorites, and link them to a subject or task.</p>
+        </li>
+        <li class="lp-card">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-book"></i></span>
+          <h3 class="lp-h3">Curriculum</h3>
+          <p>Open program curriculum PDFs with page navigation, zoom and rotation.</p>
+        </li>
+        <li class="lp-card lp-card-ai">
+          <span class="lp-card-icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
+          <h3 class="lp-h3">AI study tools</h3>
+          <p>Generate quizzes and flashcards from a topic, notes or an attached file, or ask the study assistant.</p>
+        </li>
+      </ul>
+
+      <p class="lp-also">Also included: Light, Dark and AMOLED themes, notifications and inbox, and installation as an app on your device.</p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="lp-section lp-section-alt" id="about" aria-labelledby="lpAboutTitle">
+    <div class="lp-wrap lp-about-grid">
+      <div>
+        <p class="lp-kicker">About</p>
+        <h2 class="lp-h2" id="lpAboutTitle">About QCU Student Planner</h2>
+        <p class="lp-body">QCU Student Planner puts a student's academic life in one place. Instead of switching between a timetable, a to-do list, a grade spreadsheet and loose notes, you manage them together and see how they connect.</p>
+        <p class="lp-body">It was built by IM101 Group 5, student developers from SBCS 2A at Quezon City University, for academic organization and study support.</p>
+      </div>
+
+      <ul class="lp-points" role="list">
+        <li>
+          <i class="bi bi-calendar-week" aria-hidden="true"></i>
+          <div><h3 class="lp-h4">See your week</h3><p>Your schedule, calendar and dashboard show what is coming up before it arrives.</p></div>
+        </li>
+        <li>
+          <i class="bi bi-alarm" aria-hidden="true"></i>
+          <div><h3 class="lp-h4">Stay on top of deadlines</h3><p>Tasks with due dates and checklists, plus reminders you can switch on in Settings.</p></div>
+        </li>
+        <li>
+          <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+          <div><h3 class="lp-h4">Know where you stand</h3><p>Grades roll up into your GWA, and attendance shows how close you are to the absence limit.</p></div>
+        </li>
+        <li>
+          <i class="bi bi-lightbulb" aria-hidden="true"></i>
+          <div><h3 class="lp-h4">Study with help</h3><p>Turn your notes into practice quizzes and flashcards. Always check AI output yourself.</p></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- IMPORTANT PAGES -->
+  <section class="lp-section" id="pages" aria-labelledby="lpPagesTitle">
+    <div class="lp-wrap">
+      <header class="lp-section-head">
+        <p class="lp-kicker">Important pages</p>
+        <h2 class="lp-h2" id="lpPagesTitle">Policies, help and contact</h2>
+        <p class="lp-section-sub">The policy pages are public. You do not need an account to read them.</p>
+      </header>
+
+      <ul class="lp-links" role="list">
+        <li><a class="lp-link-card" href="#about"><i class="bi bi-info-circle" aria-hidden="true"></i><span><strong>About</strong><small>What the planner is and who built it</small></span><i class="bi bi-arrow-right lp-go" aria-hidden="true"></i></a></li>
+        <li><a class="lp-link-card" href="pages/app/legal-policies.html#privacy-policy"><i class="bi bi-shield-lock" aria-hidden="true"></i><span><strong>Privacy Policy</strong><small>How your data is collected and protected</small></span><i class="bi bi-arrow-right lp-go" aria-hidden="true"></i></a></li>
+        <li><a class="lp-link-card" href="pages/app/legal-policies.html#terms-of-service"><i class="bi bi-file-earmark-text" aria-hidden="true"></i><span><strong>Terms of Service</strong><small>The rules for using the planner</small></span><i class="bi bi-arrow-right lp-go" aria-hidden="true"></i></a></li>
+        <li><a class="lp-link-card" href="pages/app/help.html"><i class="bi bi-question-circle" aria-hidden="true"></i><span><strong>Help Center</strong><small>Guides and answers inside the app (sign in required)</small></span><i class="bi bi-arrow-right lp-go" aria-hidden="true"></i></a></li>
+        <li><a class="lp-link-card" href="#support"><i class="bi bi-envelope" aria-hidden="true"></i><span><strong>Contact and support</strong><small>Email the team or report an issue</small></span><i class="bi bi-arrow-right lp-go" aria-hidden="true"></i></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+  <section class="lp-section lp-section-alt" id="support" aria-labelledby="lpSupportTitle">
+    <div class="lp-wrap lp-support">
+      <div>
+        <p class="lp-kicker">Support</p>
+        <h2 class="lp-h2" id="lpSupportTitle">Need help or found a problem?</h2>
+        <p class="lp-body">Email the team for questions, privacy requests or security reports. Signed-in students can also send a report from the Report a Problem page inside the app.</p>
+      </div>
+      <div class="lp-support-actions">
+        <a class="btn btn-accent lp-btn-lg" href="mailto:qcustudentplanner.team@gmail.com"><i class="bi bi-envelope" aria-hidden="true"></i>qcustudentplanner.team@gmail.com</a>
+        <a class="btn btn-ghost lp-btn-lg" href="https://github.com/MikeyMadeIt/qcu-student-planner/issues" target="_blank" rel="noopener noreferrer"><i class="bi bi-github" aria-hidden="true"></i>GitHub issues</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="lp-cta" aria-labelledby="lpCtaTitle">
+    <div class="lp-wrap lp-cta-row">
+      <h2 class="lp-h2" id="lpCtaTitle">Ready to get organized?</h2>
+      <a class="btn btn-accent lp-btn-lg" href="pages/auth/login.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Sign in with Google</a>
+    </div>
+  </section>
+</main>
+
+<footer class="lp-footer">
+  <div class="lp-wrap">
+    <div class="lp-footer-grid">
+      <div class="lp-footer-brand">
+        <a class="lp-brand" href="#top">
+          <span class="lp-brand-mark" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+          <span class="lp-brand-name">QCU Student Planner</span>
+        </a>
+        <p>A planner for schedules, tasks, grades, attendance, notes and AI study tools.</p>
+      </div>
+
+      <nav aria-labelledby="lpFootProduct">
+        <h2 class="lp-foot-title" id="lpFootProduct">Planner</h2>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="pages/auth/login.html">Sign in</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="lpFootLegal">
+        <h2 class="lp-foot-title" id="lpFootLegal">Legal</h2>
+        <ul>
+          <li><a href="pages/app/legal-policies.html#privacy-policy">Privacy Policy</a></li>
+          <li><a href="pages/app/legal-policies.html#terms-of-service">Terms of Service</a></li>
+          <li><a href="pages/app/legal-policies.html#acceptable-use-policy">Acceptable Use Policy</a></li>
+          <li><a href="pages/app/legal-policies.html#ai-features-disclaimer">AI Features Disclaimer</a></li>
+          <li><a href="pages/app/legal-policies.html#cookie-data-storage">Cookie and Data Storage Notice</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="lpFootHelp">
+        <h2 class="lp-foot-title" id="lpFootHelp">Support</h2>
+        <ul>
+          <li><a href="pages/app/help.html">Help Center</a></li>
+          <li><a href="mailto:qcustudentplanner.team@gmail.com">Contact the team</a></li>
+          <li><a href="https://github.com/MikeyMadeIt/qcu-student-planner/issues" target="_blank" rel="noopener noreferrer">GitHub issues</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="lp-footer-base">
+      <p class="lp-disclaimer"><strong>Independent student project.</strong> QCU Student Planner is not officially affiliated with, endorsed by, or connected to Quezon City University (QCU). It is developed and maintained independently by student developers for educational and academic purposes only.</p>
+      <p class="lp-copy">&copy; 2026 QCU Student Planner. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/core/theme-toggle.js"></script>
+<script src="assets/js/modules/landing.js"></script>
 </body>
 </html>
