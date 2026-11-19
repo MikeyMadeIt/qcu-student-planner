@@ -183,3 +183,24 @@ there is still no insert/update/delete policy for `authenticated`, so even an
 admin can only read it, never edit or clear it from the app). Deleting an
 account removes its *planner data*; it does not and cannot remove the record
 that the account existed and was deleted, by whom, and when.
+
+## 6. Phase 8 — Centralized University Events
+
+**0028_university_events.sql** replaces the old per-browser localStorage
+"university events" list (any student could add/edit/delete their own copy)
+with a single shared `university_events` table:
+
+- Only an approved admin can create/update/delete a row — enforced inside
+  `admin_create_university_event()` / `admin_update_university_event()` /
+  `admin_delete_university_event()` (all `SECURITY DEFINER`, all check
+  `is_admin()`, all log to `admin_audit_log`), not by the frontend.
+- RLS on `university_events` has no insert/update/delete policy for any
+  client role — the same "mutate only through a function" shape as
+  `admin_messages` in `0008_messaging_and_support_tickets.sql`.
+- The `select` policy lets any approved account read rows where
+  `is_published = true`; an admin can also see unpublished drafts.
+- The admin UI lives at `pages/admin/university-events.html` /
+  `assets/js/modules/admin-university-events.js`. The student Calendar
+  (`assets/js/modules/calendar.js`) now fetches published events directly
+  from this table (read-only — no create/edit/delete controls) instead of
+  reading `localStorage`.
