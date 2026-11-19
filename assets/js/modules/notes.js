@@ -2039,7 +2039,7 @@ function openNoteModal(id) {
             '<div class="form-check"><input class="form-check-input" type="checkbox" id="nPinned" ' + (n && n.pinned ? 'checked' : '') + '><label class="form-check-label" for="nPinned">Pin note</label></div>' +
             '<div class="form-check"><input class="form-check-input" type="checkbox" id="nFavorite" ' + (n && n.favorite ? 'checked' : '') + '><label class="form-check-label" for="nFavorite">Favorite</label></div>' +
             '</div></div>' +
-            '<div class="d-flex gap-2 mt-3">' +
+            '<div class="modal-actions">' +
             '<button class="btn btn-accent flex-grow-1" type="button" onclick="saveNote()"><i class="bi bi-check2 me-1"></i>' + (n ? 'Update' : 'Save') + ' Note</button>' +
             (n ? '<button class="btn btn-ghost" type="button" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="bi bi-file-earmark-pdf"></i></button>' : '') +
             (n ? '<button class="btn btn-ghost" type="button" onclick="deleteNote(\'' + n.id + '\')" aria-label="Delete note"><i class="bi bi-trash"></i></button>' : '') +
