@@ -8,6 +8,9 @@ export const ACTION_LABELS = {
     admin_message_sent: 'Administrative message sent',
     admin_message_archived: 'Administrative message archived',
     ticket_status_change: 'Support ticket status change',
+    university_event_created: 'University event created',
+    university_event_updated: 'University event updated',
+    university_event_deleted: 'University event deleted',
 };
 
 export function escHtml(s) {
