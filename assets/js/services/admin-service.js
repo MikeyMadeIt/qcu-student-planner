@@ -412,4 +412,73 @@ export const AdminService = {
             return fail('Could not load the activity log.');
         }
     },
+
+    // University Events — centrally managed; students get read-only access
+    async listUniversityEvents() {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase
+                .from('university_events')
+                .select('id, title, description, event_date, start_time, end_time, location, is_published, created_at, updated_at')
+                .order('event_date', { ascending: true })
+                .order('start_time', { ascending: true, nullsFirst: true });
+
+            if (error) return fail(readableDbError(error));
+            return ok({ rows: data });
+        } catch (error) {
+            return fail('Could not load university events.');
+        }
+    },
+
+    async createUniversityEvent({ title, description, eventDate, startTime, endTime, location, isPublished = true }) {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase.rpc('admin_create_university_event', {
+                p_title: title,
+                p_description: description || null,
+                p_event_date: eventDate,
+                p_start_time: startTime || null,
+                p_end_time: endTime || null,
+                p_location: location || null,
+                p_is_published: isPublished,
+            });
+
+            if (error) return fail(readableDbError(error));
+            return ok({ id: data });
+        } catch (error) {
+            return fail('Could not create that event.');
+        }
+    },
+
+    async updateUniversityEvent({ id, title, description, eventDate, startTime, endTime, location, isPublished = true }) {
+        try {
+            const supabase = getSupabase();
+            const { error } = await supabase.rpc('admin_update_university_event', {
+                p_id: id,
+                p_title: title,
+                p_description: description || null,
+                p_event_date: eventDate,
+                p_start_time: startTime || null,
+                p_end_time: endTime || null,
+                p_location: location || null,
+                p_is_published: isPublished,
+            });
+
+            if (error) return fail(readableDbError(error));
+            return ok({});
+        } catch (error) {
+            return fail('Could not update that event.');
+        }
+    },
+
+    async deleteUniversityEvent(id) {
+        try {
+            const supabase = getSupabase();
+            const { error } = await supabase.rpc('admin_delete_university_event', { p_id: id });
+            if (error) return fail(readableDbError(error));
+            return ok({});
+        } catch (error) {
+            return fail('Could not delete that event.');
+        }
+    },
 };
