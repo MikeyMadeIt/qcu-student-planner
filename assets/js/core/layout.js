@@ -19,6 +19,7 @@ const NAV_ITEMS = [
     { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
     { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app'},
     { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
+    { href: 'university-events.html', icon: 'bi-bank2', label: 'University Events', key: 'admin-university-events', base: 'admin' },
     { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
     { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
     { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
@@ -56,6 +57,7 @@ const PAGE_SECTIONS = {
     report: 'Safety & Support',
     'legal-policies': 'Safety & Support',
     'admin-dashboard': 'Overview',
+    'admin-university-events': 'Events',
     'admin-users': 'User Management',
     'admin-verification': 'User Management',
     'admin-rejected': 'User Management',
@@ -668,6 +670,7 @@ function renderShell(activeKey, admin) {
         const sidebarGroups = isAdminArea
             ? [
                 { label: 'Overview', keys: ['admin-dashboard'] },
+                { label: 'Events', keys: ['admin-university-events'] },
                 { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
                 { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
                 { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
@@ -901,6 +904,7 @@ const DRAWER_GROUPS = [
 ];
 const ADMIN_DRAWER_GROUPS = [
     { label: 'Overview', keys: ['admin-dashboard'] },
+    { label: 'Events', keys: ['admin-university-events'] },
     { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
     { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
     { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },

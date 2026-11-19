@@ -10,7 +10,6 @@ const DB_KEYS = {
     settings: 'sp_settings',
     semester: 'sp_semester',
     pomodoro: 'sp_pomodoro_stats',
-    universityEvents: 'sp_university_events',
     calendarEvents: 'sp_calendar_events',
     syllabusCourses: 'sp_syllabus_courses',
     semesters: 'sp_semesters',
@@ -201,7 +200,6 @@ function initIfEmpty() {
     writeKey(DB_KEYS.attendance, []);
     writeKey(DB_KEYS.grades, []);
     writeKey(DB_KEYS.gwaCalc, []);
-    writeKey(DB_KEYS.universityEvents, []);
     writeKey(DB_KEYS.calendarEvents, []);
     writeKey(DB_KEYS.syllabusCourses, []);
     writeKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] });
@@ -322,8 +320,6 @@ const DB = {
     saveCancelledOccurrences(list) {
         try { localStorage.setItem('sp_cancelled_occurrences', JSON.stringify(list)); } catch (e) { /* ignore */ }
     },
-    getUniversityEvents() { return readKey(DB_KEYS.universityEvents, []); },
-    saveUniversityEvents(list) { return writeKey(DB_KEYS.universityEvents, list); },
     getCalendarEvents() { return readKey(DB_KEYS.calendarEvents, []); },
     saveCalendarEvents(list) { return writeKey(DB_KEYS.calendarEvents, list); },
     getSyllabusCourses() { return readKey(DB_KEYS.syllabusCourses, []); },

@@ -96,3 +96,28 @@
     border-color: var(--border);
     background: var(--surface-2);
 }
+
+/* University event lifecycle status (computed from date/time, not stored) */
+.status-badge.event-status-upcoming {
+    color: #4F8CFF;
+    border-color: rgba(79,140,255,.35);
+    background: rgba(79,140,255,.10);
+}
+
+.status-badge.event-status-ongoing {
+    color: var(--success);
+    border-color: rgba(52,211,153,.35);
+    background: rgba(52,211,153,.10);
+}
+
+.status-badge.event-status-past {
+    color: var(--text-soft);
+    border-color: rgba(148,163,184,.35);
+    background: rgba(148,163,184,.12);
+}
+
+.status-badge.event-status-draft {
+    color: var(--warning);
+    border-color: rgba(180,83,9,.35);
+    background: rgba(180,83,9,.10);
+}
