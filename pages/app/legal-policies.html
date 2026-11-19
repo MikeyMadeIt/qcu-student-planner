@@ -12,15 +12,414 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/legal.css" rel="stylesheet">
 </head>
 <body>
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
-  <main class="main-content">
-    <div class="topbar"><div><h1 class="page-title">Legal & Policies</h1><p class="page-sub">Terms of Service, Privacy Policy, and data handling.</p></div></div>
+  <main class="main-content legal-page" id="legalTop">
+    <div class="topbar"><div><h1 class="page-title">Legal &amp; Policies</h1><p class="page-sub">Privacy Policy, Terms of Service, Acceptable Use Policy, AI Features Disclaimer, and Cookie and Data Storage Notice.</p></div></div>
 
-    <div class="glass card-pad fade-in feature-placeholder" data-feature-placeholder></div>
+    <!-- Non-affiliation notice -->
+    <aside class="lg-notice" role="note" aria-label="Important disclaimer">
+      <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+      <p><strong>Important disclaimer:</strong> QCU Student Planner is an independent student developed project. It is NOT affiliated with, owned by, sponsored by, endorsed by, or officially managed by Quezon City University (QCU). This platform is developed and maintained independently by SBCS 2A Students for educational and academic purposes only.</p>
+    </aside>
 
+    <!-- Table of contents (top of page, all screen sizes). The five main sections are always visible; the full list opens below. -->
+    <nav class="glass card-pad lg-toc-card" id="lgToc" aria-labelledby="lgTocTitle">
+      <h2 class="lg-toc-title" id="lgTocTitle"><i class="bi bi-list-ul" aria-hidden="true"></i>Table of contents</h2>
+      <ol class="lg-toc-main" id="lgTocMain"></ol>
+      <details class="lg-toc-details" id="lgTocDetails">
+        <summary><i class="bi bi-chevron-down" aria-hidden="true"></i>All subsections</summary>
+        <div class="lg-toc-full" id="lgTocFull"></div>
+      </details>
+    </nav>
+
+    <div class="lg-layout">
+      <div class="lg-content" id="lgContent">
+
+        <!-- 1. PRIVACY POLICY -->
+        <section class="glass card-pad lg-section" id="privacy-policy" aria-labelledby="privacy-policy-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true">1</span>
+            <h2 class="lg-h2" id="privacy-policy-title">Privacy Policy</h2>
+          </header>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-1"><span class="lg-num">1.1</span>Introduction and Scope</h3>
+            <p>This Privacy Policy describes how the QCU Student Planner collects, uses, processes, stores, and protects your personal information. This policy applies to all users accessing and using the platform.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-2"><span class="lg-num">1.2</span>Project Ownership and Non-Affiliation</h3>
+            <p>The QCU Student Planner is an independent academic project developed by IM101 Group 5, student developers from SBCS 2A at Quezon City University (QCU). We are not affiliated with, endorsed by, or officially connected to Quezon City University (QCU).</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-3"><span class="lg-num">1.3</span>Categories of Personal Information Collected</h3>
+            <p>To provide, personalize, and secure the QCU Student Planner, we collect only the personal and academic information for its core features, such as academic tracking, AI assisted study, and secure account management. This information is provided by you. The types of information we collect include the following:</p>
+
+            <div class="lg-nested">
+              <h4 class="lg-h4" id="s1-3-1"><span class="lg-num">1.3.1</span>Account Registration and Authentication Information</h4>
+              <p>The Platform uses Google OAuth as its only sign-in and sign-up method (managed through Supabase Auth). When you sign in with Google, we receive your Google account’s email address and basic profile info, and we assign you a user role (student).</p>
+
+              <h4 class="lg-h4" id="s1-3-2"><span class="lg-num">1.3.2</span>Academic and Profile Information</h4>
+              <p>Your full name, academic program, campus, and year level (collected at account registration), along with subjects, class schedules, tasks, assignments, grades, attendance records, and personal calendar events you create while using the Platform.</p>
+
+              <h4 class="lg-h4" id="s1-3-3"><span class="lg-num">1.3.3</span>User Generated Content and Records</h4>
+              <p>Personal notes, flashcards, quizzes, and other study materials you create and save within the platform, which are stored in our systems. Separately, files you attach to AI-powered features (e.g., PDF, JPG, or PNG files up to 8MB) are transmitted to our AI processing backend and a third-party AI provider solely to generate the requested output, and are not retained as stored files after processing.</p>
+
+              <h4 class="lg-h4" id="s1-3-4"><span class="lg-num">1.3.4</span>AI Prompts and Generated Content</h4>
+              <p>Text prompts, topics, and the names of any files you submit to the AI Quiz Maker, AI Flashcard Maker, and AI Study Assistant; the AI-generated outputs produced from them (quizzes, flashcard decks, and assistant responses); and your quiz attempt results (scores and answers). Submitted file content is transmitted to our AI processing backend to generate output and is not retained after processing — only the file name is kept as part of the record.</p>
+
+              <h4 class="lg-h4" id="s1-3-5"><span class="lg-num">1.3.5</span>Technical Information and System Logs</h4>
+              <p>Session and refresh tokens managed by our authentication provider to keep you signed in. Our infrastructure provider (Supabase) and hosting provider may also log standard technical data such as IP addresses and browser/device information at the network level for security and abuse-prevention purposes; this is not stored within the application’s own database.</p>
+            </div>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-4"><span class="lg-num">1.4</span>Purpose and Legal Basis of Data Processing</h3>
+            <p>Your data is processed based on your consent and the necessity to provide the platform’s core functionalities. Processing purposes include:</p>
+            <ul class="lg-list">
+              <li>Facilitating account creation and manual administrator approval.</li>
+              <li>Organizing and displaying your academic schedules, tasks, and grades.</li>
+              <li>Generating study materials via Google Gemini AI integrations.</li>
+              <li>Maintaining system security and isolating your data using Row Level Security (RLS).</li>
+            </ul>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-5"><span class="lg-num">1.5</span>Data Storage and Third-Party Service Providers</h3>
+            <p>Data is securely stored using Supabase (PostgreSQL databases and Supabase Storage). Supabase Storage is used to host institution-provided reference files (such as curriculum documents) — not user-uploaded personal files, which are not stored in this bucket. The Platform is hosted on Vercel. We utilize the Google Gemini API to process AI requests via Supabase Edge Functions. These third-party providers act as data processors and have their own privacy policies.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-6"><span class="lg-num">1.6</span>Data Security and Access Restrictions</h3>
+            <p>We implement security measures to protect your data. Personal data stored in our database is protected using PostgreSQL Row Level Security (RLS) policies, which are designed to ensure users can only access and modify their own records. Authorized administrators may access limited account data (such as verification status and support requests) as necessary to operate the Platform. We periodically audit these access controls and apply fixes as needed.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-7"><span class="lg-num">1.7</span>User Data Isolation</h3>
+            <p>The QCU Student Planner enforces per-user data isolation at the database level through PostgreSQL Row Level Security (RLS) and Supabase Authentication. Each academic record (tasks, grades, attendance, schedule, calendar and notes) is linked to a unique user ID, and RLS policies are designed to prevent one account from accessing another’s data. This means your academic information can only be accessed through your own authenticated session, except where explicitly noted (see Section <a href="#s1-6">1.6</a> regarding administrator access to account status and support data).</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-8"><span class="lg-num">1.8</span>Data Sharing and Disclosure</h3>
+            <p>We do not sell your personal information. Data is only shared with our integrated service providers (Supabase, Vercel, Google Gemini) strictly for the purpose of operating the Platform, or if required by Philippine law.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-9"><span class="lg-num">1.9</span>Data Retention and Deletion</h3>
+            <p>Your academic data (tasks, grades, attendance, schedule, calendar entries, and notes) is retained for as long as your account remains active on the Platform. We do not currently run an automatic deletion or data-purge schedule. If you wish to have your account and associated data deleted, you may request this at any time by contacting us at <a href="mailto:qcustudentplanner.team@gmail.com">qcustudentplanner.team@gmail.com</a>; such requests are reviewed and processed manually by a Platform administrator, and your data will be permanently removed once the request is verified and completed.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-10"><span class="lg-num">1.10</span>User Rights Under the Philippine Data Privacy Act</h3>
+            <p>Under Republic Act No. 10173 (Data Privacy Act of 2012), you have the right to:</p>
+            <ul class="lg-list lg-list-cols">
+              <li>Be informed about how your data is processed.</li>
+              <li>Access your personal data.</li>
+              <li>Object to processing.</li>
+              <li>Erase or block your data.</li>
+              <li>Rectify inaccurate data.</li>
+              <li>Data portability.</li>
+            </ul>
+            <p>To exercise these rights, or to submit a privacy request, please contact us at <a href="mailto:qcustudentplanner.team@gmail.com">qcustudentplanner.team@gmail.com</a>.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-11"><span class="lg-num">1.11</span>Data Breach and Security Incident Handling</h3>
+            <p>In the event of a data breach compromising personal information, we will notify affected users and the National Privacy Commission (NPC) in accordance with the Data Privacy Act of 2012. Report security incidents to <a href="mailto:qcustudentplanner.team@gmail.com">qcustudentplanner.team@gmail.com</a></p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s1-12"><span class="lg-num">1.12</span>Policy Updates and Contact Information</h3>
+            <p>We may update this Privacy Policy from time to time. Any revised version will be posted on this page, and your continued use of the platform following such updates constitutes acceptance of the revised terms.</p>
+          </article>
+
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+        <!-- 2. TERMS OF SERVICE -->
+        <section class="glass card-pad lg-section" id="terms-of-service" aria-labelledby="terms-of-service-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true">2</span>
+            <h2 class="lg-h2" id="terms-of-service-title">Terms of Service / Terms of Use</h2>
+          </header>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-1"><span class="lg-num">2.1</span>Acceptance of Terms</h3>
+            <p>By registering for and manually receiving administrator approval to use QCU Student Planner, you agree to abide by these Terms of Service. If you do not agree, do not use the Platform.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-2"><span class="lg-num">2.2</span>Description and Purpose of the Platform</h3>
+            <p>QCU Student Planner provides academic tracking tools, including dashboards, task management, calendar events, grade and attendance tracking, and AI-assisted study features.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-3"><span class="lg-num">2.3</span>Independent Student Project Disclaimer</h3>
+            <p>This Platform is an independent student project and is explicitly NOT affiliated with Quezon City University (QCU). Academic records, grades, and schedules maintained on this Platform are for personal organizational purposes and have no official bearing or recognition by QCU.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-4"><span class="lg-num">2.4</span>Account Registration and Approval</h3>
+            <p>Accounts are created through Google OAuth sign-in only (via Supabase Auth) — there is no separate email/password registration. New accounts are subject to manual approval by platform administrators before access to the Platform’s features is granted. You are responsible for the security of the Google account used to sign in.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-5"><span class="lg-num">2.5</span>User Responsibilities</h3>
+            <p>As a user, you are responsible for keeping your login credentials confidential and for all activities under your account. You must provide accurate information, follow applicable Philippine laws, and report suspected unauthorized access immediately. You retain ownership of the academic records, notes, and study materials you upload, but you are responsible for ensuring they do not infringe on third-party rights. You also grant the Platform limited permission to store and process your content solely to provide its services.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-6"><span class="lg-num">2.6</span>Acceptable and Prohibited Activities</h3>
+            <p>You may use the Platform only for personal academic organization, scheduling, record tracking, and study assistance. You must not compromise the system’s security and integrity. Violations are shown in Section <a href="#acceptable-use-policy">3</a>.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-7"><span class="lg-num">2.7</span>AI-Generated Content Disclaimer</h3>
+            <p>The Platform integrates Google Gemini via Supabase Edge Functions. AI-generated answers, quizzes, and flashcards may contain inaccuracies. Users are strictly responsible for verifying AI content. The Platform assumes no liability for academic outcomes resulting from reliance on AI-generated materials.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-8"><span class="lg-num">2.8</span>Platform Availability and Maintenance</h3>
+            <p>The Platform is provided “as is.” We do not guarantee uninterrupted or error free access, particularly to third-party API availability (e.g., Google Gemini). Scheduled maintenance, updates, or outages of these external services may temporarily limit or disrupt certain features, and we are not responsible for such interruptions.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-9"><span class="lg-num">2.9</span>Account Suspension and Termination</h3>
+            <p>Administrators reserve the right to suspend or terminate accounts that violate these Terms, at their sole discretion. This may be done with or without prior notice, depending on the nature and severity of the violation.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-10"><span class="lg-num">2.10</span>Intellectual Property</h3>
+            <p>The platform’s original code, design, and architecture belong to the development team. While, user uploaded files remain the intellectual property of their owners, and users retain all rights to their own content. By uploading files, users grant the platform only the limited permission needed to process them.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-11"><span class="lg-num">2.11</span>Limitation of Liability</h3>
+            <p>To the maximum extent permitted by Philippine law, the developers shall not be liable for any direct, indirect, incidental, or consequential damages arising from the use or inability to use the Platform. This includes, but is not limited to, loss of data or interruptions in service.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s2-12"><span class="lg-num">2.12</span>Governing Law and Contact Information</h3>
+            <p>These Terms are governed by the laws of the Republic of the Philippines. Questions or concerns regarding these Terms may be directed to the official project contact information provided within the Platform.</p>
+          </article>
+
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+        <!-- 3. ACCEPTABLE USE POLICY -->
+        <section class="glass card-pad lg-section" id="acceptable-use-policy" aria-labelledby="acceptable-use-policy-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true">3</span>
+            <h2 class="lg-h2" id="acceptable-use-policy-title">Acceptable Use Policy</h2>
+          </header>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s3-1"><span class="lg-num">3.1</span>Permitted Use of the Platform</h3>
+            <p>The Platform is intended strictly for personal academic organization, scheduling, record tracking, and study assistance. You may use its features to manage your academic activities, organize your notes and study materials, and access educational tools provided by the QCU Student Planner.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s3-2"><span class="lg-num">3.2</span>Prohibited Behaviors</h3>
+            <p>You are strictly prohibited from engaging in any activity that may compromise the security, integrity, or proper operation of the Platform. This includes the following:</p>
+
+            <div class="lg-nested">
+              <h4 class="lg-h4" id="s3-2-1"><span class="lg-num">3.2.1</span>Unauthorized Account Access</h4>
+              <p>Logging into an account that does not belong to you, or allowing another person to use your Google account to access the Platform on your behalf.</p>
+
+              <h4 class="lg-h4" id="s3-2-2"><span class="lg-num">3.2.2</span>Attempting to Access Another User’s Records</h4>
+              <p>Attempting to bypass Row Level Security (RLS) policies or exploit system vulnerabilities to access another user’s data.</p>
+
+              <h4 class="lg-h4" id="s3-2-3"><span class="lg-num">3.2.3</span>Database and Security Abuse</h4>
+              <p>Sending automated, excessive, or malicious requests to the Supabase PostgreSQL database.</p>
+
+              <h4 class="lg-h4" id="s3-2-4"><span class="lg-num">3.2.4</span>Uploading Malicious or Inappropriate Files</h4>
+              <p>Uploading viruses, malware, or inappropriate or illegal files through the Platform’s AI-powered features (e.g., as attachments to the AI Quiz Maker, AI Flashcard Maker, or AI Study Assistant).</p>
+
+              <h4 class="lg-h4" id="s3-2-5"><span class="lg-num">3.2.5</span>Misuse of AI Features</h4>
+              <p>Submitting prompts that violate the Google Gemini API terms, including requests to generate harmful, illegal, or explicit content.</p>
+
+              <h4 class="lg-h4" id="s3-2-6"><span class="lg-num">3.2.6</span>Account Sharing and Impersonation</h4>
+              <p>Sharing accounts or impersonating administrators, faculty members, or other students.</p>
+            </div>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s3-3"><span class="lg-num">3.3</span>Reporting Violations</h3>
+            <p>If you observe or suspect a violation of this Acceptable Use Policy report it immediately to <a href="mailto:qcustudentplanner.team@gmail.com">qcustudentplanner.team@gmail.com</a>. Include relevant details to help the project maintainers investigate and address the issue promptly.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s3-4"><span class="lg-num">3.4</span>Consequences of Policy Violations</h3>
+            <p>Violations may result in enforcement actions at the discretion of the platform administrators, including account suspension, permanent termination, and removal of content. Severe or unlawful activities, such as unauthorized system access, database abuse, or security interference, may be reported to the appropriate authorities under applicable Philippine laws, including Republic Act No. 10175 (Cybercrime Prevention Act of 2012).</p>
+          </article>
+
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+        <!-- 4. AI FEATURES DISCLAIMER -->
+        <section class="glass card-pad lg-section" id="ai-features-disclaimer" aria-labelledby="ai-features-disclaimer-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true">4</span>
+            <h2 class="lg-h2" id="ai-features-disclaimer-title">AI Features Disclaimer</h2>
+          </header>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-1"><span class="lg-num">4.1</span>Scope of AI Features</h3>
+            <p>The Platform provides the following AI features to support your academic organization, study preparation, and learning needs:</p>
+
+            <div class="lg-nested">
+              <h4 class="lg-h4" id="s4-1-1"><span class="lg-num">4.1.1</span>AI Quiz Maker</h4>
+              <p>The Platform provides an AI Quiz Maker designed to generate practice questions from your study materials.</p>
+
+              <h4 class="lg-h4" id="s4-1-2"><span class="lg-num">4.1.2</span>AI Flashcard Maker</h4>
+              <p>The Platform includes an AI Flashcard Maker that generates flashcards from a topic you enter, notes you type in, or a file you attach, extracting key concepts and definitions for review.</p>
+
+              <h4 class="lg-h4" id="s4-1-3"><span class="lg-num">4.1.3</span>AI Study Assistant</h4>
+              <p>An AI Study Assistant is available to help summarize complex topics, answer study related queries, and provide contextual academic support.</p>
+
+              <h4 class="lg-h4" id="s4-1-4"><span class="lg-num">4.1.4</span>AI-Generated Answers and Explanations</h4>
+              <p>The answers, summaries, and explanations produced by these features are generated using probabilistic language models rather than a fixed database of facts.</p>
+            </div>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-2"><span class="lg-num">4.2</span>Accuracy and Reliability Limitations</h3>
+            <p>AI generated answers and explanations are probabilistic and may contain factual errors or outdated information. AI content should not be treated as official academic information.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-3"><span class="lg-num">4.3</span>User Responsibility to Verify Generated Content</h3>
+            <p>Users are solely responsible for independently verifying the accuracy of any generated quizzes, flashcards, or study materials before using them for academic preparation.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-4"><span class="lg-num">4.4</span>Uploaded File and Prompt Processing</h3>
+            <p>When using these tools, your text prompts and uploaded files may be transmitted externally for processing. Prompts are limited to 12,000 characters, and attached files must be a PDF, JPG, or PNG up to 8MB. Do not submit sensitive, confidential, or personal information into the AI system.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-5"><span class="lg-num">4.5</span>Third-Party AI Provider Disclosure</h3>
+            <p>The platform’s AI features are powered by the Google Gemini API and processed through Supabase Edge Functions. By using these features, you acknowledge that your inputs may be handled by this third-party provider.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-6"><span class="lg-num">4.6</span>AI Content Should Not Be Treated as Official Academic Information</h3>
+            <p>All AI generated outputs are intended only as tools for study aids and do not serve as official, recognized, or authoritative academic course material.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s4-7"><span class="lg-num">4.7</span>No Guarantee of Uninterrupted AI Availability</h3>
+            <p>AI features are provided on an “as is” basis. Their availability depends on third-party API uptime, server stability, and usage limits, and access may be interrupted, delayed, or restricted without notice.</p>
+          </article>
+
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+        <!-- 5. COOKIE AND DATA STORAGE NOTICE -->
+        <section class="glass card-pad lg-section" id="cookie-data-storage" aria-labelledby="cookie-data-storage-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true">5</span>
+            <h2 class="lg-h2" id="cookie-data-storage-title">Cookie and Data Storage Notice</h2>
+          </header>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-1"><span class="lg-num">5.1</span>Browser Storage and Local Storage</h3>
+            <p>We utilize your browser's local storage capabilities rather than traditional cookies to manage your active state on the Platform.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-2"><span class="lg-num">5.2</span>Authentication Tokens and Session Information</h3>
+            <p>Secure authentication tokens issued by Supabase Auth are saved in your browser's local storage to reliably maintain your active login session as you navigate the system.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-3"><span class="lg-num">5.3</span>User Preferences and Application Settings</h3>
+            <p>Your personal user preferences and application settings, such as your chosen interface layout or dark/light theme, are saved locally on your device.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-4"><span class="lg-num">5.4</span>Essential Storage Required for System Functionality</h3>
+            <p>All local storage utilized by the Platform is strictly essential for core system functionality; we do not store unnecessary or non-essential data on your device.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-5"><span class="lg-num">5.5</span>Third-Party Cookies or Tracking Technologies, If Applicable</h3>
+            <p>The Platform does not use any third-party cookies, tracking pixels, or marketing technologies to monitor your activity across other websites.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-6"><span class="lg-num">5.6</span>Data Stored in the Database vs. Data Stored in the Browser</h3>
+            <p>Your academic records (subjects, schedules, tasks, grades, attendance, notes, and calendar events) are stored in the Supabase PostgreSQL database as the source of truth, but the Platform also keeps a local working copy of this data in your browser’s local storage for offline access and performance, which is kept in sync with the database. Session tokens and UI preferences are stored in local storage only and are never written to the database.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-7"><span class="lg-num">5.7</span>Clearing Browser Data</h3>
+            <p>If you clear your browser’s cache or local storage, you will be logged out and any locally cached academic data and UI preferences on that device will be cleared. Data that has already been synced to the database will not be lost and will reload once you sign in again; however, any changes made while offline that had not yet synced may be lost.</p>
+          </article>
+
+          <article class="lg-sub">
+            <h3 class="lg-h3" id="s5-8"><span class="lg-num">5.8</span>Types of Stored Data</h3>
+            <div class="lg-table-wrap">
+              <table class="lg-table">
+                <caption class="visually-hidden">Types of stored data, their purpose, where they are stored, and their category</caption>
+                <thead>
+                  <tr><th scope="col">Purpose</th><th scope="col">Technology / Location</th><th scope="col">Data Category</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="Purpose">Maintains secure active login session</td>
+                    <td data-label="Technology / Location">Browser Local Storage (Supabase Auth)</td>
+                    <td data-label="Data Category">Authentication Tokens</td>
+                  </tr>
+                  <tr>
+                    <td data-label="Purpose">Stores local UI preferences (e.g., dark/light theme)</td>
+                    <td data-label="Technology / Location">Browser Local Storage</td>
+                    <td data-label="Data Category">User Preferences</td>
+                  </tr>
+                  <tr>
+                    <td data-label="Purpose">Remote storage (source of truth) plus a local offline cache for tasks, schedules, grades, and notes</td>
+                    <td data-label="Technology / Location">Supabase PostgreSQL Database + Browser Local Storage</td>
+                    <td data-label="Data Category">Academic Records</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+        <!-- REFERENCES -->
+        <section class="glass card-pad lg-section" id="legal-references" aria-labelledby="legal-references-title" data-lg-section>
+          <header class="lg-section-head">
+            <span class="lg-section-num" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></span>
+            <h2 class="lg-h2" id="legal-references-title">References</h2>
+          </header>
+          <ul class="lg-refs">
+            <li>Congress of the Philippines. (2000, June 14). Republic Act No. 8792: Electronic Commerce Act of 2000. Official Gazette of the Republic of the Philippines. <a href="https://officialgazette.gov.ph/2000/06/14/republic-act-no-8792-s-2000" target="_blank" rel="noopener noreferrer">officialgazette.gov.ph/2000/06/14/republic-act-no-8792-s-2000</a></li>
+            <li>Congress of the Philippines. (2012, August 15). Republic Act No. 10173: Data Privacy Act of 2012. Official Gazette of the Republic of the Philippines. <a href="https://officialgazette.gov.ph/2012/08/15/republic-act-no-10173" target="_blank" rel="noopener noreferrer">officialgazette.gov.ph/2012/08/15/republic-act-no-10173</a></li>
+            <li>Congress of the Philippines. (2012, September 12). Republic Act No. 10175: Cybercrime Prevention Act of 2012. Official Gazette of the Republic of the Philippines. <a href="https://officialgazette.gov.ph/2012/09/12/republic-act-no-10175" target="_blank" rel="noopener noreferrer">officialgazette.gov.ph/2012/09/12/republic-act-no-10175</a></li>
+            <li>National Privacy Commission. (2016, August 24). Implementing rules and regulations of the Data Privacy Act of 2012. Republic of the Philippines. <a href="https://privacy.gov.ph/implementing-rules-regulations-data-privacy-act-2012" target="_blank" rel="noopener noreferrer">privacy.gov.ph/implementing-rules-regulations-data-privacy-act-2012</a></li>
+            <li>National Privacy Commission. (n.d.). Advisories &amp; circulars. Republic of the Philippines. Retrieved November 13, 2026, from <a href="https://privacy.gov.ph/pips-and-pics/advisories-circulars" target="_blank" rel="noopener noreferrer">privacy.gov.ph/pips-and-pics/advisories-circulars</a></li>
+          </ul>
+          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+        </section>
+
+      </div>
+
+      <!-- Desktop rail: same table of contents, sticky, highlights the section being read. -->
+      <aside class="lg-rail" aria-label="Page sections">
+        <nav class="lg-rail-nav" id="lgRail" aria-labelledby="lgRailTitle">
+          <p class="lg-rail-title" id="lgRailTitle">On this page</p>
+          <div id="lgRailList"></div>
+        </nav>
+      </aside>
+    </div>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -34,16 +433,10 @@
 <script src="../../assets/js/services/task-stats.js"></script>
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
-<script src="../../assets/js/modules/feature-placeholder.js"></script>
+<script src="../../assets/js/modules/legal-policies.js"></script>
 <script>
   renderShell('legal-policies');
   applyTheme();
-  initFeaturePlaceholder({
-    icon: 'bi-shield-check',
-    title: 'Legal & Policies',
-    badge: 'Coming Soon',
-    description: 'A central page for the application\'s Terms of Service, Privacy Policy, data-handling information, and other relevant policies.'
-  });
 </script>
 </body>
 </html>

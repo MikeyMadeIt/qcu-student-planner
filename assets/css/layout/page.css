@@ -120,26 +120,6 @@ label {
         font-size: 0.8rem;
     }
 
-    /* Modals: full-width stacked actions and even padding. */
-    .modal-dialog {
-        margin: var(--space-3);
-    }
-
-    .modal-footer {
-        flex-wrap: nowrap;
-    }
-
-    .modal-footer > .btn {
-        flex: 1 1 0%;
-        margin: 0;
-    }
-
-    .modal-body,
-    .modal-header,
-    .modal-footer {
-        padding: var(--card-pad-sm);
-    }
-
     .table-responsive,
     .overflow-auto {
         -webkit-overflow-scrolling: touch;
