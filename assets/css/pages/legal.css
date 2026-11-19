@@ -1,0 +1,617 @@
+/* LEGAL & POLICIES page.
+   Scoped to .lg-* / .legal-page. Colors and spacing come from the shared theme tokens, so
+   Light, Dark and AMOLED work without per-theme overrides.
+   The header is position: fixed, so every anchor target gets scroll-margin-top. */
+
+html:has(.legal-page) {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:has(.legal-page) {
+        scroll-behavior: auto;
+    }
+}
+
+.legal-page {
+    --lg-anchor-offset: calc(var(--shell-bar-height) + var(--space-4));
+    min-width: 0;
+}
+
+.legal-page #legalTop,
+.legal-page .lg-section,
+.legal-page .lg-h3,
+.legal-page .lg-h4 {
+    scroll-margin-top: var(--lg-anchor-offset);
+}
+
+/* ---------- Disclaimer ---------- */
+
+.lg-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--grid-gap);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-left: 3px solid rgb(var(--accent));
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.lg-notice > i {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: rgb(var(--accent));
+    font-size: 1.05rem;
+}
+
+.lg-notice p {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+.lg-notice strong {
+    color: var(--text);
+}
+
+/* ---------- Table of contents (top card) ---------- */
+
+.lg-toc-card {
+    margin-bottom: var(--page-gap);
+}
+
+.lg-toc-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.lg-toc-title i {
+    color: rgb(var(--accent));
+}
+
+.lg-toc-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 640px) {
+    .lg-toc-main {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .lg-toc-main {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.lg-toc-main a,
+.lg-rail-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    padding: 0.5rem var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.lg-toc-main a:hover,
+.lg-toc-main a:focus-visible {
+    border-color: rgb(var(--accent));
+    background: var(--surface-2);
+}
+
+.lg-toc-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: var(--radius-sm);
+    background: rgb(var(--accent));
+    color: var(--on-accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.lg-toc-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Expandable full list */
+.lg-toc-details {
+    margin-top: var(--space-3);
+}
+
+.lg-toc-details summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: 0 var(--space-2);
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+
+.lg-toc-details summary {
+    list-style: none;
+}
+
+.lg-toc-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.lg-toc-details summary i {
+    transition: transform var(--transition-fast);
+}
+
+.lg-toc-details[open] summary i {
+    transform: rotate(180deg);
+}
+
+.lg-toc-details summary:hover {
+    color: var(--text);
+}
+
+.lg-toc-details summary:focus-visible,
+.lg-toc-card a:focus-visible,
+.lg-rail a:focus-visible,
+.lg-top:focus-visible,
+.lg-sub a:focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+}
+
+.lg-toc-full {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+}
+
+@media (min-width: 720px) {
+    .lg-toc-full {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .lg-toc-full {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.lg-toc-group-title {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--text);
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lg-toc-sub {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lg-toc-sub a {
+    display: flex;
+    gap: var(--space-2);
+    padding: 0.4rem 0;
+    min-height: 2rem;
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    line-height: 1.35;
+    text-decoration: none;
+}
+
+.lg-toc-sub a:hover,
+.lg-toc-sub a:focus-visible {
+    color: var(--text);
+}
+
+.lg-toc-subnum {
+    flex: 0 0 auto;
+    min-width: 2.4rem;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+}
+
+.lg-toc-l4 a {
+    padding-left: var(--space-4);
+}
+
+/* ---------- Layout ---------- */
+
+.lg-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--page-gap);
+    align-items: start;
+}
+
+.lg-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-gap);
+    min-width: 0;
+}
+
+.lg-rail {
+    display: none;
+}
+
+@media (min-width: 1100px) {
+    .lg-layout {
+        grid-template-columns: minmax(0, 1fr) 16.5rem;
+    }
+
+    .lg-rail {
+        display: block;
+        position: sticky;
+        top: var(--lg-anchor-offset);
+        max-height: calc(100vh - var(--shell-bar-height) - (var(--space-4) * 2));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+}
+
+.lg-rail-title {
+    margin: 0 0 var(--space-2);
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lg-rail-group {
+    margin-bottom: var(--space-2);
+}
+
+.lg-rail-link {
+    min-height: 2.5rem;
+    font-size: 0.82rem;
+}
+
+.lg-rail-group.is-active > .lg-rail-link {
+    border-color: rgb(var(--accent));
+    background: var(--surface-2);
+}
+
+.lg-rail .lg-toc-sub {
+    display: none;
+    margin: var(--space-1) 0 var(--space-2);
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--border);
+}
+
+.lg-rail-group.is-active .lg-toc-sub {
+    display: block;
+}
+
+.lg-rail .lg-toc-sub a {
+    padding: 0.3rem 0 0.3rem var(--space-2);
+    min-height: 0;
+    font-size: 0.76rem;
+}
+
+.lg-rail .lg-toc-subnum {
+    min-width: 2.2rem;
+    font-size: 0.7rem;
+}
+
+/* ---------- Sections ---------- */
+
+.lg-section-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--border);
+}
+
+.lg-section-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-sm);
+    background: rgb(var(--accent));
+    color: var(--on-accent);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.lg-h2 {
+    margin: 0;
+    min-width: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.lg-sub {
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border);
+}
+
+.lg-section-head + .lg-sub {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.lg-h3 {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-2);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text);
+}
+
+.lg-num {
+    flex: 0 0 auto;
+    color: rgb(var(--accent));
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    font-weight: 600;
+}
+
+.lg-h3 .lg-num {
+    min-width: 2.4rem;
+}
+
+/* Nested subsections (1.3.x, 3.2.x, 4.1.x): indented, with a rule down the left. */
+.lg-nested {
+    margin: var(--space-3) 0 0;
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--border);
+}
+
+.lg-h4 {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin: var(--space-4) 0 var(--space-1);
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+}
+
+.lg-h4:first-child {
+    margin-top: 0;
+}
+
+.lg-h4 .lg-num {
+    min-width: 2.8rem;
+}
+
+.lg-sub p,
+.lg-sub li {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.lg-sub p {
+    margin: 0 0 var(--space-3);
+    max-width: 72ch;
+    overflow-wrap: anywhere;
+}
+
+.lg-sub p:last-child {
+    margin-bottom: 0;
+}
+
+.lg-nested p {
+    padding-left: calc(2.8rem + var(--space-3));
+}
+
+@media (max-width: 575.98px) {
+    /* Phones: numbers sit above the title and the text uses the full width. */
+    .lg-h3,
+    .lg-h4 {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .lg-nested p {
+        padding-left: 0;
+    }
+
+    .lg-nested {
+        padding-left: var(--space-3);
+    }
+}
+
+.lg-sub a {
+    color: rgb(var(--accent));
+    text-underline-offset: 2px;
+}
+
+.lg-list {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.25rem;
+}
+
+.lg-list li {
+    margin-bottom: var(--space-1);
+    padding-left: var(--space-1);
+}
+
+@media (min-width: 640px) {
+    .lg-list-cols {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: var(--space-5);
+        max-width: 40rem;
+    }
+}
+
+/* ---------- 5.8 table ---------- */
+
+.lg-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.lg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+}
+
+.lg-table th {
+    padding: var(--space-3);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.lg-table td {
+    padding: var(--space-3);
+    border-top: 1px solid var(--border);
+    color: var(--text-soft);
+    line-height: 1.55;
+    vertical-align: top;
+}
+
+@media (max-width: 639.98px) {
+    /* Phones: each row becomes a stacked block with its column label above the value. */
+    .lg-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .lg-table,
+    .lg-table tbody,
+    .lg-table tr,
+    .lg-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .lg-table tr + tr {
+        border-top: 1px solid var(--border);
+    }
+
+    .lg-table td {
+        border-top: 0;
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .lg-table td:first-child {
+        padding-top: var(--space-3);
+    }
+
+    .lg-table td:last-child {
+        padding-bottom: var(--space-3);
+    }
+
+    .lg-table td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}
+
+/* ---------- References ---------- */
+
+.lg-refs {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lg-refs li {
+    padding: var(--space-3) 0 var(--space-3) var(--space-5);
+    border-top: 1px solid var(--border);
+    text-indent: calc(var(--space-5) * -1);
+    color: var(--text-soft);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.lg-refs li:first-child {
+    border-top: 0;
+}
+
+.lg-refs a {
+    color: rgb(var(--accent));
+}
+
+/* ---------- Back to top ---------- */
+
+.lg-top {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    margin-top: var(--space-3);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.lg-top:hover {
+    color: var(--text);
+}
