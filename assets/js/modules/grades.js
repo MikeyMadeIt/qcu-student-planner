@@ -314,9 +314,9 @@ function renderGradeModalBody() {
         : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle-fill"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
         </div>` : ''}
     </div>
-    <button class="btn btn-accent w-100 mt-3" onclick="saveGradeComponents()">
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
       <i class="bi bi-check2 me-1"></i>Save Grading Breakdown
-    </button>`;
+    </button></div>`;
 }
 
 function componentBlockHtml(c, ci) {

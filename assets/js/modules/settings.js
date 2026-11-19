@@ -207,7 +207,7 @@ function openAddSemesterModal() {
       <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${ymdLocalFuture(100)}"></div>
       <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="15" min="1" max="52"></div>
     </div>
-    <button class="btn btn-accent w-100 mt-3" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Add Semester</button>`;
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Add Semester</button></div>`;
     document.getElementById('semModalTitle').textContent = 'Add Semester';
     new bootstrap.Modal(document.getElementById('semModal')).show();
 }
@@ -222,12 +222,12 @@ function openEditSemesterModal(id) {
     <div class="row g-2">
       <div class="col-md-6">
         <label>School Year</label>
-        <input class="form-control" id="semYearInput" value="${escHtml(sem.schoolYear)}" readonly class="sem-readonly-field">
+        <input class="form-control sem-readonly-field" id="semYearInput" value="${escHtml(sem.schoolYear)}" readonly>
         <div class="text-faint mt-1 sem-readonly-hint">School year cannot be changed</div>
       </div>
       <div class="col-md-6">
         <label>Semester</label>
-        <input class="form-control" id="semNameInput" value="${escHtml(sem.name)}" readonly class="sem-readonly-field">
+        <input class="form-control sem-readonly-field" id="semNameInput" value="${escHtml(sem.name)}" readonly>
         <div class="text-faint mt-1 sem-readonly-hint">Name cannot be changed</div>
       </div>
       <div class="col-md-6"><label for="semStartInput">Start Date</label><input type="date" class="form-control" id="semStartInput" value="${sem.startDate}"></div>
@@ -235,7 +235,7 @@ function openEditSemesterModal(id) {
       <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${sem.finalsDate}"></div>
       <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="${sem.totalWeeks}" min="1" max="52"></div>
     </div>
-    <button class="btn btn-accent w-100 mt-3" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Update Semester</button>`;
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Update Semester</button></div>`;
     document.getElementById('semModalTitle').textContent = 'Edit Semester';
     new bootstrap.Modal(document.getElementById('semModal')).show();
 }
