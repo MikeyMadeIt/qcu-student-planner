@@ -380,3 +380,63 @@ select.cs-native-hidden {
     float: right;
     opacity: .8;
 }
+
+/* University Event Details modal (#univEventModal) — real .modal-header +
+   .modal-body, matching every other well-designed modal in the app; filled
+   by assets/js/utils/event-details.js and shared as-is by both the student
+   Calendar (click a published event) and the admin University Events
+   page's "View" action. */
+.uev-detail-head {
+    flex-wrap: nowrap;
+}
+
+.uev-detail-head .modal-title {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+}
+
+/* Title / Details / Date / Status rows, as one 3-column grid (label, colon,
+   value) rather than separate per-row flex boxes. Each row is a `display:
+   contents` wrapper, so its 3 spans become direct children of this grid
+   instead of a nested box — that's what makes the label column (and so the
+   colon column right after it) size to the single longest label across
+   every row, lining every colon up in one vertical column regardless of
+   how short "Date" or how long "Details" is. */
+.uev-detail-dl {
+    display: grid;
+    grid-template-columns: max-content max-content 1fr;
+    row-gap: 12px;
+    column-gap: 10px;
+    font-size: .88rem;
+}
+
+.uev-detail-row {
+    display: contents;
+}
+
+.uev-detail-label {
+    color: var(--text-faint);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.uev-detail-colon {
+    color: var(--text-faint);
+    font-weight: 600;
+}
+
+.uev-detail-value {
+    min-width: 0;
+    color: var(--text-soft);
+    overflow-wrap: anywhere;
+}
+
+.uev-detail-value .status-badge {
+    vertical-align: middle;
+}
+
+.uev-detail-sep {
+    margin: 0 .35em;
+    color: var(--text-faint);
+}
