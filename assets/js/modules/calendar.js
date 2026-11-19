@@ -10,7 +10,6 @@ const CATEGORY_COLORS = {
     Exam: '#FB7185', Personal: '#34D399', Organization: '#A78BFA'
 };
 
-const UNIV_COLORS = ['#92400E', '#7C6CF6', '#4F8CFF', '#FB7185', '#34D399', '#22D3EE', '#F472B6', '#A78BFA'];
 const EVENT_CATEGORIES = ['Study Session', 'Organization Meeting', 'Personal Appointment', 'Project Meeting', 'Exam Review', 'Event', 'Other'];
 const EVENT_CAT_COLORS = {
     'Study Session': '#34D399',
@@ -22,14 +21,12 @@ const EVENT_CAT_COLORS = {
     'Other': '#8a90a6'
 };
 const _subjectColorCache = {};
-let univModalMode = 'range';
-let univModalColor = UNIV_COLORS[0];
-let univEditingId = null;
 let eventEditingId = null;
 let taskEditingId = null;
 // Init
 
-function initCalendar() {
+async function initCalendar() {
+    await fetchUnivEvents();
     calSelectedDate = todayKey();
     renderCalendar();
     renderAgenda(calSelectedDate);
@@ -38,6 +35,17 @@ function initCalendar() {
     const ji = document.getElementById('jumpDateInput');
     if (ji)
         ji.value = todayKey();
+    // Re-fetch when the tab regains focus, so admin edits made elsewhere
+    // show up without the student needing to reload the page.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            fetchUnivEvents().then(() => {
+                renderCalendar();
+                if (calSelectedDate)
+                    renderAgenda(calSelectedDate);
+            });
+        }
+    });
 }
 
 // Subject Colors (stable)
@@ -120,12 +128,12 @@ function allEventsForDate(dateStr) {
         });
     }
     if (calFilters.univ) {
-        DB.getUniversityEvents().filter(u => u.dates && u.dates.includes(dateStr)).forEach(u => {
+        getUnivEvents().filter(u => u.event_date === dateStr).forEach(u => {
             events.push({
                 type: 'univ', id: u.id, title: u.title,
-                color: u.color || '#4F8CFF',
-                time: '', endTime: '',
-                sub: 'University', room: '',
+                color: '#4F8CFF',
+                time: u.start_time || '', endTime: u.end_time || '',
+                sub: u.location || 'University', room: u.location || '',
                 draggable: false,
                 _obj: u
             });
@@ -901,21 +909,28 @@ function exportICS() {
             lines.push('DESCRIPTION:' + icsEscape(t.description));
         lines.push('END:VEVENT');
     });
-    const univEvents = DB.getUniversityEvents();
+    const univEvents = getUnivEvents();
     univEvents.forEach(u => {
-        if (!u.dates || !u.dates.length)
+        if (!u.event_date)
             return;
-        u.dates.forEach(dateStr => {
-            lines.push('BEGIN:VEVENT');
-            lines.push('UID:univ-' + u.id + '-' + dateStr + '@studentplanner');
-            lines.push('DTSTAMP:' + icsNow());
-            lines.push('DTSTART;VALUE=DATE:' + dateStr.replace(/-/g, ''));
-            lines.push('DTEND;VALUE=DATE:' + dateStr.replace(/-/g, ''));
-            lines.push('SUMMARY:' + icsEscape(u.title));
-            if (u.note)
-                lines.push('DESCRIPTION:' + icsEscape(u.note));
-            lines.push('END:VEVENT');
-        });
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:univ-' + u.id + '@studentplanner');
+        lines.push('DTSTAMP:' + icsNow());
+        if (u.start_time) {
+            lines.push('DTSTART:' + icsDate(u.event_date, u.start_time));
+            lines.push('DTEND:' + icsDate(u.event_date, u.end_time || u.start_time));
+        }
+        else {
+            lines.push('DTSTART;VALUE=DATE:' + u.event_date.replace(/-/g, ''));
+            lines.push('DTEND;VALUE=DATE:' + u.event_date.replace(/-/g, ''));
+        }
+        lines.push('SUMMARY:' + icsEscape(u.title));
+        const descParts = [u.description, u.location].filter(Boolean);
+        if (descParts.length)
+            lines.push('DESCRIPTION:' + icsEscape(descParts.join(' — ')));
+        if (u.location)
+            lines.push('LOCATION:' + icsEscape(u.location));
+        lines.push('END:VEVENT');
     });
     lines.push('END:VCALENDAR');
     const total = calEvents.length + tasks.length + univEvents.length;
@@ -1296,160 +1311,52 @@ function deleteCalEvent(id) {
         renderAgenda(calSelectedDate);
 }
 
-// UNIVERSITY EVENT MODAL
+// UNIVERSITY EVENTS — centrally managed by admins; students get a
+// read-only view. Fetched from Supabase (published events only — RLS
+// enforces this server-side too) and cached for the session; re-fetched
+// on load and whenever the tab regains focus, same as the rest of this
+// app's "fetch, don't push" data for anything it doesn't own.
 
-function openUnivEventModal(id, presetDate) {
-    univEditingId = id || null;
-    const existing = id ? DB.getUniversityEvents().find(e => e.id === id) : null;
-    univModalColor = existing ? (existing.color || UNIV_COLORS[0]) : UNIV_COLORS[0];
-    univModalMode = existing && existing.dates && existing.dates.length > 2 && isContiguousRange(existing.dates) ? 'range' : (existing ? 'multiple' : 'range');
-    const initialDates = existing ? existing.dates.slice().sort() : (presetDate ? [presetDate] : [todayKey()]);
-    const rangeStart = initialDates[0];
-    const rangeEnd = initialDates[initialDates.length - 1];
-    const body = document.getElementById('univEventModalBody');
-    body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-bank2 me-2"></i>${existing ? 'Edit' : 'Add'} University Event</h5>
-    <div class="mb-2"><label>Event Title</label><input class="form-control" id="ueTitle" placeholder="e.g. Semestral Break, Enrollment, Foundation Day" value="${existing ? escapeHtml(existing.title) : ''}"></div>
-    <div class="mb-3"><label>Note (optional)</label><textarea class="form-control" id="ueNote" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.note || '') : ''}</textarea></div>
-    <div class="mb-2"><label>Color</label>
-      <div class="d-flex gap-2 flex-wrap" id="ueColorPicker">
-        ${UNIV_COLORS.map(c => `<div onclick="selectUnivColor('${c}')" data-color-swatch="${c}" style="width:26px;height:26px;border-radius:50%;cursor:pointer;background:${c};border:2px solid ${c === univModalColor ? '#fff' : 'transparent'};box-shadow:0 0 0 1px rgba(0,0,0,.15)" aria-label="Color ${c}"></div>`).join('')}
-      </div>
-    </div>
-    <div class="mb-3">
-      <div class="btn-group w-100" role="group">
-        <button type="button" class="btn btn-ghost btn-sm ${univModalMode === 'range' ? 'active' : ''}" id="ueModeRangeBtn" onclick="setUnivMode('range')"><i class="bi bi-calendar-range me-1"></i>Date Range</button>
-        <button type="button" class="btn btn-ghost btn-sm ${univModalMode === 'multiple' ? 'active' : ''}" id="ueModeMultiBtn" onclick="setUnivMode('multiple')"><i class="bi bi-calendar-plus me-1"></i>Specific Dates</button>
-      </div>
-    </div>
-    <div id="ueRangeFields" class="${univModalMode === 'range' ? '' : 'd-none'}">
-      <div class="row g-2 mb-2">
-        <div class="col-6"><label>From</label><input type="date" class="form-control" id="ueRangeStart" value="${rangeStart}"></div>
-        <div class="col-6"><label>To</label><input type="date" class="form-control" id="ueRangeEnd" value="${rangeEnd}"></div>
-      </div>
-      <div class="text-faint" style="font-size:.75rem">Every day in this range (inclusive) will show the event.</div>
-    </div>
-    <div id="ueMultiFields" class="${univModalMode === 'multiple' ? '' : 'd-none'}">
-      <label>Dates</label>
-      <div id="ueDateRows">
-        ${(existing ? existing.dates.slice().sort() : (presetDate ? [presetDate] : [todayKey()])).map(d => univDateRowHtml(d)).join('')}
-      </div>
-      <button type="button" class="btn btn-ghost btn-sm mt-1" onclick="addUnivDateRow()"><i class="bi bi-plus-lg me-1"></i>Add Another Date</button>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveUnivEvent()"><i class="bi bi-check2 me-1"></i>Save Event</button>
-      ${existing ? `<button class="btn btn-ghost" onclick="deleteUnivEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
-    </div>`;
-    new bootstrap.Modal(document.getElementById('univEventModal')).show();
+let _univEventsCache = [];
+let _univClientPromise = null;
+
+function _getUnivSupabaseClient() {
+    if (!_univClientPromise)
+        _univClientPromise = import('../core/supabase-client.js').then(m => m.getSupabase());
+    return _univClientPromise;
 }
 
-function univDateRowHtml(value) {
-    return `<div class="d-flex gap-2 mb-2 uev-date-row">
-    <input type="date" class="form-control" value="${value || ''}">
-    <button type="button" class="btn-icon" onclick="this.parentElement.remove()" aria-label="Remove date"><i class="bi bi-x-lg"></i></button>
-  </div>`;
+function getUnivEvents() {
+    return _univEventsCache;
 }
 
-function addUnivDateRow() {
-    document.getElementById('ueDateRows').insertAdjacentHTML('beforeend', univDateRowHtml(''));
-}
-
-function setUnivMode(mode) {
-    univModalMode = mode;
-    document.getElementById('ueModeRangeBtn').classList.toggle('active', mode === 'range');
-    document.getElementById('ueModeMultiBtn').classList.toggle('active', mode === 'multiple');
-    document.getElementById('ueRangeFields').classList.toggle('d-none', mode !== 'range');
-    document.getElementById('ueMultiFields').classList.toggle('d-none', mode !== 'multiple');
-}
-
-function selectUnivColor(c) {
-    univModalColor = c;
-    document.querySelectorAll('[data-color-swatch]').forEach(el => {
-        el.style.border = `2px solid ${el.dataset.colorSwatch === c ? '#fff' : 'transparent'}`;
-    });
-}
-
-function collectUnivDates() {
-    if (univModalMode === 'range') {
-        const start = document.getElementById('ueRangeStart').value;
-        const end = document.getElementById('ueRangeEnd').value;
-        if (!start || !end)
-            return [];
-        const dates = [];
-        let d = new Date(start + 'T00:00');
-        const endD = new Date(end + 'T00:00');
-        if (d > endD)
-            return [];
-        while (d <= endD) {
-            dates.push(ymdLocal(d));
-            d.setDate(d.getDate() + 1);
+async function fetchUnivEvents() {
+    try {
+        const supabase = await _getUnivSupabaseClient();
+        const { data, error } = await supabase
+            .from('university_events')
+            .select('id, title, description, event_date, start_time, end_time, location')
+            .eq('is_published', true)
+            .order('event_date', { ascending: true });
+        if (error) {
+            console.warn('Could not load university events', error);
+            return;
         }
-        return dates;
+        _univEventsCache = data || [];
     }
-    else {
-        const inputs = document.querySelectorAll('#ueDateRows input[type="date"]');
-        const dates = [];
-        inputs.forEach(i => { if (i.value)
-            dates.push(i.value); });
-        return [...new Set(dates)].sort();
+    catch (e) {
+        console.warn('Could not load university events', e);
     }
 }
 
-let ueSaving = false;
-function saveUnivEvent() {
-    if (ueSaving) return;
-    const title = document.getElementById('ueTitle').value.trim();
-    if (!title) {
-        Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
+// Read-only detail view (students cannot create/edit/delete these). The
+// modal markup + body-building is shared with the admin University Events
+// page's "View" action — see assets/js/utils/event-details.js.
+function openUnivEventModal(id) {
+    const existing = _univEventsCache.find(e => e.id === id);
+    if (!existing) {
+        Toast.show('This event is no longer available', 'medium', 'bi-info-circle');
         return;
     }
-    const dates = collectUnivDates();
-    if (!dates.length) {
-        Toast.show('Please add at least one valid date', 'high', 'bi-exclamation-triangle');
-        return;
-    }
-    ueSaving = true;
-    const note = document.getElementById('ueNote').value.trim();
-    const events = DB.getUniversityEvents();
-    if (univEditingId) {
-        const ev = events.find(e => e.id === univEditingId);
-        if (ev) {
-            ev.title = title;
-            ev.note = note;
-            ev.dates = dates;
-            ev.color = univModalColor;
-        }
-    }
-    else {
-        events.push({ id: DB.uid(), title, note, dates, color: univModalColor, createdAt: Date.now() });
-    }
-    DB.saveUniversityEvents(events);
-    bootstrap.Modal.getInstance(document.getElementById('univEventModal')).hide();
-    Toast.show('University event saved');
-    renderCalendar();
-    if (calSelectedDate)
-        renderAgenda(calSelectedDate);
-    ueSaving = false;
-}
-
-function deleteUnivEvent(id) {
-    DB.saveUniversityEvents(DB.getUniversityEvents().filter(e => e.id !== id));
-    const inst = bootstrap.Modal.getInstance(document.getElementById('univEventModal'));
-    if (inst)
-        inst.hide();
-    Toast.show('University event deleted');
-    renderCalendar();
-    if (calSelectedDate)
-        renderAgenda(calSelectedDate);
-}
-
-function isContiguousRange(dates) {
-    const sorted = dates.slice().sort();
-    for (let i = 1; i < sorted.length; i++) {
-        const prev = new Date(sorted[i - 1] + 'T00:00');
-        const cur = new Date(sorted[i] + 'T00:00');
-        if ((cur - prev) / 86400000 !== 1)
-            return false;
-    }
-    return true;
+    openUnivEventDetailsModal(existing, { showAdminHint: true });
 }

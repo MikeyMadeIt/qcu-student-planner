@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Legal & Policies · Student Planner</title>
-<script src="../../assets/js/core/app-guard.js"></script>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
 <link rel="manifest" href="../../manifest.json">
@@ -15,6 +14,22 @@
 <link href="../../assets/css/pages/legal.css" rel="stylesheet">
 </head>
 <body>
+<!-- Shown instead of the app shell when the visitor is not signed in (this page is public). -->
+<header class="lg-public-bar" id="lgPublicBar">
+  <a class="lg-public-brand" href="../../index.html">
+    <span class="lg-public-mark" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+    <span class="lg-public-name">QCU Student Planner</span>
+  </a>
+  <div class="lg-public-tools">
+    <a class="btn btn-ghost lg-public-home" href="../../index.html"><i class="bi bi-house" aria-hidden="true"></i><span>Home</span></a>
+    <a class="btn btn-accent" href="../auth/login.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i><span>Sign in</span></a>
+    <button type="button" class="lg-public-theme" data-theme-toggle aria-label="Switch to light theme">
+      <i class="bi bi-sun theme-icon-sun" aria-hidden="true"></i>
+      <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
+    </button>
+  </div>
+</header>
+
 <div class="app-shell">
   <nav class="sidebar" id="sidebar"></nav>
   <main class="main-content legal-page" id="legalTop">
@@ -434,9 +449,26 @@
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
 <script src="../../assets/js/modules/legal-policies.js"></script>
+<script src="../../assets/js/core/theme-toggle.js"></script>
 <script>
-  renderShell('legal-policies');
-  applyTheme();
+  // Public page: signed-in students get the normal app shell, everyone else gets the public bar.
+  // Supabase keeps the session in localStorage under sb-<project>-auth-token, so this check is
+  // synchronous and avoids a flash of the wrong layout. The page content is public either way.
+  (function () {
+    var signedIn = false;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        if (/^sb-.+-auth-token$/.test(localStorage.key(i))) { signedIn = true; break; }
+      }
+    } catch (e) { /* storage blocked: treat as signed out */ }
+
+    if (signedIn) {
+      renderShell('legal-policies');
+    } else {
+      document.documentElement.classList.add('lg-public');
+    }
+    applyTheme();
+  })();
 </script>
 </body>
 </html>
