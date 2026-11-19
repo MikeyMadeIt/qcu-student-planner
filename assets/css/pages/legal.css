@@ -615,3 +615,126 @@ html:has(.legal-page) {
 .lg-top:hover {
     color: var(--text);
 }
+
+/* ---------- Public mode (visitor not signed in) ---------- */
+
+.lg-public-bar {
+    display: none;
+}
+
+.lg-public .lg-public-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--layer-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--shell-bar-height);
+    padding: var(--space-2) var(--content-padding-x);
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.lg-public .sidebar {
+    display: none;
+}
+
+.lg-public-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    min-height: 2.75rem;
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lg-public-mark {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-sm);
+    background: rgb(var(--accent));
+    color: var(--on-accent);
+    font-size: 1.1rem;
+}
+
+.lg-public-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+.lg-public-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 0 0 auto;
+}
+
+.lg-public-tools .btn {
+    min-height: 2.75rem;
+    text-decoration: none;
+}
+
+.lg-public-theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+.lg-public-theme:hover {
+    border-color: rgb(var(--accent));
+}
+
+.lg-public-theme:focus-visible,
+.lg-public-brand:focus-visible,
+.lg-public-tools .btn:focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+}
+
+.theme-icon-moon {
+    display: none;
+}
+
+[data-theme="light"] .theme-icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .theme-icon-moon {
+    display: inline-block;
+}
+
+@media (max-width: 575.98px) {
+    /* Phones: icon-only buttons so the bar never wraps. */
+    .lg-public-home span,
+    .lg-public-tools .btn-accent span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .lg-public-tools .btn {
+        width: 2.75rem;
+        padding: 0;
+    }
+}
