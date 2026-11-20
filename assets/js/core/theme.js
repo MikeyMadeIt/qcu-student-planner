@@ -18,6 +18,13 @@
         }
         catch (e) { }
     }
+    function persistSettings() {
+        try {
+            if (typeof DB !== 'undefined' && DB && typeof DB.getSettings === 'function' && typeof DB.saveSettings === 'function')
+                DB.saveSettings(DB.getSettings());
+        }
+        catch (e) { }
+    }
     window.applyTheme = function () {
         var s = read();
         var theme = THEMES.indexOf(s.theme) > -1 ? s.theme : 'dark';
@@ -90,10 +97,10 @@
     function notifyThemeChanged() {
         try { document.dispatchEvent(new CustomEvent('sp:themechange')); } catch (e) { }
     }
-    window.setTheme = function (theme, originEvent) { withTransition(function () { write({ theme: theme }); window.applyTheme(); notifyThemeChanged(); }, originEvent); };
+    window.setTheme = function (theme, originEvent) { withTransition(function () { write({ theme: theme }); persistSettings(); window.applyTheme(); notifyThemeChanged(); }, originEvent); };
     // Accent swaps only recolor a handful of elements, not the whole page,
     // so they get the plain cross-fade rather than the full circular reveal.
-    window.setAccent = function (accent) { if (motionOk()) { fallbackTransition(function () { write({ accent: accent }); window.applyTheme(); notifyThemeChanged(); }); } else { write({ accent: accent }); window.applyTheme(); notifyThemeChanged(); } };
+    window.setAccent = function (accent) { if (motionOk()) { fallbackTransition(function () { write({ accent: accent }); persistSettings(); window.applyTheme(); notifyThemeChanged(); }); } else { write({ accent: accent }); persistSettings(); window.applyTheme(); notifyThemeChanged(); } };
     window.cycleTheme = function (originEvent) {
         var cur = document.documentElement.getAttribute('data-theme') || 'dark';
         window.setTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length], originEvent);

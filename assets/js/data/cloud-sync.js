@@ -179,6 +179,9 @@
             notes: row.notes || '',
             absenceLimit: row.absence_limit != null ? row.absence_limit : null,
             archived: !!row.archived,
+            source: row.source || 'manual',
+            setupStatus: row.setup_status || 'completed',
+            curriculumKey: row.curriculum_key || '',
             semesterId: semFor('subjects', row.id),
         };
     }
@@ -194,6 +197,9 @@
             color: s.color || '', notes: s.notes || '',
             absence_limit: s.absenceLimit != null && s.absenceLimit !== '' ? s.absenceLimit : null,
             archived: !!s.archived,
+            source: s.source || 'manual',
+            setup_status: s.setupStatus || 'completed',
+            curriculum_key: s.curriculumKey || null,
         };
     }
 
@@ -389,6 +395,10 @@
     let _lastCancelledJson = '[]';
 
     const LAST_USER_KEY = 'sp_cloud_last_user_id';
+    // A local preference edit must survive a reload while its debounced
+    // server write is pending. Otherwise hydrate() can restore the older
+    // server value and erase the user's most recent theme choice.
+    const LOCAL_PREFS_DIRTY_KEY = 'sp_cloud_local_prefs_dirty';
 
     async function hydrate() {
         const userId = await getUserId();
@@ -504,6 +514,8 @@
             }
 
             if (!prefsTableMissing) {
+                let localPrefsDirty = false;
+                try { localPrefsDirty = localStorage.getItem(LOCAL_PREFS_DIRTY_KEY) === '1'; } catch (e) { /* ignore */ }
                 if (prefRes && prefRes.data && prefRes.data.prefs && typeof prefRes.data.prefs === 'object') {
                     // Server has a saved copy: it wins (same last-write-wins
                     // rule as cancelled occurrences) since settings are a
@@ -515,8 +527,15 @@
                     const rawMerged = { ...DEFAULT_SETTINGS, ...prefRes.data.prefs, notifications: { ...DEFAULT_SETTINGS.notifications, ...(prefRes.data.prefs.notifications || {}) } };
                     const merged = {};
                     Object.keys(DEFAULT_SETTINGS).forEach(k => { merged[k] = rawMerged[k]; });
-                    DB.set('settings', merged);
-                    _lastPrefsJson = JSON.stringify(merged);
+                    if (localPrefsDirty) {
+                        const localPrefs = DB.getSettings();
+                        DB.set('settings', localPrefs);
+                        _lastPrefsJson = JSON.stringify(merged);
+                        pushSettings(localPrefs);
+                    } else {
+                        DB.set('settings', merged);
+                        _lastPrefsJson = JSON.stringify(merged);
+                    }
                 } else {
                     // Nothing saved for this user yet — push what's on this
                     // device now so the row exists for next time.
@@ -792,6 +811,10 @@
             );
             if (error) throw error;
             _lastPrefsJson = json;
+            try {
+                if (localStorage.getItem(LOCAL_PREFS_DIRTY_KEY) === '1' && JSON.stringify(DB.getSettings()) === json)
+                    localStorage.removeItem(LOCAL_PREFS_DIRTY_KEY);
+            } catch (e) { /* ignore */ }
             clearSyncError('settings');
         } catch (err) {
             console.warn('Cloud sync (settings) failed', err);
@@ -1048,7 +1071,8 @@
     const _saveSettings = DB.saveSettings.bind(DB);
     DB.saveSettings = function (s) {
         const r = _saveSettings(s);
-        pushSettings(s);
+        try { localStorage.setItem(LOCAL_PREFS_DIRTY_KEY, '1'); } catch (e) { /* ignore */ }
+        pushSettings(DB.getSettings());
         return r;
     };
 

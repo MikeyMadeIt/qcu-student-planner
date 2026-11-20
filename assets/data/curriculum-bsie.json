@@ -1,0 +1,499 @@
+{
+  "program": "Bachelor of Science in Industrial Engineering",
+  "programCode": "BSIE",
+  "effectiveAcademicYear": "BSIE-2021",
+  "basis": null,
+  "totalUnits": 170,
+  "source": "Quezon City University, Registrar and Admissions Division — Program of Study, BSIE-2021",
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "1st Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "EMATH113",
+              "title": "Calculus 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECHEM113L1",
+              "title": "Chemistry for Engineers",
+              "units": 4,
+              "prerequisites": []
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE1",
+              "title": "Physical Fitness and Wellness",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "IE113B",
+              "title": "Principles of Industrial Engineering",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IE113A",
+              "title": "Statistical Analysis for Industrial Engineering 1",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "EMATH123",
+              "title": "Calculus 2",
+              "units": 3,
+              "prerequisites": [
+                "EMATH113"
+              ]
+            },
+            {
+              "code": "IE123B",
+              "title": "Industrial Organization and Management",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ]
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EPHYS123L1-IE",
+              "title": "Physics for Engineers",
+              "units": 4,
+              "prerequisites": [
+                "EMATH123"
+              ]
+            },
+            {
+              "code": "PE2",
+              "title": "Rhythmic Activities",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "SCI1",
+              "title": "Science, Technology and Society",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IE123A",
+              "title": "Statistical Analysis for Industrial Engineering 2",
+              "units": 3,
+              "prerequisites": [
+                "IE113A"
+              ]
+            },
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "2nd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "ES210L1",
+              "title": "Computer-Aided Drafting",
+              "units": 1,
+              "prerequisites": []
+            },
+            {
+              "code": "EMATH213",
+              "title": "Differential Equations",
+              "units": 3,
+              "prerequisites": [
+                "EMATH123"
+              ]
+            },
+            {
+              "code": "ES213",
+              "title": "Engineering Mechanics",
+              "units": 3,
+              "prerequisites": [
+                "EPHYS123L1-IE"
+              ]
+            },
+            {
+              "code": "ACTG01",
+              "title": "Financial Accounting",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE3",
+              "title": "Individual and Dual Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "IE212L1",
+              "title": "Industrial Materials and Processes",
+              "units": 3,
+              "prerequisites": [
+                "ECHEM113L1",
+                "EPHYS123L1-IE"
+              ]
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "IE223",
+              "title": "Advanced Mathematics for Industrial Engineering",
+              "units": 3,
+              "prerequisites": [
+                "EMATH213"
+              ]
+            },
+            {
+              "code": "ES220L2",
+              "title": "Computer Fundamentals and Programming",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "ACTG03",
+              "title": "Managerial Accounting",
+              "units": 3,
+              "prerequisites": [
+                "ACTG01"
+              ]
+            },
+            {
+              "code": "EAC223",
+              "title": "Principles of Economics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE4",
+              "title": "Team Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "ES223",
+              "title": "Technopreneurship 101",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IE223L1",
+              "title": "Work Study and Measurement",
+              "units": 4,
+              "prerequisites": [
+                "IE123B",
+                "IE113A",
+                "IE212L1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "3rd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EAC313A",
+              "title": "Elementary Electrical Engineering",
+              "units": 3,
+              "prerequisites": [
+                "EPHYS123L1-IE"
+              ]
+            },
+            {
+              "code": "EAC313B",
+              "title": "Environmental Science",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IE312L1B",
+              "title": "Ergonomics 1",
+              "units": 3,
+              "prerequisites": [
+                "IE223L1"
+              ]
+            },
+            {
+              "code": "HUM2",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IEOJT1",
+              "title": "IE Industry Immersion 1 (120 Hours)",
+              "units": 1,
+              "prerequisites": [
+                "3rd Year Standing"
+              ]
+            },
+            {
+              "code": "IE312L1A",
+              "title": "Operations Research 1",
+              "units": 3,
+              "prerequisites": [
+                "IE223"
+              ]
+            },
+            {
+              "code": "RIZAL",
+              "title": "The Life and Works of Rizal",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ES323B",
+              "title": "Basic Occupational Safety and Health",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ES323A",
+              "title": "Engineering Economics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "IE322L1B",
+              "title": "Ergonomics 2",
+              "units": 3,
+              "prerequisites": [
+                "IE312L1B"
+              ]
+            },
+            {
+              "code": "IEELEC323",
+              "title": "IE Elective 1",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing"
+              ]
+            },
+            {
+              "code": "IEOJT2",
+              "title": "IE Industry Immersion 2 (120 Hours)",
+              "units": 1,
+              "prerequisites": [
+                "IEOJT1"
+              ]
+            },
+            {
+              "code": "IE322L1A",
+              "title": "Operations Research 2",
+              "units": 3,
+              "prerequisites": [
+                "IE312L1A"
+              ]
+            },
+            {
+              "code": "IE323",
+              "title": "Quality Management Systems",
+              "units": 3,
+              "prerequisites": [
+                "IE123A",
+                "IE223L1"
+              ]
+            },
+            {
+              "code": "EAC323A",
+              "title": "Thermodynamics",
+              "units": 3,
+              "prerequisites": [
+                "EMATH123"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "4th Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "IE411L2",
+              "title": "IE Capstone Project",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "IEELEC413",
+              "title": "IE Elective 2",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "IE413L1",
+              "title": "Operations Management",
+              "units": 4,
+              "prerequisites": [
+                "IE312L1A",
+                "IE323"
+              ]
+            },
+            {
+              "code": "IE412L1",
+              "title": "Systems Engineering",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "IEELEC423",
+              "title": "IE Elective 3",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "IE422L1B",
+              "title": "Information System",
+              "units": 3,
+              "prerequisites": [
+                "ES220L2",
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "IE423B",
+              "title": "Integrative Engineering",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "IE422L1A",
+              "title": "Project Feasibility",
+              "units": 3,
+              "prerequisites": [
+                "ACTG03",
+                "IE413L1"
+              ]
+            },
+            {
+              "code": "IE423A",
+              "title": "Supply Chain Management",
+              "units": 3,
+              "prerequisites": [
+                "IE413L1"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
