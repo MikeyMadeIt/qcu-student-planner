@@ -381,7 +381,7 @@ function openSubjectModal(id, opts) {
     ensureSubjectModal();
     opts = opts || {};
     const s = id ? DB.getSubject(id) : null;
-    document.getElementById('subjectModalTitle').textContent = s ? 'Edit Subject' : 'Add Subject';
+    document.getElementById('subjectModalTitle').textContent = s && s.source === 'curriculum' && s.setupStatus === 'needs_setup' ? 'Set Up Subject' : (s ? 'Edit Subject' : 'Add Subject');
     const sem = DB.getActiveSemester();
     const body = document.getElementById('subjectModalBody');
     const days = s ? s.days : (opts.presetDays || []);
@@ -487,6 +487,7 @@ function saveSubject() {
     // subject before the modal's fade-out finishes.
     if (subSaving) return;
     const id = document.getElementById('subId').value;
+    const existing = id ? DB.getSubject(id) : null;
     const codeInput = document.getElementById('subCode');
     const code = codeInput.value.trim();
     const codeInvalid = !code;
@@ -535,8 +536,11 @@ function saveSubject() {
         notes: document.getElementById('subNotes').value.trim(),
         semester: sem ? sem.name : '1st Semester',
         schoolYear: sem ? sem.schoolYear : '2026-2027',
-        semesterId: sem ? sem.id : DB.getActiveSemesterId(),
+        semesterId: existing ? existing.semesterId : (sem ? sem.id : DB.getActiveSemesterId()),
         archived: false,
+        source: existing ? (existing.source || 'manual') : 'manual',
+        setupStatus: existing && existing.source === 'curriculum' ? 'completed' : (existing ? (existing.setupStatus || 'completed') : 'completed'),
+        curriculumKey: existing ? (existing.curriculumKey || '') : '',
     };
     subSaving = true;
     const conflicts = checkSaveConflict(data, id || null);
