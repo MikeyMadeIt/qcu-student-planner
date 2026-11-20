@@ -36,7 +36,7 @@ function initAiFlashcardMaker() {
             infoEl: afmEl('afmFileInfo'),
             removeEl: afmEl('afmFileRemove'),
             emptyEl: afmEl('afmFileEmpty'),
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle-fill'),
+            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
         });
     } catch (error) {
         console.error('AI Flashcard Maker: file attachment setup failed', error);
@@ -74,7 +74,7 @@ async function afmGenerate() {
     const file = afmAttachment.getFile();
 
     if (!topic && !notes && !file) {
-        Toast.show('Add a topic, some notes, or attach a file to generate flashcards.', 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show('Add a topic, some notes, or attach a file to generate flashcards.', 'danger', 'bi-exclamation-triangle');
         return;
     }
 
@@ -193,17 +193,17 @@ async function afmOpenSaved(id) {
         afmIndex = 0; afmFlipped = false;
         afmRenderCard(); afmShowView('cards');
     } catch (error) {
-        Toast.show("Couldn't open that deck: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show("Couldn't open that deck: " + error.message, 'danger', 'bi-exclamation-triangle');
     }
 }
 
 function afmDeleteSaved(id) {
     confirmAction({
         title: 'Delete deck?', message: 'This flashcard deck will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         async onConfirm() {
             try { await (await afmStore()).deleteDeck(id); Toast.show('Deck deleted'); afmLoadHistory(); }
-            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill'); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle'); }
         }
     });
 }

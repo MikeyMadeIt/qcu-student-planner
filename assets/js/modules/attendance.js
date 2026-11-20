@@ -619,7 +619,11 @@ function renderAttendanceAll() {
 function renderOverallRate() {
     const semId = DB.getActiveSemesterId();
     const rate = summarizeAttendance(getLiveSemesterAttendance(semId)).rate;
-    document.getElementById('aRate').textContent = rate === null ? '--%' : rate + '%';
+    const data = document.getElementById('attOverallRateData');
+    const empty = document.getElementById('attOverallRateEmpty');
+    if (data) data.hidden = rate === null;
+    if (empty) empty.hidden = rate !== null;
+    document.getElementById('aRate').textContent = rate === null ? '' : rate + '%';
     const bar = document.getElementById('aRateBar');
     if (bar) {
         bar.style.width = (rate || 0) + '%';
@@ -633,14 +637,8 @@ function renderStatistics() {
     const semId = DB.getActiveSemesterId();
     const records = getLiveSemesterAttendance(semId);
     const wrap = document.getElementById('attendanceStats');
-    if (!records.length) {
-        wrap.innerHTML = `
-      <div class="att-stat-card present"><div class="stat-label">Present</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
-      <div class="att-stat-card present-online"><div class="stat-label">Online</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
-      <div class="att-stat-card late"><div class="stat-label">Late</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
-      <div class="att-stat-card excused"><div class="stat-label">Excused</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
-      <div class="att-stat-card absent"><div class="stat-label">Absent</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
-      <div class="att-stat-card noclasses"><div class="stat-label">No Class</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>`;
+    if (!records.some(r => r.status !== 'No Classes')) {
+        wrap.innerHTML = `<div class="att-empty-state att-stats-empty"><span class="att-empty-icon"><i class="bi bi-bar-chart" aria-hidden="true"></i></span><strong>No attendance statistics yet</strong><span>Log attendance to see your totals and percentages.</span></div>`;
         return;
     }
     const presentCount = records.filter(r => r.status === 'Present').length;
@@ -707,7 +705,7 @@ function renderConsecutiveAbsenceAlerts() {
     wrap.innerHTML = `<div class="att-consec-alerts mb-3">` +
         warnings.map(({ s, streak }) => `
       <div class="att-consec-alert fade-in" role="alert">
-        <div class="att-consec-icon"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></div>
+        <div class="att-consec-icon"><i class="bi bi-exclamation-triangle"></i></div>
         <div class="att-consec-body">
           <div class="att-consec-title">Consecutive Absences</div>
           <div class="att-consec-msg">
@@ -740,6 +738,13 @@ function renderHeatmap() {
     const records = DB.getAttendance().filter(r => r.semesterId === semId);
     const filterSubId = document.getElementById('heatmapSubjectFilter')?.value || '';
     const filteredRecords = filterSubId ? records.filter(r => r.subjectId === filterSubId) : records;
+    if (!filteredRecords.length) {
+        const title = filterSubId ? 'No attendance for this subject yet' : 'No attendance data yet';
+        const message = filterSubId ? 'Choose another subject or log attendance for this one.' : 'Log attendance to build your activity heatmap.';
+        wrap.innerHTML = `<div class="att-empty-state att-heatmap-empty"><span class="att-empty-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span><strong>${title}</strong><span>${message}</span></div>`;
+        if (legend) legend.innerHTML = '';
+        return;
+    }
     const toLocalYMD = d => d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
@@ -1031,7 +1036,7 @@ function renderAbsenceWarnings() {
     if (!wrap)
         return;
     if (!subs.length) {
-        wrap.innerHTML = `<div class="text-faint" style="font-size:.8rem">No subjects yet.</div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects in Schedule to start tracking attendance.</span></div>`;
         return;
     }
     const rows = subs.map(s => {
@@ -1063,7 +1068,7 @@ function openAbsenceLimitModal() {
     const records = DB.getAttendance().filter(r => r.semesterId === semId);
     const body = document.getElementById('absenceLimitModalBody');
     if (!subs.length) {
-        body.innerHTML = `<div class="text-faint text-center py-4">No subjects for this semester.</div>`;
+        body.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects for this semester in Schedule first.</span></div>`;
         new bootstrap.Modal(document.getElementById('absenceLimitModal')).show();
         return;
     }
@@ -1087,9 +1092,9 @@ function openAbsenceLimitModal() {
             <span class="al-code">${escapeAttHtml(s.code)}</span>
           </div>
           <div class="al-status-badge ${reached ? 'danger' : nearLimit ? 'warn' : 'ok'}">
-            ${reached ? '<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Limit reached' :
-        nearLimit ? `<i class="bi bi-exclamation-circle" aria-hidden="true"></i> ${remaining} remaining` :
-            `<i class="bi bi-check-circle" aria-hidden="true"></i> ${remaining} remaining`}
+            ${reached ? '<i class="bi bi-exclamation-triangle"></i> Limit reached' :
+        nearLimit ? `<i class="bi bi-exclamation-circle"></i> ${remaining} remaining` :
+            `<i class="bi bi-check-circle"></i> ${remaining} remaining`}
           </div>
         </div>
         <div class="al-stats-row">
@@ -1142,7 +1147,7 @@ function renderSubjectBreakdown() {
     if (!wrap)
         return;
     if (!subs.length) {
-        wrap.innerHTML = `<div class="text-faint text-center py-3" style="font-size:.82rem">No subjects yet.</div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects in Schedule to set absence limits.</span></div>`;
         return;
     }
     const subData = subs.map(s => {
@@ -1198,7 +1203,7 @@ function renderSubjectBreakdown() {
         </div>
         <div class="progress att-bd-limit-bar"><div class="progress-bar" style="width:${limitPct}%;background:${limitColor};transition:width .4s ease"></div></div>
       </div>
-      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> ${consec} consecutive absences</div>` : ''}
+      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="bi bi-exclamation-triangle"></i> ${consec} consecutive absences</div>` : ''}
     </div>`;
     }).join('');
 }
@@ -1217,7 +1222,7 @@ function renderLog(showAll) {
         .sort((a, b) => b.date.localeCompare(a.date));
     const wrap = document.getElementById('attendanceLog');
     if (!records.length) {
-        wrap.innerHTML = `<div class="text-faint text-center py-5 att-log-empty"><i class="bi bi-calendar3" aria-hidden="true"></i><div>No attendance logged yet</div></div>`;
+        wrap.innerHTML = `<div class="att-log-empty"><i class="bi bi-calendar-check" aria-hidden="true"></i><strong>No attendance logged yet</strong><span>Attendance records you add will appear here.</span></div>`;
         const cl = document.getElementById('attLogCountLabel');
         if (cl)
             cl.textContent = '';
@@ -1246,7 +1251,7 @@ function renderLog(showAll) {
       <td class="att-tbl-status"><span class="att-status-badge ${statusClass}">${statusDisplay}${onlinePill}</span></td>
         <td class="att-tbl-actions">
         ${hasNotes
-            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text-fill" aria-hidden="true"></i></button>`
+            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text"></i></button>`
             : ''}
         <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
         <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3" aria-hidden="true"></i></button>
@@ -1301,7 +1306,7 @@ function deleteAttendance(id) {
         message: 'This log entry will be permanently removed.',
         confirmLabel: 'Remove',
         danger: true,
-        icon: 'bi-trash-fill',
+        icon: 'bi-trash',
         onConfirm() {
             DB.saveAttendance(DB.getAttendance().filter(r => r.id !== id));
             Toast.show('Record removed');

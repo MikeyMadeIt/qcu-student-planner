@@ -40,9 +40,16 @@
               </button>
             </div>
           </div>
-          <div class="stat-num" id="aRate">--%</div>
-          <div class="progress my-2"><div class="progress-bar att-rate-bar" id="aRateBar" style="width:0%"></div></div>
-          <div class="text-faint" style="font-size:.72rem">Excludes No Classes days</div>
+          <div id="attOverallRateData">
+            <div class="stat-num" id="aRate">--%</div>
+            <div class="progress my-2"><div class="progress-bar att-rate-bar" id="aRateBar" style="width:0%"></div></div>
+            <div class="text-faint" style="font-size:.72rem">Excludes No Classes days</div>
+          </div>
+          <div class="att-empty-state" id="attOverallRateEmpty" hidden>
+            <span class="att-empty-icon"><i class="bi bi-percent" aria-hidden="true"></i></span>
+            <strong>No attendance data yet</strong>
+            <span>Log attendance to see your overall rate.</span>
+          </div>
         </div>
         <div class="glass card-pad fade-in mt-3 mb-3" id="absenceLimitsCard">
           <div class="d-flex justify-content-between align-items-center mb-2">

@@ -63,20 +63,26 @@ html[data-motion="reduced"] .skel::after { animation: none; display: none; }
 /* ---------- Generic state panel: loading / empty / error ---------- */
 .ld-state {
     text-align: center;
-    color: var(--text-faint);
-    padding: var(--space-6) var(--space-4);
+    color: var(--text-soft);
+    padding: var(--space-7) var(--space-4);
     font-size: .88rem;
 }
 .ld-state-icon {
-    font-size: 1.9rem;
-    display: block;
-    margin: 0 auto .6rem;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin: 0 auto var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    font-size: 1.35rem;
     color: rgb(var(--accent));
 }
 .ld-state-error .ld-state-icon { color: var(--danger); }
-.ld-state-title { font-weight: 600; color: var(--text); margin-bottom: .2rem; }
-.ld-state-msg { max-width: 30rem; margin: 0 auto; }
-.ld-state-actions { margin-top: .85rem; display: flex; justify-content: center; gap: .5rem; }
+.ld-state-title { font-size: .98rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; }
+.ld-state-msg { max-width: 30rem; margin: 0 auto; color: var(--text-soft); line-height: 1.55; }
+.ld-state-actions { margin-top: var(--space-4); display: flex; justify-content: center; gap: .5rem; }
 
 /* ---------- Small inline spinner (buttons / inline fetches) ----------
    Namespaced as .ld-* so it never collides with page-specific .is-loading
