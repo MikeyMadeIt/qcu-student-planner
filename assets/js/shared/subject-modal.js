@@ -206,7 +206,7 @@ function saveSubject() {
     const warnEl = document.getElementById('subConflictWarning');
     if (conflicts.length) {
         const conflictNames = conflicts.map(c => `${c.code} (${fmtTime(c.start)}–${fmtTime(c.end)})`).join(', ');
-        warnEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
+        warnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
         warnEl.classList.remove('d-none');
     }
     else {

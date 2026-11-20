@@ -5,6 +5,9 @@
     line-height: 1;
     flex: 0 0 auto;
     vertical-align: -0.125em;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .bi::before {

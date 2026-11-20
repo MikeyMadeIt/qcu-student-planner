@@ -43,7 +43,7 @@ function initAiStudyAssistant() {
             infoEl: asaEl('asaFileInfo'),
             removeEl: asaEl('asaFileRemove'),
             emptyEl: null,
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle-fill'),
+            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
             onChange: file => asaUpdateAttachBar(file),
         });
     } catch (error) {
@@ -185,7 +185,7 @@ async function asaSend() {
         try {
             fileData = await aiUploadToBase64(file);
         } catch (error) {
-            Toast.show(error.message || 'That file could not be read.', 'danger', 'bi-exclamation-triangle-fill');
+            Toast.show(error.message || 'That file could not be read.', 'danger', 'bi-exclamation-triangle');
             return;
         }
     }
@@ -380,7 +380,7 @@ async function asaOpenSaved(id) {
         asaRenderMessages();
         asaRenderHistoryLists();
     } catch (error) {
-        Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'bi-exclamation-triangle');
     }
 }
 
@@ -400,7 +400,7 @@ function asaRenameSaved(id) {
                     if (conv) conv.title = title;
                     asaRenderHistoryLists();
                 } catch (error) {
-                    Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+                    Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle');
                 }
             })();
         },
@@ -410,7 +410,7 @@ function asaRenameSaved(id) {
 function asaDeleteSaved(id) {
     confirmAction({
         title: 'Delete conversation?', message: 'This conversation will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         async onConfirm() {
             try {
                 await asaSaveChain;
@@ -419,7 +419,7 @@ function asaDeleteSaved(id) {
                 if (id === asaConvId) asaNewChat();
                 asaLoadHistory();
             } catch (error) {
-                Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle');
             }
         }
     });

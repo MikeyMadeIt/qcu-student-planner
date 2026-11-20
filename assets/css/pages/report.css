@@ -65,7 +65,11 @@
 }
 
 .rp-req {
-    color: var(--danger, #fb7185);
+    color: var(--text-faint) !important;
+    display: inline-block;
+    margin-inline-start: .18em;
+    line-height: 1;
+    vertical-align: baseline;
 }
 
 .rp-count {
@@ -102,11 +106,15 @@
 }
 
 .rp-error {
+    display: block;
     margin: 6px 0 0;
     color: var(--danger, #fb7185);
-    font-size: .8rem;
-    line-height: 1.4;
+    font-size: .78rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
 }
+
+.rp-error[hidden] { display: none; }
 
 .rp-form-error {
     display: flex;

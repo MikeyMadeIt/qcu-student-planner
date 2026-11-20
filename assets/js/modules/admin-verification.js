@@ -10,8 +10,8 @@ function emailFormatBadge(email) {
     if (!email) return '';
     const matches = APP_CONFIG.studentEmailPattern.test(email.trim());
     return matches
-        ? '<i class="bi bi-check-circle-fill text-success" title="Matches the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>'
-        : '<i class="bi bi-exclamation-triangle-fill text-danger" title="Does not match the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>';
+        ? '<i class="bi bi-check-circle text-success" title="Matches the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>'
+        : '<i class="bi bi-exclamation-triangle text-danger" title="Does not match the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>';
 }
 
 const PAGE_SIZE = 20;
@@ -79,15 +79,15 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
     renderAccountDetail(result.data);
 }
 
 const ACTION_CONFIG = {
-    approve: { title: 'Approve this account?', label: 'Approve', danger: false, icon: 'bi-check-circle-fill', status: 'approved', needsReason: false },
-    reject: { title: 'Reject this account?', label: 'Reject', danger: true, icon: 'bi-x-circle-fill', status: 'rejected', needsReason: true },
+    approve: { title: 'Approve this account?', label: 'Approve', danger: false, icon: 'bi-check-circle', status: 'approved', needsReason: false },
+    reject: { title: 'Reject this account?', label: 'Reject', danger: true, icon: 'bi-x-circle', status: 'rejected', needsReason: true },
 };
 
 function onAction(e) {
@@ -118,7 +118,7 @@ function onAction(e) {
             const result = await AdminService.reviewAccount({ targetUserId: id, newStatus: config.status, reason: reason || null });
 
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
                 return;
             }
 

@@ -2,25 +2,25 @@
 const NAV_ITEMS = [
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
-    { href: 'dashboard.html', icon: 'bi-grid-1x2-fill', label: 'Dashboard', key: 'dashboard', base: 'app' },
-    { href: 'schedule.html', icon: 'bi-calendar2-week-fill', label: 'Schedule', key: 'schedule', base: 'app' },
+    { href: 'dashboard.html', icon: 'bi-grid-1x2', label: 'Dashboard', key: 'dashboard', base: 'app' },
+    { href: 'schedule.html', icon: 'bi-calendar2-week', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
     { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
-    { href: 'grades.html', icon: 'bi-mortarboard-fill', label: 'Grades', key: 'grades', base: 'app' },
-    { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
+    { href: 'grades.html', icon: 'bi-mortarboard', label: 'Grades', key: 'grades', base: 'app' },
+    { href: 'attendance.html', icon: 'bi-person-check', label: 'Attendance', key: 'attendance', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
-    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
-    { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
+    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
+    { href: 'ai-flashcard-maker.html', icon: 'bi-layers', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
     { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
-    { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
-    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
+    { href: 'wallpaper.html', icon: 'bi-phone', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
+    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
     { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
     { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
     { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
     { href: 'university-events.html', icon: 'bi-bank2', label: 'University Events', key: 'admin-university-events', base: 'admin' },
-    { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
+    { href: 'users.html', icon: 'bi-people', label: 'All Users', key: 'admin-users', base: 'admin' },
     { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
     { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
@@ -28,12 +28,12 @@ const NAV_ITEMS = [
     { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin', soon: true },
     { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin', soon: true },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
-    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
+    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
 ];
 const THEME_OPTIONS = [
     { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
     { value: 'light', label: 'Light', icon: 'bi-sun' },
-    { value: 'amoled', label: 'AMOLED', icon: 'bi-circle-fill' }
+    { value: 'amoled', label: 'AMOLED', icon: 'bi-circle' }
 ];
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 
@@ -302,7 +302,7 @@ function renderInboxPanelItems(rows, icons, categoryBadge) {
         return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
     return `<div class="msg-list msg-list-compact">` + rows.slice(0, 5).map(r => {
         const m = r.message;
-        const icon = icons[m.category] || 'bi-chat-square-text-fill';
+        const icon = icons[m.category] || 'bi-chat-square-text';
         return `
         <a class="msg-row ${r.read_at ? '' : 'is-unread'}" href="../app/inbox.html">
             <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
@@ -573,7 +573,7 @@ function wireModalDefaults() {
             message: 'Discard unsaved changes and close this dialog?',
             confirmLabel: 'Discard',
             danger: true,
-            icon: 'bi-exclamation-triangle-fill',
+            icon: 'bi-exclamation-triangle',
             onConfirm: onDiscard,
         });
     };
@@ -688,7 +688,7 @@ function renderShell(activeKey, admin) {
         const name = (sidebarSettings.name || '').trim() || 'Student';
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
-        const brandIcon = isAdminArea ? 'bi-shield-lock-fill' : 'bi-mortarboard';
+        const brandIcon = isAdminArea ? 'bi-shield-lock' : 'bi-mortarboard';
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
         sidebarGroups.forEach(g => {
