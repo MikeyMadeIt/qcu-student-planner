@@ -17,7 +17,7 @@ const NAV_ITEMS = [
     { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
     { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
-    { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app', soon: true },
+    { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
     { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
     { href: 'university-events.html', icon: 'bi-bank2', label: 'University Events', key: 'admin-university-events', base: 'admin' },
     { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
