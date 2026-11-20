@@ -221,6 +221,7 @@ function initAttendance() {
     if (attDate) {
         updateAttendanceDateBounds();
         attDate.value = todayKey();
+        if (window.DatePicker) DatePicker.refresh('attDate');
         if (!attDate.dataset.attendanceDateBound) {
             attDate.dataset.attendanceDateBound = 'true';
             attDate.addEventListener('change', renderAttendanceSubjectList);
@@ -1359,6 +1360,7 @@ function openAttendanceEdit(id, draft) {
     dateInput.min = sem?.startDate || '';
     dateInput.max = sem?.endDate || '';
     dateInput.value = values.date;
+    if (window.DatePicker) DatePicker.refresh('attEditDate');
 
     const statusSel = document.getElementById('attEditStatus');
     statusSel.innerHTML = ATTENDANCE_STATUSES.map(st =>
