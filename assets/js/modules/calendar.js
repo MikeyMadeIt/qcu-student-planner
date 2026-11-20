@@ -1360,3 +1360,7 @@ function openUnivEventModal(id) {
     }
     openUnivEventDetailsModal(existing, { showAdminHint: true });
 }
+
+// Shared subject/task modals announce changes so calendar views stay current.
+document.addEventListener('subjects:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });
+document.addEventListener('tasks:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });

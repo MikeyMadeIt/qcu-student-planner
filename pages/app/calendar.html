@@ -14,6 +14,7 @@
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/calendar.css" rel="stylesheet">
 <link href="../../assets/css/pages/schedule.css" rel="stylesheet">
+<link href="../../assets/css/pages/tasks.css" rel="stylesheet">
 </head>
 <body>
 <div class="app-shell">
@@ -41,7 +42,7 @@
                 <ul class="dropdown-menu dropdown-menu-end">
                   <li><a class="dropdown-item" href="#" onclick="openCalEventModal();return false;"><i class="bi bi-calendar-event me-2"></i>One-off Event</a></li>
                   <li><a class="dropdown-item" href="#" onclick="openTaskModal();return false;"><i class="bi bi-check2-square me-2"></i>Task</a></li>
-                  <li><a class="dropdown-item" href="#" onclick="openScheduleModal();return false;"><i class="bi bi-calendar2-week me-2"></i>Class Schedule</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="openSubjectModal();return false;"><i class="bi bi-calendar2-week me-2"></i>Class Schedule</a></li>
                 </ul>
               </div>
             </div>
@@ -129,24 +130,6 @@
   </main>
 </div>
 
-<!-- Add/Edit Schedule Modal -->
-<div class="modal fade" id="calSubjectModal" tabindex="-1" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-body card-pad" id="calSubjectModalBody"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Add/Edit Task Modal -->
-<div class="modal fade" id="calTaskModal" tabindex="-1" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-body card-pad" id="calTaskModalBody"></div>
-    </div>
-  </div>
-</div>
-
 <!-- One-off Event Modal -->
 <div class="modal fade" id="calEventModal" tabindex="-1" aria-modal="true" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -192,6 +175,8 @@
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
 <script src="../../assets/js/core/time-field.js"></script>
+<script src="../../assets/js/shared/subject-modal.js"></script>
+<script src="../../assets/js/shared/task-modal.js"></script>
 <script src="../../assets/js/modules/calendar.js"></script>
 <script>
   renderShell('calendar');
