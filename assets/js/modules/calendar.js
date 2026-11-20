@@ -596,13 +596,13 @@ function renderAgenda(dateStr) {
     </div>
     <div class="d-flex gap-2 flex-wrap mt-2">
       <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,null,null,'${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
     </div>`;
     }
     else {
         html += `<div class="d-flex gap-2 flex-wrap mt-3">
       <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,null,null,'${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
     </div>`;
     }
     body.innerHTML = html;
@@ -634,13 +634,24 @@ function renderAgendaItem(e, dateStr) {
 
 function handleDayEventClick(type, id, date) {
     if (type === 'class')
-        openSubjectModal(id);
+        openScheduleModal(id);
     else if (type === 'task')
         openTaskModal(id);
     else if (type === 'event')
         openCalEventModal(id);
     else if (type === 'univ')
         openUnivEventModal(id);
+}
+
+function openCalendarTaskModal(dateStr) {
+    const dayModalElement = document.getElementById('dayModal');
+    if (dayModalElement && dayModalElement.classList.contains('show')) {
+        const dayModal = bootstrap.Modal.getOrCreateInstance(dayModalElement);
+        dayModalElement.addEventListener('hidden.bs.modal', () => openTaskModal(null, null, null, dateStr), { once: true });
+        dayModal.hide();
+        return;
+    }
+    openTaskModal(null, null, null, dateStr);
 }
 
 // Legacy Day Modal (kept for mobile fallback)
@@ -678,7 +689,7 @@ function openDayModal(dateStr) {
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
         <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,null,null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
       </div>`;
         new bootstrap.Modal(document.getElementById('dayModal')).show();
     }
@@ -1025,6 +1036,123 @@ function hexWithAlpha(hex, alpha) {
     }
 }
 
+// SCHEDULE MODAL (add/edit class)
+
+function openScheduleModal(id, presetDay) {
+    const s = id ? DB.getSubject(id) : null;
+    const sem = DB.getSemester();
+    const days = s ? s.days : (presetDay ? [presetDay] : []);
+    const color = s ? s.color : DB.colors[0];
+    const body = document.getElementById('calSubjectModalBody');
+    body.innerHTML = `
+    <h5 class="mb-3"><i class="bi bi-calendar3 me-2"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
+    <input type="hidden" id="csId" value="${s ? s.id : ''}">
+    <div class="row g-2">
+      <div class="col-md-4"><label>Subject Code</label><input class="form-control" id="csCode" value="${s ? escapeHtml(s.code) : ''}" placeholder="CS101"></div>
+      <div class="col-md-8"><label>Subject Description</label><input class="form-control" id="csDesc" value="${s ? escapeHtml(s.desc) : ''}" placeholder="Introduction to Computing"></div>
+      <div class="col-md-4"><label>Subject Type</label>
+        <select class="form-select" id="csType">${['Lecture', 'Laboratory', 'Seminar', 'Hybrid'].map(t => `<option ${s && s.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="col-md-4"><label>Units</label><input type="number" step="0.5" class="form-control" id="csUnits" value="${s ? s.units : 3}"></div>
+      <div class="col-md-4"><label>Section</label><input class="form-control" id="csSection" value="${s ? escapeHtml(s.section) : ''}" placeholder="BSCS-1A"></div>
+      <div class="col-12"><label>Days</label>
+        <div class="day-selector" role="group" aria-label="Select class days">
+          ${DAY_NAMES.slice(1).concat(DAY_NAMES[0]).map(d => `
+            <label class="day-chip">
+              <input class="cs-day-check" type="checkbox" value="${d}" id="csday_${d}" ${days.includes(d) ? 'checked' : ''}>
+              <span>${d}</span>
+            </label>`).join('')}
+        </div>
+      </div>
+      <div class="col-md-6">${TimeField.html({ id: 'csStart', label: 'Start Time', value: s ? s.start : '08:00', placeholder: '9:00 AM', required: true })}</div>
+      <div class="col-md-6">${TimeField.html({ id: 'csEnd', label: 'End Time', value: s ? s.end : '09:00', placeholder: '10:30 AM', required: true, after: 'csStart' })}</div>
+      <div class="col-12"><p class="sch-time-hint mb-0" data-start="csStart" data-end="csEnd" aria-live="polite"></p></div>
+      <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}"></div>
+      <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}"></div>
+      <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}"></div>
+      <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}"></div>
+      <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}"></div>
+      <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}"></div>
+      <div class="col-12"><label>Color Label</label>
+        <div class="color-swatch-group" id="csColorPicker" role="radiogroup" aria-label="Select subject color">
+          ${DB.colors.map(c => `<button type="button" onclick="selectScheduleColor('${c}')" data-cs-color="${c}" class="color-swatch-btn${color === c ? ' is-selected' : ''}" role="radio" aria-checked="${color === c}" aria-label="Color ${c}" style="background:${c}"></button>`).join('')}
+        </div>
+        <input type="hidden" id="csColor" value="${color}">
+      </div>
+      <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3"></i></button>` : ''}
+    </div>`;
+
+    TimeField.init(body);
+    new bootstrap.Modal(document.getElementById('calSubjectModal')).show();
+}
+
+function selectScheduleColor(c) {
+    document.getElementById('csColor').value = c;
+    document.querySelectorAll('#csColorPicker .color-swatch-btn').forEach(d => {
+        const isSelected = d.dataset.csColor === c;
+        d.classList.toggle('is-selected', isSelected);
+        d.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
+}
+
+let csSaving = false;
+function saveScheduleEntry() {
+    // Re-entrancy guard against a rapid double-click duplicating the
+    // record before the modal's fade-out finishes.
+    if (csSaving) return;
+    const id = document.getElementById('csId').value;
+    const code = document.getElementById('csCode').value.trim();
+    if (!code) {
+        Toast.show('Subject code is required', 'high', 'bi-exclamation-triangle');
+        return;
+    }
+    if (!TimeField.validate(['csStart', 'csEnd'])) return;
+    csSaving = true;
+    const days = [...document.querySelectorAll('.cs-day-check:checked')].map(c => c.value);
+    const semId = DB.getActiveSemesterId();
+    const data = {
+        code, desc: document.getElementById('csDesc').value.trim(),
+        type: document.getElementById('csType').value,
+        units: parseFloat(document.getElementById('csUnits').value) || 0,
+        section: document.getElementById('csSection').value.trim(),
+        days, start: document.getElementById('csStart').value, end: document.getElementById('csEnd').value,
+        room: document.getElementById('csRoom').value.trim(), building: document.getElementById('csBuilding').value.trim(),
+        professor: document.getElementById('csProf').value.trim(), email: document.getElementById('csEmail').value.trim(),
+        color: document.getElementById('csColor').value, notes: document.getElementById('csNotes').value.trim(),
+        semester: document.getElementById('csSemester').value.trim(), schoolYear: document.getElementById('csYear').value.trim(),
+    };
+    const subjects = DB.getSubjects();
+    if (id) {
+        const idx = subjects.findIndex(s => s.id === id);
+        subjects[idx] = { ...subjects[idx], ...data };
+    }
+    else {
+        subjects.push({ id: DB.uid(), archived: false, semesterId: semId, ...data });
+    }
+    DB.saveSubjects(subjects);
+    bootstrap.Modal.getInstance(document.getElementById('calSubjectModal')).hide();
+    Toast.show(id ? 'Schedule updated' : 'Schedule added');
+    renderCalendar();
+    if (calSelectedDate)
+        renderAgenda(calSelectedDate);
+    csSaving = false;
+}
+
+function deleteScheduleEntry(id) {
+    DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id));
+    const inst = bootstrap.Modal.getInstance(document.getElementById('calSubjectModal'));
+    if (inst)
+        inst.hide();
+    Toast.show('Schedule deleted');
+    renderCalendar();
+    if (calSelectedDate)
+        renderAgenda(calSelectedDate);
+}
+
 let calEventModalColor = EVENT_CAT_COLORS['Event'];
 
 function openCalEventModal(id, presetDate) {
@@ -1162,6 +1290,6 @@ function openUnivEventModal(id) {
     openUnivEventDetailsModal(existing, { showAdminHint: true });
 }
 
-// Shared modals (assets/js/shared/) tell us when data changed.
+// Shared subject/task modals announce changes so calendar views stay current.
 document.addEventListener('subjects:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });
 document.addEventListener('tasks:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });

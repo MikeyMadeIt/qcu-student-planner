@@ -1,0 +1,703 @@
+{
+  "program": "Bachelor of Science in Accountancy",
+  "programCode": "BSA",
+  "effectiveAcademicYear": "2025-2026",
+  "basis": null,
+  "totalUnits": 197,
+  "source": "Quezon City University — AY 2025-2026 Curriculum, Bachelor of Science in Accountancy",
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "First Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PATHFIT1",
+              "title": "Physical Activities Toward Health and Fitness 1",
+              "units": 2,
+              "prerequisites": [],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE1",
+              "title": "Financial Accounting and Reporting 1",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE3",
+              "title": "IT Application Tools in Business",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 1,
+              "labHours": 2
+            },
+            {
+              "code": "PrEE1",
+              "title": "Human Behavior in Organizations",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PATHFIT2",
+              "title": "Physical Activities Toward Health and Fitness 2",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT1"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SCI1",
+              "title": "Science Technology and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE2",
+              "title": "Financial Accounting and Reporting 2",
+              "units": 3,
+              "prerequisites": [
+                "AE1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE4",
+              "title": "Management Science",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE5",
+              "title": "Conceptual Framework and Accounting Standards",
+              "units": 3,
+              "prerequisites": [
+                "AE1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "Second Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "PATHFIT3",
+              "title": "Physical Activities Toward Health and Fitness 3",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT2"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "HUM2",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "CBME1",
+              "title": "Operations Management and TQM",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE6",
+              "title": "Intermediate Accounting 1",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE7",
+              "title": "Financial Management",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE8",
+              "title": "Cost Accounting and Control",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE9",
+              "title": "Law on Obligations and Contracts",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE10",
+              "title": "Accounting Information System",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 1,
+              "labHours": 2
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "PATHFIT4",
+              "title": "Physical Activities Toward Health and Fitness 4",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT3"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "RIZAL",
+              "title": "Rizal's Life and Works",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE11",
+              "title": "Intermediate Accounting 2",
+              "units": 3,
+              "prerequisites": [
+                "AE6"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE12",
+              "title": "Income Taxation",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE13",
+              "title": "Strategic Cost Management",
+              "units": 3,
+              "prerequisites": [
+                "AE8"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE14",
+              "title": "Statistical Analysis with Software Application",
+              "units": 3,
+              "prerequisites": [
+                "AE3"
+              ],
+              "lecHours": 1,
+              "labHours": 2
+            },
+            {
+              "code": "PrE1",
+              "title": "Auditing and Assurance Principles",
+              "units": 3,
+              "prerequisites": [
+                "AE6"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "Third Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "AE15",
+              "title": "Economic Development",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE16",
+              "title": "Business Laws and Regulations",
+              "units": 3,
+              "prerequisites": [
+                "AE10"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE17",
+              "title": "Business Taxation",
+              "units": 3,
+              "prerequisites": [
+                "AE12"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE18",
+              "title": "Intermediate Accounting 3",
+              "units": 3,
+              "prerequisites": [
+                "AE11"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE19",
+              "title": "Governance, Business Ethics, Risk Management, and Internal Control",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE20",
+              "title": "Strategic Business Analysis",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE21",
+              "title": "Accounting Research Methods",
+              "units": 3,
+              "prerequisites": [
+                "AE14"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE22",
+              "title": "Financial Markets",
+              "units": 3,
+              "prerequisites": [
+                "AE7"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "Summer",
+          "courses": [
+            {
+              "code": "CBME2",
+              "title": "Strategic Management",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE25",
+              "title": "International Business and Trade",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrEE3",
+              "title": "Principles and Methods in Teaching Accounting",
+              "units": 3,
+              "prerequisites": [
+                "AE21"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "AE23",
+              "title": "Regulatory Framework and Legal Issues in Business",
+              "units": 3,
+              "prerequisites": [
+                "AE16"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE24",
+              "title": "Accountancy Research",
+              "units": 3,
+              "prerequisites": [
+                "AE21"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE2",
+              "title": "Accounting for Special Transactions",
+              "units": 3,
+              "prerequisites": [
+                "AE11"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE3",
+              "title": "Auditing and Assurance: Concepts and Applications 1",
+              "units": 3,
+              "prerequisites": [
+                "PrE1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE4",
+              "title": "Accounting for Government and Non-Profit Organizations",
+              "units": 3,
+              "prerequisites": [
+                "AE2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE5",
+              "title": "Accounting for Business Combinations",
+              "units": 3,
+              "prerequisites": [
+                "AE11"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE6",
+              "title": "Auditing in a CIS Environment",
+              "units": 3,
+              "prerequisites": [
+                "AE7"
+              ],
+              "lecHours": 1,
+              "labHours": 2
+            },
+            {
+              "code": "PrEE2",
+              "title": "Valuation Concepts and Methods",
+              "units": 3,
+              "prerequisites": [
+                "AE18"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "Fourth Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "AE26",
+              "title": "Managerial Economics",
+              "units": 3,
+              "prerequisites": [
+                "AE4"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE27",
+              "title": "Accounting Internship",
+              "units": 6,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 0,
+              "labHours": 400
+            },
+            {
+              "code": "PrEE4",
+              "title": "Operations Auditing",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE7",
+              "title": "Auditing and Assurance: Concepts and Applications 2",
+              "units": 3,
+              "prerequisites": [
+                "PrE3"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PrE8",
+              "title": "Auditing and Assurance: Specialized Industries",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "AE28",
+              "title": "Integrative Review - Financial Accounting and Reporting",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE29",
+              "title": "Integrative Review - Advanced Financial Accounting and Reporting",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE30",
+              "title": "Integrative Review - Auditing",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE31",
+              "title": "Integrative Review - Management Services",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE32",
+              "title": "Integrative Review - Taxation",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE33",
+              "title": "Integrative Review - Regulatory Framework for Business Transactions",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AE34",
+              "title": "Integrative Review - Information Systems and Control",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
