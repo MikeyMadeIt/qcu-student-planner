@@ -22,7 +22,6 @@ const EVENT_CAT_COLORS = {
 };
 const _subjectColorCache = {};
 let eventEditingId = null;
-let taskEditingId = null;
 // Init
 
 async function initCalendar() {
@@ -597,13 +596,13 @@ function renderAgenda(dateStr) {
     </div>
     <div class="d-flex gap-2 flex-wrap mt-2">
       <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,'${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
     </div>`;
     }
     else {
         html += `<div class="d-flex gap-2 flex-wrap mt-3">
       <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,'${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
     </div>`;
     }
     body.innerHTML = html;
@@ -644,6 +643,17 @@ function handleDayEventClick(type, id, date) {
         openUnivEventModal(id);
 }
 
+function openCalendarTaskModal(dateStr) {
+    const dayModalElement = document.getElementById('dayModal');
+    if (dayModalElement && dayModalElement.classList.contains('show')) {
+        const dayModal = bootstrap.Modal.getOrCreateInstance(dayModalElement);
+        dayModalElement.addEventListener('hidden.bs.modal', () => openTaskModal(null, null, null, dateStr), { once: true });
+        dayModal.hide();
+        return;
+    }
+    openTaskModal(null, null, null, dateStr);
+}
+
 // Legacy Day Modal (kept for mobile fallback)
 
 function openDayModal(dateStr) {
@@ -679,7 +689,7 @@ function openDayModal(dateStr) {
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
         <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openTaskModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
       </div>`;
         new bootstrap.Modal(document.getElementById('dayModal')).show();
     }
@@ -1138,87 +1148,6 @@ function deleteScheduleEntry(id) {
     if (inst)
         inst.hide();
     Toast.show('Schedule deleted');
-    renderCalendar();
-    if (calSelectedDate)
-        renderAgenda(calSelectedDate);
-}
-
-// TASK MODAL
-
-function openTaskModal(id, presetDate) {
-    taskEditingId = id || null;
-    const t = id ? DB.getTasks().find(x => x.id === id) : null;
-    const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId);
-    const body = document.getElementById('calTaskModalBody');
-    body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-check2-square me-2"></i>${t ? 'Edit' : 'Add'} Task</h5>
-    <input type="hidden" id="ctId" value="${t ? t.id : ''}">
-    <div class="row g-2">
-      <div class="col-12"><label>Title</label><input class="form-control" id="ctTitle" value="${t ? escapeHtml(t.title) : ''}"></div>
-      <div class="col-12"><label>Description</label><textarea class="form-control" id="ctDesc" rows="2">${t ? escapeHtml(t.description || '') : ''}</textarea></div>
-      <div class="col-md-4"><label>Subject</label><select class="form-select" id="ctSubject"><option value="">None</option>${subs.map(s => `<option value="${s.id}" ${t && t.subjectId === s.id ? 'selected' : ''}>${escapeHtml(s.code)}</option>`).join('')}</select></div>
-      <div class="col-md-4"><label>Category</label><select class="form-select" id="ctCategory">${['Homework', 'Project', 'Quiz', 'Exam', 'Personal', 'Organization'].map(c => `<option ${t && t.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
-      <div class="col-md-4"><label>Priority</label><select class="form-select" id="ctPriority">${['low', 'medium', 'high'].map(p => `<option value="${p}" ${t && t.priority === p ? 'selected' : (!t && p === 'medium' ? 'selected' : '')}>${p[0].toUpperCase() + p.slice(1)}</option>`).join('')}</select></div>
-      <div class="col-md-4"><label>Due Date</label><input type="date" class="form-control" id="ctDueDate" value="${t ? t.dueDate : (presetDate || todayKey())}"></div>
-      <div class="col-md-4">${TimeField.html({ id: 'ctDueTime', label: 'Due Time', value: t ? (t.dueTime || '23:59') : '23:59', placeholder: '11:59 PM', fallback: '23:59' })}</div>
-      <div class="col-md-4"><label>Status</label><select class="form-select" id="ctStatus">${['not-started', 'in-progress', 'completed'].map(s => `<option value="${s}" ${t && t.status === s ? 'selected' : ''}>${s.replace('-', ' ')}</option>`).join('')}</select></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveCalTask()"><i class="bi bi-check2 me-1"></i>${t ? 'Update' : 'Save'} Task</button>
-      ${t ? `<button class="btn btn-ghost" onclick="deleteCalTask('${t.id}')" aria-label="Delete task"><i class="bi bi-trash3"></i></button>` : ''}
-    </div>`;
-
-    TimeField.init(body);
-    new bootstrap.Modal(document.getElementById('calTaskModal')).show();
-}
-
-let ctSaving = false;
-function saveCalTask() {
-    if (ctSaving) return;
-    const title = document.getElementById('ctTitle').value.trim();
-    if (!title) {
-        Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
-        return;
-    }
-    if (!TimeField.validate(['ctDueTime'])) return;
-    ctSaving = true;
-    const data = {
-        title, description: document.getElementById('ctDesc').value.trim(),
-        subjectId: document.getElementById('ctSubject').value || null,
-        category: document.getElementById('ctCategory').value,
-        priority: document.getElementById('ctPriority').value,
-        dueDate: document.getElementById('ctDueDate').value,
-        dueTime: document.getElementById('ctDueTime').value,
-        status: document.getElementById('ctStatus').value,
-    };
-    if (data.status === 'completed')
-        data.progress = 100;
-    const id = document.getElementById('ctId').value;
-    const tasks = DB.getTasks();
-    if (id) {
-        const idx = tasks.findIndex(t => t.id === id);
-        tasks[idx] = { ...tasks[idx], ...data };
-    }
-    else {
-        const semId = DB.getActiveSemesterId();
-        tasks.push({ id: DB.uid(), progress: 0, repeat: 'none', score: null, remarks: '', reminder: true, checklist: [], createdAt: Date.now(), semesterId: semId, ...data });
-    }
-    DB.saveTasks(tasks);
-    bootstrap.Modal.getInstance(document.getElementById('calTaskModal')).hide();
-    Toast.show(id ? 'Task updated' : 'Task added');
-    renderCalendar();
-    if (calSelectedDate)
-        renderAgenda(calSelectedDate);
-    ctSaving = false;
-}
-
-function deleteCalTask(id) {
-    DB.saveTasks(DB.getTasks().filter(x => x.id !== id));
-    const inst = bootstrap.Modal.getInstance(document.getElementById('calTaskModal'));
-    if (inst)
-        inst.hide();
-    Toast.show('Task deleted');
     renderCalendar();
     if (calSelectedDate)
         renderAgenda(calSelectedDate);
