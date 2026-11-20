@@ -1234,6 +1234,9 @@ function deleteSubject(id) {
                 Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
                 return;
             }
+            const subjectModal = document.getElementById('subjectModal');
+            if (subjectModal)
+                bootstrap.Modal.getOrCreateInstance(subjectModal).hide();
             Toast.show('Subject deleted');
             renderAllViews();
         }
