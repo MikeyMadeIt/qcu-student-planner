@@ -136,18 +136,27 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-6) var(--space-4);
-    color: var(--text-faint);
+    padding: var(--space-7) var(--space-4);
+    color: var(--text-soft);
     font-size: 0.82rem;
     text-align: center;
 }
 
 .msg-list-empty > i {
-    font-size: 1.8rem;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.2rem;
 }
 
 .msg-list-empty strong {
-    color: var(--text-soft);
+    color: var(--text);
     font-size: 0.9rem;
 }
 

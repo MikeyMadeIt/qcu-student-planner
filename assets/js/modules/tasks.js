@@ -888,7 +888,7 @@ function bulkDelete() {
     confirmAction({
         title: 'Delete ' + count + ' task' + (count !== 1 ? 's' : '') + '?',
         message: 'This will permanently remove the selected tasks.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         onConfirm: function () {
             var ids = Array.from(tkSelected);
             var tasks = DB.getTasks().filter(function (t) { return !ids.includes(t.id); });
@@ -1057,9 +1057,9 @@ function renderTasks() {
         renderSelectAllBtn([]);
         var isFiltered = q || tkFilter !== 'all' || tkCatFilter || tkSubFilter;
         wrap.innerHTML = '<div class="tk-empty-state glass card-pad fade-in">' +
-            '<i class="bi ' + (isFiltered ? 'bi-filter-circle' : 'bi-inbox') + '"></i>' +
+            '<i class="bi ' + (isFiltered ? 'bi-search' : 'bi-clipboard-check') + '" aria-hidden="true"></i>' +
             '<p class="tk-empty-title">' + (isFiltered ? 'No matching tasks' : (tkFilter === 'completed' ? 'No completed tasks yet.' : tkFilter === 'overdue' ? 'No overdue tasks.' : 'No tasks yet')) + '</p>' +
-            '<p class="tk-empty-sub">' + (isFiltered ? 'Try adjusting your filters or search.' : 'Start organizing your work for this semester.') + '</p></div>';
+            '<p class="tk-empty-sub">' + (isFiltered ? 'Try changing your search or filters.' : 'Use Add Task above to keep deadlines and coursework in one place.') + '</p></div>';
         return;
     }
     var html = '';
@@ -1076,15 +1076,15 @@ function renderTasks() {
         var overdue = filtered.filter(function (t) { return getDueBucket(t) === 'overdue'; });
         var completed = filtered.filter(function (t) { return getDueBucket(t) === 'completed'; });
         if (overdue.length)
-            html += buildDueBucketGroup('Overdue', 'bi-exclamation-triangle-fill', overdue, 'group-overdue');
+            html += buildDueBucketGroup('Overdue', 'bi-exclamation-triangle', overdue, 'group-overdue');
         if (today.length)
-            html += buildDueBucketGroup('Today', 'bi-sun-fill', today, 'group-today');
+            html += buildDueBucketGroup('Today', 'bi-sun', today, 'group-today');
         if (tomorrow.length)
             html += buildDueBucketGroup('Tomorrow', 'bi-calendar2-day', tomorrow, 'group-tomorrow');
         if (upcoming.length)
             html += buildDueBucketGroup('Upcoming', 'bi-arrow-right-circle', upcoming, 'group-upcoming');
         if (completed.length)
-            html += buildDueBucketGroup('Completed', 'bi-check-circle-fill', completed, 'group-completed');
+            html += buildDueBucketGroup('Completed', 'bi-check-circle', completed, 'group-completed');
     }
     wrap.innerHTML = '<div class="tk-groups-wrap fade-in">' + html + '</div>';
     renderSelectAllBtn(visibleIds);
@@ -1106,8 +1106,8 @@ function renderBoardView(tasks) {
     }
     return '<div class="tk-board-wrap">' +
         col('Active', 'bi-hourglass-split', 'col-active', active) +
-        col('Overdue', 'bi-exclamation-triangle-fill', 'col-overdue', overdue) +
-        col('Completed', 'bi-check-circle-fill', 'col-completed', completed) +
+        col('Overdue', 'bi-exclamation-triangle', 'col-overdue', overdue) +
+        col('Completed', 'bi-check-circle', 'col-completed', completed) +
         '</div>';
 }
 
@@ -1236,7 +1236,7 @@ function deleteTask(id) {
     confirmAction({
         title: 'Delete this task?',
         message: 'This will permanently remove the task and its checklist items.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         onConfirm: function () {
             if (tkExpandedId === id)
                 tkExpandedId = null;

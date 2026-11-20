@@ -513,8 +513,8 @@ function dayHtml() {
     if (!evts.length) {
         return `<div class="cal-empty-state">
       <i class="bi bi-calendar-x" aria-hidden="true"></i>
-      <div>Nothing scheduled for this day.</div>
-      <button class="btn btn-ghost btn-sm mt-2" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
+      <strong>Nothing scheduled for this day</strong>
+      <span>Add an event or task to plan this day.</span>
     </div>`;
     }
     return `<div class="day-view-list">${evts.map(e => renderDayEventRow(e, dateStr)).join('')}</div>`;
@@ -593,18 +593,10 @@ function renderAgenda(dateStr) {
     if (!html) {
         html = `<div class="cal-empty-state cal-empty-small">
       <i class="bi bi-calendar3" aria-hidden="true"></i>
-      <div>Nothing scheduled</div>
+      <strong>Nothing scheduled</strong>
+      <span>Use the Add menu above to plan this day.</span>
     </div>
-    <div class="d-flex gap-2 flex-wrap mt-2">
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
-    </div>`;
-    }
-    else {
-        html += `<div class="d-flex gap-2 flex-wrap mt-3">
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
-    </div>`;
+    `;
     }
     body.innerHTML = html;
     attachDragListeners();
@@ -680,7 +672,7 @@ function openDayModal(dateStr) {
                 groups[g.key].map(e => renderDayEventRow(e, dateStr)).join('');
         });
         if (!sectionsHtml) {
-            sectionsHtml = `<div class="text-faint text-center py-3">Nothing scheduled — add something below.</div>`;
+            sectionsHtml = `<div class="cal-empty-state cal-empty-small"><i class="bi bi-calendar-x" aria-hidden="true"></i><strong>Nothing scheduled</strong><span>Add an event or task to plan this day.</span></div>`;
         }
         body.innerHTML = `
       <div class="d-flex justify-content-between align-items-start mb-3">
@@ -998,7 +990,7 @@ function exportGoogleCalendar() {
         chooseAction({
             title: 'Multiple events found',
             message: `You have ${calEvents.length} events. Open the first event in Google Calendar, or download the .ics file for bulk import.`,
-            icon: 'bi-calendar2-week-fill',
+            icon: 'bi-calendar2-week',
             options: [
                 { label: 'Open first event in Google Calendar', value: 'google', primary: true },
                 { label: 'Download .ics file', value: 'ics' },

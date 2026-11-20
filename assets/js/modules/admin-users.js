@@ -72,7 +72,7 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
@@ -97,7 +97,7 @@ function onAction(e) {
         message: 'This will be recorded in the activity log.' + (isSuspend ? ' The student will lose access until restored.' : ''),
         confirmLabel: isSuspend ? 'Suspend' : 'Restore',
         danger: isSuspend,
-        icon: isSuspend ? 'bi-pause-circle-fill' : 'bi-arrow-counterclockwise',
+        icon: isSuspend ? 'bi-pause-circle' : 'bi-arrow-counterclockwise',
         reasonField: isSuspend ? { label: 'Reason for suspension (optional)', placeholder: 'e.g. Reported duplicate account' } : null,
         async onConfirm(reason) {
             const result = await AdminService.reviewAccount({
@@ -107,7 +107,7 @@ function onAction(e) {
             });
 
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
                 return;
             }
 

@@ -158,7 +158,7 @@ async function onSaveStatus() {
         return;
     }
 
-    Toast.show('Ticket status updated.', 'accent', 'bi-check-circle-fill');
+    Toast.show('Ticket status updated.', 'accent', 'bi-check-circle');
     loadRows();
     viewTicket(currentTicketId);
 }

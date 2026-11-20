@@ -294,7 +294,7 @@ async function saveEvent() {
             return;
         }
         bootstrap.Modal.getInstance(document.getElementById('uevModal')).hide();
-        Toast.show('University event updated', 'accent', 'bi-check-circle-fill');
+        Toast.show('University event updated', 'accent', 'bi-check-circle');
         loadRows();
         return;
     }
@@ -317,9 +317,9 @@ async function saveEvent() {
     if (dates.length > 1) {
         const created = dates.length - failures;
         Toast.show(failures ? `Created ${created} of ${dates.length} days (${failures} failed).` : `Created ${created} events, one per day.`,
-            failures ? 'medium' : 'accent', failures ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill');
+            failures ? 'medium' : 'accent', failures ? 'bi-exclamation-triangle' : 'bi-check-circle');
     } else {
-        Toast.show('University event created', 'accent', 'bi-check-circle-fill');
+        Toast.show('University event created', 'accent', 'bi-check-circle');
     }
     loadRows();
 }
@@ -329,10 +329,10 @@ async function deleteEvent(id, title, triggerBtn) {
     const result = await AdminService.deleteUniversityEvent(id);
     if (!result.ok) {
         if (triggerBtn) triggerBtn.disabled = false;
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
-    Toast.show(`"${title}" was deleted.`, 'accent', 'bi-check-circle-fill');
+    Toast.show(`"${title}" was deleted.`, 'accent', 'bi-check-circle');
     loadRows();
 }
 
@@ -358,7 +358,7 @@ function onAction(e) {
             message: 'This removes the event for every student immediately. This cannot be undone.',
             confirmLabel: 'Delete event',
             danger: true,
-            icon: 'bi-trash3-fill',
+            icon: 'bi-trash3',
             onConfirm() { deleteEvent(id, title, btn); },
         });
     }

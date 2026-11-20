@@ -128,7 +128,7 @@ function toggleFavFilter() {
     var btn = document.getElementById('favFilterBtn');
     if (btn) {
         btn.classList.toggle('nt-icon-btn-active', favFilterOn);
-        btn.querySelector('i').className = favFilterOn ? 'bi bi-star-fill' : 'bi bi-star';
+        btn.querySelector('i').className = favFilterOn ? 'bi bi-star' : 'bi bi-star';
         btn.title = favFilterOn ? 'Show all notes' : 'Favorites only';
     }
     renderNotes();
@@ -238,7 +238,7 @@ function renderNtBulkToolbar() {
         '<span class="nt-bulk-count"><i class="bi bi-check2-square"></i>' + count + ' selected</span>' +
             '<div class="nt-bulk-actions">' +
             '<button class="nt-bulk-btn nt-bulk-all' + (allSel ? ' nt-bulk-all-active' : '') + '" onclick="selectAllVisible()" aria-label="' + allLabel + ' notes" title="' + allLabel + '"><i class="bi ' + (allSel ? 'bi-check2-square' : 'bi-check2-all') + '"></i><span>' + (allSel ? 'None' : 'All') + '</span></button>' +
-            '<button class="nt-bulk-btn nt-bulk-fav" onclick="bulkFavoriteNotes(true)" aria-label="Favorite selected notes" title="Favorite"><i class="bi bi-star-fill"></i><span>Fav</span></button>' +
+            '<button class="nt-bulk-btn nt-bulk-fav" onclick="bulkFavoriteNotes(true)" aria-label="Favorite selected notes" title="Favorite"><i class="bi bi-star"></i><span>Fav</span></button>' +
             '<button class="nt-bulk-btn nt-bulk-unfav" onclick="bulkFavoriteNotes(false)" aria-label="Unfavorite selected notes" title="Unfavorite"><i class="bi bi-star"></i><span>Unfav</span></button>' +
             '<button class="nt-bulk-btn nt-bulk-delete" onclick="bulkDeleteNotes()" aria-label="Delete selected notes" title="Delete"><i class="bi bi-trash"></i><span>Delete</span></button>' +
             '<button class="nt-bulk-btn nt-bulk-clear" onclick="exitSelectMode()" aria-label="Exit selection mode" title="Done"><i class="bi bi-x-lg"></i></button>' +
@@ -271,7 +271,7 @@ function bulkDeleteNotes() {
     confirmAction({
         title: 'Delete ' + count + ' note' + (count !== 1 ? 's' : '') + '?',
         message: 'This will permanently remove the selected notes.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         onConfirm: function () {
             var ids = Array.from(ntSelected);
             DB.saveNotes(DB.getNotes().filter(function (n) { return !ids.includes(n.id); }));
@@ -382,8 +382,8 @@ function renderNotes() {
         var hasSemesterNotes = DB.getNotes().some(function (note) { return note.semesterId === semId; });
         var emptyMessage = hasSemesterNotes
             ? '<p>No notes match your current filters.</p><button type="button" class="btn btn-ghost btn-sm" onclick="clearNoteFilters()">Clear filters</button>'
-            : '<p>No notes found. Create your first note!</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()">Create note</button>';
-        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center text-faint"><i class="bi bi-journal-x" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.4" aria-hidden="true"></i>' + emptyMessage + '</div>';
+            : '<strong>No notes yet</strong><p>Create a note to keep useful details close at hand.</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()"><i class="bi bi-plus-lg" aria-hidden="true"></i>Create note</button>';
+        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center">' + (hasSemesterNotes ? '<i class="bi bi-search" aria-hidden="true"></i><strong>No matching notes</strong>' : '<i class="bi bi-journal-text" aria-hidden="true"></i>') + emptyMessage + '</div>';
         return;
     }
     var semId = DB.getActiveSemesterId();
@@ -422,12 +422,12 @@ function renderNotes() {
             '<div class="note-card-header">' +
             (ntSelectMode ? '<button class="nt-select-check' + (isSelected ? ' selected' : '') + '" onclick="event.stopPropagation();toggleNoteSelect(\'' + n.id + '\')" aria-label="' + (isSelected ? 'Deselect' : 'Select') + ' note" title="' + (isSelected ? 'Deselect' : 'Select') + '">' + (isSelected ? '<i class="bi bi-check-lg"></i>' : '') + '</button>' : '') +
             '<div class="note-card-title-wrap">' +
-            (n.pinned ? '<i class="bi bi-pin-angle-fill note-pin" title="Pinned" aria-hidden="true"></i>' : '') +
+            (n.pinned ? '<i class="bi bi-pin-angle note-pin" title="Pinned" aria-hidden="true"></i>' : '') +
             '<span class="note-card-title">' + escapeHtml(n.title) + '</span>' +
             '</div>' +
             '<div class="nt-card-actions">' +
             '<span class="nt-card-cat-pill">' + escapeHtml(n.category) + '</span>' +
-            '<button class="nt-card-action-box ' + (n.favorite ? 'nt-fav-active' : '') + '" onclick="event.stopPropagation();toggleFavorite(\'' + n.id + '\')" title="' + (n.favorite ? 'Unfavorite' : 'Favorite') + '" aria-label="' + (n.favorite ? 'Remove from favorites' : 'Add to favorites') + '"><i class="bi ' + (n.favorite ? 'bi-star-fill' : 'bi-star') + '"></i></button>' +
+            '<button class="nt-card-action-box ' + (n.favorite ? 'nt-fav-active' : '') + '" onclick="event.stopPropagation();toggleFavorite(\'' + n.id + '\')" title="' + (n.favorite ? 'Unfavorite' : 'Favorite') + '" aria-label="' + (n.favorite ? 'Remove from favorites' : 'Add to favorites') + '"><i class="bi ' + (n.favorite ? 'bi-star' : 'bi-star') + '"></i></button>' +
             '<button class="nt-card-action-box" onclick="event.stopPropagation();openNoteModal(\'' + n.id + '\')" title="Edit note" aria-label="Edit note"><i class="bi bi-pencil"></i></button>' +
             '</div>' +
             '</div>' +
@@ -506,7 +506,7 @@ function openNotePreview(id) {
             '<div class="nt-preview-panel">' +
             '<div class="nt-preview-header">' +
             '<div class="nt-preview-title-wrap">' +
-            (n.pinned ? '<i class="bi bi-pin-angle-fill nt-preview-pin" aria-hidden="true"></i>' : '') +
+            (n.pinned ? '<i class="bi bi-pin-angle nt-preview-pin" aria-hidden="true"></i>' : '') +
             '<h2 class="nt-preview-title">' + escapeHtml(n.title) + '</h2>' +
             '</div>' +
             '<div class="nt-preview-header-actions">' +
@@ -1946,7 +1946,7 @@ function applyTemplate(key) {
             message: 'Replace current content with the "' + tmpl.label + '" template?',
             confirmLabel: 'Replace',
             danger: true,
-            icon: 'bi-file-earmark-text-fill',
+            icon: 'bi-file-earmark-text',
             onConfirm: doApply,
         });
         return;
@@ -2147,7 +2147,7 @@ function deleteNote(id) {
     confirmAction({
         title: 'Delete note?',
         message: '"' + n.title + '" will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         onConfirm: function () {
             DB.saveNotes(DB.getNotes().filter(function (x) { return x.id !== id; }));
             var modalEl = document.getElementById('noteModal');

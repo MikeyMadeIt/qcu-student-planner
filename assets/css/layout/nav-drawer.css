@@ -116,7 +116,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: var(--text-soft);
 }
 
 .drawer-link {
@@ -126,7 +126,7 @@
     min-height: 2.5rem;
     padding: 0 var(--space-3);
     border-radius: var(--radius-sm);
-    color: var(--text-soft);
+    color: var(--text);
     font-size: 0.86rem;
     font-weight: 600;
     text-decoration: none;
@@ -145,9 +145,11 @@
 }
 
 .drawer-link.active {
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    box-shadow: inset 2px 0 0 rgb(var(--accent));
+    background: color-mix(in srgb, rgb(var(--accent)) 14%, var(--surface-2));
+    color: var(--text);
+    font-weight: 700;
+    outline: 1px solid color-mix(in srgb, rgb(var(--accent)) 34%, var(--border));
+    outline-offset: -1px;
 }
 
 /* Inbox / Notifications — same prominent row treatment on mobile as on the desktop sidebar, */
@@ -178,6 +180,7 @@
 
 .drawer-sem-banner {
     padding: var(--space-1) var(--space-3) var(--space-2);
+    color: var(--text-soft);
 }
 
 .drawer-link.drawer-link-danger,
@@ -254,7 +257,7 @@ button.drawer-link {
 
 .drawer-profile-sub {
     font-size: 0.7rem;
-    color: var(--text-faint);
+    color: var(--text-soft);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

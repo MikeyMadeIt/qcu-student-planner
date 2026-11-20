@@ -156,8 +156,8 @@ function renderGradeCards() {
     const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
     const grades = DB.getGrades().map(normalizeGradeRecord);
     if (!subs.length) {
-        const msg = sem ? `No subjects yet for ${sem.schoolYear} • ${sem.name}. Add subjects in Schedule.` : 'Add subjects in Schedule to start tracking grades.';
-        wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-5 text-faint">${msg}</div></div>`;
+        const msg = sem ? `Add subjects in Schedule to start tracking grades for ${sem.schoolYear} · ${sem.name}.` : 'Add subjects in Schedule to start tracking grades.';
+        wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
         return;
     }
     wrap.innerHTML = subs.map(s => {
@@ -172,10 +172,10 @@ function renderGradeCards() {
         const hasAnyScores = hasComponents && g.components.some(c => c.assessments && c.assessments.some(a => assessmentPct(a) !== null));
         if (pct !== null) {
             if (isPassingPct(pct)) {
-                statusBadge = `<span class="grade-pass-badge passing"><i class="bi bi-check-circle-fill"></i> Passing</span>`;
+                statusBadge = `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing</span>`;
             }
             else {
-                statusBadge = `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle-fill"></i> At Risk</span>`;
+                statusBadge = `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk</span>`;
             }
         }
         else if (hasComponents && !hasAnyScores) {
@@ -195,7 +195,7 @@ function renderGradeCards() {
           <div class="grade-card-center">
             <div class="grade-card-pct">${pct === null ? '--' : pct.toFixed(1) + '%'}</div>
             <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}${equivBadge}</div>
-            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle-fill me-1"></i>${totalWeight}%</div>` : ''}
+            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle me-1"></i>${totalWeight}%</div>` : ''}
           </div>
           <div class="grade-card-actions">
             <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil"></i></button>
@@ -223,7 +223,7 @@ function renderGradeCards() {
                   </div>`;
         }).join('')}
               </div>
-              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
+              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
               ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="bi bi-exclamation-triangle me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
             ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="bi bi-pencil"></i> to add.</div>`}
           </div>
@@ -313,8 +313,8 @@ function renderGradeModalBody() {
       ${finalPct !== null ? `
         <div class="mt-1" id="modalPassStatus">
           ${isPassing
-        ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle-fill"></i> Passing (≥${PASSING_PCT}%)</span>`
-        : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle-fill"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
+        ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
+        : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
         </div>` : ''}
     </div>
     <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
@@ -472,8 +472,8 @@ function refreshGradePreview() {
         }
         else {
             statusEl.innerHTML = isPassing
-                ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle-fill"></i> Passing (≥${PASSING_PCT}%)</span>`
-                : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle-fill"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
+                ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
+                : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
         }
     }
 }

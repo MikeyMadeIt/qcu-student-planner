@@ -681,10 +681,33 @@ ol ol,
     justify-content: center;
     gap: var(--space-2);
     margin: 0;
+    color: var(--text-soft);
+}
+
+.nt-empty > i {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
+}
+
+.nt-empty > strong {
+    color: var(--text);
+    font-size: .96rem;
 }
 
 .nt-empty p {
+    max-width: 30rem;
     margin: 0;
+    color: var(--text-soft);
+    font-size: .82rem;
+    line-height: 1.5;
 }
 
 .nt-empty .btn {

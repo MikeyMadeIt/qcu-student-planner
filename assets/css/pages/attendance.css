@@ -1089,14 +1089,51 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 32px 0;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
 }
 
 .att-log-empty i {
-    font-size: 1.6rem;
-    opacity: .25;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
 }
+
+.att-log-empty strong { color: var(--text); font-size: .92rem; }
+.att-log-empty span { max-width: 28rem; color: var(--text-soft); font-size: .8rem; line-height: 1.5; }
+
+.att-card-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-3);
+    text-align: center;
+}
+
+.att-card-empty > i {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.1rem;
+}
+
+.att-card-empty strong { color: var(--text); font-size: .88rem; }
+.att-card-empty span { max-width: 25rem; color: var(--text-soft); font-size: .78rem; line-height: 1.5; }
 
 .att-log-row {
     display: grid;
@@ -2593,6 +2630,36 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     min-width: 0;
 }
 
+.att-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-soft);
+    text-align: center;
+}
+
+.att-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.1rem;
+}
+
+.att-empty-state > strong { color: var(--text); font-size: .88rem; }
+.att-empty-state > span:last-child { max-width: 26rem; font-size: .78rem; line-height: 1.5; }
+.att-stats-empty { grid-column: 1 / -1; min-height: 10rem; }
+.att-heatmap-empty { min-height: 9rem; }
+#attOverallRateData[hidden], #attOverallRateEmpty[hidden] { display: none !important; }
+
 .att-heatmap-filter {
     max-width: 150px;
     font-size: .75rem;
@@ -2761,22 +2828,16 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 
 .att-heatmap-empty {
     text-align: center;
-    padding: 24px 16px;
-    color: var(--text-faint);
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-soft);
     font-size: .82rem;
-}
-
-.att-heatmap-empty i {
-    font-size: 1.8rem;
-    opacity: .2;
-    display: block;
-    margin-bottom: 8px;
 }
 
 .att-heatmap-empty-sub {
     font-size: .74rem;
     margin-top: 4px;
-    opacity: .7;
+    color: var(--text-soft);
+    line-height: 1.45;
 }
 
 /* Heatmap Legend */

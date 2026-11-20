@@ -224,6 +224,12 @@ function renderAttendanceDonut() {
     var counts = { Present: sum.present, Late: sum.late, Excused: sum.excused, Absent: sum.absent };
     var total = sum.counted;
     var pctNum = sum.rate;
+    var donutContent = document.getElementById('attendanceDonutContent');
+    var donutEmpty = document.getElementById('attendanceDonutEmpty');
+    var donutNote = document.getElementById('dashAttendanceNote');
+    if (donutContent) donutContent.hidden = total === 0;
+    if (donutEmpty) donutEmpty.hidden = total !== 0;
+    if (donutNote) donutNote.hidden = total === 0;
     var pctEl = document.getElementById('donutPct');
     if (pctEl)
         pctEl.textContent = pctNum !== null ? pctNum + '%' : '\u2013';
@@ -355,7 +361,7 @@ function renderUpcomingTasks() {
     }
     var html = '';
     if (overdueTasks.length) {
-        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle-fill me-1"></i>Overdue</div>';
+        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle me-1"></i>Overdue</div>';
         html += overdueTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });

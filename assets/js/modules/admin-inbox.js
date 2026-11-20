@@ -60,7 +60,7 @@ async function loadRows() {
 
     body.hidden = false;
     body.innerHTML = rows.map(r => {
-        const icon = MESSAGE_CATEGORY_ICONS[r.category] || 'bi-chat-square-text-fill';
+        const icon = MESSAGE_CATEGORY_ICONS[r.category] || 'bi-chat-square-text';
         return `
       <div class="msg-row" data-id="${r.id}">
         <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
@@ -142,14 +142,14 @@ async function archiveMessage(id, subject) {
         message: `"${subject}" will be hidden from every recipient's inbox and from this list. Recipient read history and the audit trail are preserved.`,
         confirmLabel: 'Archive',
         danger: true,
-        icon: 'bi-archive-fill',
+        icon: 'bi-archive',
         async onConfirm() {
             const result = await AdminService.archiveMessage(id);
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
                 return;
             }
-            Toast.show('Message archived.', 'accent', 'bi-check-circle-fill');
+            Toast.show('Message archived.', 'accent', 'bi-check-circle');
             loadRows();
         },
     });
@@ -288,12 +288,12 @@ async function onComposeSubmit(e) {
     sendBtn.innerHTML = `<i class="bi bi-send"></i> Send message`;
 
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
     bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
-    Toast.show('Message sent.', 'accent', 'bi-check-circle-fill');
+    Toast.show('Message sent.', 'accent', 'bi-check-circle');
     resetComposeForm();
     currentPage = 1;
     loadRows();

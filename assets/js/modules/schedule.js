@@ -467,9 +467,9 @@ function buildLocation(s) {
 function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal') {
     const isSmall = size === 'small';
     if (existingStatus && existingStatus !== 'No Classes') {
-        const icons = { Present: 'bi-check-circle-fill', Late: 'bi-clock-fill', Absent: 'bi-x-circle-fill', Excused: 'bi-shield-check' };
+        const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
         const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
-        const ic = icons[existingStatus] || 'bi-check-circle-fill';
+        const ic = icons[existingStatus] || 'bi-check-circle';
         const col = colors[existingStatus] || 'var(--text-faint)';
         return `<div class="sch-att-logged" style="color:${col}"><i class="bi ${ic}" aria-hidden="true"></i> ${existingStatus}</div>`;
     }
@@ -481,9 +481,9 @@ function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal')
 
 function buildAttendanceIconBtn(subjectId, dateStr, existingStatus) {
     if (existingStatus && existingStatus !== 'No Classes') {
-        const icons = { Present: 'bi-check-circle-fill', Late: 'bi-clock-fill', Absent: 'bi-x-circle-fill', Excused: 'bi-shield-check' };
+        const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
         const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
-        const ic = icons[existingStatus] || 'bi-check-circle-fill';
+        const ic = icons[existingStatus] || 'bi-check-circle';
         const col = colors[existingStatus] || 'var(--text-faint)';
         return `<button class="btn-icon sched-icon-btn sch-att-icon-logged" style="color:${col}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Attendance: ${existingStatus}" aria-label="Attendance logged: ${existingStatus}"><i class="bi ${ic}" aria-hidden="true"></i></button>`;
     }
@@ -733,7 +733,7 @@ function renderDaySummary() {
     let conflictHtml = '';
     if (conflicts.length) {
         conflictHtml = `<div class="sch-conflict-banner glass card-pad mb-2 fade-in" role="alert" aria-live="polite">
-      <i class="bi bi-exclamation-triangle-fill sch-conflict-icon" aria-hidden="true"></i>
+      <i class="bi bi-exclamation-triangle sch-conflict-icon" aria-hidden="true"></i>
       <div>
         <div class="sch-conflict-title">Schedule Conflict${conflicts.length > 1 ? 's' : ''}</div>
         ${conflicts.map(c => `<div class="sch-conflict-body">${esc(c.a.code)} (${fmtTime(c.a.start)}–${fmtTime(c.a.end)}) overlaps ${esc(c.b.code)} (${fmtTime(c.b.start)}–${fmtTime(c.b.end)}) by ${c.overlapMins}m</div>`).join('')}
@@ -744,9 +744,9 @@ function renderDaySummary() {
     if (!classes.length) {
         const semesterState = getSemesterEmptyState(_selectedDate);
         timelineHtml = `<div class="glass card-pad sch-empty-day fade-in">
-      <i class="bi bi-calendar-x" style="font-size:1.6rem;opacity:.4" aria-hidden="true"></i>
+      <i class="bi bi-calendar-x" aria-hidden="true"></i>
       <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
-      ${semesterState ? (semesterState.detail ? `<div class="text-faint" style="font-size:.85rem">${semesterState.detail}</div>` : '') : `<div class="text-faint" style="font-size:.85rem">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
+      ${semesterState ? (semesterState.detail ? `<div class="sch-empty-copy">${semesterState.detail}</div>` : '') : `<div class="sch-empty-copy">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
       <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
       <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>
     </div>`;
@@ -758,7 +758,7 @@ function renderDaySummary() {
                 return `<div class="sch-timeline-free" role="listitem">
           <div class="sch-tl-connector free" aria-hidden="true"></div>
           <div class="sch-free-block">
-            <i class="bi bi-cup-hot-fill sch-free-icon" aria-hidden="true"></i>
+            <i class="bi bi-cup-hot sch-free-icon" aria-hidden="true"></i>
             FREE TIME · ${fmtDuration(item.mins)}
           </div>
         </div>`;
@@ -833,12 +833,12 @@ function renderTasksPanel() {
     ${tasks.length
         ? `<div class="sch-task-list" role="list">${tasks.map(t => `
           <div class="sch-task-row ${t.status === 'completed' ? 'done' : ''}" role="listitem">
-            <i class="bi ${t.status === 'completed' ? 'bi-check-circle-fill' : 'bi-circle'} sch-task-icon" aria-hidden="true"></i>
+            <i class="bi ${t.status === 'completed' ? 'bi-check-circle' : 'bi-circle'} sch-task-icon" aria-hidden="true"></i>
             <span class="sch-task-title">${esc(t.title)}</span>
             ${t.priority === 'high' ? '<span class="chip high" style="font-size:.6rem" aria-label="High priority">!</span>' : ''}
           </div>`).join('')}
         </div>`
-        : `<div class="text-faint" style="font-size:.84rem">No tasks due today.</div>`}
+        : `<div class="sch-tasks-empty"><span class="sch-tasks-empty-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span><strong>No tasks due today</strong><span>You’re all caught up. Tasks due today will appear here.</span></div>`}
   </div>`;
 }
 
@@ -888,13 +888,13 @@ function renderTimetable() {
     const selectedDayName = DAY_SHORT[_selectedDate.getDay()];
     if (!allSubs.length) {
         wrap.innerHTML = `<div class="sch-empty-day" style="min-height:200px">
-      <i class="bi bi-calendar2-week" style="font-size:1.6rem;opacity:.4" aria-hidden="true"></i>
+      <i class="bi bi-calendar2-week" aria-hidden="true"></i>
       <div class="mt-2 fw-bold" style="color:var(--text)">No Classes Scheduled</div>
       <div class="text-faint" style="font-size:.85rem">Add subjects to see your weekly timetable.</div>
     </div>`;
         return;
     }
-    let html = `<div class="tt-grid-inner" style="display:grid;grid-template-columns:48px repeat(7,minmax(0,1fr));position:relative">`;
+    let html = `<div class="tt-grid-inner" style="display:grid;grid-template-columns:48px repeat(7,minmax(0,1fr));position:relative;min-width:560px">`;
     html += `<div class="tt-corner"></div>`;
     weekDays.forEach(d => {
         const isToday = sameDay(d, today);
@@ -1088,9 +1088,9 @@ function renderListView() {
             s.professor.toLowerCase().includes(q) || s.room.toLowerCase().includes(q));
     const sem = DB.getActiveSemester();
     if (!list.length) {
-        wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-4">
-      <i class="bi bi-journal-x" style="font-size:1.5rem;opacity:.4" aria-hidden="true"></i>
-      <div class="mt-2 fw-bold" style="color:var(--text)">${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</div>
+        wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-4 sch-empty-day">
+      <i class="bi bi-journal-x" aria-hidden="true"></i>
+      <strong>${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</strong>
       <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
       ${!showArchived ? `<div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>` : ''}
     </div></div>`;
@@ -1229,7 +1229,7 @@ function deleteSubject(id) {
     confirmAction({
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill', hideCloseButton: true,
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash', hideCloseButton: true,
         onConfirm() {
             if (DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)) === false) {
                 Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');

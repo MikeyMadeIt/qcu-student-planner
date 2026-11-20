@@ -73,7 +73,7 @@
     function stateHTML(opts) {
         opts = opts || {};
         const status = opts.status || 'loading';
-        const icon = opts.icon || (status === 'error' ? 'bi-exclamation-triangle-fill' : status === 'empty' ? 'bi-inbox' : 'bi-arrow-repeat');
+        const icon = opts.icon || (status === 'error' ? 'bi-exclamation-triangle' : status === 'empty' ? 'bi-inbox' : 'bi-arrow-repeat');
         const title = opts.title || (status === 'error' ? 'Something went wrong' : status === 'empty' ? 'Nothing here yet' : 'Loading…');
         const message = opts.message || '';
         const spin = status === 'loading' && opts.spinIcon !== false;
@@ -159,9 +159,9 @@
             return `<span class="ld-save-status" role="status"><span class="ld-spin" style="width:.75rem;height:.75rem;border-width:1.5px"></span> ${opts.savingText || 'Saving…'}</span>`;
         }
         if (status === 'error') {
-            return `<span class="ld-save-status is-error" role="alert"><i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i> ${opts.errorText || 'Not saved'}</span>`;
+            return `<span class="ld-save-status is-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i> ${opts.errorText || 'Not saved'}</span>`;
         }
-        return `<span class="ld-save-status is-saved" role="status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> ${opts.savedText || 'Saved'}</span>`;
+        return `<span class="ld-save-status is-saved" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i> ${opts.savedText || 'Saved'}</span>`;
     }
 
     window.Loading = {
