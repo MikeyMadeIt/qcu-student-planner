@@ -707,7 +707,7 @@ function renderConsecutiveAbsenceAlerts() {
     wrap.innerHTML = `<div class="att-consec-alerts mb-3">` +
         warnings.map(({ s, streak }) => `
       <div class="att-consec-alert fade-in" role="alert">
-        <div class="att-consec-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="att-consec-icon"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></div>
         <div class="att-consec-body">
           <div class="att-consec-title">Consecutive Absences</div>
           <div class="att-consec-msg">
@@ -1087,9 +1087,9 @@ function openAbsenceLimitModal() {
             <span class="al-code">${escapeAttHtml(s.code)}</span>
           </div>
           <div class="al-status-badge ${reached ? 'danger' : nearLimit ? 'warn' : 'ok'}">
-            ${reached ? '<i class="bi bi-exclamation-triangle-fill"></i> Limit reached' :
-        nearLimit ? `<i class="bi bi-exclamation-circle"></i> ${remaining} remaining` :
-            `<i class="bi bi-check-circle"></i> ${remaining} remaining`}
+            ${reached ? '<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Limit reached' :
+        nearLimit ? `<i class="bi bi-exclamation-circle" aria-hidden="true"></i> ${remaining} remaining` :
+            `<i class="bi bi-check-circle" aria-hidden="true"></i> ${remaining} remaining`}
           </div>
         </div>
         <div class="al-stats-row">
@@ -1198,7 +1198,7 @@ function renderSubjectBreakdown() {
         </div>
         <div class="progress att-bd-limit-bar"><div class="progress-bar" style="width:${limitPct}%;background:${limitColor};transition:width .4s ease"></div></div>
       </div>
-      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="bi bi-exclamation-triangle-fill"></i> ${consec} consecutive absences</div>` : ''}
+      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> ${consec} consecutive absences</div>` : ''}
     </div>`;
     }).join('');
 }
@@ -1217,7 +1217,7 @@ function renderLog(showAll) {
         .sort((a, b) => b.date.localeCompare(a.date));
     const wrap = document.getElementById('attendanceLog');
     if (!records.length) {
-        wrap.innerHTML = `<div class="text-faint text-center py-5 att-log-empty"><i class="bi bi-calendar3"></i><div>No attendance logged yet</div></div>`;
+        wrap.innerHTML = `<div class="text-faint text-center py-5 att-log-empty"><i class="bi bi-calendar3" aria-hidden="true"></i><div>No attendance logged yet</div></div>`;
         const cl = document.getElementById('attLogCountLabel');
         if (cl)
             cl.textContent = '';
@@ -1246,15 +1246,15 @@ function renderLog(showAll) {
       <td class="att-tbl-status"><span class="att-status-badge ${statusClass}">${statusDisplay}${onlinePill}</span></td>
         <td class="att-tbl-actions">
         ${hasNotes
-            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text-fill"></i></button>`
+            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text-fill" aria-hidden="true"></i></button>`
             : ''}
-        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square"></i></button>
-        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3"></i></button>
+        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
+        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3" aria-hidden="true"></i></button>
       </td>
     </tr>`;
     }
     const showMoreHtml = hasMore
-        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="bi bi-chevron-down me-1"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
+        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="bi bi-chevron-down me-1" aria-hidden="true"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
         : '';
     wrap.innerHTML = `<table class="att-log-table" role="grid">
     <thead>

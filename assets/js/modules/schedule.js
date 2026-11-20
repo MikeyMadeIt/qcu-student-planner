@@ -377,7 +377,7 @@ function renderNextCard() {
         const semesterState = getSemesterEmptyState(today);
         if (semesterState) {
             host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
-      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-calendar-x"></i></div>
+      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-calendar-x" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">${semesterState.title.toUpperCase()}</div>
         ${semesterState.detail ? `<div class="sch-next-subject">${semesterState.detail}</div>` : ''}
@@ -388,7 +388,7 @@ function renderNextCard() {
         const classes = getSubjectsForDay(today);
         const hadClasses = classes.length > 0;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
-      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-check2-circle"></i></div>
+      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-check2-circle" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">${hadClasses ? 'NO MORE CLASSES TODAY' : 'NO CLASSES TODAY'}</div>
         <div class="sch-next-subject">${hadClasses ? 'All done for today!' : 'No scheduled classes.'}</div>
@@ -402,7 +402,7 @@ function renderNextCard() {
     const timeStr = `${fmtTime(s.start)} – ${fmtTime(s.end)}`;
     const attRecord = getAttendanceRecord(s.id, todayStr);
     const attStatus = attRecord ? attRecord.status : null;
-    const onlineChip = s.online ? `<span class="sch-online-chip" aria-label="Online class"><i class="bi bi-wifi"></i> ONLINE</span>` : '';
+    const onlineChip = s.online ? `<span class="sch-online-chip" aria-label="Online class"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>` : '';
     const attBtn = buildAttendanceBtn(s.id, todayStr, attStatus, 'small');
     if (info.type === 'now') {
         const elapsed = nm - toMins(s.start);
@@ -410,7 +410,7 @@ function renderNextCard() {
         const pct = Math.min(100, Math.round((elapsed / total) * 100));
         const remaining = toMins(s.end) - nm;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-now fade-in" style="--sc-color:${s.color}">
-      <div class="sch-next-badge now" aria-hidden="true"><i class="bi bi-broadcast"></i></div>
+      <div class="sch-next-badge now" aria-hidden="true"><i class="bi bi-broadcast" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">NOW IN SESSION</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>
@@ -433,7 +433,7 @@ function renderNextCard() {
         const minsAway = toMins(s.start) - nm;
         const awayStr = minsAway < 60 ? `In ${minsAway}m` : `In ${Math.floor(minsAway / 60)}h ${minsAway % 60}m`;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-upcoming fade-in" style="--sc-color:${s.color}">
-      <div class="sch-next-badge next" aria-hidden="true"><i class="bi bi-arrow-right-circle"></i></div>
+      <div class="sch-next-badge next" aria-hidden="true"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">NEXT CLASS</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>

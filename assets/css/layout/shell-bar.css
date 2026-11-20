@@ -74,13 +74,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.85rem;
-    height: 1.85rem;
+    width: var(--icon-btn-size-sm);
+    height: var(--icon-btn-size-sm);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-soft);
-    font-size: 0.95rem;
+    font-size: var(--icon-size-sm);
     transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 
