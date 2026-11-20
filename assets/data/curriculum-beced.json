@@ -1,0 +1,448 @@
+{
+  "program": "Bachelor of Early Childhood Education",
+  "programCode": "BECEd",
+  "effectiveAcademicYear": "BECEd-2022",
+  "basis": null,
+  "totalUnits": 158,
+  "source": "Quezon City University, Registrar and Admissions Division — Program of Study, BECEd-2022",
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "1st Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "ECED111",
+              "title": "Child Development",
+              "units": 3,
+              "prerequisites": [
+                "EDUC111 (co-req)"
+              ]
+            },
+            {
+              "code": "ECED112",
+              "title": "Health Nutrition and Safety",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE1",
+              "title": "Physical Fitness and Wellness",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SCI1",
+              "title": "Science, Technology and Society",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC111",
+              "title": "The Child and Adolescent Learner and Learning Principles",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC112",
+              "title": "The Teaching Profession",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECED123",
+              "title": "Foundation of Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC124",
+              "title": "Foundation of Special and Inclusive Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ]
+            },
+            {
+              "code": "ECED124",
+              "title": "Play and Developmentally Appropriate Practices in Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE2",
+              "title": "Rhythmic Activities",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "EDUC123",
+              "title": "The Teacher and the Community, School Culture and Organizational Leadership",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "2nd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC216",
+              "title": "Assessment in Learning 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED215",
+              "title": "Creative Arts, Music and Movement in Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC215",
+              "title": "Facilitating Learner-Centered Teaching",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE3",
+              "title": "Individual and Dual Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "ECED216",
+              "title": "Numeracy Development",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "EDUC227",
+              "title": "Assessment in Learning 2",
+              "units": 3,
+              "prerequisites": [
+                "EDUC216"
+              ]
+            },
+            {
+              "code": "ECED228",
+              "title": "Children's Literature",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI4",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED227",
+              "title": "Inclusive Education in Early Childhood Settings",
+              "units": 3,
+              "prerequisites": [
+                "EDUC124"
+              ]
+            },
+            {
+              "code": "EDUC2214",
+              "title": "Integrative Teaching Strategies",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "GE9",
+              "title": "Rizal, Life, Works and Writing",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE4",
+              "title": "Team Sports",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC228",
+              "title": "Technology for Teaching and Learning 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC229",
+              "title": "The Teacher and the School Curriculum",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "3rd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "ECED319",
+              "title": "Assessment of Children's Development and Learning",
+              "units": 3,
+              "prerequisites": [
+                "EDUC216"
+              ]
+            },
+            {
+              "code": "EDUC3110",
+              "title": "Building and Enhancing New Literacies Across the Curriculum",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3110",
+              "title": "Content and Pedagogy in the Mother Tongue Based Multilingual Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3113",
+              "title": "Science in Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3111",
+              "title": "Social Studies in Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3112",
+              "title": "Technology for Teaching and Learning 2",
+              "units": 3,
+              "prerequisites": [
+                "EDUC228"
+              ]
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECED3215",
+              "title": "Early Childhood Education Curriculum Models",
+              "units": 3,
+              "prerequisites": [
+                "EDUC229"
+              ]
+            },
+            {
+              "code": "ECED3218",
+              "title": "Early Learning Environment",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC3211",
+              "title": "Field Study 1",
+              "units": 3,
+              "prerequisites": [
+                "EDUC111",
+                "EDUC112",
+                "ECED111",
+                "ECED112",
+                "ECED123",
+                "EDUC124",
+                "ECED124",
+                "EDUC215",
+                "EDUC216",
+                "ECED215",
+                "ECED216",
+                "EDUC227",
+                "EDUC228",
+                "EDUC229",
+                "ECED227",
+                "ECED228",
+                "EDUC2214",
+                "EDUC3110",
+                "ECED319",
+                "ECED3110",
+                "ECED3111",
+                "ECED3112",
+                "ECED3113"
+              ]
+            },
+            {
+              "code": "ECED3216",
+              "title": "Guiding Children's Behavior and Moral Development",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3217",
+              "title": "Infant and Toddler Programs",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED3214",
+              "title": "Literacy Development",
+              "units": 3,
+              "prerequisites": [
+                "EDUC3110"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "4th Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "ECED4121",
+              "title": "Family, School and Community Partnership",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EDUC4112",
+              "title": "Field Study 2",
+              "units": 3,
+              "prerequisites": [
+                "ECED3214",
+                "ECED3215",
+                "ECED3216",
+                "ECED3217",
+                "ECED3218",
+                "EDUC3211"
+              ]
+            },
+            {
+              "code": "ECED4119",
+              "title": "Management of Early Childhood Education Program",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECED4120",
+              "title": "Research in Early Childhood Education",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "EDUC4213",
+              "title": "Teaching Internship",
+              "units": 6,
+              "prerequisites": [
+                "ECED4119",
+                "ECED4120",
+                "ECED4121",
+                "EDUC4112"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -66,7 +66,7 @@ function writeKey(key, value) {
 // it's missing, so dropping it here changes nothing visible.
 const DEFAULT_SETTINGS = {
     theme: 'dark', accent: 'blue',
-    compact: false, reduceMotion: false,
+    compact: false, reduceMotion: false, curriculumStatusOverrides: {},
     notifications: {
         upcomingClass: true, upcomingClassMinutes: 10,
         taskReminders: true, taskReminderMinutes: 60,
