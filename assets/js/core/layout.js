@@ -305,7 +305,7 @@ function renderInboxPanelItems(rows, icons, categoryBadge) {
         const icon = icons[m.category] || 'bi-chat-square-text-fill';
         return `
         <a class="msg-row ${r.read_at ? '' : 'is-unread'}" href="../app/inbox.html">
-            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
             <span class="msg-row-body">
                 <span class="msg-pill">${categoryBadge(escHtml, m.category)}</span>
                 <span class="msg-subject">${escHtml(m.subject)}</span>

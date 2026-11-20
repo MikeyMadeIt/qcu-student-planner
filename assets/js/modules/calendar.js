@@ -34,6 +34,7 @@ async function initCalendar() {
     const ji = document.getElementById('jumpDateInput');
     if (ji)
         ji.value = todayKey();
+    if (ji && window.DatePicker) DatePicker.refresh('jumpDateInput');
     // Re-fetch when the tab regains focus, so admin edits made elsewhere
     // show up without the student needing to reload the page.
     document.addEventListener('visibilitychange', () => {
@@ -513,7 +514,7 @@ function dayHtml() {
         return `<div class="cal-empty-state">
       <i class="bi bi-calendar-x" aria-hidden="true"></i>
       <div>Nothing scheduled for this day.</div>
-      <button class="btn btn-ghost btn-sm mt-2" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
+      <button class="btn btn-ghost btn-sm mt-2" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
     </div>`;
     }
     return `<div class="day-view-list">${evts.map(e => renderDayEventRow(e, dateStr)).join('')}</div>`;
@@ -595,14 +596,14 @@ function renderAgenda(dateStr) {
       <div>Nothing scheduled</div>
     </div>
     <div class="d-flex gap-2 flex-wrap mt-2">
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1" aria-hidden="true"></i>Add Task</button>
     </div>`;
     }
     else {
         html += `<div class="d-flex gap-2 flex-wrap mt-3">
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}')"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
+      <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1" aria-hidden="true"></i>Add Task</button>
     </div>`;
     }
     body.innerHTML = html;
@@ -675,7 +676,7 @@ function openDayModal(dateStr) {
         groupDefs.forEach(g => {
             if (!groups[g.key].length)
                 return;
-            sectionsHtml += `<div class="day-modal-section-title"><i class="bi ${g.icon}"></i>${g.label}</div>` +
+            sectionsHtml += `<div class="day-modal-section-title"><i class="bi ${g.icon}" aria-hidden="true"></i>${g.label}</div>` +
                 groups[g.key].map(e => renderDayEventRow(e, dateStr)).join('');
         });
         if (!sectionsHtml) {
@@ -688,8 +689,8 @@ function openDayModal(dateStr) {
       </div>
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1" aria-hidden="true"></i>Add Task</button>
       </div>`;
         new bootstrap.Modal(document.getElementById('dayModal')).show();
     }
@@ -1045,7 +1046,7 @@ function openScheduleModal(id, presetDay) {
     const color = s ? s.color : DB.colors[0];
     const body = document.getElementById('calSubjectModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar3 me-2"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
+    <h5 class="mb-3"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
     <input type="hidden" id="csId" value="${s ? s.id : ''}">
     <div class="row g-2">
       <div class="col-md-4"><label>Subject Code</label><input class="form-control" id="csCode" value="${s ? escapeHtml(s.code) : ''}" placeholder="CS101"></div>
@@ -1067,10 +1068,10 @@ function openScheduleModal(id, presetDay) {
       <div class="col-md-6">${TimeField.html({ id: 'csStart', label: 'Start Time', value: s ? s.start : '08:00', placeholder: '9:00 AM', required: true })}</div>
       <div class="col-md-6">${TimeField.html({ id: 'csEnd', label: 'End Time', value: s ? s.end : '09:00', placeholder: '10:30 AM', required: true, after: 'csStart' })}</div>
       <div class="col-12"><p class="sch-time-hint mb-0" data-start="csStart" data-end="csEnd" aria-live="polite"></p></div>
-      <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}"></div>
-      <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}"></div>
-      <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}"></div>
-      <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}"></div>
+      <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}" placeholder="e.g. 302"></div>
+      <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}" placeholder="e.g. Engineering Building"></div>
+      <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}" placeholder="e.g. Juan Dela Cruz"></div>
+      <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}" placeholder="e.g. juan.delacruz@qcu.edu.ph"></div>
       <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}"></div>
       <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}"></div>
       <div class="col-12"><label>Color Label</label>
@@ -1079,11 +1080,11 @@ function openScheduleModal(id, presetDay) {
         </div>
         <input type="hidden" id="csColor" value="${color}">
       </div>
-      <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
+      <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2" placeholder="Optional notes about this subject…">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>
-      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Schedule</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);
@@ -1161,7 +1162,7 @@ function openCalEventModal(id, presetDate) {
     calEventModalColor = existing ? (existing.color || EVENT_CAT_COLORS['Event']) : EVENT_CAT_COLORS['Event'];
     const body = document.getElementById('calEventModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar-event me-2"></i>${existing ? 'Edit' : 'Add'} Event</h5>
+    <h5 class="mb-3"><i class="bi bi-calendar-event me-2" aria-hidden="true"></i>${existing ? 'Edit' : 'Add'} Event</h5>
     <div class="row g-2">
       <div class="col-12"><label>Event Title</label><input class="form-control" id="ceTitle" placeholder="e.g. Study Session, Project Meeting" value="${existing ? escapeHtml(existing.title) : ''}"></div>
       <div class="col-md-6"><label>Category</label>
@@ -1176,8 +1177,8 @@ function openCalEventModal(id, presetDate) {
       <div class="col-12"><label>Description (optional)</label><textarea class="form-control" id="ceDesc" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.description || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1"></i>${existing ? 'Update' : 'Save'} Event</button>
-      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${existing ? 'Update' : 'Save'} Event</button>
+      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);
