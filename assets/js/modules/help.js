@@ -57,6 +57,43 @@
         });
     }
 
+    /* ── Email links ──
+       A plain mailto: link opens the computer's default mail app. On many
+       desktops that app is missing or is not Gmail, so the click seems to do
+       nothing. Every student signs in with a Gmail address, so on desktop these
+       links open a Gmail compose window in a new tab instead. Phones keep the
+       mailto: link, which opens the Gmail or Mail app that is already installed. */
+    function isMobileDevice() {
+        if (navigator.userAgentData && navigator.userAgentData.mobile === true) return true;
+        if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')) return true;
+        // iPadOS reports itself as a Mac but has a touch screen.
+        return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    }
+
+    function gmailComposeUrl(address, subject) {
+        return 'https://mail.google.com/mail/?view=cm&fs=1' +
+            '&to=' + encodeURIComponent(address) +
+            '&su=' + encodeURIComponent(subject);
+    }
+
+    function setupMailLinks() {
+        if (isMobileDevice()) return;
+
+        $$('a[href^="mailto:"]').forEach(function (link) {
+            var address = link.getAttribute('href').slice(7).split('?')[0];
+            if (!EMAIL_PATTERN.test(address)) return;
+
+            var subject = link.closest('#faq-security-report')
+                ? 'Security or privacy issue'
+                : 'QCU Student Planner support';
+
+            link.setAttribute('data-mailto', link.getAttribute('href'));
+            link.href = gmailComposeUrl(address, subject);
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        });
+    }
+
     /* ── Search + topic filter ── */
     var input, clearBtn, status, emptyState, pills;
     var items = [];
@@ -205,6 +242,7 @@
 
     function init() {
         setupDetails();
+        setupMailLinks();
         setupSearch();
         openFromHash();
         window.addEventListener('hashchange', openFromHash);
