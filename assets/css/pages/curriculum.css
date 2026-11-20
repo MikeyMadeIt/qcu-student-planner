@@ -1,13 +1,5 @@
 /* CURRICULUM PAGE */
 
-.cur-toolbar {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-/* 2×2 grid, tight, no wrapping */
 
 .cur-stats-row {
     display: grid;
@@ -204,7 +196,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: .72rem;
+    font-size: .8rem;
     font-weight: 600;
     color: var(--text-faint);
 }
@@ -302,87 +294,116 @@
     display: inline-block;
 }
 
-/* Mobile subject cards */
+/* Mobile subject cards — deliberately a different composition than the
+   desktop table (title-led, not code-led), so it reads as a card, not a
+   squeezed row. */
 
 .cur-mobile-cards {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 10px;
+    gap: 10px;
+    padding: 12px;
 }
 
 .cur-subject-card {
+    position: relative;
     background: var(--surface-2);
     border: 1px solid var(--border);
+    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-sm);
-    padding: var(--card-pad-xs);
+    padding: 12px 14px;
 }
 
-.cur-card-head {
+.cur-card-top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 4px;
+    gap: 10px;
+}
+
+.cur-card-title {
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--text);
+    line-height: 1.35;
 }
 
 .cur-units-badge {
+    flex-shrink: 0;
     font-family: var(--font-mono);
     font-size: .72rem;
     font-weight: 700;
     color: rgb(var(--accent));
     background: rgba(var(--accent), .12);
     border: 1px solid rgba(var(--accent), .22);
-    border-radius: 4px;
-    padding: 2px 8px;
+    border-radius: var(--radius-pill, 999px);
+    padding: 3px 10px;
+    margin-top: 1px;
 }
 
-.cur-card-title {
-    font-weight: 600;
-    font-size: .84rem;
-    color: var(--text);
-    margin-bottom: 5px;
-    line-height: 1.3;
-}
-
-.cur-card-meta {
-    display: flex;
-    gap: 12px;
-    font-size: .73rem;
-    color: var(--text-soft);
-    margin-bottom: 5px;
-}
-
-.cur-card-meta i {
-    margin-right: 3px;
-    font-size: .7rem;
-    opacity: .7;
-}
-
-.cur-card-req {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 3px;
+.cur-card-code {
+    font-family: var(--font-mono);
     font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    color: var(--text-faint);
     margin-top: 3px;
 }
 
-.cur-req-label {
-    font-size: .65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-faint);
-    margin-right: 3px;
+.cur-card-hours {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+
+.cur-card-hours i {
+    margin-right: 4px;
+    font-size: .72rem;
+    opacity: .7;
+    color: rgb(var(--accent));
+}
+
+.cur-card-hours-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-faint);
     flex-shrink: 0;
 }
 
+.cur-card-req {
+    margin-top: 8px;
+}
+
+.cur-card-req-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.cur-req-label {
+    display: block;
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--text-faint);
+}
+
+.cur-badge-grad {
+    background: rgba(var(--accent-2), .15) !important;
+    color: rgb(var(--accent-2)) !important;
+    border-color: rgba(var(--accent-2), .3) !important;
+}
+
 @media (min-width: 768px) {
-    .cur-toolbar {
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-    }
     .cur-stats-row {
         grid-template-columns: repeat(4, auto);
         flex-shrink: 0;
@@ -443,77 +464,8 @@
     overflow-x: auto;
 }
 
-/* CURRICULUM PDF VIEWER */
+/* CURRICULUM PDF ACTIONS (download / open buttons) */
 
-.cur-picker {
-    position: relative;
-    z-index: var(--layer-popover);
-    padding: 14px 16px;
-    border-radius: 5px;
-}
-
-.cur-picker-label {
-    display: block;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    opacity: .7;
-    margin-bottom: 6px;
-}
-.cur-picker select {
-    width: 100%;
-}
-
-.curv {
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 12px;
-}
-.curv-stage {
-    height: 62vh;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, .25);
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-.curv-canvas {
-    display: block;
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
-}
-.cur-viewer-status {
-    margin: auto;
-    text-align: center;
-    padding: 24px 12px;
-    opacity: .75;
-    font-size: .9rem;
-}
-
-.curv-nav {
-    display: grid;
-    grid-template-columns: 48px 1fr 48px;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-}
-.curv-pager {
-    text-align: center;
-    font-size: .8rem;
-    opacity: .8;
-}
-
-.curv-tools {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 8px;
-}
 .curv-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -537,7 +489,6 @@
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: var(--shadow);
 }
 .curv-btn:hover {
     color: rgb(var(--accent));
@@ -548,7 +499,6 @@
     background: rgb(var(--accent));
     border: none;
     color: var(--on-accent);
-    box-shadow: 0 1px 2px rgba(var(--accent),.3);
 }
 .curv-btn:disabled {
     opacity: .35;
@@ -570,4 +520,2754 @@
 .cur-empty p {
     margin: 12px 0 0;
     opacity: .85;
+}
+
+/* STRUCTURED CURRICULUM VIEWER: year + semester navigation */
+
+.cur-nav-group {
+    margin-bottom: 10px;
+}
+
+.cur-nav-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+}
+
+.cur-nav-label i {
+    color: rgb(var(--accent));
+    font-size: .78rem;
+}
+
+/* Pill rows: 4-up year row, 2-up semester row below it (mobile/original).
+   On desktop these sit inside the narrow left card, so they switch to a
+   single stacked column there — see the lg breakpoint further down. */
+
+.cur-pill-row {
+    display: grid;
+    gap: 8px;
+}
+
+.cur-pill-row-years {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.cur-pill-row-sems {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 480px) {
+    .cur-pill-row-years {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.cur-pill-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-weight: 700;
+    font-size: .82rem;
+    padding: 10px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.cur-pill-btn:hover {
+    border-color: rgba(var(--accent), .45);
+    color: rgb(var(--accent));
+}
+
+.cur-pill-btn.active {
+    background: rgb(var(--accent));
+    border-color: transparent;
+    color: var(--on-accent);
+    box-shadow: 0 1px 2px rgba(var(--accent), .3);
+}
+
+.cur-pill-btn-sem {
+    font-size: .8rem;
+}
+
+/* Clean course list (no accordion) */
+
+.cur-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 2px 2px;
+}
+
+.cur-list-header-title {
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--text);
+}
+
+.cur-list-block {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.cur-list-group-label {
+    font-weight: 800;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: rgb(var(--accent));
+    margin-bottom: 6px;
+    padding: 0 2px;
+}
+
+/* ============================================================
+   SINGLE-CARD STRUCTURED CURRICULUM VIEWER
+   Program select, overview, filters, search, course accordion,
+   and PDF buttons all live inside one .cur-card. Flat, hairline
+   borders, minimal shadow — matches the Swiss editorial system.
+   ============================================================ */
+
+.cur-card.glass {
+    box-shadow: none;
+}
+
+.cur-card {
+    padding: var(--card-pad, 18px);
+    margin-bottom: 12px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.cur-program-group select.form-select {
+    width: 100%;
+}
+
+.cur-card .cur-nav-group {
+    margin-bottom: 16px;
+}
+
+/* Overview: one bordered box, 1px hairlines between the 4 stats
+   (grid gap painted with --border, cells painted with --surface) */
+
+.cur-stats-box {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+/* Column count tracks however many stat cards are actually present
+   (2 when a program has no lecture/lab data, 4 when it does) instead of
+   a fixed 4 — a fixed count left empty cells showing the gap color when
+   there were only 2 cards. auto-fit sizes columns to fill the row
+   evenly for either count, with no leftover background showing through. */
+.cur-stats-box .cur-stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1px;
+    background: var(--border);
+}
+
+.cur-stats-box .cur-stat-card {
+    background: var(--surface);
+    border-radius: 0;
+    padding: 14px 16px;
+}
+
+/* Search (no label — the input + icon already read as a search bar) */
+
+.cur-search-wrap.cur-search-standalone {
+    margin-bottom: 16px;
+}
+
+/* Structured viewer layout. Responsive card and control layouts are defined
+   with the current curriculum shell rules below. */
+.cur-layout {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+@media (min-width: 992px) {
+    .cur-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+    }
+}
+
+/* Desktop course table wrapper (bordered box, same family as the
+   mobile accordion box) */
+
+.cur-course-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.cur-course-table-wrap .cur-table-wrap {
+    overflow-x: auto;
+}
+
+/* Course accordion: each course is its own collapsible row.
+   Flat list, hairline dividers between rows, no per-row card/shadow. */
+
+.cur-course-accordion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.cur-course-item {
+    border-top: 1px solid var(--border);
+}
+
+.cur-course-item:first-child {
+    border-top: none;
+}
+
+.cur-course-btn {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.cur-course-btn:focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: -2px;
+}
+
+.cur-course-btn:hover {
+    background: rgba(var(--accent), .04);
+}
+
+.cur-course-btn-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cur-course-pills {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cur-unit-pill {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--text-soft);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+}
+
+.cur-course-btn-title {
+    font-weight: 600;
+    font-size: .85rem;
+    line-height: 1.35;
+    color: var(--text);
+    overflow-wrap: break-word;
+}
+
+.cur-chevron-box {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-faint);
+    font-size: .8rem;
+    transition: transform .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.cur-course-btn:not(.collapsed) .cur-chevron-box {
+    transform: rotate(180deg);
+    border-color: rgba(var(--accent), .4);
+    color: rgb(var(--accent));
+}
+
+.cur-course-body {
+    padding: 2px 14px 14px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    align-items: flex-start;
+    margin-top: -1px;
+    padding-top: 12px;
+}
+
+.cur-course-detail {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    white-space: nowrap;
+}
+
+.cur-course-detail i {
+    margin-right: 5px;
+    font-size: .75rem;
+    opacity: .75;
+    color: rgb(var(--accent));
+}
+
+.cur-course-detail-req {
+    flex-basis: 100%;
+    margin-top: 2px;
+}
+
+.cur-course-detail-req .cur-card-req-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.cur-selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 9px 11px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    font-size: .78rem;
+    color: var(--text-faint);
+}
+.cur-selection-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cur-import-notice {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(var(--accent), .3);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-size: .78rem;
+    line-height: 1.35;
+}
+.cur-import-notice i { color: rgb(var(--accent)); flex: 0 0 auto; }
+.cur-import-notice a { color: rgb(var(--accent)); font-weight: 700; }
+
+.cur-course-select { display: inline-flex; align-items: center; margin-right: 8px; }
+.cur-course-select { flex: 0 0 20px; display: inline-flex; align-items: center; }
+.cur-select-course {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .15s;
+    flex-shrink: 0;
+    color: transparent;
+    font-size: .72rem;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+}
+.cur-select-course:hover {
+    border-color: rgba(var(--accent), .5);
+    background: rgba(var(--accent), .08);
+}
+.cur-select-course.selected {
+    background: rgb(var(--accent));
+    border-color: rgb(var(--accent));
+    color: #fff;
+}
+.cur-select-course:focus-visible { outline: 2px solid rgba(var(--accent), .45); outline-offset: 2px; }
+.cur-select-course[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+@media (max-width: 575.98px) { .cur-selection-actions { width: 100%; } .cur-selection-actions .btn { flex: 1 1 auto; } }
+
+.cur-list-table th:first-child, .cur-list-table td:first-child { width: 42px; text-align: center; }
+@media (max-width: 767.98px) {
+  .cur-card { min-width: 0; max-width: 100%; }
+  .cur-selection-toolbar { align-items: flex-start; }
+  .cur-selection-actions { width: 100%; }
+  .cur-selection-actions .btn { flex: 1 1 125px; min-width: 0; }
+  .cur-course-btn { gap: 8px; padding-left: 10px; padding-right: 10px; }
+  .cur-course-btn-title { overflow-wrap: anywhere; }
+}
+
+.cur-program-reminder {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 9px 11px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-left: 3px solid rgb(var(--accent));
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-faint);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+.cur-program-reminder i { color: rgb(var(--accent)); flex: 0 0 auto; margin-top: 2px; }
+.cur-program-reminder strong { color: var(--text-soft); }
+@media (max-width: 575.98px) {
+  .sch-subject-empty-actions { flex-direction: column; align-items: stretch; }
+  .sch-subject-empty-actions .btn { width: 100%; }
+}
+
+@media (max-width: 575.98px) {
+    .curv-actions { gap: 6px; }
+    .curv-btn {
+        height: 36px;
+        min-height: 36px;
+        padding: 0 7px;
+        gap: 5px;
+        border-radius: var(--radius-sm);
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .curv-btn i { font-size: .82rem; }
+}
+
+/* CURRICULUM TRACKER */
+.cur-tracker-context, .cur-tracker-overview, .cur-tracker-breakdown { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-md); padding: var(--card-pad, 18px); min-width: 0; }
+.cur-tracker-context { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-left: 3px solid rgb(var(--accent)); }
+.cur-tracker-context-main { display: grid; gap: 3px; min-width: 0; }
+.cur-tracker-eyebrow { color: var(--text-faint); font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .08em; }
+.cur-tracker-context-main strong { color: var(--text); font-size: 1.02rem; overflow-wrap: anywhere; }
+.cur-tracker-context-term { color: var(--text-soft); font-size: .8rem; }
+.cur-tracker-context-stats { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-faint); font-size: .76rem; }
+.cur-tracker-context-stats b { color: var(--text); font-family: var(--font-mono); font-size: .9rem; margin-right: 3px; }
+.cur-tracker-warning { flex-basis: 100%; display: flex; gap: 7px; align-items: flex-start; padding-top: 9px; border-top: 1px solid var(--border); color: var(--text-faint); font-size: .76rem; line-height: 1.4; }
+.cur-tracker-warning i { color: #b45309; flex: 0 0 auto; }
+.cur-tracker-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.cur-tracker-section-heading h2 { margin: 3px 0 0; color: var(--text); font-family: var(--font-display); font-size: 1.02rem; }
+.cur-tracker-total, .cur-tracker-hint { color: var(--text-faint); font-family: var(--font-mono); font-size: .72rem; }
+.cur-tracker-progress { margin-bottom: 16px; }
+.cur-tracker-progress-bar, .cur-tracker-sem-progress { height: 7px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; }
+.cur-tracker-progress-bar span, .cur-tracker-sem-progress span { display: block; height: 100%; background: rgb(var(--accent)); }
+.cur-tracker-progress-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--text-faint); font-size: .72rem; }
+.cur-tracker-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.cur-tracker-stat { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--border); border-left: 3px solid var(--text-faint); background: var(--surface-2); min-width: 0; }
+.cur-tracker-stat-done { border-left-color: #34d399; }
+.cur-tracker-stat-current { border-left-color: rgb(var(--accent)); }
+.cur-tracker-stat-warning { border-left-color: #b45309; }
+.cur-tracker-stat-value { color: var(--text); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 700; }
+.cur-tracker-stat-label { color: var(--text-soft); font-size: .73rem; font-weight: 700; overflow-wrap: anywhere; }
+.cur-tracker-stat-units { color: var(--text-faint); font-size: .68rem; }
+.cur-tracker-year, .cur-tracker-semester, .cur-tracker-subject { border: 1px solid var(--border); background: var(--surface); }
+.cur-tracker-year + .cur-tracker-year { border-top: 0; }
+.cur-tracker-year > summary, .cur-tracker-semester > summary, .cur-tracker-subject > summary { list-style: none; cursor: pointer; }
+.cur-tracker-year > summary::-webkit-details-marker, .cur-tracker-semester > summary::-webkit-details-marker, .cur-tracker-subject > summary::-webkit-details-marker { display: none; }
+.cur-tracker-year > summary { display: flex; align-items: center; gap: 10px; padding: 12px; color: var(--text); }
+.cur-tracker-year > summary::after, .cur-tracker-semester > summary::after { content: '\f282'; margin-left: auto; color: var(--text-faint); font-family: bootstrap-icons; font-size: .8rem; }
+.cur-tracker-year[open] > summary::after, .cur-tracker-semester[open] > summary::after { content: '\f286'; }
+.cur-tracker-year[open] > summary { background: rgba(var(--accent), .06); }
+.cur-tracker-year-number { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 25px; background: rgb(var(--accent)); color: var(--on-accent); font-family: var(--font-mono); font-size: .76rem; font-weight: 700; }
+.cur-tracker-year-title { font-weight: 700; font-size: .84rem; }
+.cur-tracker-current-chip { padding: 2px 5px; border: 1px solid rgba(var(--accent), .35); color: rgb(var(--accent)); font-family: var(--font-mono); font-size: .58rem; font-weight: 700; letter-spacing: .04em; }
+.cur-tracker-year-progress, .cur-tracker-sem-meta { margin-left: auto; color: var(--text-faint); font-family: var(--font-mono); font-size: .7rem; }
+.cur-tracker-year-body { border-top: 1px solid var(--border); padding: 8px; display: grid; gap: 8px; }
+.cur-tracker-semester > summary { display: flex; align-items: center; gap: 8px; padding: 10px; color: var(--text-soft); font-size: .8rem; font-weight: 700; }
+.cur-tracker-semester[open] > summary { color: rgb(var(--accent)); }
+.cur-tracker-sem-body { padding: 0 10px 10px; }
+.cur-tracker-sem-caption { color: var(--text-faint); font-size: .7rem; margin: 5px 0 8px; }
+.cur-tracker-subject { margin-top: 6px; background: var(--surface-2); }
+.cur-tracker-subject > summary { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 9px 10px; }
+.cur-tracker-subject-code { color: var(--text); font-family: var(--font-mono); font-size: .72rem; font-weight: 700; }
+.cur-tracker-subject-name { min-width: 0; color: var(--text-soft); font-size: .76rem; overflow-wrap: anywhere; }
+.cur-tracker-subject-units { color: var(--text-faint); font-family: var(--font-mono); font-size: .68rem; white-space: nowrap; }
+.cur-tracker-status { display: inline-flex; align-items: center; gap: 4px; width: max-content; padding: 3px 6px; border: 1px solid var(--border); font-size: .62rem; font-weight: 700; white-space: nowrap; }
+.cur-tracker-status-completed { color: #34d399; }
+.cur-tracker-status-ongoing { color: rgb(var(--accent)); }
+.cur-tracker-status-needs { color: #b45309; }
+.cur-tracker-status-not-taken { color: var(--text-faint); }
+.cur-tracker-subject-detail { display: grid; gap: 8px; padding: 10px; border-top: 1px solid var(--border); color: var(--text-soft); font-size: .73rem; line-height: 1.4; }
+.cur-tracker-detail-label { display: block; color: var(--text-faint); font-family: var(--font-mono); font-size: .61rem; text-transform: uppercase; letter-spacing: .05em; }
+.cur-tracker-subject-detail p { margin: 0; color: var(--text-faint); }
+.cur-tracker-prereqs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.cur-tracker-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.cur-tracker-locked { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 24px; padding: 11px 13px; border: 1px solid var(--border); border-left: 3px solid rgb(var(--accent)); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-faint); font-size: .78rem; line-height: 1.4; }
+.cur-tracker-locked i { color: rgb(var(--accent)); }
+@media (max-width: 767.98px) {
+    .cur-tracker-context, .cur-tracker-overview, .cur-tracker-breakdown { padding: 13px; }
+    .cur-tracker-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cur-tracker-year-progress, .cur-tracker-sem-meta { font-size: .64rem; }
+    .cur-tracker-subject > summary { grid-template-columns: 1fr auto; }
+    .cur-tracker-subject-name { grid-column: 1 / -1; grid-row: 2; }
+    .cur-tracker-subject-units { grid-column: 2; grid-row: 1; }
+    .cur-tracker-status { grid-column: 1 / -1; grid-row: 3; }
+}
+@media (max-width: 420px) {
+    .cur-tracker-year > summary, .cur-tracker-semester > summary { align-items: flex-start; flex-wrap: wrap; }
+    .cur-tracker-year-progress, .cur-tracker-sem-meta { width: 100%; margin-left: 35px; }
+    .cur-tracker-sem-meta { margin-left: 0; }
+}
+
+.cur-tracker-editor { padding-top: 2px; }
+.cur-tracker-editor-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.cur-tracker-editor-actions .btn { font-size: .68rem; padding: 4px 7px; }
+.cur-tracker-editor-actions .btn.active { border-color: rgb(var(--accent)); color: rgb(var(--accent)); background: rgba(var(--accent), .08); }
+@media (max-width: 575.98px) {
+  .cur-tracker-hint { width: 100%; }
+}
+
+/* Final structured viewer refinement: one page frame with two useful regions.
+   Nested tracker surfaces use hairlines and spacing instead of additional cards. */
+.cur-card:has(.cur-layout) {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+.cur-card:has(.cur-layout) .cur-layout {
+    gap: 14px;
+}
+.cur-card:has(.cur-layout) .cur-tracker-context,
+.cur-card:has(.cur-layout) .cur-tracker-overview,
+.cur-card:has(.cur-layout) .cur-tracker-breakdown {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+}
+.cur-card:has(.cur-layout) .cur-tracker-overview {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+.cur-card:has(.cur-layout) .cur-tracker-breakdown {
+    padding-top: 2px;
+}
+.cur-card:has(.cur-layout) .cur-tracker-section-heading {
+    margin-bottom: 10px;
+}
+.cur-card:has(.cur-layout) .cur-tracker-stats {
+    gap: 6px;
+}
+.cur-card:has(.cur-layout) .cur-tracker-stat {
+    padding: 8px;
+}
+.cur-card:has(.cur-layout) .cur-area-results {
+    margin-bottom: 0;
+}
+.cur-card:has(.cur-layout) .cur-area-results {
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+}
+.cur-card:has(.cur-layout) .cur-selection-toolbar {
+    margin-bottom: 8px;
+}
+
+/* Curriculum page redesign: a compact header, a control rail, and one
+   focused subject area. Existing IDs and controls remain unchanged. */
+.cur-card:has(.cur-curriculum-shell) {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+.cur-curriculum-shell {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+}
+.cur-program-heading {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+.cur-program-heading strong {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+.cur-program-heading > span:last-child {
+    color: var(--text-faint);
+    font-size: .72rem;
+}
+.cur-program-kicker {
+    color: rgb(var(--accent));
+    font-family: var(--font-mono);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.cur-curriculum-shell .cur-layout {
+    gap: 14px;
+}
+.cur-curriculum-shell .cur-tracker-context,
+.cur-curriculum-shell .cur-tracker-overview,
+.cur-curriculum-shell .cur-tracker-breakdown {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+}
+.cur-curriculum-shell .cur-tracker-overview {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+.cur-curriculum-shell .cur-tracker-breakdown {
+    padding-top: 0;
+}
+.cur-curriculum-shell .cur-tracker-section-heading {
+    margin-bottom: 10px;
+}
+.cur-curriculum-shell .cur-tracker-section-heading h2 {
+    font-size: 1rem;
+}
+.cur-curriculum-shell .cur-area-results {
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+.cur-results-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 10px;
+}
+.cur-results-heading h2 {
+    margin: 3px 0 0;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+.cur-results-note {
+    max-width: 270px;
+    color: var(--text-faint);
+    font-size: .72rem;
+    line-height: 1.35;
+    text-align: right;
+}
+.cur-curriculum-shell .cur-selection-toolbar {
+    margin-bottom: 8px;
+}
+@media (min-width: 992px) {
+    .cur-curriculum-shell .cur-layout {
+        grid-template-columns: minmax(230px, 260px) minmax(0, 1fr);
+        align-items: start;
+    }
+}
+@media (max-width: 575.98px) {
+    .cur-program-heading strong { font-size: 1rem; }
+    .cur-results-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .cur-results-note {
+        max-width: none;
+        text-align: left;
+    }
+}
+
+/* Swiss editorial header: the program switcher stays at the top of the page,
+   beside the curriculum identity, instead of becoming a lower content block. */
+.cur-card:has(.cur-curriculum-header) {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.cur-curriculum-shell {
+    gap: 18px;
+}
+.cur-curriculum-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 0 0 16px;
+    border-bottom: 2px solid var(--text);
+}
+.cur-program-switcher {
+    flex: 0 1 310px;
+    min-width: 220px;
+}
+.cur-program-switcher .cur-program-group {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+}
+.cur-program-switcher .cur-nav-label {
+    margin: 0;
+    color: var(--text-faint);
+}
+.cur-program-switcher .form-select {
+    min-height: 40px;
+    border-color: var(--text);
+    background-color: var(--surface);
+    font-weight: 600;
+}
+.cur-program-switcher .form-select:focus {
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 2px rgba(var(--accent), .12);
+}
+.cur-curriculum-header + .cur-layout {
+    margin-top: 0;
+}
+@media (max-width: 700px) {
+    .cur-curriculum-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 13px;
+    }
+    .cur-program-switcher {
+        min-width: 0;
+        flex-basis: auto;
+    }
+}
+
+/* Focused two-panel composition: tracker and subject catalog each get one
+   readable surface; controls stay inside the subject catalog surface. */
+.cur-curriculum-shell .cur-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+}
+.cur-tracker-panel,
+.cur-subject-panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+.cur-tracker-panel {
+    display: grid;
+    gap: 16px;
+}
+.cur-subject-panel {
+    display: grid;
+    gap: 12px;
+}
+.cur-panel-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+.cur-panel-heading h2 {
+    margin: 3px 0 0;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.2;
+}
+.cur-panel-note {
+    max-width: 300px;
+    color: var(--text-faint);
+    font-size: .72rem;
+    line-height: 1.35;
+    text-align: right;
+}
+.cur-tracker-panel .cur-tracker-context,
+.cur-tracker-panel .cur-tracker-overview,
+.cur-tracker-panel .cur-tracker-breakdown {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+}
+.cur-tracker-panel .cur-tracker-overview {
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+.cur-tracker-panel .cur-tracker-breakdown {
+    padding-top: 0;
+}
+.cur-tracker-panel .cur-tracker-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+.cur-tracker-panel .cur-tracker-stat {
+    border: 1px solid var(--border);
+    border-left-width: 1px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    padding: 11px;
+}
+.cur-tracker-panel .cur-tracker-stat-done,
+.cur-tracker-panel .cur-tracker-stat-current,
+.cur-tracker-panel .cur-tracker-stat-warning {
+    border-left-color: var(--border);
+}
+.cur-tracker-panel .cur-tracker-stat-value {
+    font-size: 1.15rem;
+}
+.cur-tracker-panel .cur-tracker-progress-bar {
+    height: 8px;
+    border-radius: 1px;
+}
+.cur-tracker-panel .cur-tracker-year,
+.cur-tracker-panel .cur-tracker-semester {
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+}
+.cur-tracker-panel .cur-tracker-year:last-child {
+    border-bottom: 0;
+}
+.cur-tracker-panel .cur-tracker-year > summary {
+    min-height: 52px;
+    padding: 10px 4px;
+    transition: background .15s ease;
+}
+.cur-tracker-panel .cur-tracker-year > summary:hover {
+    background: rgba(var(--accent), .05);
+}
+.cur-tracker-panel .cur-tracker-year-number {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+    border-radius: 50%;
+}
+.cur-tracker-panel .cur-tracker-year-title {
+    font-size: .88rem;
+}
+.cur-tracker-panel .cur-tracker-year-body {
+    gap: 0;
+    padding: 0 0 8px 42px;
+    border-top: 0;
+}
+.cur-tracker-panel .cur-tracker-semester {
+    border-bottom: 0;
+}
+.cur-tracker-panel .cur-tracker-semester > summary {
+    padding: 9px 10px;
+    border-left: 2px solid var(--border);
+    background: transparent;
+}
+.cur-tracker-panel .cur-tracker-semester[open] > summary {
+    border-left-color: rgb(var(--accent));
+    background: rgba(var(--accent), .05);
+}
+.cur-tracker-panel .cur-tracker-sem-body {
+    padding: 0 10px 9px;
+    border-left: 2px solid var(--border);
+}
+.cur-tracker-panel .cur-tracker-subject {
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+}
+.cur-tracker-panel .cur-tracker-subject > summary {
+    padding-left: 0;
+    padding-right: 0;
+}
+.cur-subject-panel .cur-area-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: end;
+}
+.cur-subject-panel .cur-area-nav .cur-nav-group {
+    margin: 0;
+}
+.cur-subject-panel .cur-search-wrap {
+    margin: 0;
+}
+.cur-subject-panel .cur-area-results {
+    padding-top: 2px;
+    border-top: 1px solid var(--border);
+}
+.cur-subject-panel .cur-list-header {
+    margin-top: 4px;
+}
+@media (max-width: 700px) {
+    .cur-tracker-panel,
+    .cur-subject-panel {
+        padding: 13px;
+    }
+    .cur-panel-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .cur-panel-note {
+        max-width: none;
+        text-align: left;
+    }
+    .cur-tracker-panel .cur-tracker-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cur-subject-panel .cur-area-nav {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+@media (max-width: 420px) {
+    .cur-tracker-panel .cur-tracker-year-body {
+        padding-left: 6px;
+    }
+    .cur-tracker-panel .cur-tracker-sem-body {
+        padding-left: 7px;
+    }
+}
+
+/* Final spacing pass: controls follow the catalog description, and the
+   tracker uses a dashboard-style current-term panel. */
+.cur-subject-panel .cur-panel-heading {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+.cur-subject-panel .cur-search-wrap {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin: 0;
+}
+.cur-subject-panel .cur-search-input {
+    height: 42px !important;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.cur-subject-panel .cur-area-nav {
+    display: block;
+}
+.cur-subject-panel .cur-area-nav .cur-nav-group {
+    margin: 0 0 12px;
+}
+.cur-subject-panel .cur-area-nav .cur-nav-group:last-child {
+    margin-bottom: 0;
+}
+.cur-subject-panel .cur-pill-row-years {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.cur-subject-panel .cur-pill-row-sems {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.cur-subject-panel .cur-area-results {
+    border-top: 0;
+    padding-top: 0;
+}
+.cur-tracker-panel .cur-panel-heading {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+.cur-tracker-panel .cur-tracker-context,
+.cur-tracker-panel .cur-tracker-overview {
+    border: 0;
+}
+.cur-tracker-panel .cur-tracker-overview {
+    padding-top: 0;
+}
+.cur-tracker-current-card {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(190px, 1.25fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 15px;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--surface-2) !important;
+}
+.cur-tracker-current-progress {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+.cur-tracker-current-progress strong {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+.cur-tracker-current-progress > span:last-child {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: .64rem;
+}
+.cur-tracker-current-progress .cur-tracker-progress-bar {
+    margin: 3px 0 0;
+    height: 7px;
+}
+.cur-tracker-current-card .cur-tracker-context-stats {
+    display: grid;
+    gap: 5px;
+    white-space: nowrap;
+}
+.cur-tracker-panel .cur-tracker-warning {
+    grid-column: 1 / -1;
+    border-top: 0;
+    padding-top: 0;
+}
+.cur-tracker-panel .cur-tracker-year {
+    margin: 6px 0;
+    border: 0;
+}
+.cur-tracker-panel .cur-tracker-year > summary {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+}
+.cur-tracker-panel .cur-tracker-year[open] > summary {
+    border-color: rgba(var(--accent), .35);
+    background: rgba(var(--accent), .04);
+}
+.cur-tracker-panel .cur-tracker-year-body {
+    padding: 5px 0 2px;
+}
+.cur-tracker-panel .cur-tracker-semester {
+    margin: 5px 0;
+}
+.cur-tracker-panel .cur-tracker-semester > summary,
+.cur-tracker-panel .cur-tracker-semester[open] > summary {
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    padding: 10px 12px;
+}
+.cur-tracker-panel .cur-tracker-sem-body {
+    padding: 4px 12px 5px;
+    border: 0;
+}
+.cur-tracker-panel .cur-tracker-subject {
+    border-top: 1px solid var(--border);
+}
+@media (max-width: 700px) {
+    .cur-subject-panel .cur-pill-row-years {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cur-subject-panel .cur-pill-row-sems {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cur-tracker-current-card {
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+    }
+    .cur-tracker-current-progress {
+        justify-self: end;
+        text-align: right;
+    }
+    .cur-tracker-current-card .cur-tracker-context-stats {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+@media (max-width: 420px) {
+    .cur-tracker-current-card {
+        grid-template-columns: 1fr;
+    }
+    .cur-tracker-current-progress {
+        justify-self: stretch;
+        text-align: left;
+    }
+    .cur-tracker-current-card .cur-tracker-context-stats {
+        grid-column: auto;
+    }
+}
+
+/* UI refinement: unify the program card, align catalog controls, and keep
+   requirement rows readable at every breakpoint. */
+.cur-curriculum-header {
+    padding: 15px 17px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+.cur-subject-panel {
+    gap: 16px;
+}
+.cur-subject-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 340px);
+    align-items: center;
+    gap: 22px;
+}
+.cur-subject-top .cur-panel-heading {
+    padding: 0;
+    border: 0;
+}
+.cur-subject-top .cur-area-search {
+    width: 100%;
+    margin: 0;
+}
+.cur-subject-top .cur-search-input {
+    height: 40px !important;
+    background: var(--surface-2);
+}
+.cur-subject-panel .cur-area-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+.cur-subject-panel .cur-area-nav .cur-nav-group {
+    margin: 0;
+}
+.cur-subject-panel .cur-pill-row-years {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.cur-subject-panel .cur-pill-row-sems {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    flex-wrap: nowrap;
+}
+.cur-subject-panel .cur-pill-btn {
+    min-width: 0;
+    padding: 9px 7px;
+}
+.cur-subject-panel .cur-selection-toolbar {
+    display: grid;
+    gap: 9px;
+    padding: 11px;
+    margin: 12px 0;
+    background: var(--surface-2);
+}
+.cur-subject-panel .cur-selection-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+}
+.cur-subject-panel .cur-selection-actions .btn {
+    min-width: 0;
+    width: 100%;
+}
+.cur-subject-panel .cur-selection-actions .btn:last-child {
+    grid-column: 1 / -1;
+}
+.cur-subject-panel .cur-area-results {
+    padding-top: 0;
+    border: 0;
+}
+.cur-tracker-panel .cur-tracker-year > summary {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+}
+.cur-tracker-panel .cur-tracker-year > summary::after,
+.cur-tracker-panel .cur-tracker-semester > summary::after {
+    margin-left: 0;
+}
+.cur-tracker-panel .cur-tracker-year-progress,
+.cur-tracker-panel .cur-tracker-sem-meta {
+    margin-left: 0;
+    white-space: nowrap;
+    text-align: right;
+}
+.cur-tracker-panel .cur-tracker-semester > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 9px;
+}
+.cur-tracker-panel .cur-tracker-sem-body {
+    padding: 12px 0 4px;
+}
+.cur-tracker-panel .cur-tracker-sem-progress {
+    margin-top: 2px;
+}
+.cur-tracker-panel .cur-tracker-subject {
+    margin-top: 7px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.cur-tracker-panel .cur-tracker-subject > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 12px;
+}
+.cur-tracker-panel .cur-tracker-subject-main {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+.cur-tracker-panel .cur-tracker-subject-code {
+    color: var(--text);
+    font-size: .76rem;
+}
+.cur-tracker-panel .cur-tracker-subject-name {
+    color: var(--text-faint);
+    font-size: .76rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+.cur-tracker-panel .cur-tracker-subject-meta {
+    display: grid;
+    justify-items: end;
+    align-content: center;
+    gap: 5px;
+    min-width: 100px;
+}
+.cur-tracker-panel .cur-tracker-subject-units {
+    color: var(--text-soft);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.cur-tracker-panel .cur-tracker-status {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: .64rem;
+}
+.cur-tracker-panel .cur-tracker-subject-detail {
+    margin: 0 12px 11px;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--border);
+}
+@media (max-width: 700px) {
+    .cur-curriculum-header {
+        padding: 13px;
+    }
+    .cur-subject-top {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .cur-subject-panel .cur-area-nav {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .cur-subject-panel .cur-pill-row-years {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cur-subject-panel .cur-pill-row-sems {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    .cur-tracker-panel .cur-tracker-year > summary {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+    .cur-tracker-panel .cur-tracker-year-progress {
+        grid-column: 2 / -1;
+        justify-self: end;
+    }
+    .cur-tracker-panel .cur-tracker-semester > summary {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        grid-column: 1 / -1;
+        justify-self: start;
+        text-align: left;
+    }
+    .cur-tracker-panel .cur-tracker-subject > summary {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+}
+@media (max-width: 420px) {
+    .cur-tracker-panel .cur-tracker-subject > summary {
+        grid-template-columns: minmax(0, 1fr) 92px;
+    }
+    .cur-tracker-panel .cur-tracker-subject-meta {
+        min-width: 0;
+    }
+}
+
+.cur-tracker-current-bar {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+.cur-tracker-current-bar .cur-tracker-progress-bar {
+    width: 100%;
+    height: 8px;
+}
+.cur-tracker-current-progress .cur-tracker-progress-bar {
+    margin: 0;
+}
+@media (max-width: 700px) {
+    .cur-tracker-current-bar {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Subject catalog desktop alignment and mobile edge correction. */
+.cur-subject-panel {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.cur-subject-top {
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 340px);
+    align-items: stretch;
+}
+.cur-subject-top .cur-panel-heading {
+    display: block;
+    align-self: stretch;
+}
+.cur-subject-top .cur-panel-note {
+    display: block;
+    max-width: 420px;
+    margin-top: 5px;
+    text-align: left;
+}
+.cur-subject-top .cur-area-search {
+    display: flex;
+    align-items: stretch;
+    align-self: stretch;
+}
+.cur-subject-top .cur-search-input {
+    height: auto !important;
+    min-height: 40px;
+}
+.cur-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px 8px;
+    width: 100%;
+    min-width: 0;
+}
+.cur-nav-grid .cur-nav-label {
+    margin: 0;
+    min-width: 0;
+}
+.cur-nav-year-label,
+.cur-nav-grid .cur-pill-row-years {
+    grid-column: 1 / 5;
+}
+.cur-nav-sem-label,
+.cur-nav-grid .cur-pill-row-sems {
+    grid-column: 5 / 7;
+}
+.cur-nav-year-label,
+.cur-nav-sem-label {
+    grid-row: 1;
+}
+.cur-nav-grid .cur-pill-row-years,
+.cur-nav-grid .cur-pill-row-sems {
+    grid-row: 2;
+    min-width: 0;
+}
+.cur-nav-grid .cur-pill-row-years {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+.cur-nav-grid .cur-pill-row-sems {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+.cur-nav-grid .cur-pill-row-sems .cur-pill-btn {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.cur-nav-grid .cur-pill-btn {
+    width: 100%;
+    box-sizing: border-box;
+}
+.cur-subject-panel .cur-selection-toolbar {
+    box-sizing: border-box;
+}
+@media (min-width: 701px) {
+    .cur-subject-panel .cur-selection-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .cur-subject-panel .cur-selection-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        width: auto;
+        gap: 6px;
+    }
+    .cur-subject-panel .cur-selection-actions .btn,
+    .cur-subject-panel .cur-selection-actions .btn:last-child {
+        flex: 0 0 auto;
+        width: auto;
+        grid-column: auto;
+    }
+}
+@media (max-width: 700px) {
+    .cur-subject-panel .cur-area-nav,
+    .cur-nav-grid,
+    .cur-nav-grid .cur-pill-row-years,
+    .cur-nav-grid .cur-pill-row-sems {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .cur-nav-grid {
+        display: block;
+    }
+    .cur-nav-grid .cur-nav-label {
+        margin: 0 0 6px;
+    }
+    .cur-nav-grid .cur-pill-row-years {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .cur-nav-grid .cur-pill-row-sems {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-selection-toolbar {
+        margin-right: 0;
+    }
+}
+
+/* Tracker spacing and right-side disclosure controls. */
+.cur-tracker-panel {
+    box-sizing: border-box;
+    padding: 18px;
+    overflow: hidden;
+}
+.cur-tracker-panel .cur-tracker-current-card {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px;
+}
+.cur-tracker-panel .cur-tracker-year > summary,
+.cur-tracker-panel .cur-tracker-semester > summary {
+    position: relative;
+    padding-right: 34px;
+}
+.cur-tracker-panel .cur-tracker-year > summary::after,
+.cur-tracker-panel .cur-tracker-semester > summary::after {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    margin: 0;
+    transform: translateY(-50%);
+}
+.cur-tracker-panel .cur-tracker-year-progress,
+.cur-tracker-panel .cur-tracker-sem-meta {
+    padding-right: 0;
+}
+.cur-tracker-panel .cur-tracker-subject-meta {
+    justify-self: end;
+    text-align: right;
+}
+@media (max-width: 700px) {
+    .cur-tracker-panel {
+        padding: 14px;
+    }
+    .cur-tracker-panel .cur-tracker-current-card {
+        padding: 13px;
+    }
+    .cur-tracker-panel .cur-tracker-year > summary,
+    .cur-tracker-panel .cur-tracker-semester > summary {
+        padding-right: 32px;
+    }
+}
+
+/* Keep disclosure metadata on the same horizontal axis as its title, with
+   the chevron pinned to the far right at every breakpoint. */
+.cur-tracker-panel .cur-tracker-year > summary,
+.cur-tracker-panel .cur-tracker-semester > summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+.cur-tracker-panel .cur-tracker-year-title,
+.cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.cur-tracker-panel .cur-tracker-year-progress,
+.cur-tracker-panel .cur-tracker-sem-meta {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+@media (max-width: 700px) {
+    .cur-tracker-panel .cur-tracker-year-progress,
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        width: auto;
+        margin-left: auto;
+        text-align: right;
+        white-space: nowrap;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        font-size: .6rem;
+    }
+}
+
+/* Final responsive correction: keep the catalog within its card and keep
+   tracker disclosure controls and metadata on the same row. */
+.cur-subject-panel,
+.cur-tracker-panel,
+.cur-subject-top,
+.cur-panel-heading,
+.cur-area-nav,
+.cur-nav-grid,
+.cur-area-results,
+.cur-selection-toolbar {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.cur-tracker-panel .cur-tracker-year > summary,
+.cur-tracker-panel .cur-tracker-semester > summary {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    position: relative;
+    padding-right: 34px !important;
+}
+.cur-tracker-panel .cur-tracker-year > summary::after,
+.cur-tracker-panel .cur-tracker-semester > summary::after {
+    content: '\f282';
+    position: absolute !important;
+    top: 50% !important;
+    right: 10px !important;
+    left: auto !important;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
+}
+.cur-tracker-panel .cur-tracker-year[open] > summary::after,
+.cur-tracker-panel .cur-tracker-semester[open] > summary::after {
+    content: '\f286';
+}
+.cur-tracker-panel .cur-tracker-year-title,
+.cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.cur-tracker-panel .cur-tracker-year-progress,
+.cur-tracker-panel .cur-tracker-sem-meta {
+    flex: 0 0 auto;
+    width: auto !important;
+    margin: 0 0 0 auto !important;
+    white-space: nowrap;
+    text-align: right !important;
+}
+.cur-tracker-panel .cur-tracker-subject > summary {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(76px, auto) !important;
+    align-items: center !important;
+}
+.cur-tracker-panel .cur-tracker-subject-meta {
+    justify-self: end !important;
+    align-self: center;
+    text-align: right !important;
+}
+.cur-tracker-panel .cur-tracker-subject-status,
+.cur-tracker-panel .cur-tracker-subject-meta .cur-tracker-status {
+    justify-self: end;
+}
+@media (max-width: 700px) {
+    .cur-subject-panel {
+        width: 100%;
+        padding: 12px !important;
+        overflow: hidden;
+    }
+    .cur-subject-top {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px !important;
+    }
+    .cur-subject-panel .cur-search-input {
+        width: 100%;
+        min-width: 0;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        display: block !important;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-nav-label {
+        display: flex;
+        margin: 0 0 6px !important;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+        width: 100%;
+        margin: 0 0 12px !important;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+        width: 100%;
+        margin: 0;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-btn {
+        min-width: 0;
+        width: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
+        font-size: .76rem;
+    }
+    .cur-subject-panel .cur-selection-toolbar {
+        width: 100%;
+        padding: 9px;
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-selection-actions {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px;
+    }
+    .cur-subject-panel .cur-selection-actions .btn,
+    .cur-subject-panel .cur-selection-actions .btn:last-child {
+        min-width: 0;
+        width: 100%;
+        padding: 7px 3px;
+        font-size: .68rem;
+        white-space: nowrap;
+    }
+    .cur-tracker-panel {
+        width: 100%;
+        padding: 12px !important;
+    }
+    .cur-tracker-panel .cur-tracker-current-card {
+        width: 100%;
+        padding: 12px !important;
+    }
+    .cur-tracker-panel .cur-tracker-year > summary,
+    .cur-tracker-panel .cur-tracker-semester > summary {
+        gap: 6px;
+        padding: 9px 30px 9px 8px !important;
+    }
+    .cur-tracker-panel .cur-tracker-year-progress {
+        font-size: .64rem;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        font-size: .57rem !important;
+        letter-spacing: -.02em;
+    }
+    .cur-tracker-panel .cur-tracker-subject > summary {
+        grid-template-columns: minmax(0, 1fr) minmax(68px, auto) !important;
+        gap: 8px;
+        padding: 9px !important;
+    }
+    .cur-tracker-panel .cur-tracker-subject-meta {
+        min-width: 0 !important;
+        justify-items: end;
+    }
+    .cur-tracker-panel .cur-tracker-subject-units {
+        font-size: .66rem;
+    }
+    .cur-tracker-panel .cur-tracker-status {
+        font-size: .58rem;
+    }
+}
+@media (max-width: 360px) {
+    .cur-subject-panel .cur-selection-actions .btn,
+    .cur-subject-panel .cur-selection-actions .btn:last-child {
+        font-size: .62rem;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        font-size: .53rem !important;
+    }
+    .cur-tracker-panel .cur-tracker-year-progress {
+        font-size: .59rem;
+    }
+}
+
+/* Mobile-only corrections requested for catalog control order and tracker rows. */
+@media (max-width: 700px) {
+    /* DOM order is year label/options, then semester label/options. */
+    .cur-subject-panel .cur-nav-grid {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+    .cur-subject-panel .cur-nav-year-label { order: 1; }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years { order: 2; }
+    .cur-subject-panel .cur-nav-sem-label { order: 3; }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems { order: 4; }
+    .cur-subject-panel .cur-nav-year-label {
+        margin-top: 0 !important;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years {
+        margin-bottom: 12px !important;
+    }
+
+    /* Keep all three secondary actions in one row and center every label. */
+    .cur-subject-panel .cur-selection-actions {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        width: 100%;
+        gap: 6px;
+    }
+    .cur-subject-panel .cur-selection-actions .btn,
+    .cur-subject-panel .cur-selection-actions .btn:last-child {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .cur-subject-panel .cur-selection-actions .btn:last-child {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-selection-toolbar > div:first-child {
+        text-align: left;
+    }
+
+    /* Semester name remains left; semester totals stay to its right, before
+       the chevron, on the same header line. */
+    .cur-tracker-panel .cur-tracker-semester > summary {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 5px;
+        padding-right: 31px !important;
+    }
+    .cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+        white-space: nowrap;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        order: 2;
+        flex: 0 0 auto;
+        width: auto !important;
+        margin-left: auto !important;
+        white-space: nowrap;
+        text-align: right !important;
+        font-size: clamp(.48rem, 2.25vw, .61rem) !important;
+        letter-spacing: -.035em;
+    }
+    .cur-tracker-panel .cur-tracker-semester > summary .cur-tracker-current-chip {
+        order: 3;
+        flex: 0 0 auto;
+        padding: 1px 3px;
+        font-size: .48rem;
+    }
+}
+
+/* Focused mobile fixes: stack course metadata in the right column and make
+   selection actions occupy the full card width. */
+@media (max-width: 700px) {
+    .cur-tracker-panel .cur-tracker-subject > summary {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(82px, auto) !important;
+        align-items: center !important;
+        column-gap: 10px !important;
+    }
+    .cur-tracker-panel .cur-tracker-subject-main {
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+        align-self: center;
+    }
+    .cur-tracker-panel .cur-tracker-subject-name {
+        display: block;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+    }
+    .cur-tracker-panel .cur-tracker-subject-meta {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-end !important;
+        justify-content: center;
+        justify-self: end !important;
+        align-self: center;
+        gap: 4px;
+        min-width: 82px !important;
+        text-align: right !important;
+    }
+    .cur-tracker-panel .cur-tracker-subject-units,
+    .cur-tracker-panel .cur-tracker-subject-meta .cur-tracker-status {
+        display: block;
+        grid-column: auto !important;
+        grid-row: auto !important;
+        justify-self: end !important;
+        width: max-content;
+        max-width: 100%;
+        margin: 0;
+        text-align: right;
+    }
+    .cur-tracker-panel .cur-tracker-subject-status,
+    .cur-tracker-panel .cur-tracker-status {
+        grid-column: auto !important;
+        grid-row: auto !important;
+    }
+
+    .cur-subject-panel .cur-selection-toolbar {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100% !important;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .cur-subject-panel .cur-selection-toolbar > div:first-child,
+    .cur-subject-panel .cur-selection-actions {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .cur-subject-panel .cur-selection-actions {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-auto-flow: row;
+        gap: 6px !important;
+        margin: 0;
+    }
+    .cur-subject-panel .cur-selection-actions > .btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100%;
+        margin: 0;
+        padding: 7px 2px !important;
+        text-align: center !important;
+        white-space: nowrap;
+    }
+    .cur-subject-panel .cur-selection-actions > .btn:last-child {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+}
+
+/* Fine visual balance for tracker status labels, current markers, and progress. */
+.cur-tracker-panel .cur-tracker-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    line-height: 1.25;
+}
+.cur-tracker-panel .cur-tracker-status i {
+    display: inline-block;
+    flex: 0 0 auto;
+    line-height: 1;
+}
+.cur-tracker-panel .cur-tracker-year-title,
+.cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cur-tracker-panel .cur-tracker-year-progress,
+.cur-tracker-panel .cur-tracker-sem-meta {
+    margin-left: auto !important;
+}
+.cur-tracker-panel .cur-tracker-current-chip {
+    flex: 0 0 auto;
+    margin-left: 2px;
+    white-space: nowrap;
+    line-height: 1.2;
+}
+.cur-tracker-panel .cur-tracker-semester > summary .cur-tracker-current-chip {
+    order: 0;
+}
+.cur-tracker-panel .cur-tracker-current-bar .cur-tracker-progress-bar,
+.cur-tracker-panel .cur-tracker-current-bar .cur-tracker-progress-bar span {
+    border-radius: 999px;
+}
+@media (max-width: 700px) {
+    .cur-tracker-panel .cur-tracker-year-title,
+    .cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
+        flex: 0 1 auto;
+        max-width: 42%;
+    }
+    .cur-tracker-panel .cur-tracker-semester > summary .cur-tracker-current-chip {
+        order: 0;
+        padding: 1px 3px;
+        font-size: .48rem;
+    }
+    .cur-tracker-panel .cur-tracker-sem-meta {
+        margin-left: auto !important;
+    }
+}
+
+/* Mobile tracker finishing touches. */
+@media (max-width: 700px) {
+    .cur-tracker-panel .cur-tracker-status {
+        display: inline-flex !important;
+        flex-direction: row;
+        align-items: center !important;
+        justify-content: flex-end;
+        gap: 6px !important;
+        line-height: 1.35;
+        vertical-align: middle;
+    }
+    .cur-tracker-panel .cur-tracker-status i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 2px 0 0 !important;
+        line-height: 1;
+        vertical-align: middle;
+    }
+    .cur-tracker-panel .cur-tracker-sem-progress,
+    .cur-tracker-panel .cur-tracker-sem-progress span,
+    .cur-tracker-panel .cur-tracker-current-bar .cur-tracker-progress-bar,
+    .cur-tracker-panel .cur-tracker-current-bar .cur-tracker-progress-bar span {
+        border-radius: 999px !important;
+    }
+    .cur-tracker-panel .cur-tracker-subject-detail {
+        padding-bottom: 14px !important;
+    }
+    .cur-tracker-panel .cur-tracker-links {
+        padding-bottom: 3px;
+        margin-bottom: 2px;
+    }
+}
+
+/* Flat Dashboard-style progress tracks and compact program selector. */
+.cur-tracker-panel .cur-tracker-progress-bar,
+.cur-tracker-panel .cur-tracker-sem-progress {
+    height: 7px;
+    border: 0 !important;
+    outline: 0;
+    border-radius: 6px !important;
+    background: var(--surface-2);
+    box-shadow: none;
+}
+.cur-tracker-panel .cur-tracker-progress-bar span,
+.cur-tracker-panel .cur-tracker-sem-progress span {
+    border: 0;
+    border-radius: 6px !important;
+}
+.cur-tracker-panel .cur-tracker-overview {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+.cur-tracker-panel .cur-tracker-current-card + .cur-tracker-overview {
+    margin-top: 0 !important;
+}
+.cur-program-switcher .cur-program-group .cur-nav-label {
+    font-size: .66rem;
+}
+.cur-program-switcher .cur-program-group .form-select {
+    font-size: .82rem;
+    line-height: 1.25;
+    font-weight: 600;
+}
+.cur-program-switcher .cur-program-group .form-select option {
+    font-size: .82rem;
+}
+
+/* Progress and reminder spacing refinements. */
+.cur-tracker-panel .cur-tracker-current-bar .cur-tracker-progress-bar,
+.cur-tracker-panel .cur-tracker-sem-progress {
+    background: var(--border) !important;
+}
+.cur-tracker-panel .cur-tracker-current-card + .cur-tracker-overview {
+    margin-top: 12px !important;
+}
+.cur-tracker-panel .cur-tracker-locked {
+    margin: 0 !important;
+}
+.cur-subject-panel .cur-area-results > .cur-program-reminder {
+    margin-top: 10px;
+}
+.cur-subject-panel .cur-area-results #curYearResults > .cur-program-reminder {
+    margin-top: 10px;
+}
+
+/* Desktop-only curriculum layout refinements. */
+@media (min-width: 701px) {
+    .cur-curriculum-header {
+        gap: 28px;
+        padding: 16px 20px;
+        border: 1px solid var(--border);
+        border-bottom-width: 1px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+    }
+    .cur-program-switcher {
+        flex: 0 1 470px;
+        width: min(470px, 48%);
+        min-width: 360px;
+    }
+    .cur-program-switcher .cur-program-group {
+        grid-template-columns: minmax(108px, auto) minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+    }
+    .cur-program-switcher .cur-program-group .form-select {
+        width: 100%;
+        min-width: 0;
+        font-size: .8rem;
+        white-space: nowrap;
+    }
+    .cur-program-switcher .cur-program-group .form-select option {
+        white-space: nowrap;
+    }
+
+    .cur-tracker-panel {
+        padding: 22px !important;
+    }
+    .cur-tracker-panel .cur-tracker-current-card {
+        width: 100%;
+        min-width: 0;
+        padding: 20px !important;
+        grid-template-columns: minmax(150px, 1fr) minmax(220px, 1.25fr) minmax(130px, auto);
+        gap: 20px;
+    }
+    .cur-tracker-panel .cur-tracker-current-progress {
+        min-width: 0;
+    }
+    .cur-tracker-panel .cur-tracker-context-stats {
+        justify-self: end;
+        text-align: right;
+    }
+    .cur-tracker-panel .cur-tracker-subject-detail {
+        padding-bottom: 18px !important;
+    }
+    .cur-tracker-panel .cur-tracker-links {
+        gap: 8px;
+        padding-bottom: 5px;
+        margin-bottom: 3px;
+    }
+
+    .cur-subject-panel {
+        padding: 22px !important;
+    }
+    .cur-subject-top {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 42%);
+        align-items: stretch;
+        gap: 28px;
+    }
+    .cur-subject-top .cur-panel-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        min-height: 58px;
+    }
+    .cur-subject-top .cur-panel-note {
+        max-width: 100%;
+        text-align: left;
+    }
+    .cur-subject-top .cur-area-search {
+        align-self: stretch;
+        height: 100%;
+        min-height: 58px;
+    }
+    .cur-subject-top .cur-search-input {
+        height: 100% !important;
+        min-height: 58px;
+        font-size: .86rem !important;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 20px;
+        row-gap: 8px;
+    }
+    .cur-subject-panel .cur-nav-year-label,
+    .cur-subject-panel .cur-nav-sem-label {
+        grid-row: 1;
+    }
+    .cur-subject-panel .cur-nav-year-label,
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years {
+        grid-column: 1;
+    }
+    .cur-subject-panel .cur-nav-sem-label,
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        grid-column: 2;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years,
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        grid-row: 2;
+        min-width: 0;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        padding: 8px 5px;
+        text-align: center;
+        white-space: nowrap;
+        font-size: .76rem;
+    }
+    .cur-subject-panel .cur-selection-toolbar {
+        width: 100%;
+        min-width: 0;
+        padding: 12px 14px;
+    }
+    .cur-subject-panel .cur-selection-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-selection-actions > .btn {
+        min-height: 36px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .cur-subject-panel .cur-selection-actions > .btn:last-child {
+        width: auto;
+        margin-left: 2px;
+    }
+}
+
+/* Desktop-only fixes for the program selector and current progress card. */
+@media (min-width: 992px) {
+    .cur-curriculum-header {
+        align-items: center;
+    }
+    .cur-program-switcher {
+        flex: 0 0 min(600px, 50%);
+        width: min(600px, 50%);
+        min-width: 470px;
+    }
+    .cur-program-switcher .cur-program-group {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+        width: 100%;
+    }
+    .cur-program-switcher .cur-program-group .cur-nav-label {
+        justify-self: start;
+        white-space: nowrap;
+    }
+    .cur-program-switcher .cur-program-group .form-select {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .cur-program-switcher .cur-program-group .form-select option {
+        white-space: nowrap;
+    }
+
+    .cur-tracker-panel .cur-tracker-current-card {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        align-items: center;
+        column-gap: 24px;
+        row-gap: 12px;
+    }
+    .cur-tracker-panel .cur-tracker-context-main {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .cur-tracker-panel .cur-tracker-current-progress {
+        grid-column: 2;
+        grid-row: 1;
+        justify-items: end;
+        text-align: right;
+    }
+    .cur-tracker-panel .cur-tracker-current-bar {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+    .cur-tracker-panel .cur-tracker-current-card .cur-tracker-context-stats {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-align: left;
+    }
+    .cur-tracker-panel .cur-tracker-current-card .cur-tracker-context-stats span:last-child {
+        text-align: right;
+    }
+    .cur-tracker-panel .cur-tracker-warning {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Desktop-only catalog alignment; mobile catalog rules remain unchanged. */
+@media (min-width: 992px) {
+    .cur-subject-panel .cur-subject-top {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(340px, 44%);
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 28px;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-subject-top .cur-panel-heading {
+        justify-self: start;
+        align-self: stretch;
+        width: 100%;
+        text-align: left;
+    }
+    .cur-subject-panel .cur-subject-top .cur-panel-note {
+        align-self: flex-start;
+        margin-left: 0;
+        text-align: left;
+    }
+    .cur-subject-panel .cur-subject-top .cur-area-search {
+        justify-self: end;
+        align-self: stretch;
+        width: 100%;
+        min-width: 340px;
+        margin-left: auto;
+    }
+    .cur-subject-panel .cur-subject-top .cur-search-input {
+        width: 100%;
+        min-height: 58px;
+    }
+
+    .cur-subject-panel .cur-area-nav,
+    .cur-subject-panel .cur-nav-grid {
+        width: 100%;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 22px;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years,
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        width: 100%;
+        justify-self: stretch;
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-years {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-row-sems {
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    }
+    .cur-subject-panel .cur-nav-grid .cur-pill-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        text-align: center;
+    }
+}
+
+/* Desktop catalog spacing: compact left heading, right-aligned search, and
+   selector groups that use the full card width without squeezed columns. */
+@media (min-width: 992px) {
+    .cur-subject-panel .cur-subject-top {
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 44%);
+        align-items: stretch;
+        justify-content: space-between;
+        column-gap: 32px;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-subject-top .cur-panel-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 3px;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        text-align: left;
+    }
+    .cur-subject-panel .cur-subject-top .cur-panel-heading > div {
+        width: 100%;
+        text-align: left;
+    }
+    .cur-subject-panel .cur-subject-top .cur-panel-note {
+        display: block;
+        max-width: none;
+        margin: 0;
+        text-align: left;
+    }
+    .cur-subject-panel .cur-subject-top .cur-area-search {
+        justify-self: end;
+        align-self: stretch;
+        width: 100%;
+        min-width: 360px;
+        margin: 0 0 0 auto;
+    }
+    .cur-subject-panel .cur-subject-top .cur-search-input {
+        width: 100%;
+        height: 100% !important;
+        min-height: 60px;
+    }
+
+    .cur-subject-panel .cur-nav-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        grid-template-rows: auto auto;
+        column-gap: 24px;
+        row-gap: 9px;
+        width: 100%;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-year-label {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-sem-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        width: 100%;
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+        width: 100%;
+        gap: 8px;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years .cur-pill-btn,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems .cur-pill-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        padding: 8px 6px;
+        text-align: center;
+        white-space: nowrap;
+        font-size: .8rem;
+    }
+}
+
+/* Force the desktop catalog header into one horizontal row and expand the
+   selector groups to the catalog card edges. */
+@media (min-width: 701px) {
+    .cur-subject-panel > .cur-subject-top {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        justify-content: space-between !important;
+        gap: 28px !important;
+        width: 100% !important;
+        min-width: 0;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-panel-heading {
+        display: flex !important;
+        flex: 1 1 0 !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        min-width: 0 !important;
+        width: auto !important;
+        text-align: left !important;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-panel-heading > div,
+    .cur-subject-panel > .cur-subject-top > .cur-panel-heading .cur-panel-note {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        text-align: left !important;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-area-search {
+        display: flex !important;
+        flex: 0 0 42% !important;
+        align-self: stretch !important;
+        width: 42% !important;
+        min-width: 300px !important;
+        max-width: 520px;
+        margin: 0 0 0 auto !important;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-area-search .cur-search-input {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 60px !important;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        width: 100% !important;
+        gap: 8px 24px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-year-label {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-sem-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        display: grid !important;
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        min-width: 0;
+        gap: 8px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        display: grid !important;
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        min-width: 0;
+        gap: 8px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years .cur-pill-btn,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems .cur-pill-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 100% !important;
+        min-width: 0;
+        min-height: 44px;
+        padding: 8px 4px;
+        text-align: center !important;
+        white-space: nowrap;
+    }
+}
+
+/* Desktop catalog final sizing: shorter search field and wider year options. */
+@media (min-width: 701px) {
+    .cur-subject-panel > .cur-subject-top > .cur-area-search {
+        min-height: 0 !important;
+        height: 46px !important;
+        max-height: 46px;
+        align-self: center !important;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-area-search .cur-search-input {
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        grid-template-columns: minmax(0, 1.8fr) minmax(250px, 1fr) !important;
+        column-gap: 24px !important;
+    }
+}
+
+/* Desktop finishing pass for tracker stats and full-width year controls. */
+@media (min-width: 701px) {
+    .cur-tracker-panel .cur-tracker-stat {
+        padding: 16px !important;
+        min-height: 92px;
+        align-content: center;
+        gap: 4px;
+    }
+    .cur-subject-panel .cur-area-nav,
+    .cur-subject-panel .cur-nav-grid {
+        width: 100% !important;
+        max-width: none !important;
+    }
+    .cur-subject-panel .cur-nav-grid {
+        grid-template-columns: minmax(0, 2.5fr) minmax(210px, 1fr) !important;
+        column-gap: 22px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        width: 100% !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years .cur-pill-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding-left: 4px;
+        padding-right: 4px;
+        text-align: center !important;
+    }
+}
+
+/* Desktop selectors use the complete catalog width in separate full-width rows. */
+@media (min-width: 701px) {
+    .cur-subject-panel .cur-nav-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 7px !important;
+        width: 100% !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-label,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        display: grid !important;
+        grid-column: auto !important;
+        grid-row: auto !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-label {
+        display: flex !important;
+        margin: 0 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        margin: 0 0 8px !important;
+        gap: 10px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+        margin: 0 !important;
+        gap: 10px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years .cur-pill-btn,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems .cur-pill-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 44px;
+        text-align: center !important;
+    }
+}
+
+/* Desktop: place the two full-width selector groups side by side. */
+@media (min-width: 701px) {
+    .cur-subject-panel .cur-nav-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        align-items: start;
+        column-gap: 22px !important;
+        row-gap: 8px !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-year-label {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-nav-sem-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years,
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        display: grid !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-years {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+    .cur-subject-panel .cur-nav-grid > .cur-pill-row-sems {
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+    }
+}
+
+/* The nav wrapper was splitting its single selector grid into one outer
+   column. Let the inner year/semester grid span the complete catalog width. */
+@media (min-width: 701px) {
+    .cur-subject-panel #curNavWrap.cur-area-nav {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid {
+        width: 100% !important;
+        max-width: none !important;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) !important;
+    }
+}
+
+/* Tablet layout: use the desktop hierarchy with tablet-safe column sizing.
+   Scoped to 701–991px so phone and desktop layouts keep their own rules. */
+@media (min-width: 701px) and (max-width: 991.98px) {
+    .cur-curriculum-header {
+        align-items: center;
+        gap: 18px;
+    }
+    .cur-program-switcher {
+        flex: 0 1 42%;
+        width: 42%;
+        min-width: 270px;
+    }
+    .cur-program-switcher .cur-program-group {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        gap: 5px;
+    }
+    .cur-program-switcher .cur-program-group .cur-nav-label {
+        justify-self: start;
+        white-space: nowrap;
+    }
+    .cur-program-switcher .cur-program-group .form-select {
+        width: 100%;
+        min-width: 0;
+        font-size: .78rem;
+        white-space: nowrap;
+    }
+
+    .cur-tracker-panel {
+        padding: 18px !important;
+    }
+    .cur-tracker-panel .cur-tracker-current-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        align-items: center;
+        gap: 12px 18px;
+        width: 100%;
+        padding: 16px !important;
+    }
+    .cur-tracker-panel .cur-tracker-context-main {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .cur-tracker-panel .cur-tracker-current-progress {
+        grid-column: 2;
+        grid-row: 1;
+        justify-items: end;
+        text-align: right;
+    }
+    .cur-tracker-panel .cur-tracker-current-bar {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+    }
+    .cur-tracker-panel .cur-tracker-current-card .cur-tracker-context-stats {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .cur-tracker-panel .cur-tracker-current-card .cur-tracker-context-stats span:last-child {
+        text-align: right;
+    }
+
+    .cur-subject-panel {
+        padding: 18px !important;
+    }
+    .cur-subject-panel > .cur-subject-top {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        gap: 18px !important;
+        width: 100%;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-panel-heading {
+        display: flex !important;
+        flex: 1 1 0 !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        min-width: 0;
+        text-align: left;
+    }
+    .cur-subject-panel > .cur-subject-top .cur-panel-note {
+        margin: 3px 0 0;
+        max-width: none;
+        text-align: left;
+    }
+    .cur-subject-panel > .cur-subject-top > .cur-area-search {
+        display: flex !important;
+        flex: 0 0 40% !important;
+        width: 40% !important;
+        min-width: 220px !important;
+        max-width: 360px;
+        height: 46px !important;
+        min-height: 46px !important;
+        align-self: center !important;
+        margin-left: auto !important;
+    }
+    .cur-subject-panel > .cur-subject-top .cur-search-input {
+        width: 100% !important;
+        height: 46px !important;
+        min-height: 46px !important;
+    }
+
+    .cur-subject-panel #curNavWrap.cur-area-nav {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        width: 100% !important;
+        gap: 8px 16px !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid > .cur-nav-year-label {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid > .cur-pill-row-years {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        gap: 6px !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid > .cur-nav-sem-label {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    .cur-subject-panel #curNavWrap > .cur-nav-grid > .cur-pill-row-sems {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        gap: 6px !important;
+    }
+    .cur-subject-panel #curNavWrap .cur-pill-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        padding: 7px 3px;
+        text-align: center;
+        white-space: nowrap;
+        font-size: .7rem;
+    }
 }

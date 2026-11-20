@@ -85,6 +85,9 @@ function initGrades() {
     renderGradeCards();
     renderGradeReferenceTable();
     renderGwaCalculator();
+    const linkedSubjectId = new URLSearchParams(location.search).get('subject');
+    if (linkedSubjectId && DB.getSubject(linkedSubjectId))
+        setTimeout(() => openGradeModal(linkedSubjectId), 0);
 }
 
 // Overview (Current GWA) — full-width 3 stat blocks
