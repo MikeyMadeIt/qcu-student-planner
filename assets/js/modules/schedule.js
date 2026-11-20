@@ -105,9 +105,12 @@ function getSubjectAttendanceRate(subjectId) {
 
 function initSchedule() {
     const params = new URLSearchParams(location.search);
+    const linkedSubjectId = params.get('subject');
     if (params.get('new') === '1')
         openSubjectModal();
-    setSchedView('day');
+    setSchedView(linkedSubjectId && DB.getSubject(linkedSubjectId) ? 'list' : 'day');
+    if (linkedSubjectId && DB.getSubject(linkedSubjectId))
+        setTimeout(() => openSubjectModal(linkedSubjectId), 0);
     renderNav();
     renderAllViews();
     startTick();
@@ -744,7 +747,8 @@ function renderDaySummary() {
       <i class="bi bi-calendar-x" style="font-size:1.6rem;opacity:.4" aria-hidden="true"></i>
       <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
       ${semesterState ? (semesterState.detail ? `<div class="text-faint" style="font-size:.85rem">${semesterState.detail}</div>` : '') : `<div class="text-faint" style="font-size:.85rem">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
-      <button class="btn btn-accent btn-sm mt-3" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button>
+      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
+      <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>
     </div>`;
     }
     else {
@@ -809,7 +813,7 @@ function renderDaySummary() {
       </div>`;
         }).join('') + `</div>`;
     }
-    host.innerHTML = summaryHtml + conflictHtml + timelineHtml;
+    host.innerHTML = getCurriculumSetupHtml() + summaryHtml + conflictHtml + timelineHtml;
 }
 
 // Today's tasks panel
@@ -1041,6 +1045,27 @@ function computeOverlaps(classes) {
     return map;
 }
 
+// Show imported subjects that still need schedule details in both schedule views.
+function getCurriculumSetupHtml() {
+    const semId = DB.getActiveSemesterId();
+    const pending = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.source === 'curriculum' && s.setupStatus === 'needs_setup');
+    if (!pending.length) return '';
+    return `<div class="glass card-pad sch-curriculum-setup mb-3" aria-live="polite">
+      <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-3">
+        <div><div class="section-title mb-1"><i class="bi bi-book-half" aria-hidden="true"></i>From Curriculum</div><div class="text-faint sch-curriculum-setup-sub">${pending.length} subject${pending.length === 1 ? '' : 's'} awaiting setup</div></div>
+      </div>
+      <div class="sch-curriculum-setup-list">${pending.map(s => `<div class="sch-curriculum-setup-item"><div class="min-w-0"><div class="fw-bold" style="font-family:var(--font-mono);font-size:.82rem">${esc(s.code)}</div><div class="text-soft sch-curriculum-subject-name">${esc(s.desc)}</div><div class="text-faint" style="font-size:.72rem">${s.units} unit${s.units === 1 ? '' : 's'} · Additional details needed</div></div><button class="btn btn-accent btn-sm flex-shrink-0" onclick="openSubjectModal('${s.id}')"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Set Up</button></div>`).join('')}</div>
+    </div>`;
+}
+
+function renderCurriculumSetup(targetId) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    const html = getCurriculumSetupHtml();
+    target.classList.toggle('d-none', !html);
+    target.innerHTML = html;
+}
+
 // Subject list view (improved)
 
 function renderListView() {
@@ -1048,8 +1073,11 @@ function renderListView() {
     if (wrap) wrap.removeAttribute('aria-busy');
     const q = (document.getElementById('schSearchInput')?.value || '').toLowerCase().trim();
     const semId = DB.getActiveSemesterId();
+    renderCurriculumSetup('schCurriculumSetup');
     let list = DB.getSubjects().filter(s => {
         if (s.semesterId !== semId)
+            return false;
+        if (s.source === 'curriculum' && s.setupStatus === 'needs_setup')
             return false;
         if (!showArchived && s.archived)
             return false;
@@ -1062,8 +1090,9 @@ function renderListView() {
     if (!list.length) {
         wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-4">
       <i class="bi bi-journal-x" style="font-size:1.5rem;opacity:.4" aria-hidden="true"></i>
-      <div class="mt-2 text-faint">${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects found'}</div>
-      ${!showArchived ? `<button class="btn btn-accent btn-sm mt-3" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button>` : ''}
+      <div class="mt-2 fw-bold" style="color:var(--text)">${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</div>
+      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
+      ${!showArchived ? `<div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>` : ''}
     </div></div>`;
         return;
     }
@@ -1206,6 +1235,9 @@ function deleteSubject(id) {
                 Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
                 return;
             }
+            const subjectModal = document.getElementById('subjectModal');
+            if (subjectModal)
+                bootstrap.Modal.getOrCreateInstance(subjectModal).hide();
             Toast.show('Subject deleted');
             renderAllViews();
         }

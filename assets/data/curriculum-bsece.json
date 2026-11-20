@@ -1,0 +1,497 @@
+{
+  "program": "Bachelor of Science in Electronics Engineering",
+  "programCode": "BSECE",
+  "effectiveAcademicYear": "BSECE-2021",
+  "basis": null,
+  "totalUnits": 180,
+  "source": "Quezon City University, Registrar and Admissions Division — Program of Study, BSECE-2021",
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "1st Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "EMATH113B",
+              "title": "Calculus 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECHEM113L1",
+              "title": "Chemistry for Engineers",
+              "units": 4,
+              "prerequisites": []
+            },
+            {
+              "code": "EMATH113A",
+              "title": "Engineering Data Analysis",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE1",
+              "title": "Physical Fitness and Wellness",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "ECE113",
+              "title": "Principles of Electronics Engineering",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "EMATH123",
+              "title": "Calculus 2",
+              "units": 3,
+              "prerequisites": [
+                "EMATH113B"
+              ]
+            },
+            {
+              "code": "EAC120L2",
+              "title": "Computer Programming",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "ES123",
+              "title": "Engineering Management",
+              "units": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ]
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EPHY123L1",
+              "title": "Physics for Engineers",
+              "units": 4,
+              "prerequisites": [
+                "EMATH113B"
+              ]
+            },
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE2",
+              "title": "Rhythmic Activities",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "SCI1",
+              "title": "Science, Technology and Society",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "2nd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ES210L1",
+              "title": "Computer-Aided Drafting",
+              "units": 1,
+              "prerequisites": []
+            },
+            {
+              "code": "EMATH213",
+              "title": "Differential Equations",
+              "units": 3,
+              "prerequisites": [
+                "EMATH123"
+              ]
+            },
+            {
+              "code": "EAC213",
+              "title": "Environmental Science and Engineering",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "PE3",
+              "title": "Individual and Dual Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EPHY213L1",
+              "title": "Physics 2",
+              "units": 4,
+              "prerequisites": [
+                "EPHY123L1"
+              ]
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "RIZAL",
+              "title": "The Life and Works of Rizal",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECE223L1A",
+              "title": "Advanced Engineering Mathematics for ECE",
+              "units": 4,
+              "prerequisites": [
+                "EMATH213"
+              ]
+            },
+            {
+              "code": "EAC223L1",
+              "title": "Circuits 1",
+              "units": 4,
+              "prerequisites": [
+                "EPHY213L1",
+                "EMATH213"
+              ]
+            },
+            {
+              "code": "ECE224",
+              "title": "Electromagnetics",
+              "units": 4,
+              "prerequisites": [
+                "EMATH213"
+              ]
+            },
+            {
+              "code": "ECE223L1B",
+              "title": "Electronics 1: Electronic Devices and Circuits",
+              "units": 4,
+              "prerequisites": [
+                "EAC223L1"
+              ]
+            },
+            {
+              "code": "HUM2",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "EAC223",
+              "title": "Material Science and Engineering",
+              "units": 3,
+              "prerequisites": [
+                "ECHEM113L1"
+              ]
+            },
+            {
+              "code": "PE4",
+              "title": "Team Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ]
+            },
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "3rd Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "EAC313L1",
+              "title": "Circuits 2",
+              "units": 4,
+              "prerequisites": [
+                "EAC223L1"
+              ]
+            },
+            {
+              "code": "ECE313L1B",
+              "title": "Digital Electronics 1: Logic Circuits and Switching Theory",
+              "units": 4,
+              "prerequisites": [
+                "ECE223L1A"
+              ]
+            },
+            {
+              "code": "ECE313L1A",
+              "title": "Electronics 2: Electronic Circuit Analysis and Design",
+              "units": 4,
+              "prerequisites": [
+                "ECE223L1B"
+              ]
+            },
+            {
+              "code": "ES313A",
+              "title": "Engineering Economics",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECE313",
+              "title": "Methods of Research",
+              "units": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "ECEOJT1",
+              "title": "On-the-Job Training / Practicum 1 (80 Hours)",
+              "units": 1,
+              "prerequisites": [
+                "3rd Year Standing"
+              ]
+            },
+            {
+              "code": "ES313B",
+              "title": "Technopreneurship 101",
+              "units": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECE323L1A",
+              "title": "Communication 1: Principles of Communication System",
+              "units": 4,
+              "prerequisites": [
+                "ECE313L1A"
+              ]
+            },
+            {
+              "code": "ECE323L1D",
+              "title": "Digital Electronics 2: Microprocessor and Microcontroller Systems and Design",
+              "units": 4,
+              "prerequisites": [
+                "ECE313L1B"
+              ]
+            },
+            {
+              "code": "ECE323L1B",
+              "title": "Electronics 3: Electronic Systems and Design",
+              "units": 4,
+              "prerequisites": [
+                "ECE313L1A"
+              ]
+            },
+            {
+              "code": "ECE323L1C",
+              "title": "Feedback and Control Systems",
+              "units": 4,
+              "prerequisites": [
+                "ECE223L1A"
+              ]
+            },
+            {
+              "code": "ECE323",
+              "title": "Integrative Engineering 1: (General Engineering and Applied Science/Mathematics Review)",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing"
+              ]
+            },
+            {
+              "code": "ECEOJT2",
+              "title": "On-the-Job Training / Practicum 2 (160 Hours)",
+              "units": 2,
+              "prerequisites": [
+                "ECEOJT1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "4th Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "ECE413L1",
+              "title": "Communication 2: Modulation and Coding Techniques",
+              "units": 4,
+              "prerequisites": [
+                "ECE323L1A"
+              ]
+            },
+            {
+              "code": "ECE410L1A",
+              "title": "Design 1/Capstone Project",
+              "units": 1,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "ECEELEC1",
+              "title": "ECE Elective 1",
+              "units": 4,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "ECE413A",
+              "title": "ECE Laws, Contracts, Ethics, Standards and Safety",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "ECE413B",
+              "title": "Integrative Engineering 2: (Electronics Systems and Technology/Electronics Engineering Review)",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "ECE410L1B",
+              "title": "Seminars/Colloquium",
+              "units": 1,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECE423L1A",
+              "title": "Communication 3: Data Communication",
+              "units": 4,
+              "prerequisites": [
+                "ECE413L1"
+              ]
+            },
+            {
+              "code": "ECE423L1B",
+              "title": "Communication 4: Transmission Media, Antenna System and Design",
+              "units": 4,
+              "prerequisites": [
+                "ECE413L1"
+              ]
+            },
+            {
+              "code": "ECE420L1",
+              "title": "Design 2/Capstone Project",
+              "units": 1,
+              "prerequisites": [
+                "ECE410L1A"
+              ]
+            },
+            {
+              "code": "ECEELEC2",
+              "title": "ECE Elective 2",
+              "units": 4,
+              "prerequisites": [
+                "4th Year Standing"
+              ]
+            },
+            {
+              "code": "ECE423L1C",
+              "title": "Signals, Spectra, Signal Processing",
+              "units": 4,
+              "prerequisites": [
+                "ECE223L1A"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
