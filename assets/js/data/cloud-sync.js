@@ -179,6 +179,9 @@
             notes: row.notes || '',
             absenceLimit: row.absence_limit != null ? row.absence_limit : null,
             archived: !!row.archived,
+            source: row.source || 'manual',
+            setupStatus: row.setup_status || 'completed',
+            curriculumKey: row.curriculum_key || '',
             semesterId: semFor('subjects', row.id),
         };
     }
@@ -194,6 +197,9 @@
             color: s.color || '', notes: s.notes || '',
             absence_limit: s.absenceLimit != null && s.absenceLimit !== '' ? s.absenceLimit : null,
             archived: !!s.archived,
+            source: s.source || 'manual',
+            setup_status: s.setupStatus || 'completed',
+            curriculum_key: s.curriculumKey || null,
         };
     }
 

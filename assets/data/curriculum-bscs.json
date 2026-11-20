@@ -1,0 +1,168 @@
+{
+  "program": "Bachelor of Science in Computer Science",
+  "programCode": "BSCS",
+  "effectiveAcademicYear": "2023-2024",
+  "basis": "CMO No. 25, Series of 2015",
+  "totalUnits": 149,
+  "source": "Quezon City University, Office of the Registrar — BSCS Curriculum",
+  "categorySummary": [
+    { "category": "General Education Courses", "chedMinUnits": 27, "qcuUnits": 27 },
+    { "category": "General Education Electives", "chedMinUnits": 9, "qcuUnits": 9 },
+    { "category": "NSTP", "chedMinUnits": 6, "qcuUnits": 6 },
+    { "category": "PE", "chedMinUnits": 8, "qcuUnits": 8 },
+    { "category": "Common Courses", "chedMinUnits": 18, "qcuUnits": 18 },
+    { "category": "Professional Courses", "chedMinUnits": 66, "qcuUnits": 66 },
+    { "category": "Professional Electives", "chedMinUnits": 9, "qcuUnits": 9 },
+    { "category": "Additional Math Requirement", "chedMinUnits": 3, "qcuUnits": 6 }
+  ],
+  "notes": [
+    "* For Graduating Student Only (128 units completed) — applies to THS101 and PRC101",
+    "2nd Year Standing requires at least 34 units earned",
+    "3rd Year Standing requires at least 80 units earned",
+    "4th Year Standing requires at least 122 units earned",
+    "Common courses for BSCS, BSIS, and BSIT: Computer Programming 1 = Fundamentals of Programming (CC102)",
+    "Common courses for BSCS, BSIS, and BSIT: Computer Programming 2 = Intermediate Programming (CC103)"
+  ],
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "First Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            { "code": "MATH 1", "title": "Mathematics in the Modern World", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "GEE 1", "title": "Gender and Society", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "GEE 2", "title": "People and the Earth's Ecosystems", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "MATH 2", "title": "College Algebra", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "CC101", "title": "Introduction to Computing", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": [] },
+            { "code": "CC102", "title": "Fundamentals of Programming", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": [] },
+            { "code": "PE 1", "title": "Physical Fitness and Wellness", "units": 2, "lecHours": 2, "labHours": 0, "prerequisites": [] },
+            { "code": "NSTP 1", "title": "National Service Training Program 1", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] }
+          ],
+          "totalUnits": 23,
+          "totalLecHours": 21,
+          "totalLabHours": 6
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            { "code": "SCI 1", "title": "Science, Technology and Society", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "ENG 1", "title": "Purposive Communication", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "GEE 3", "title": "Philippine Popular Culture", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "SOCSCI 2", "title": "Readings in Philippine History", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "CC103", "title": "Intermediate Programming", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC101", "CC102"] },
+            { "code": "DS101", "title": "Discrete Structure 1", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["MATH1"] },
+            { "code": "PE 2", "title": "Rhythmic Activities", "units": 2, "lecHours": 2, "labHours": 0, "prerequisites": ["PE 1"] },
+            { "code": "NSTP 2", "title": "National Service Training Program 2", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["NSTP 1"] }
+          ],
+          "totalUnits": 23,
+          "totalLecHours": 22,
+          "totalLabHours": 3
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "Second Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            { "code": "RIZAL", "title": "The Life and Works of Rizal", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "HUM 1", "title": "Art Appreciation", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "DS102", "title": "Discrete Structure 2", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["DS101"] },
+            { "code": "CC104", "title": "Data Structures and Algorithms", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC103"] },
+            { "code": "CC105", "title": "Information Management", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC103"] },
+            { "code": "SDF101", "title": "Object-Oriented Programming", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC103"] },
+            { "code": "NC101", "title": "Networks and Communications", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC103"] },
+            { "code": "PE 3", "title": "Individual and Dual Sports", "units": 2, "lecHours": 2, "labHours": 0, "prerequisites": ["PE 1"] }
+          ],
+          "totalUnits": 23,
+          "totalLecHours": 19,
+          "totalLabHours": 12
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            { "code": "HUM 2", "title": "Ethics", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "AR101", "title": "Architecture and Organization", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["DS102", "CC104"] },
+            { "code": "SS100", "title": "Understanding the Self", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "IM101", "title": "Advanced Database Systems", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC105"] },
+            { "code": "PL101", "title": "Programming Languages", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC104", "SDF101", "CC105"] },
+            { "code": "OS101", "title": "Operating Systems", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC104", "NC101"] },
+            { "code": "IAS101", "title": "Information Assurance and Security", "units": 2, "lecHours": 2, "labHours": 0, "prerequisites": ["IM101", "NC101", "SDF101"] },
+            { "code": "HCI101", "title": "Human Computer Interaction", "units": 1, "lecHours": 1, "labHours": 0, "prerequisites": ["SDF101"] },
+            { "code": "PE 4", "title": "Team Sports", "units": 2, "lecHours": 2, "labHours": 0, "prerequisites": ["PE 1"] }
+          ],
+          "totalUnits": 23,
+          "totalLecHours": 19,
+          "totalLabHours": 12
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "Third Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            { "code": "SOCSCI 3", "title": "The Contemporary World", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "DM103", "title": "Business Process Management", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": [] },
+            { "code": "AL101", "title": "Algorithms and Complexity", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["DS102", "CC104"] },
+            { "code": "CC106", "title": "Application Development and Emerging Technologies", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["3rd Year Standing", "CC105"] },
+            { "code": "IPT101", "title": "Integrative Programming and Technologies", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["SDF101", "OS101"] },
+            { "code": "SE101", "title": "Software Engineering 1", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["CC105", "SDF101"] },
+            { "code": "SF101", "title": "System Fundamentals", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["3rd Year Standing", "PL101"] }
+          ],
+          "totalUnits": 21,
+          "totalLecHours": 17,
+          "totalLabHours": 12
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            { "code": "AL102", "title": "Automata Theory and Formal Languages", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["3rd Year Standing", "AL101"] },
+            { "code": "STAT 1", "title": "Advanced Statistics with Computer Applications", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["MATH 2"] },
+            { "code": "SIA101", "title": "Systems Integration and Architecture", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["3rd Year Standing", "IPT101"] },
+            { "code": "SE102", "title": "Software Engineering 2", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["SE101"] },
+            { "code": "DM104", "title": "Evaluation of Business Performance", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["DM103"] },
+            { "code": "GV101", "title": "Graphics and Visual Computing", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["3rd Year Standing"] }
+          ],
+          "totalUnits": 18,
+          "totalLecHours": 15,
+          "totalLabHours": 9
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "Fourth Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            { "code": "SP101", "title": "Social Issues and Professional Practice 1", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["SE102"] },
+            { "code": "THS101", "title": "CS Thesis Writing 1", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["4th Year Standing", "SE102", "STAT 1"], "graduatingStudentOnly": true },
+            { "code": "PRC101", "title": "Practicum", "units": 3, "lecHours": 0, "labHours": 162, "prerequisites": ["4th Year Standing", "SE102"], "graduatingStudentOnly": true }
+          ],
+          "totalUnits": 9,
+          "totalLecHours": 6,
+          "totalLabHours": 162
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            { "code": "THS102", "title": "CS Thesis Writing 2", "units": 3, "lecHours": 3, "labHours": 0, "prerequisites": ["THS101"] },
+            { "code": "SA101", "title": "Systems Administration and Maintenance", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["4th Year Standing", "IAS101"] },
+            { "code": "IS101", "title": "Intelligent Systems", "units": 3, "lecHours": 2, "labHours": 3, "prerequisites": ["4th Year Standing"] }
+          ],
+          "totalUnits": 9,
+          "totalLecHours": 7,
+          "totalLabHours": 6
+        }
+      ]
+    }
+  ]
+}
