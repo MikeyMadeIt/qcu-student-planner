@@ -30,13 +30,13 @@
       <div class="col-md-4 att-overall-rate-column">
         <div class="glass card-pad fade-in att-overall-rate-card">
           <div class="att-overall-header">
-            <div class="section-title mb-0"><i class="bi bi-percent"></i>Overall Rate</div>
+            <div class="section-title mb-0"><i class="bi bi-percent" aria-hidden="true"></i>Overall Rate</div>
             <div class="att-export-group">
               <button class="btn btn-ghost btn-sm" onclick="exportAttendanceCSV()" title="Export CSV" aria-label="Export attendance as CSV">
-                <i class="bi bi-filetype-csv me-1"></i><span class="att-export-label">CSV</span>
+                <i class="bi bi-filetype-csv me-1" aria-hidden="true"></i><span class="att-export-label">CSV</span>
               </button>
               <button class="btn btn-ghost btn-sm" onclick="exportAttendancePDF()" title="Export PDF" aria-label="Export attendance as PDF">
-                <i class="bi bi-file-earmark-pdf me-1"></i><span class="att-export-label">PDF</span>
+                <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i><span class="att-export-label">PDF</span>
               </button>
             </div>
           </div>
@@ -46,9 +46,9 @@
         </div>
         <div class="glass card-pad fade-in mt-3 mb-3" id="absenceLimitsCard">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-shield-exclamation"></i>Absence Limits</div>
+            <div class="section-title mb-0"><i class="bi bi-shield-exclamation" aria-hidden="true"></i>Absence Limits</div>
             <button class="btn btn-ghost btn-sm" onclick="openAbsenceLimitModal()">
-              <i class="bi bi-gear me-1"></i>Configure
+              <i class="bi bi-gear me-1" aria-hidden="true"></i>Configure
             </button>
           </div>
           <div id="absenceWarnings"></div>
@@ -57,7 +57,7 @@
       <div class="col-md-8">
         <div class="glass card-pad fade-in att-log-form">
           <div class="att-log-form-header">
-            <div class="section-title mb-0"><i class="bi bi-plus-circle"></i>Log Attendance</div>
+            <div class="section-title mb-0"><i class="bi bi-plus-circle" aria-hidden="true"></i>Log Attendance</div>
           </div>
           <div class="row g-2">
             <div class="col-12 att-date-bulk-row">
@@ -88,7 +88,7 @@
               <input type="text" class="form-control form-control-sm" id="attNotes" placeholder="Optional note…">
             </div>
             <div class="col-12">
-              <button class="btn btn-accent w-100" id="attLogButton" onclick="logAttendance()"><i class="bi bi-check2 me-1"></i>Log Attendance</button>
+              <button class="btn btn-accent w-100" id="attLogButton" onclick="logAttendance()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Log Attendance</button>
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@
 
     <!-- Overall Statistics -->
     <div class="glass card-pad mb-3 fade-in">
-      <div class="section-title"><i class="bi bi-bar-chart"></i>Overall Statistics</div>
+      <div class="section-title"><i class="bi bi-bar-chart" aria-hidden="true"></i>Overall Statistics</div>
       <div class="att-stats-grid" id="attendanceStats">
         <!-- skeleton shown before JS runs -->
         <div class="att-stat-card present att-stat-skeleton"><div class="stat-label">Present</div><div class="stat-value att-skel-val">--</div><div class="stat-percent">—</div></div>
@@ -115,7 +115,7 @@
     <!-- Attendance Heatmap -->
     <div class="glass card-pad mb-3 fade-in">
       <div class="d-flex justify-content-between align-items-center mb-2 gap-2 att-heatmap-head">
-        <div class="section-title mb-0"><i class="bi bi-grid-3x3-gap"></i>Attendance Heatmap</div>
+        <div class="section-title mb-0"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>Attendance Heatmap</div>
         <div class="dropdown att-heatmap-dropdown">
           <button class="btn btn-ghost btn-sm att-heatmap-filter-btn" id="heatmapFilterBtn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-label="Filter heatmap by subject">
             <i class="bi bi-funnel att-heatmap-filter-icon-btn" aria-hidden="true"></i><span id="heatmapFilterLabel">By Subject</span><i class="bi bi-chevron-down att-heatmap-caret" aria-hidden="true"></i>
@@ -133,14 +133,14 @@
 
     <!-- Per-subject Breakdown -->
     <div class="glass card-pad mb-3 fade-in">
-      <div class="section-title"><i class="bi bi-list-columns"></i>Attendance by Subject</div>
+      <div class="section-title"><i class="bi bi-list-columns" aria-hidden="true"></i>Attendance by Subject</div>
       <div id="subjectBreakdown"></div>
     </div>
 
     <!-- Attendance Log -->
     <div class="glass card-pad fade-in">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="section-title mb-0"><i class="bi bi-list-ul"></i>Attendance Log</div>
+        <div class="section-title mb-0"><i class="bi bi-list-ul" aria-hidden="true"></i>Attendance Log</div>
         <div id="attLogCountLabel" class="att-log-count-label"></div>
       </div>
       <div id="attendanceLog"></div>
@@ -153,7 +153,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="attEditTitle"><i class="bi bi-pencil-square me-2"></i>Edit Attendance</h5>
+        <h5 class="modal-title" id="attEditTitle"><i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Edit Attendance</h5>
         <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
       <form id="attEditForm" novalidate>
@@ -189,7 +189,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-accent btn-sm"><i class="bi bi-check2 me-1"></i>Save changes</button>
+          <button type="submit" class="btn btn-accent btn-sm"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save changes</button>
         </div>
       </form>
     </div>
@@ -201,7 +201,7 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-shield-exclamation me-2"></i>Absence Limits</h5>
+        <h5 class="modal-title"><i class="bi bi-shield-exclamation me-2" aria-hidden="true"></i>Absence Limits</h5>
         <button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="absenceLimitModalBody"></div>
@@ -214,7 +214,7 @@
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header py-2">
-        <h6 class="modal-title mb-0"><i class="bi bi-chat-left-text me-2"></i>Attendance Note</h6>
+        <h6 class="modal-title mb-0"><i class="bi bi-chat-left-text me-2" aria-hidden="true"></i>Attendance Note</h6>
         <button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
