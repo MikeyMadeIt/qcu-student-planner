@@ -747,8 +747,8 @@ function renderDaySummary() {
       <i class="bi bi-calendar-x" style="font-size:1.6rem;opacity:.4" aria-hidden="true"></i>
       <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
       ${semesterState ? (semesterState.detail ? `<div class="text-faint" style="font-size:.85rem">${semesterState.detail}</div>` : '') : `<div class="text-faint" style="font-size:.85rem">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
-      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring subjects into this semester.</div>
-      <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>
+      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
+      <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>
     </div>`;
     }
     else {
