@@ -2,7 +2,7 @@
   "name": "QCU Student Planner",
   "short_name": "QCU Planner",
   "description": "Student planner for schedule, tasks, grades, attendance and notes.",
-  "start_url": "index.html",
+  "start_url": "pages/auth/login.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
