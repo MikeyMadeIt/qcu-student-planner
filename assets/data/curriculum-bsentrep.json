@@ -1,0 +1,444 @@
+{
+  "program": "Bachelor of Science in Entrepreneurship",
+  "programCode": "BS Entrep",
+  "effectiveAcademicYear": "AY 2021-2022",
+  "basis": null,
+  "totalUnits": 131,
+  "source": "Quezon City University — AY 2021-2022 Curriculum, Bachelor of Science in Entrepreneurship",
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "First Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PATHFIT1",
+              "title": "Physical Activities Toward Health and Fitness 1",
+              "units": 2,
+              "prerequisites": [],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC1",
+              "title": "Entrepreneurial Marketing Strategies",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC1",
+              "title": "Entrepreneurial Behavior",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC2",
+              "title": "Microeconomics",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PATHFIT2",
+              "title": "Physical Activities Toward Health and Fitness 2",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT1"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SCI1",
+              "title": "Science Technology and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC2",
+              "title": "Financial Accounting and Reporting 1",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC3",
+              "title": "Innovation Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC4",
+              "title": "Programs and Policies on Enterprise Development",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "Second Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "PATHFIT3",
+              "title": "Physical Activities Toward Health and Fitness 3",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT2"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "HUM2",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC5",
+              "title": "Financial Management",
+              "units": 3,
+              "prerequisites": [
+                "EC2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC6",
+              "title": "Business Law and Taxation, with focus on Laws affecting MSME's",
+              "units": 3,
+              "prerequisites": [
+                "EC2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC7",
+              "title": "Market Research and Consumer Behavior",
+              "units": 3,
+              "prerequisites": [
+                "EC1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC8",
+              "title": "Opportunity Seeking",
+              "units": 3,
+              "prerequisites": [
+                "ECC1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC3",
+              "title": "E-Commerce",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC4",
+              "title": "Managing of a Service Enterprise",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "PATHFIT4",
+              "title": "Physical Activities Toward Health and Fitness 4",
+              "units": 2,
+              "prerequisites": [
+                "PATHFIT3"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "RIZAL",
+              "title": "Rizal's Life and Works",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC5",
+              "title": "Events Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC9",
+              "title": "Human Resource Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC10",
+              "title": "Business Plan Preparation",
+              "units": 3,
+              "prerequisites": [
+                "ECC8"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC15",
+              "title": "Social Enterprise",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC12",
+              "title": "Pricing and Costing",
+              "units": 3,
+              "prerequisites": [
+                "EC2"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "CBMEC1",
+              "title": "Operations Management (TQM)",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "Third Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "CBMEC2",
+              "title": "Strategic Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC7",
+              "title": "Supply Chain Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC11",
+              "title": "International Business and Trade",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC9",
+              "title": "Managing a Manufacturing Enterprise",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ECC13",
+              "title": "Business Plan Implementation 1: Product Development and Market Analysis",
+              "units": 3,
+              "prerequisites": [
+                "ECC10"
+              ],
+              "lecHours": 5,
+              "labHours": 2
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ECC14",
+              "title": "Business Plan Implementation 2",
+              "units": 3,
+              "prerequisites": [
+                "ECC13"
+              ],
+              "lecHours": 5,
+              "labHours": 2
+            },
+            {
+              "code": "EC10",
+              "title": "Wholesale and Retail Sales Management",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC6",
+              "title": "Franchising",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "EC8",
+              "title": "Microfinancing",
+              "units": 3,
+              "prerequisites": [
+                "ECC5"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
