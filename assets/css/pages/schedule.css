@@ -2062,3 +2062,22 @@ body {
 .sch-view-menu .sch-view-option.active .sch-view-option-check {
     color: rgb(var(--accent));
 }
+
+/* Curriculum imports awaiting completion */
+.sch-curriculum-setup { border-left: 3px solid rgb(var(--accent)); }
+.sch-curriculum-setup-sub { font-size: .78rem; }
+.sch-curriculum-setup-list { display: grid; gap: 8px; }
+.sch-curriculum-setup-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.sch-curriculum-setup-item:first-child { border-top: 0; padding-top: 0; }
+.sch-curriculum-setup-item:last-child { padding-bottom: 0; }
+
+.sch-curriculum-subject-name { font-size: .8rem; overflow-wrap: anywhere; }
+@media (max-width: 575.98px) {
+  .sch-curriculum-setup-item { align-items: flex-start; }
+  .sch-curriculum-setup-item .btn { white-space: nowrap; }
+  .sch-curriculum-setup .section-title { font-size: .88rem; }
+  .sch-curriculum-setup { padding: 12px !important; }
+}
+
+.sch-subject-empty-copy { max-width: 420px; margin: 7px auto 0; color: var(--text-faint); font-size: .82rem; line-height: 1.45; }
+.sch-subject-empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
