@@ -34,6 +34,7 @@ async function initCalendar() {
     const ji = document.getElementById('jumpDateInput');
     if (ji)
         ji.value = todayKey();
+    if (ji && window.DatePicker) DatePicker.refresh('jumpDateInput');
     // Re-fetch when the tab regains focus, so admin edits made elsewhere
     // show up without the student needing to reload the page.
     document.addEventListener('visibilitychange', () => {
@@ -1067,10 +1068,10 @@ function openScheduleModal(id, presetDay) {
       <div class="col-md-6">${TimeField.html({ id: 'csStart', label: 'Start Time', value: s ? s.start : '08:00', placeholder: '9:00 AM', required: true })}</div>
       <div class="col-md-6">${TimeField.html({ id: 'csEnd', label: 'End Time', value: s ? s.end : '09:00', placeholder: '10:30 AM', required: true, after: 'csStart' })}</div>
       <div class="col-12"><p class="sch-time-hint mb-0" data-start="csStart" data-end="csEnd" aria-live="polite"></p></div>
-      <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}"></div>
-      <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}"></div>
-      <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}"></div>
-      <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}"></div>
+      <div class="col-md-4"><label>Room Number</label><input class="form-control" id="csRoom" value="${s ? escapeHtml(s.room) : ''}" placeholder="e.g. 302"></div>
+      <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}" placeholder="e.g. Engineering Building"></div>
+      <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}" placeholder="e.g. Juan Dela Cruz"></div>
+      <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}" placeholder="e.g. juan.delacruz@qcu.edu.ph"></div>
       <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}"></div>
       <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}"></div>
       <div class="col-12"><label>Color Label</label>
@@ -1079,7 +1080,7 @@ function openScheduleModal(id, presetDay) {
         </div>
         <input type="hidden" id="csColor" value="${color}">
       </div>
-      <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
+      <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2" placeholder="Optional notes about this subject…">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>

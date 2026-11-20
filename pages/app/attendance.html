@@ -63,7 +63,7 @@
             <div class="col-12 att-date-bulk-row">
               <div class="att-date-field">
                 <label class="att-form-label" for="attDate">Date</label>
-                <input type="date" class="form-control form-control-sm" id="attDate">
+                <input type="date" class="form-control form-control-sm" id="attDate" data-compact-mobile="true">
               </div>
               <div class="att-bulk-panel">
                 <label class="att-bulk-label" for="attBulkStatus">Bulk Attendance</label>
@@ -76,9 +76,9 @@
                     <option value="Absent">Absent</option>
                     <option value="No Classes">No Class</option>
                   </select>
-                  <button type="button" class="btn btn-ghost btn-sm att-bulk-apply" id="attBulkApply" onclick="applyBulkAttendanceStatus()" disabled>Apply</button>
                 </div>
               </div>
+              <button type="button" class="btn btn-ghost btn-sm att-bulk-apply" id="attBulkApply" onclick="applyBulkAttendanceStatus()" disabled>Apply</button>
             </div>
             <div class="col-12 att-subject-list-column">
               <div id="attSubjectList" class="att-subject-list" aria-live="polite"></div>
@@ -244,5 +244,6 @@
   applyTheme();
   DB.whenCloudReady(initAttendance);
 </script>
+<script src="../../assets/js/core/date-picker.js"></script>
 </body>
 </html>

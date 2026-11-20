@@ -282,7 +282,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 .att-log-form .att-subject-row .att-status-select-trigger {
     height: 33px;
     padding: 0 10px;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
 }
 
 .att-log-form .att-subject-empty {
@@ -2189,18 +2189,20 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 .att-log-form .att-date-bulk-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: flex-end;
-    gap: 12px;
+    gap: 8px;
 }
 
 .att-log-form .att-date-field {
-    flex: 1 1 0;
-    min-width: 180px;
+    width: 100%;
+    min-width: 0;
 }
 
 .att-bulk-panel {
-    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
     padding: 0;
     margin: 0;
     border-radius: 4px;
@@ -2210,7 +2212,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 6px;
+    width: 100%;
 }
 
 .att-bulk-label {
@@ -2224,19 +2226,25 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 .att-bulk-status {
-    flex: 0 0 160px;
-    width: 160px;
-    min-width: 140px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
     height: 33px;
     padding: 0 24px 0 10px;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .att-bulk-apply {
-    min-height: 36px;
+    align-self: end;
+    height: var(--input-height);
+    min-height: var(--input-height);
     flex-shrink: 0;
+    padding-block: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 575.98px) {
@@ -2244,30 +2252,36 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
         margin-bottom: 10px;
     }
     .att-log-form .att-date-bulk-row {
-        flex-wrap: nowrap;
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap: 6px;
     }
     .att-log-form .att-date-field {
-        flex: 1 1 0;
+        width: auto;
         min-width: 0;
     }
     .att-log-form .att-bulk-panel {
-        flex: 0 0 auto;
         width: auto;
+        min-width: 0;
     }
+    .att-log-form .att-bulk-controls { width: 100%; }
     .att-log-form .att-bulk-controls > .att-status-select {
-        flex: 0 0 126px;
-        width: 126px;
-        min-width: 120px;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
     }
     .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
-        padding-right: 8px;
-        padding-left: 8px;
-        font-size: .75rem;
+        width: 100%;
+        padding: 0 .5rem;
+        gap: 4px;
+        font-family: var(--font-body);
+        font-size: var(--input-font-size);
+    }
+    .att-log-form #attDatePicker {
+        padding-inline: .5rem;
     }
     .att-log-form .att-bulk-apply {
-        padding-right: 8px;
-        padding-left: 8px;
+        padding-inline: .4rem;
+        white-space: nowrap;
     }
 }
 
@@ -2306,7 +2320,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2368,7 +2382,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     text-align: left;
     white-space: nowrap;
     cursor: pointer;
@@ -3498,19 +3512,31 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 /* Date input: same color + height as bulk status, text never clipped */
-.att-log-form #attDate {
+.att-log-form #attDate,
+.att-log-form #attDatePicker {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     min-width: 0;
     height: var(--input-height);
     min-height: var(--input-height);
-    padding: 0 10px;
-    font-size: .8125rem;
+    padding: 0 .85rem;
+    font-size: var(--input-font-size);
     line-height: normal;
     background: var(--surface) !important;
     box-sizing: border-box;
+}
+
+.att-log-form #attDatePicker .date-picker-value {
+    min-width: 0;
+    flex: 1 1 auto;
+    text-overflow: clip;
+}
+
+.att-log-form #attDatePicker .bi {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
 }
 
 .att-log-form #attDate::-webkit-date-and-time-value {
@@ -3553,16 +3579,6 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     min-height: var(--input-height);
 }
 
-.att-log-form .att-bulk-controls .att-bulk-apply {
-    height: var(--input-height);
-    min-height: var(--input-height);
-    padding-top: 0;
-    padding-bottom: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .att-log-form .att-bulk-controls {
     align-items: flex-end;
 }
@@ -3576,44 +3592,3 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
   border: 1px solid rgba(251, 113, 133, .35);
 }
 .att-edit-btn:hover { color: rgb(var(--accent, 36, 87, 214)); }
-
-@media (max-width: 479.98px) {
-    .att-log-form #attDate {
-        font-size: .75rem;
-        padding: 0 10px 0 8px;
-    }
-    .att-log-form #attDate::-webkit-calendar-picker-indicator {
-        width: 13px;
-        height: 13px;
-        margin-left: 4px;
-    }
-    .att-log-form .att-bulk-controls {
-        gap: 4px;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select {
-        flex: 0 0 104px;
-        width: 104px;
-        min-width: 0;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
-        padding-left: 8px;
-        padding-right: 8px;
-        font-size: .75rem;
-    }
-    .att-log-form .att-bulk-apply {
-        padding-left: 10px;
-        padding-right: 10px;
-        font-size: .75rem;
-    }
-}
-
-@media (max-width: 359.98px) {
-    .att-log-form #attDate {
-        font-size: .7rem;
-        padding: 0 8px 0 6px;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select {
-        flex-basis: 94px;
-        width: 94px;
-    }
-}

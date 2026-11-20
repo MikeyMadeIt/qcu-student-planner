@@ -62,6 +62,9 @@ function tkInitTimeField(field, cfg) {
     var menu = field.querySelector('.sch-time-menu');
     var active = -1;
     var errEl = document.getElementById(input.id + 'Error');
+    document.body.appendChild(menu);
+    function reposition() { if (!menu.hidden && window.TimeField) TimeField.position(menu, field); }
+    function stopPositioning() { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); }
 
     function setError(msg) {
     if (errEl) { errEl.textContent = msg || ''; errEl.hidden = !msg; }
@@ -95,12 +98,7 @@ function tkInitTimeField(field, cfg) {
     }
 
     function place() {
-        menu.classList.remove('is-up');
-        var host = field.closest('.modal-body') || document.documentElement;
-        var f = field.getBoundingClientRect(), b = host.getBoundingClientRect();
-        var below = Math.min(b.bottom, window.innerHeight) - f.bottom;
-        var above = f.top - Math.max(b.top, 0);
-        if (below < 236 && above > below) menu.classList.add('is-up');
+        reposition();
     }
 
     function open() {
@@ -109,6 +107,8 @@ function tkInitTimeField(field, cfg) {
         menu.hidden = false;
         input.setAttribute('aria-expanded', 'true');
         place();
+        window.addEventListener('resize', reposition);
+        window.addEventListener('scroll', reposition, true);
         var cur = field._tkValue, best = 0, bestDiff = Infinity;
         cfg.options.forEach(function (o, i) {
             var d = cur == null ? Math.abs(o - cfg.fallback) : Math.abs(o - cur);
@@ -119,6 +119,7 @@ function tkInitTimeField(field, cfg) {
 
     function close() {
         menu.hidden = true;
+        stopPositioning();
         input.setAttribute('aria-expanded', 'false');
         active = -1;
     }
@@ -141,6 +142,8 @@ function tkInitTimeField(field, cfg) {
 
     field._tkCommit = commit;
     setValue(cfg.value);
+    var modal = field.closest('.modal');
+    if (modal) modal.addEventListener('hide.bs.modal', close, { once: true });
 
     btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
     btn.addEventListener('click', function () {
@@ -242,7 +245,7 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
             '<div class="col-6 col-md-4"><label class="form-label">Repeat</label><select class="form-select" id="tRepeat" onchange="updateRepeatHint(this)">' + repeatOptions + '</select>' + repeatDescHtml + '</div>' +
             '<div class="col-6 col-md-4"><label class="form-label" for="tEst">Time Estimate</label>' +
             tkTimeFieldHtml('Est', 'tEst', 'e.g. 1h 30m', 'Choose time estimate') + '</div>' +
-            (isEdit ? '<div class="col-6 col-md-4"><label class="form-label">Score (%)</label><input type="number" class="form-control" id="tScore" min="0" max="100" step="0.01" placeholder="Optional" value="' + escHtml(String(scoreVal)) + '"></div>' : '') +
+            (isEdit ? '<div class="col-6 col-md-4"><label class="form-label">Score (%)</label><input type="number" class="form-control" id="tScore" min="0" max="100" step="0.01" placeholder="e.g. 85" value="' + escHtml(String(scoreVal)) + '"></div>' : '') +
             (isEdit ? '<div class="col-' + (isEdit ? '6 col-md-8' : '12') + '"><label class="form-label">Remarks</label><input type="text" class="form-control" id="tRemarks" placeholder="Optional feedback or remarks…" value="' + escHtml(remarksVal) + '"></div>' : '') +
             '<div class="col-12 mt-1"><label class="form-label">Checklist</label>' +
             '<div id="modalChecklistWrap" class="tk-modal-cl-wrap">' +
