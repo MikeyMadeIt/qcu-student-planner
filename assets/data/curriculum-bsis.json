@@ -1,0 +1,601 @@
+{
+  "program": "Bachelor of Science in Information Systems",
+  "programCode": "BSIS",
+  "effectiveAcademicYear": "2023-2024",
+  "basis": "CMO No. 25, Series of 2015",
+  "totalUnits": 146,
+  "source": "Quezon City University, Office of the Registrar — BSIS Curriculum",
+  "categorySummary": [
+    {
+      "category": "General Education Courses",
+      "chedMinUnits": 27,
+      "qcuUnits": 27
+    },
+    {
+      "category": "General Education Electives",
+      "chedMinUnits": 9,
+      "qcuUnits": 9
+    },
+    {
+      "category": "NSTP",
+      "chedMinUnits": 6,
+      "qcuUnits": 6
+    },
+    {
+      "category": "PE",
+      "chedMinUnits": 8,
+      "qcuUnits": 8
+    },
+    {
+      "category": "Common Courses",
+      "chedMinUnits": 18,
+      "qcuUnits": 18
+    },
+    {
+      "category": "Professional Courses",
+      "chedMinUnits": 66,
+      "qcuUnits": 66
+    },
+    {
+      "category": "Professional Electives",
+      "chedMinUnits": 12,
+      "qcuUnits": 12
+    }
+  ],
+  "notes": [
+    "For Graduating Student Only (128 units completed)",
+    "2nd Year Standing requires at least 34 units earned",
+    "3rd Year Standing requires at least 80 units earned",
+    "4th Year Standing requires at least 116 units earned"
+  ],
+  "years": [
+    {
+      "yearLevel": 1,
+      "yearLabel": "First Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "MATH1",
+              "title": "Mathematics in the Modern World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE1",
+              "title": "Gender and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE2",
+              "title": "People and the Earth's Ecosystems",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "RIZAL",
+              "title": "The Life and Works of Rizal",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "CC101",
+              "title": "Introduction to Computing",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "CC102",
+              "title": "Fundamentals of Programming",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "PE1",
+              "title": "Physical Fitness and Wellness",
+              "units": 2,
+              "prerequisites": [],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "NSTP1",
+              "title": "National Service Training Program 1",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "ENG1",
+              "title": "Purposive Communication",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "GEE3",
+              "title": "Philippine Popular Culture",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "WS101",
+              "title": "Web Systems and Technologies",
+              "units": 3,
+              "prerequisites": [
+                "CC101"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "CC103",
+              "title": "Intermediate Programming",
+              "units": 3,
+              "prerequisites": [
+                "CC101",
+                "CC102"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "IS101",
+              "title": "Fundamentals of Information Systems",
+              "units": 3,
+              "prerequisites": [
+                "CC101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "DM101",
+              "title": "Organization and Management Concepts",
+              "units": 3,
+              "prerequisites": [
+                "CC101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PE2",
+              "title": "Rhythmic Activities",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            },
+            {
+              "code": "NSTP2",
+              "title": "National Service Training Program 2",
+              "units": 3,
+              "prerequisites": [
+                "NSTP1"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 2,
+      "yearLabel": "Second Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "HUM1",
+              "title": "Art Appreciation",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "CC104",
+              "title": "Data Structures and Algorithms",
+              "units": 3,
+              "prerequisites": [
+                "CC103"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "CC105",
+              "title": "Information Management",
+              "units": 3,
+              "prerequisites": [
+                "CC103"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "MS101",
+              "title": "Discrete Mathematics",
+              "units": 3,
+              "prerequisites": [
+                "2nd Year Standing"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "IS102",
+              "title": "Professional Issues in IS",
+              "units": 3,
+              "prerequisites": [
+                "IS101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "DM102",
+              "title": "Financial Management",
+              "units": 3,
+              "prerequisites": [
+                "DM101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ADV01",
+              "title": "Enterprise Systems",
+              "units": 3,
+              "prerequisites": [
+                "2nd Year Standing",
+                "IS101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PE3",
+              "title": "Individual and Dual Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "SOCSCI1",
+              "title": "Understanding the Self",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SCI1",
+              "title": "Science, Technology and Society",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "SOCSCI2",
+              "title": "Readings in Philippine History",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "DM103",
+              "title": "Business Process Management",
+              "units": 3,
+              "prerequisites": [
+                "DM102"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ADV02",
+              "title": "Human Computer Interaction",
+              "units": 3,
+              "prerequisites": [
+                "ADV01"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "IS103",
+              "title": "IT Infrastructure and Network Technologies",
+              "units": 3,
+              "prerequisites": [
+                "IS102"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "PF101",
+              "title": "Object-Oriented Programming",
+              "units": 3,
+              "prerequisites": [
+                "CC103"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "PE4",
+              "title": "Team Sports",
+              "units": 2,
+              "prerequisites": [
+                "PE1"
+              ],
+              "lecHours": 2,
+              "labHours": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 3,
+      "yearLabel": "Third Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "SOCSCI3",
+              "title": "The Contemporary World",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AL101",
+              "title": "Algorithms and Complexity",
+              "units": 3,
+              "prerequisites": [
+                "MS101",
+                "CC104"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "DM104",
+              "title": "Evaluation of Business Performance",
+              "units": 3,
+              "prerequisites": [
+                "DM103"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ADV03",
+              "title": "IT Audit and Controls",
+              "units": 3,
+              "prerequisites": [
+                "ADV02"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "IS104",
+              "title": "Systems Analysis and Design",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing",
+                "PF101"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            },
+            {
+              "code": "IS105",
+              "title": "Enterprise Architecture",
+              "units": 3,
+              "prerequisites": [
+                "IS103"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "HUM2",
+              "title": "Ethics",
+              "units": 3,
+              "prerequisites": [],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "QUAMET",
+              "title": "Quantitative Methods",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing",
+                "IS104"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "AL102",
+              "title": "Automata Theory and Formal Languages",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing",
+                "AL101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "IS106",
+              "title": "IS Project Management 1",
+              "units": 3,
+              "prerequisites": [
+                "IS104"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "ADV04",
+              "title": "IS Innovations and New Technologies",
+              "units": 3,
+              "prerequisites": [
+                "ADV03"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "CC106",
+              "title": "Application Development and Emerging Technologies",
+              "units": 3,
+              "prerequisites": [
+                "3rd Year Standing",
+                "IS104"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "yearLevel": 4,
+      "yearLabel": "Fourth Year",
+      "semesters": [
+        {
+          "semesterLabel": "1st Semester",
+          "courses": [
+            {
+              "code": "CAP101",
+              "title": "Capstone Project 1",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing",
+                "QUAMET",
+                "IS106",
+                "CC106"
+              ],
+              "lecHours": 3,
+              "labHours": 0,
+              "graduatingStudentOnly": true
+            },
+            {
+              "code": "PRC101",
+              "title": "Practicum for Information Systems 1",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing",
+                "QUAMET",
+                "IS106",
+                "CC106"
+              ],
+              "lecHours": 0,
+              "labHours": 243,
+              "graduatingStudentOnly": true
+            },
+            {
+              "code": "IS107",
+              "title": "IS Strategy Management and Acquisition",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing",
+                "IS106"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            }
+          ]
+        },
+        {
+          "semesterLabel": "2nd Semester",
+          "courses": [
+            {
+              "code": "CAP102",
+              "title": "Capstone Project 2",
+              "units": 3,
+              "prerequisites": [
+                "CAP101"
+              ],
+              "lecHours": 3,
+              "labHours": 0
+            },
+            {
+              "code": "PRC102",
+              "title": "Practicum for Information Systems 2",
+              "units": 3,
+              "prerequisites": [
+                "PRC101"
+              ],
+              "lecHours": 0,
+              "labHours": 243
+            },
+            {
+              "code": "SA101",
+              "title": "Systems Administration and Maintenance",
+              "units": 3,
+              "prerequisites": [
+                "4th Year Standing"
+              ],
+              "lecHours": 2,
+              "labHours": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
