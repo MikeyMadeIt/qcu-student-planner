@@ -57,18 +57,18 @@ async function loadRows() {
         <td data-label="Year Level" class="adm-col-hide-mobile">${escHtml(r.year_level || '—')}</td>
         <td data-label="Registration Date" class="adm-col-hide-mobile">${formatDate(r.created_at)}</td>
         <td class="text-end adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="reject" data-id="${r.id}" title="Reject" aria-label="Reject account"><i class="bi bi-x-lg"></i></button>
-          <button class="btn btn-accent btn-sm adm-icon-btn" data-act="approve" data-id="${r.id}" title="Approve" aria-label="Approve account"><i class="bi bi-check-lg"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="reject" data-id="${r.id}" title="Reject" aria-label="Reject account"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          <button class="btn btn-accent btn-sm adm-icon-btn" data-act="approve" data-id="${r.id}" title="Approve" aria-label="Approve account"><i class="bi bi-check-lg" aria-hidden="true"></i></button>
         </td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');

@@ -230,8 +230,8 @@ function openFilterDrawer() {
             '<div class="tk-fm-row">' + section('Order', 'order', orderHtml) + section('Group By', 'group', groupHtml) + '</div>' +
             '</div>' +
             '<div class="modal-footer">' +
-            '<button type="button" class="btn btn-ghost btn-sm" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>' +
-            '<button type="button" class="btn btn-accent btn-sm" onclick="applyDrawerFilters()"><i class="bi bi-check2 me-1"></i>Apply</button>' +
+            '<button type="button" class="btn btn-ghost btn-sm" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Reset</button>' +
+            '<button type="button" class="btn btn-accent btn-sm" onclick="applyDrawerFilters()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Apply</button>' +
             '</div></div></div>';
     document.body.appendChild(modal);
     // Single-select per group (same selection model as before)
@@ -469,7 +469,7 @@ function dueLabelHtml(t, status) {
         relLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' + timeStr;
         relClass = 'tk-due-normal';
     }
-    return '<span class="tk-due-label ' + relClass + '"><i class="bi bi-calendar3"></i>' + relLabel + '</span>';
+    return '<span class="tk-due-label ' + relClass + '"><i class="bi bi-calendar3" aria-hidden="true"></i>' + relLabel + '</span>';
 }
 
 function timeLeftLabel(t, status) {
@@ -509,7 +509,7 @@ function repeatBadgeHtml(t) {
     if (r === 'none')
         return '';
     var labels = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
-    return '<span class="tk-repeat-badge" title="Repeats ' + r + '"><i class="bi bi-arrow-repeat"></i>' + (labels[r] || r) + '</span>';
+    return '<span class="tk-repeat-badge" title="Repeats ' + r + '"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>' + (labels[r] || r) + '</span>';
 }
 
 function timeEstimateHtml(t) {
@@ -525,7 +525,7 @@ function timeEstimateHtml(t) {
     else {
         label = te + 'm';
     }
-    return '<span class="tk-estimate-badge"><i class="bi bi-clock"></i>' + label + '</span>';
+    return '<span class="tk-estimate-badge"><i class="bi bi-clock" aria-hidden="true"></i>' + label + '</span>';
 }
 
 function progressRingHtml(t) {
@@ -567,7 +567,7 @@ function checklistHtml(t) {
         t.checklist.map(function (c, i) {
             return '<div class="tk-cl-item" data-taskid="' + t.id + '" data-i="' + i + '">' +
                 '<button class="tk-cl-check ' + (c.done ? 'done' : '') + '" onclick="toggleChecklistItem(\'' + t.id + '\', ' + i + ')" title="' + (c.done ? 'Uncheck' : 'Check') + '" aria-label="' + (c.done ? 'Uncheck: ' : 'Check: ') + c.text + '">' +
-                (c.done ? '<i class="bi bi-check-lg"></i>' : '') + '</button>' +
+                (c.done ? '<i class="bi bi-check-lg" aria-hidden="true"></i>' : '') + '</button>' +
                 '<span class="tk-cl-text ' + (c.done ? 'done' : '') + '">' + escHtml(c.text) + '</span></div>';
         }).join('') + '</div>';
 }
@@ -629,9 +629,9 @@ function buildTaskCard(t, inSubjectGroup) {
     var ringHtml = progressRingHtml(t);
     var statusBadge = '';
     if (isOverdue)
-        statusBadge = '<span class="tk-status-badge overdue"><i class="bi bi-exclamation-circle"></i>Overdue</span>';
+        statusBadge = '<span class="tk-status-badge overdue"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Overdue</span>';
     else if (isCompleted)
-        statusBadge = '<span class="tk-status-badge completed"><i class="bi bi-check-circle"></i>Done</span>';
+        statusBadge = '<span class="tk-status-badge completed"><i class="bi bi-check-circle" aria-hidden="true"></i>Done</span>';
     var collapsed = !isExpanded ? '<div class="tk-card-body-collapsed">' +
         '<div class="tk-inline-meta">' + metaLine +
         (repeatBadge ? '<span class="tk-sep">·</span>' + repeatBadge : '') +
@@ -647,23 +647,23 @@ function buildTaskCard(t, inSubjectGroup) {
         metaGridHtml(t) +
         scoreRemarksHtml(t) +
         '<div class="tk-card-actions">' +
-        '<button class="btn btn-ghost btn-sm" onclick="openTaskModal(\'' + t.id + '\')" aria-label="Edit task"><i class="bi bi-pencil me-1"></i>Edit</button>' +
-        '<button class="btn tk-btn-danger btn-sm" onclick="deleteTask(\'' + t.id + '\')" aria-label="Delete task"><i class="bi bi-trash me-1"></i>Delete</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="openTaskModal(\'' + t.id + '\')" aria-label="Edit task"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit</button>' +
+        '<button class="btn tk-btn-danger btn-sm" onclick="deleteTask(\'' + t.id + '\')" aria-label="Delete task"><i class="bi bi-trash me-1" aria-hidden="true"></i>Delete</button>' +
         '</div></div>' : '';
     var completeBtn = isCompleted
-        ? '<button class="tk-complete-btn tk-complete-btn-done" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Active" aria-label="Reopen task"><i class="bi bi-arrow-counterclockwise"></i><span>Reopen</span></button>'
-        : '<button class="tk-complete-btn" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Complete" aria-label="Mark task complete"><i class="bi bi-check-lg"></i><span>Complete</span></button>';
+        ? '<button class="tk-complete-btn tk-complete-btn-done" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Active" aria-label="Reopen task"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Reopen</span></button>'
+        : '<button class="tk-complete-btn" onclick="event.stopPropagation();toggleTaskComplete(\'' + t.id + '\')" title="Mark as Complete" aria-label="Mark task complete"><i class="bi bi-check-lg" aria-hidden="true"></i><span>Complete</span></button>';
     return '<div class="tk-card ' + (isCompleted ? 'completed' : '') + ' ' + (isOverdue ? 'overdue' : '') + ' ' + (isExpanded ? 'expanded' : '') + ' ' + (isSelected ? 'tk-selected' : '') + '" id="tkCard_' + t.id + '" data-taskid="' + t.id + '" style="--sc-color:' + (sub ? (sub.color || 'rgb(var(--accent))') : '#525252') + '">' +
         '<div class="tk-card-header" onclick="toggleCard(\'' + t.id + '\', event)">' +
         '<button class="tk-bulk-check ' + (isSelected ? 'selected' : '') + '" onclick="event.stopPropagation();toggleSelect(\'' + t.id + '\')" title="' + (isSelected ? 'Deselect' : 'Select for bulk action') + '" aria-label="' + (isSelected ? 'Deselect task' : 'Select task') + '">' +
-        (isSelected ? '<i class="bi bi-check-lg"></i>' : '') + '</button>' +
+        (isSelected ? '<i class="bi bi-check-lg" aria-hidden="true"></i>' : '') + '</button>' +
         '<div class="tk-card-title-wrap">' +
         (ringHtml ? ringHtml : '') +
         '<span class="tk-task-title ' + (isCompleted ? 'done' : '') + '">' + escHtml(t.title) + '</span>' +
         statusBadge + '</div>' +
         completeBtn +
         '<button class="tk-expand-btn" title="' + (isExpanded ? 'Collapse' : 'Expand') + '" aria-label="' + (isExpanded ? 'Collapse task' : 'Expand task') + '" onclick="event.stopPropagation();toggleCard(\'' + t.id + '\')">' +
-        '<i class="bi bi-chevron-' + (isExpanded ? 'up' : 'down') + '"></i></button></div>' +
+        '<i class="bi bi-chevron-' + (isExpanded ? 'up' : 'down') + '" aria-hidden="true"></i></button></div>' +
         collapsed + expanded + '</div>';
 }
 
@@ -724,14 +724,14 @@ function buildBoardCard(t) {
         '<span class="tk-bc-pri-dot" style="background:' + priColor + '" title="' + (t.priority || 'low') + '"></span>' +
         '<span class="tk-bc-cat">' + escHtml(t.category || 'Other') + '</span>' +
         (dueStr ? '<span class="tk-bc-due ' + dueClass + '">' + dueStr + '</span>' : '') +
-        (teStr ? '<span class="tk-bc-te"><i class="bi bi-clock"></i>' + teStr + '</span>' : '') +
+        (teStr ? '<span class="tk-bc-te"><i class="bi bi-clock" aria-hidden="true"></i>' + teStr + '</span>' : '') +
         '</div>' +
         clProg +
         '<div class="tk-bc-actions">' +
         (isCompleted
-            ? '<button class="tk-bc-btn tk-bc-reopen" onclick="toggleTaskComplete(\'' + t.id + '\')" aria-label="Reopen task"><i class="bi bi-arrow-counterclockwise"></i>Reopen</button>'
-            : '<button class="tk-bc-btn tk-bc-done"   onclick="toggleTaskComplete(\'' + t.id + '\')" aria-label="Mark complete"><i class="bi bi-check-lg"></i>Done</button>') +
-        '<button class="tk-bc-icon-btn" onclick="openTaskModal(\'' + t.id + '\')" aria-label="Edit task"><i class="bi bi-pencil"></i></button>' +
+            ? '<button class="tk-bc-btn tk-bc-reopen" onclick="toggleTaskComplete(\'' + t.id + '\')" aria-label="Reopen task"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>Reopen</button>'
+            : '<button class="tk-bc-btn tk-bc-done"   onclick="toggleTaskComplete(\'' + t.id + '\')" aria-label="Mark complete"><i class="bi bi-check-lg" aria-hidden="true"></i>Done</button>') +
+        '<button class="tk-bc-icon-btn" onclick="openTaskModal(\'' + t.id + '\')" aria-label="Edit task"><i class="bi bi-pencil" aria-hidden="true"></i></button>' +
         '</div>' +
         '</div>';
 }
@@ -743,13 +743,13 @@ function buildDueBucketGroup(label, icon, tasks, groupClass) {
         return '';
     var cards = tasks.map(function (t) { return buildTaskCard(t, false); }).join('');
     return '<div class="tk-group ' + groupClass + '">' +
-        '<div class="tk-group-heading"><i class="bi ' + icon + '"></i>' + label + '<span class="tk-group-count">' + tasks.length + '</span>' + buildSelectAllGroupBtn(tasks) + '</div>' +
+        '<div class="tk-group-heading"><i class="bi ' + icon + '" aria-hidden="true"></i>' + label + '<span class="tk-group-count">' + tasks.length + '</span>' + buildSelectAllGroupBtn(tasks) + '</div>' +
         '<div class="tk-group-cards">' + cards + '</div></div>';
 }
 
 function buildSelectAllGroupBtn(tasks) {
     var ids = tasks.map(function (t) { return t.id; });
-    return '<button class="tk-group-select-all" onclick="event.stopPropagation();toggleSelectGroup(' + JSON.stringify(ids) + ')" title="Select all in group" aria-label="Select all in group"><i class="bi bi-check2-square"></i></button>';
+    return '<button class="tk-group-select-all" onclick="event.stopPropagation();toggleSelectGroup(' + JSON.stringify(ids) + ')" title="Select all in group" aria-label="Select all in group"><i class="bi bi-check2-square" aria-hidden="true"></i></button>';
 }
 
 // Bulk toolbar
@@ -767,13 +767,13 @@ function renderBulkToolbar(visibleIds) {
     toolbar.setAttribute('role', 'toolbar');
     toolbar.setAttribute('aria-label', 'Bulk actions');
     toolbar.innerHTML =
-        '<span class="tk-bulk-count"><i class="bi bi-check2-square"></i>' + count + ' selected</span>' +
+        '<span class="tk-bulk-count"><i class="bi bi-check2-square" aria-hidden="true"></i>' + count + ' selected</span>' +
             '<div class="tk-bulk-actions">' +
-            '<button class="tk-bulk-btn tk-bulk-complete" onclick="bulkComplete()" aria-label="Mark selected complete"><i class="bi bi-check-lg"></i><span>Done</span></button>' +
-            '<button class="tk-bulk-btn tk-bulk-reopen"   onclick="bulkActive()"   aria-label="Reopen selected"><i class="bi bi-arrow-counterclockwise"></i><span>Reopen</span></button>' +
-            '<button class="tk-bulk-btn tk-bulk-move"     onclick="openBulkMove()" aria-label="Move to subject"><i class="bi bi-folder-symlink"></i><span>Move</span></button>' +
-            '<button class="tk-bulk-btn tk-bulk-delete"   onclick="bulkDelete()"   aria-label="Delete selected"><i class="bi bi-trash"></i><span>Delete</span></button>' +
-            '<button class="tk-bulk-btn tk-bulk-clear"    onclick="clearSelection()" aria-label="Clear selection"><i class="bi bi-x"></i></button>' +
+            '<button class="tk-bulk-btn tk-bulk-complete" onclick="bulkComplete()" aria-label="Mark selected complete"><i class="bi bi-check-lg" aria-hidden="true"></i><span>Done</span></button>' +
+            '<button class="tk-bulk-btn tk-bulk-reopen"   onclick="bulkActive()"   aria-label="Reopen selected"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Reopen</span></button>' +
+            '<button class="tk-bulk-btn tk-bulk-move"     onclick="openBulkMove()" aria-label="Move to subject"><i class="bi bi-folder-symlink" aria-hidden="true"></i><span>Move</span></button>' +
+            '<button class="tk-bulk-btn tk-bulk-delete"   onclick="bulkDelete()"   aria-label="Delete selected"><i class="bi bi-trash" aria-hidden="true"></i><span>Delete</span></button>' +
+            '<button class="tk-bulk-btn tk-bulk-clear"    onclick="clearSelection()" aria-label="Clear selection"><i class="bi bi-x" aria-hidden="true"></i></button>' +
             '</div>';
     var wrap = document.getElementById('tkGroups');
     if (wrap)
@@ -791,17 +791,17 @@ function renderSelectAllBtn(visibleIds) {
     var count = tkSelected.size;
     if (allSelected) {
         btn.classList.add('tk-select-all-active');
-        btn.innerHTML = '<i class="bi bi-check2-square"></i><span>' + count + '</span>';
+        btn.innerHTML = '<i class="bi bi-check2-square" aria-hidden="true"></i><span>' + count + '</span>';
         btn.setAttribute('aria-label', 'Deselect all tasks');
     }
     else if (someSelected) {
         btn.classList.remove('tk-select-all-active');
-        btn.innerHTML = '<i class="bi bi-dash-square"></i><span>' + count + '</span>';
+        btn.innerHTML = '<i class="bi bi-dash-square" aria-hidden="true"></i><span>' + count + '</span>';
         btn.setAttribute('aria-label', count + ' tasks selected');
     }
     else {
         btn.classList.remove('tk-select-all-active');
-        btn.innerHTML = '<i class="bi bi-square"></i><span>Select</span>';
+        btn.innerHTML = '<i class="bi bi-square" aria-hidden="true"></i><span>Select</span>';
         btn.setAttribute('aria-label', 'Select all tasks');
     }
     btn.onclick = function () { toggleSelectAll(visibleIds, !allSelected); };
@@ -923,15 +923,15 @@ function openBulkMove() {
         : '<p class="tk-move-no-subs">No subjects available for this semester.</p>';
     modal.innerHTML =
         '<div class="tk-move-modal glass">' +
-            '<div class="tk-move-header"><span class="tk-move-title"><i class="bi bi-folder-symlink me-2"></i>Move to Subject</span>' +
-            '<button class="tkd-close-btn" onclick="closeBulkMove()" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>' +
+            '<div class="tk-move-header"><span class="tk-move-title"><i class="bi bi-folder-symlink me-2" aria-hidden="true"></i>Move to Subject</span>' +
+            '<button class="tkd-close-btn" onclick="closeBulkMove()" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>' +
             '<div class="tk-move-body">' +
             '<p class="tk-move-count">' + tkSelected.size + ' task' + (tkSelected.size !== 1 ? 's' : '') + ' selected</p>' +
             subOptions +
             '</div>' +
             '<div class="tk-move-footer">' +
             '<button class="btn btn-ghost btn-sm" onclick="closeBulkMove()">Cancel</button>' +
-            (subs.length ? '<button class="btn btn-accent btn-sm" onclick="executeBulkMove()"><i class="bi bi-check2 me-1"></i>Move</button>' : '') +
+            (subs.length ? '<button class="btn btn-accent btn-sm" onclick="executeBulkMove()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Move</button>' : '') +
             '</div></div>';
     document.body.appendChild(modal);
     requestAnimationFrame(function () { modal.classList.add('open'); });
@@ -1101,7 +1101,7 @@ function renderBoardView(tasks) {
     function col(title, icon, cls, items) {
         var cards = items.map(function (t) { return buildBoardCard(t); }).join('');
         return '<div class="tk-board-col ' + cls + '">' +
-            '<div class="tk-board-col-header"><i class="bi ' + icon + '"></i>' + title + '<span class="tk-board-col-count">' + items.length + '</span></div>' +
+            '<div class="tk-board-col-header"><i class="bi ' + icon + '" aria-hidden="true"></i>' + title + '<span class="tk-board-col-count">' + items.length + '</span></div>' +
             '<div class="tk-board-col-cards">' + (cards || '<div class="tk-board-empty">No tasks here</div>') + '</div></div>';
     }
     return '<div class="tk-board-wrap">' +
@@ -1146,7 +1146,7 @@ function renderSubjectGroups(tasks) {
     if (noSubject.length) {
         var cards = noSubject.map(function (t) { return buildTaskCard(t, true); }).join('');
         html += '<div class="tk-group tk-group-subject">' +
-            '<div class="tk-group-heading"><i class="bi bi-tag"></i>Unassigned<span class="tk-group-count">' + noSubject.length + '</span>' +
+            '<div class="tk-group-heading"><i class="bi bi-tag" aria-hidden="true"></i>Unassigned<span class="tk-group-count">' + noSubject.length + '</span>' +
             buildSelectAllGroupBtn(noSubject) + '</div>' +
             '<div class="tk-group-cards">' + cards + '</div></div>';
     }

@@ -1,16 +1,15 @@
-/* HELP.JS — Help Center search, topic filter and contact placeholders.
+/* HELP.JS — Help Center search, topic filter and contact details.
    Plain script (no dependencies). The page works without it; this adds search,
    topic filtering, deep-link opening and the configurable contact details. */
 
 (function () {
     'use strict';
 
-    /* ── Configurable support details ──
-       Leave a value empty until it is confirmed. Empty values show a clearly
-       marked placeholder instead of an invented contact. */
+    /* ── Support details ──
+       The official project email is the single support contact. */
     var HELP_CONFIG = {
-        supportEmail: '',          // e.g. 'support@example.com' once a temporary address exists
-        supportHours: ''           // e.g. 'Mon-Fri, 9 AM-5 PM' once confirmed
+        supportEmail: 'qcustudentplanner.team@gmail.com',
+        supportHours: ''           // not published; leave empty
     };
 
     var EMAIL_PATTERN = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
@@ -21,18 +20,33 @@
     /* ── Contact details ── */
     function setupDetails() {
         var emailOk = EMAIL_PATTERN.test(HELP_CONFIG.supportEmail);
+
+        /* The address is shown as plain text; the button below it is the link. */
         $$('[data-help-email]').forEach(function (el) {
             if (emailOk) {
-                var link = document.createElement('a');
-                link.href = 'mailto:' + HELP_CONFIG.supportEmail;
-                link.textContent = HELP_CONFIG.supportEmail;
+                /* Allow a line break after the "@" so a narrow screen never
+                   leaves a single letter alone on the second line. */
+                var parts = HELP_CONFIG.supportEmail.split('@');
                 el.textContent = '';
                 el.classList.remove('help-placeholder');
-                el.appendChild(link);
+                el.appendChild(document.createTextNode(parts[0] + '@'));
+                el.appendChild(document.createElement('wbr'));
+                el.appendChild(document.createTextNode(parts[1]));
             } else {
                 el.classList.add('help-placeholder');
             }
         });
+
+        /* The "Email us" button (a working mailto: link). */
+        $$('[data-help-email-link]').forEach(function (el) {
+            if (emailOk) {
+                el.href = 'mailto:' + HELP_CONFIG.supportEmail;
+                el.hidden = false;
+            } else {
+                el.hidden = true;
+            }
+        });
+
         $$('[data-help-hours]').forEach(function (el) {
             if (HELP_CONFIG.supportHours) {
                 el.textContent = HELP_CONFIG.supportHours;
@@ -40,6 +54,43 @@
             } else {
                 el.classList.add('help-placeholder');
             }
+        });
+    }
+
+    /* ── Email links ──
+       A plain mailto: link opens the computer's default mail app. On many
+       desktops that app is missing or is not Gmail, so the click seems to do
+       nothing. Every student signs in with a Gmail address, so on desktop these
+       links open a Gmail compose window in a new tab instead. Phones keep the
+       mailto: link, which opens the Gmail or Mail app that is already installed. */
+    function isMobileDevice() {
+        if (navigator.userAgentData && navigator.userAgentData.mobile === true) return true;
+        if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')) return true;
+        // iPadOS reports itself as a Mac but has a touch screen.
+        return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    }
+
+    function gmailComposeUrl(address, subject) {
+        return 'https://mail.google.com/mail/?view=cm&fs=1' +
+            '&to=' + encodeURIComponent(address) +
+            '&su=' + encodeURIComponent(subject);
+    }
+
+    function setupMailLinks() {
+        if (isMobileDevice()) return;
+
+        $$('a[href^="mailto:"]').forEach(function (link) {
+            var address = link.getAttribute('href').slice(7).split('?')[0];
+            if (!EMAIL_PATTERN.test(address)) return;
+
+            var subject = link.closest('#faq-security-report')
+                ? 'Security or privacy issue'
+                : 'QCU Student Planner support';
+
+            link.setAttribute('data-mailto', link.getAttribute('href'));
+            link.href = gmailComposeUrl(address, subject);
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
         });
     }
 
@@ -191,6 +242,7 @@
 
     function init() {
         setupDetails();
+        setupMailLinks();
         setupSearch();
         openFromHash();
         window.addEventListener('hashchange', openFromHash);

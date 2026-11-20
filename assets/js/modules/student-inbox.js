@@ -76,7 +76,7 @@ function renderList() {
         const icon = MESSAGE_CATEGORY_ICONS[m.category] || 'bi-chat-square-text';
         return `
         <button type="button" class="msg-row ${isUnread ? 'is-unread' : ''}" data-id="${m.id}">
-            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
             <span class="msg-row-body">
                 <span class="msg-pill">${messageCategoryBadge(escHtml, m.category)}</span>
                 <span class="msg-subject">${escHtml(m.subject)}</span>
@@ -94,9 +94,9 @@ function renderList() {
 
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="inboxPagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i> Prev</button>
+        <button class="btn btn-ghost btn-sm" id="inboxPagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i> Prev</button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="inboxPageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="inboxPageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('inboxPagePrev');
     const nextBtn = document.getElementById('inboxPageNext');
@@ -122,7 +122,7 @@ async function openMessage(messageId) {
         <div class="msg-detail-body">${escHtml(m.body)}</div>
         <div class="msg-detail-footer">
             <button type="button" class="btn btn-ghost btn-sm" id="toggleReadBtn">
-                <i class="bi ${wasUnread ? 'bi-envelope-open' : 'bi-envelope'}"></i> Mark as ${wasUnread ? 'read' : 'unread'}
+                <i class="bi ${wasUnread ? 'bi-envelope-open' : 'bi-envelope'}" aria-hidden="true"></i> Mark as ${wasUnread ? 'read' : 'unread'}
             </button>
             <p class="text-faint" style="font-size:.76rem;margin:0">This is a one-way message. You cannot reply from this inbox.</p>
         </div>`;
@@ -138,7 +138,7 @@ async function openMessage(messageId) {
             row.read_at = new Date().toISOString();
             renderList();
             const btn = document.getElementById('toggleReadBtn');
-            if (btn) btn.innerHTML = `<i class="bi bi-envelope"></i> Mark as unread`;
+            if (btn) btn.innerHTML = `<i class="bi bi-envelope" aria-hidden="true"></i> Mark as unread`;
         }
     }
 }

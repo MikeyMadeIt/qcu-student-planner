@@ -124,11 +124,11 @@ function renderGradesOverview() {
             gwaStatusSubEl.textContent = 'Add assessments to compute GWA';
         }
         else if (scoredSubjects < totalSubjects) {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="bi bi-hourglass-split me-1"></i>Incomplete</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Incomplete</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} of ${totalSubjects} subject${totalSubjects !== 1 ? 's' : ''}`;
         }
         else {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="bi bi-check2-circle me-1"></i>All Subjects</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>All Subjects</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} subject${scoredSubjects !== 1 ? 's' : ''}`;
         }
     }
@@ -179,7 +179,7 @@ function renderGradeCards() {
             }
         }
         else if (hasComponents && !hasAnyScores) {
-            statusBadge = `<span class="grade-pass-badge no-data"><i class="bi bi-dash-circle"></i> No data</span>`;
+            statusBadge = `<span class="grade-pass-badge no-data"><i class="bi bi-dash-circle" aria-hidden="true"></i> No data</span>`;
         }
         const equivBadge = gradeEquivBadgeHtml(point);
         const sparkPoints = getSparklineDatapoints(g.components);
@@ -198,8 +198,8 @@ function renderGradeCards() {
             ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle me-1"></i>${totalWeight}%</div>` : ''}
           </div>
           <div class="grade-card-actions">
-            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil"></i></button>
-            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="bi bi-chevron-down"></i></button>
+            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
           </div>
         </div>
         ${hasSparkline ? renderSparklineHtml(sparkPoints) : ''}
@@ -260,7 +260,7 @@ function renderSparklineHtml(points) {
         svg += `</circle>`;
     });
     svg += `</svg>`;
-    const dirIcon = dir === 'up' ? '<i class="bi bi-graph-up-arrow" style="color:#34d399"></i>' : dir === 'down' ? '<i class="bi bi-graph-down-arrow" style="color:#fb7185"></i>' : '<i class="bi bi-dash-lg" style="color:#94a3b8"></i>';
+    const dirIcon = dir === 'up' ? '<i class="bi bi-graph-up-arrow" style="color:#34d399" aria-hidden="true"></i>' : dir === 'down' ? '<i class="bi bi-graph-down-arrow" style="color:#fb7185" aria-hidden="true"></i>' : '<i class="bi bi-dash-lg" style="color:#94a3b8" aria-hidden="true"></i>';
     return `<div class="grade-sparkline-wrap">
     <div class="grade-sparkline-label">${dirIcon} <span>${points[0].pct}% → ${points[points.length - 1].pct}%</span></div>
     ${svg}
@@ -299,10 +299,10 @@ function renderGradeModalBody() {
       ${gradeDraft.components.map((c, ci) => componentBlockHtml(c, ci)).join('')}
     </div>
     <button type="button" class="btn btn-ghost btn-sm mt-3 w-100" onclick="addComponent()">
-      <i class="bi bi-plus-lg me-1"></i>Add Component
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Component
     </button>
     <div id="modalWeightWarn" class="mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2));${weightWarn ? '' : 'display:none'}">
-      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : ''}
+      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : ''}
     </div>
     <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--border)">
       <div class="text-faint" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Computed Final Grade</div>
@@ -318,7 +318,7 @@ function renderGradeModalBody() {
         </div>` : ''}
     </div>
     <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
-      <i class="bi bi-check2 me-1"></i>Save Grading Breakdown
+      <i class="bi bi-check2 me-1" aria-hidden="true"></i>Save Grading Breakdown
     </button></div>`;
 }
 
@@ -338,7 +338,7 @@ function componentBlockHtml(c, ci) {
         <span class="input-group-text" style="background: transparent; color: white; border: none;">%</span>
       </div>
       <button type="button" class="btn-icon btn-icon-sm" onclick="removeComponent(${ci})" title="Remove">
-        <i class="bi bi-trash3" style="color:#fb7185"></i>
+        <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
       </button>
     </div>
     <!-- Assessment column headers -->
@@ -356,7 +356,7 @@ function componentBlockHtml(c, ci) {
     <!-- Footer: add button + live avg/weighted -->
     <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-top:1px solid var(--border);margin-top:2px">
       <button type="button" class="btn btn-ghost btn-sm" onclick="addAssessment(${ci})" style="font-size:.74rem;padding:2px 9px">
-        <i class="bi bi-plus-lg me-1"></i>Add
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add
       </button>
       <div class="text-end" style="font-size:.74rem" id="compSummary-${ci}">
         ${compSummaryHtml(avg, ws)}
@@ -386,8 +386,8 @@ function assessmentRowHtml(ci, ai, a) {
     <div class="text-center mono" id="assessPct-${ci}-${ai}" style="font-size:.76rem;color:${pctColor}">
       ${pct === null ? '—' : pct.toFixed(1) + '%'}
     </div>
-    <button type="button" class="btn-icon btn-icon-sm" onclick="removeAssessment(${ci},${ai})">
-      <i class="bi bi-x-lg" style="font-size:.6rem"></i>
+    <button type="button" class="btn-icon btn-icon-sm" onclick="removeAssessment(${ci},${ai})" aria-label="Remove assessment">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
   </div>`;
 }
@@ -455,7 +455,7 @@ function refreshGradePreview() {
         const hasComponents = gradeDraft.components.length > 0;
         const warn = hasComponents && totalWeight !== 100 && totalWeight !== 0;
         weightWarnEl.style.display = warn ? '' : 'none';
-        if (warn) weightWarnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Weights total <strong>${totalWeight}%</strong> \u2014 should add up to 100%.`;
+        if (warn) weightWarnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> \u2014 should add up to 100%.`;
     }
     const pctEl = document.getElementById('modalFinalPct');
     const gwaEl = document.getElementById('modalFinalGwa');
@@ -561,8 +561,8 @@ function gwaCalcRowHtml(r, i) {
     <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow(${i},'grade',this.value)">
       ${sel}
     </select>
-    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})">
-      <i class="bi bi-trash3" style="color:#fb7185"></i>
+    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})" aria-label="Remove course from GWA calculator">
+      <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
     </button>
   </div>`;
 }

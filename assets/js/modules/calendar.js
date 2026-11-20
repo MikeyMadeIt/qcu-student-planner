@@ -668,7 +668,7 @@ function openDayModal(dateStr) {
         groupDefs.forEach(g => {
             if (!groups[g.key].length)
                 return;
-            sectionsHtml += `<div class="day-modal-section-title"><i class="bi ${g.icon}"></i>${g.label}</div>` +
+            sectionsHtml += `<div class="day-modal-section-title"><i class="bi ${g.icon}" aria-hidden="true"></i>${g.label}</div>` +
                 groups[g.key].map(e => renderDayEventRow(e, dateStr)).join('');
         });
         if (!sectionsHtml) {
@@ -681,8 +681,8 @@ function openDayModal(dateStr) {
       </div>
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1"></i>Add Event</button>
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1"></i>Add Task</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1" aria-hidden="true"></i>Add Task</button>
       </div>`;
         new bootstrap.Modal(document.getElementById('dayModal')).show();
     }
@@ -1038,7 +1038,7 @@ function openScheduleModal(id, presetDay) {
     const color = s ? s.color : DB.colors[0];
     const body = document.getElementById('calSubjectModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar3 me-2"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
+    <h5 class="mb-3"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
     <input type="hidden" id="csId" value="${s ? s.id : ''}">
     <div class="row g-2">
       <div class="col-md-4"><label>Subject Code</label><input class="form-control" id="csCode" value="${s ? escapeHtml(s.code) : ''}" placeholder="CS101"></div>
@@ -1075,8 +1075,8 @@ function openScheduleModal(id, presetDay) {
       <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2" placeholder="Optional notes about this subject…">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1"></i>${s ? 'Update' : 'Save'} Schedule</button>
-      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Schedule</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);
@@ -1154,7 +1154,7 @@ function openCalEventModal(id, presetDate) {
     calEventModalColor = existing ? (existing.color || EVENT_CAT_COLORS['Event']) : EVENT_CAT_COLORS['Event'];
     const body = document.getElementById('calEventModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar-event me-2"></i>${existing ? 'Edit' : 'Add'} Event</h5>
+    <h5 class="mb-3"><i class="bi bi-calendar-event me-2" aria-hidden="true"></i>${existing ? 'Edit' : 'Add'} Event</h5>
     <div class="row g-2">
       <div class="col-12"><label>Event Title</label><input class="form-control" id="ceTitle" placeholder="e.g. Study Session, Project Meeting" value="${existing ? escapeHtml(existing.title) : ''}"></div>
       <div class="col-md-6"><label>Category</label>
@@ -1169,8 +1169,8 @@ function openCalEventModal(id, presetDate) {
       <div class="col-12"><label>Description (optional)</label><textarea class="form-control" id="ceDesc" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.description || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1"></i>${existing ? 'Update' : 'Save'} Event</button>
-      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${existing ? 'Update' : 'Save'} Event</button>
+      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);

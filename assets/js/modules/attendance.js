@@ -1253,13 +1253,13 @@ function renderLog(showAll) {
         ${hasNotes
             ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text"></i></button>`
             : ''}
-        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square"></i></button>
-        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3"></i></button>
+        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
+        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3" aria-hidden="true"></i></button>
       </td>
     </tr>`;
     }
     const showMoreHtml = hasMore
-        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="bi bi-chevron-down me-1"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
+        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="bi bi-chevron-down me-1" aria-hidden="true"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
         : '';
     wrap.innerHTML = `<table class="att-log-table" role="grid">
     <thead>

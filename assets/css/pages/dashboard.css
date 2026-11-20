@@ -949,30 +949,15 @@
 }
 
 @media (min-width: 1024px) and (pointer: fine) {
-    /* .dashboard-page is placed by .main-content's padding-top at
-       (shell-bar-height + 1px + page-gap) from the top of the document, so
-       sizing it to a flat 100vh (the FULL viewport) always overshoots the
-       remaining space by that offset. The box used to still get its own
-       `overflow-y: auto` + `overscroll-behavior: contain`, i.e. its own
-       scroll root nested inside the document's — but since that root
-       starts shell-bar-height below the top, its bottom edge — and
-       everything in it — rendered below the viewport by that same amount,
-       with no way for the trapped 100vh box to reveal it: the document
-       itself would need to scroll that remainder, but `overscroll-behavior:
-       contain` on the inner panels (and on this element) stops scroll
-       chaining from ever reaching the document. The result was the
-       "stuck near 90%" bug: wheel/touch/trackpad scrolling over the
-       dashboard's inner panels hit their own contained boundary and never
-       handed off, so the user had to move the pointer off the panel and
-       scroll again just to nudge the outer, mostly-invisible remainder.
-       Sizing this box to exactly the viewport space left under the
-       shell-bar removes the overshoot, so the document never needs to
-       scroll and there is only ever ONE active scroll root at a time. */
+    /* The fixed shell bar's space is already reserved by .main-content's
+       padding-top, and box-sizing is border-box, so the box must be exactly
+       the viewport height. Subtracting the bar height again left an empty
+       strip at the bottom of the window. */
     .dashboard-page {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - var(--shell-bar-height) - 1px - var(--page-gap));
-        max-height: calc(100vh - var(--shell-bar-height) - 1px - var(--page-gap));
+        height: 100vh;
+        max-height: 100vh;
         min-height: 0;
         overflow-x: hidden;
         overflow-y: auto;

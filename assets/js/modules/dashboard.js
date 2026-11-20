@@ -34,8 +34,8 @@ function renderSemesterOverview() {
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
         wiEl.innerHTML = weekNum === 0
-            ? '<i class="bi bi-calendar3-week me-1"></i>Not started yet'
-            : '<i class="bi bi-calendar3-week me-1"></i>Week ' + weekNum + ' of ' + totalWeeks;
+            ? '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Not started yet'
+            : '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Week ' + weekNum + ' of ' + totalWeeks;
     var wlEl = document.getElementById('dashWeeksLeft');
     if (wlEl)
         wlEl.textContent = weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
@@ -367,7 +367,7 @@ function renderUpcomingTasks() {
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash task-row-overdue">' +
-                '<div class="task-row-icon task-row-icon-overdue"><i class="bi ' + catIcon + '"></i></div>' +
+                '<div class="task-row-icon task-row-icon-overdue"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -378,7 +378,7 @@ function renderUpcomingTasks() {
     }
     if (upcomingTasks.length) {
         if (overdueTasks.length)
-            html += '<div class="upcoming-section-label mt-2"><i class="bi bi-clock me-1"></i>Upcoming</div>';
+            html += '<div class="upcoming-section-label mt-2"><i class="bi bi-clock me-1" aria-hidden="true"></i>Upcoming</div>';
         html += upcomingTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var daysLeft = Math.ceil((new Date(t.dueDate + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
@@ -387,7 +387,7 @@ function renderUpcomingTasks() {
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash">' +
-                '<div class="task-row-icon"><i class="bi ' + catIcon + '"></i></div>' +
+                '<div class="task-row-icon"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -412,7 +412,7 @@ function taskCatIcon(cat) {
 
 function dashEmpty(icon, title, sub) {
     return '<div class="dash-empty">' +
-        '<i class="bi ' + icon + '"></i>' +
+        '<i class="bi ' + icon + '" aria-hidden="true"></i>' +
         '<div class="dash-empty-title">' + title + '</div>' +
         (sub ? '<div class="dash-empty-sub">' + sub + '</div>' : '') +
         '</div>';
