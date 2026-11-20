@@ -224,7 +224,7 @@ body.auth-page {
     border: var(--auth-rule) solid var(--auth-input-border);
     border-radius: var(--input-radius);
     color: var(--auth-text);
-    font-size: 0.95rem;
+    font-size: var(--input-font-size);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 

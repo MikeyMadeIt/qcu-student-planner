@@ -315,6 +315,7 @@ function wireFilters() {
         document.getElementById('admCategory').value = 'all';
         document.getElementById('admDateFrom').value = '';
         document.getElementById('admDateTo').value = '';
+        if (window.DatePicker) { DatePicker.refresh('admDateFrom'); DatePicker.refresh('admDateTo'); }
         document.getElementById('admSort').value = 'sent_desc';
         currentPage = 1;
         loadRows();

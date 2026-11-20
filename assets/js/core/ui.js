@@ -65,7 +65,7 @@ function ensureConfirmModal() {
         <p class="text-soft mb-0 confirm-message" id="confirmMessage"></p>
         <div class="confirm-reason-wrap text-start mt-3" id="confirmReasonWrap" hidden>
           <label class="adm-label" id="confirmReasonLabel" for="confirmReasonInput">Reason</label>
-          <textarea class="form-control" id="confirmReasonInput" rows="2" maxlength="300"></textarea>
+          <textarea class="form-control" id="confirmReasonInput" rows="2" maxlength="300" placeholder="Enter a reason…"></textarea>
           <p class="auth-error" id="confirmReasonError" hidden></p>
         </div>
         <div class="d-flex gap-2 mt-3">
@@ -202,7 +202,7 @@ function promptAction(opts) {
     const input = staleInput.cloneNode(true);
     staleInput.parentNode.replaceChild(input, staleInput);
     input.value = value || '';
-    input.placeholder = placeholder || '';
+    input.placeholder = placeholder || 'Enter a value…';
     input.setAttribute('aria-describedby', 'promptActionError');
 
     const staleBtn = document.getElementById('promptActionBtn');

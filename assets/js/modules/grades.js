@@ -546,6 +546,7 @@ function renderGwaCalculator() {
         DB.saveGwaCalcRows(rows);
     }
     wrap.innerHTML = rows.map((r, i) => gwaCalcRowHtml(r, i)).join('');
+    if (window.enhanceSelects) window.enhanceSelects(wrap);
     refreshGwaTotals(rows);
 }
 
@@ -555,9 +556,9 @@ function gwaCalcRowHtml(r, i) {
     return `<div class="gwa-input-row">
     <input class="form-control form-control-sm gwa-col-code" placeholder="e.g., HUM 1"
       value="${escapeHtml(r.label || '')}" oninput="updateGwaCalcRow(${i},'label',this.value)">
-    <input type="number" min="0" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Uts."
+    <input type="number" min="0" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Units"
       value="${r.units === '' ? '' : r.units}" oninput="updateGwaCalcRow(${i},'units',this.value)">
-    <select class="form-select form-select-sm gwa-col-grade" onchange="updateGwaCalcRow(${i},'grade',this.value)">
+    <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow(${i},'grade',this.value)">
       ${sel}
     </select>
     <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})">

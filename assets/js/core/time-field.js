@@ -37,6 +37,22 @@
         return [h ? h + ' hr' : '', m ? m + ' min' : ''].filter(Boolean).join(' ');
     }
 
+    function positionMenu(menu, anchor) {
+        var a = anchor.getBoundingClientRect(), gap = 8, maxWidth = Math.max(160, window.innerWidth - gap * 2);
+        menu.style.position = 'fixed'; menu.style.top = '0px'; menu.style.left = '0px';
+        menu.style.right = 'auto'; menu.style.bottom = 'auto'; menu.style.width = 'max-content';
+        menu.style.maxWidth = Math.min(256, maxWidth) + 'px';
+        menu.style.minWidth = Math.min(a.width, maxWidth) + 'px';
+        var below = window.innerHeight - a.bottom - gap, above = a.top - gap;
+        var room = Math.max(below, above);
+        menu.style.maxHeight = Math.max(96, Math.min(224, room - 4)) + 'px';
+        var r = menu.getBoundingClientRect();
+        var left = Math.max(gap, Math.min(a.left, window.innerWidth - r.width - gap));
+        var top = below >= Math.min(r.height, 224) + 4 ? a.bottom + 4 : a.top - r.height - 4;
+        top = Math.max(gap, Math.min(top, window.innerHeight - r.height - gap));
+        menu.style.left = left + 'px'; menu.style.top = top + 'px';
+    }
+
     /* Returns { empty } | { error } | { value:'HH:MM', assumed:boolean } */
     function parse(raw, afterMins) {
         var s = String(raw == null ? '' : raw).trim().toLowerCase().replace(/\s+/g, ' ');
@@ -149,6 +165,10 @@
         var required = field.dataset.required === '1';
         var label = field.dataset.label || 'Time';
         var attempted = false, active = null, navigated = false;
+        document.body.appendChild(menu);
+        function reposition() { if (!menu.hidden) positionMenu(menu, field); }
+        function watchPosition() { window.addEventListener('resize', reposition); window.addEventListener('scroll', reposition, true); }
+        function stopPosition() { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); }
 
         function afterMins() {
             var a = afterId && document.getElementById(afterId);
@@ -245,14 +265,7 @@
             menu.hidden = false;
             text.setAttribute('aria-expanded', 'true');
             navigated = false;
-
-            // Open upward when there isn't room below
-            menu.classList.remove('is-up');
-            var fr = field.getBoundingClientRect();
-            var br = (field.closest('.modal-body') || document.body).getBoundingClientRect();
-            var below = Math.min(br.bottom, window.innerHeight) - fr.bottom;
-            var above = fr.top - Math.max(br.top, 0);
-            menu.classList.toggle('is-up', below < 240 && above > below);
+            reposition(); watchPosition();
 
             var target = (curMins != null && times.indexOf(curMins) >= 0) ? curMins
                 : (startMins != null ? startMins + 90 : (fbMins != null ? fbMins : 8 * 60));
@@ -262,6 +275,7 @@
 
         function close() {
             menu.hidden = true;
+            stopPosition();
             text.setAttribute('aria-expanded', 'false');
             text.removeAttribute('aria-activedescendant');
             active = null;
@@ -324,8 +338,9 @@
         if (!globalBound) {
             globalBound = true;
             document.addEventListener('pointerdown', function (e) {
-                if (!e.target.closest('.sch-time-field')) closeAll();
+                if (!e.target.closest('.sch-time-field, .sch-time-menu')) closeAll();
             });
+            document.addEventListener('hide.bs.modal', function () { closeAll(); });
         }
     }
 
@@ -352,6 +367,7 @@
         html: html,
         init: init,
         validate: validate,
+        position: positionMenu,
         get: function (id) { var h = document.getElementById(id); return h ? h.value : ''; },
         format: fmt12
     };

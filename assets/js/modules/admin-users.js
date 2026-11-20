@@ -144,6 +144,7 @@ async function init() {
         document.getElementById('admStatus').value = 'all';
         document.getElementById('admDateFrom').value = '';
         document.getElementById('admDateTo').value = '';
+        if (window.DatePicker) { DatePicker.refresh('admDateFrom'); DatePicker.refresh('admDateTo'); }
         document.getElementById('admSort').value = 'created_desc';
         currentPage = 1;
         loadRows();

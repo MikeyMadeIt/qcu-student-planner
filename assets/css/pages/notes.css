@@ -518,7 +518,7 @@ ol ol,
 .nt-search-input {
     padding-left: 32px !important;
     height: 36px !important;
-    font-size: .85rem !important;
+    font-size: var(--input-font-size) !important;
 }
 
 .nt-icon-btn {
@@ -1130,7 +1130,7 @@ ol ol,
     border: none;
     background: transparent;
     outline: none;
-    font-size: .82rem;
+    font-size: var(--input-font-size);
     color: var(--text);
     min-width: 80px;
     flex: 1;
@@ -1896,7 +1896,7 @@ ol ol,
 /* Every control in the panel shares one height (search, select, star, filters, All) */
 .nt-search-input {
     height: var(--btn-height) !important;
-    font-size: var(--btn-font-size) !important;
+    font-size: var(--input-font-size) !important;
     border-radius: var(--btn-radius) !important;
 }
 

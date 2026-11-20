@@ -1185,7 +1185,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     border-radius: var(--input-radius);
     background: var(--surface-2);
     color: var(--text);
-    font-size: .82rem;
+    font-size: var(--input-font-size);
 }
 
 .asa-search input:focus {
