@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>News & Announcements · QCU Student Planner</title>
+<script src="../../assets/js/core/app-guard.js"></script><script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A"><link rel="manifest" href="../../manifest.json"><link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"><link href="../../assets/css/main.css" rel="stylesheet"><link href="../../assets/css/pages/news.css" rel="stylesheet">
+</head>
+<body><div class="app-shell"><nav class="sidebar" id="sidebar"></nav>
+<main class="main-content news-page">
+  <header class="news-heading"><div class="news-heading-text"><h1 class="page-title">News & Announcements</h1><p class="page-sub">Latest updates from Quezon City University.</p></div></header>
+  <div class="news-attribution"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Articles are published by <strong>Quezon City University</strong>. QCU Student Planner is an independent student tool.</span></div>
+  <div class="news-toolbar"><label class="news-search"><i class="bi bi-search" aria-hidden="true"></i><input id="newsSearch" class="form-control" type="search" placeholder="Search news and announcements" aria-label="Search article titles"></label><div class="news-filters" role="group" aria-label="Filter articles by category"><button class="news-filter active" data-category="all" aria-pressed="true">All</button><button class="news-filter" data-category="news" aria-pressed="false">News</button><button class="news-filter" data-category="announcement" aria-pressed="false">Announcements</button></div></div>
+  <div class="news-list-heading"><span>Latest publications</span><span id="newsCount" aria-live="polite"></span></div>
+  <section id="newsGrid" class="news-grid" aria-live="polite" aria-busy="true" aria-label="QCU publications"></section>
+  <nav id="newsPagination" class="news-pagination" aria-label="News pages" hidden>
+    <button class="btn btn-ghost btn-sm" id="newsPrevious" type="button" aria-label="Previous page"><i class="bi bi-chevron-left" aria-hidden="true"></i><span>Previous</span></button>
+    <span id="newsPageLabel" aria-live="polite"></span>
+    <button class="btn btn-ghost btn-sm" id="newsNext" type="button" aria-label="Next page"><span>Next</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+  </nav>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../../assets/js/utils/dom.js"></script><script src="../../assets/js/data/storage.js"></script><script src="../../assets/js/data/cloud-sync.js"></script><script src="../../assets/js/core/layout.js"></script>
+<script>renderShell('news');</script><script type="module" src="../../assets/js/modules/news.js"></script>
+</body></html>

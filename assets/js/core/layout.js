@@ -3,6 +3,7 @@ const NAV_ITEMS = [
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
     { href: 'dashboard.html', icon: 'bi-grid-1x2', label: 'Dashboard', key: 'dashboard', base: 'app' },
+    { href: 'news.html', icon: 'bi-megaphone', label: 'News & Announcements', key: 'news', base: 'app' },
     { href: 'schedule.html', icon: 'bi-calendar2-week', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
     { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
@@ -41,6 +42,7 @@ const PAGE_SECTIONS = {
     inbox: 'Communication',
     notifications: 'Communication',
     dashboard: 'Overview',
+    news: 'University',
     schedule: 'Academics',
     tasks: 'Academics',
     calendar: 'Academics',
@@ -663,6 +665,8 @@ function wireModalDefaults() {
 
 function renderShell(activeKey, admin) {
     const isAdminArea = String(activeKey).startsWith('admin-');
+    document.body.classList.toggle('student-app', !isAdminArea);
+    document.body.classList.toggle('admin-app', isAdminArea);
     if (isAdminArea) renderAdminShellBar(activeKey, admin);
     else renderShellBar(activeKey);
     const sidebar = document.getElementById('sidebar');
@@ -680,6 +684,7 @@ function renderShell(activeKey, admin) {
                 { label: 'Overview', keys: ['dashboard'] },
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
                 { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
+                { label: 'University', keys: ['news'] },
                 { label: 'Personalization', keys: ['wallpaper'] },
                 { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
             ];
@@ -903,6 +908,7 @@ const DRAWER_GROUPS = [
     { label: 'Overview', keys: ['dashboard'] },
     { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
     { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
+    { label: 'University', keys: ['news'] },
     { label: 'Personalization', keys: ['wallpaper'] },
     { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
 ];
