@@ -879,6 +879,10 @@ async function hydrateProfileIdentity() {
         const profileResult = await AuthService.getCurrentProfile();
         if (profileResult.ok && profileResult.data && profileResult.data.full_name)
             fullName = profileResult.data.full_name;
+        fullName = String(fullName || metadata.full_name || metadata.name || [metadata.first_name || metadata.given_name, metadata.last_name || metadata.family_name].filter(Boolean).join(' ') || '').trim();
+        const greetEl = document.getElementById('greetText');
+        if (greetEl && fullName)
+            greetEl.dataset.userName = fullName;
 
         document.querySelectorAll('#sidebarUserName, #drawerUserEmail, #topbarUserEmail, #shellAdminEmail').forEach(el => {
             el.textContent = email;
@@ -1030,8 +1034,8 @@ function startClock(clockEl, dateEl, greetEl) {
             dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         if (greetEl) {
             const s = DB.getSettings();
-            const name = s.name ? s.name.split(' ')[0] : 'there';
-            greetEl.textContent = `${greetingText()}, ${name}`;
+            const name = String(s.name || greetEl.dataset.userName || '').trim().split(/\s+/)[0].replace(/[.,;:!?]+$/, '');
+            greetEl.textContent = name ? `${greetingText()}, ${name}!` : greetingText();
         }
     }
     tick();
