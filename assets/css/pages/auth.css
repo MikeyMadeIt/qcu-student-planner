@@ -8,6 +8,7 @@
     --auth-bg: #0F172A;
     --auth-surface: #111827;
     --auth-elevated: #1E293B;
+    --auth-control-surface: #182131;
     --auth-text: #F8FAFC;
     --auth-text-soft: #94A3B8;
     --auth-text-faint: #7C8BA1;
@@ -27,6 +28,7 @@
     --auth-bg: #F4F6FA;
     --auth-surface: #FFFFFF;
     --auth-elevated: #F1F5F9;
+    --auth-control-surface: #F6F8FB;
     --auth-text: #0F172A;
     --auth-text-soft: #475569;
     --auth-text-faint: #64748B;
@@ -444,7 +446,7 @@ html[data-motion="reduced"] .auth-spin {
     gap: var(--space-3);
     min-height: 3rem;
     border-radius: var(--btn-radius);
-    background: var(--auth-input-bg);
+    background: var(--auth-control-surface);
     border: var(--auth-rule) solid var(--auth-input-border);
     color: var(--auth-text);
     font-weight: 600;
@@ -739,4 +741,230 @@ html[data-motion="reduced"] .auth-spin {
     .auth-card {
         padding: var(--space-7);
     }
+}
+
+/* Refreshed authentication layouts. Keep the existing auth hooks and fields intact. */
+body.auth-page {
+    background:
+        radial-gradient(ellipse at 14% 20%, rgba(var(--accent), .16), transparent 30rem),
+        var(--auth-bg);
+}
+
+.auth-card {
+    background: color-mix(in srgb, var(--auth-surface) 94%, rgb(var(--accent)) 6%);
+    border-color: var(--auth-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .2), 0 1px 0 rgba(255, 255, 255, .035) inset;
+}
+
+.auth-brand {
+    gap: 12px;
+    font-size: .95rem;
+    letter-spacing: -.01em;
+}
+
+.auth-brand .dot {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.auth-login-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, .85fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    align-items: center;
+    column-gap: clamp(3rem, 8vw, 8rem);
+    row-gap: 16px;
+    width: min(100%, 78rem);
+    margin-inline: auto;
+    padding-inline: clamp(1.5rem, 6vw, 6rem);
+}
+
+.auth-login-intro {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    max-width: 35rem;
+    padding-block: 1rem;
+}
+
+.auth-intro-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    color: var(--auth-text-soft);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+.auth-intro-kicker span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+    box-shadow: 0 0 0 5px rgba(var(--accent), .14);
+}
+
+.auth-login-intro h1 {
+    margin: 0;
+    color: var(--auth-text);
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    font-weight: 800;
+    letter-spacing: -.065em;
+    line-height: 1.04;
+}
+
+.auth-login-intro h1 span {
+    color: rgb(var(--accent));
+}
+
+.auth-login-intro > p {
+    max-width: 29rem;
+    margin: 22px 0 30px;
+    color: var(--auth-text-soft);
+    font-size: 1.03rem;
+    line-height: 1.7;
+}
+
+.auth-feature-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.auth-feature-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid var(--auth-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .025);
+    color: var(--auth-text-soft);
+    font-size: .78rem;
+}
+
+.auth-feature-list i {
+    color: rgb(var(--accent));
+    font-size: .9rem;
+}
+
+.auth-login-card {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: 27rem;
+    padding: clamp(1.6rem, 3vw, 2.5rem);
+}
+
+.auth-login-card .auth-title {
+    font-size: 1.8rem;
+    letter-spacing: -.04em;
+}
+
+.auth-login-card .auth-sub {
+    margin-bottom: 24px;
+}
+
+.auth-login-card .btn-google {
+    min-height: 3.25rem;
+    border-radius: var(--btn-radius);
+    background: var(--auth-control-surface);
+    font-size: .92rem;
+}
+
+.auth-consent-note {
+    margin: 14px 0 0;
+    color: var(--auth-text-faint);
+    font-size: .75rem;
+    line-height: 1.55;
+    text-align: center;
+}
+
+.auth-consent-note a {
+    color: var(--auth-link);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--accent), .45);
+    text-underline-offset: 2px;
+}
+
+.auth-consent-note a:hover {
+    text-decoration-color: currentColor;
+}
+
+.auth-login-card .auth-hint {
+    padding: 14px 15px;
+    border: 1px solid var(--auth-border);
+    border-radius: var(--radius-sm);
+    background: var(--auth-control-surface);
+    color: var(--auth-text-soft);
+}
+
+.status-icon {
+    width: 4rem;
+    height: 4rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(var(--accent), .13);
+    color: var(--auth-link);
+}
+
+.status-icon-loading {
+    background: transparent;
+}
+
+.auth-spinner {
+    display: block;
+    width: 2.8rem;
+    height: 2.8rem;
+    border: 3px solid rgba(var(--accent), .2);
+    border-top-color: rgb(var(--accent));
+    border-right-color: rgb(var(--accent));
+    border-radius: 50%;
+    animation: auth-spin .85s linear infinite;
+}
+
+.auth-status-card {
+    max-width: 29rem;
+}
+
+.auth-status-card .auth-center .auth-title {
+    white-space: normal;
+}
+
+.auth-profile-main {
+    justify-content: flex-start;
+    padding-top: max(4.5rem, env(safe-area-inset-top) + 3rem);
+}
+
+.auth-profile-card {
+    max-width: 44rem;
+}
+
+.auth-profile-card > .auth-title {
+    font-size: 1.9rem;
+}
+
+@media (max-width: 900px) {
+    .auth-login-main {
+        display: flex;
+        width: 100%;
+        gap: 0;
+        padding-inline: var(--space-4);
+    }
+
+    .auth-login-intro {
+        display: none;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-spinner { animation-duration: 2s; }
 }

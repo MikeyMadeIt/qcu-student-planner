@@ -798,26 +798,6 @@
 }
 
 @media (max-width: 575px) {
-    .dash-stats .dash-stat-link {
-        min-height: 92px;
-        padding: 12px;
-        gap: 8px;
-    }
-    .dash-stats .stat-card-val {
-        font-size: 1.15rem;
-    }
-    .dash-stats .stat-card-icon {
-        width: 1.8rem;
-        height: 1.8rem;
-        font-size: var(--icon-size-sm);
-    }
-    .dash-stats .stat-card-lbl {
-        font-size: .6rem;
-        margin-top: 2px;
-    }
-    .dash-stats .stat-card-hint {
-        font-size: .58rem;
-    }
     .att-legend-label {
         font-size: .66rem;
     }
@@ -868,7 +848,7 @@
 .dash-stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--grid-gap);
+    gap: clamp(10px, 1vw, 14px);
     margin-bottom: var(--page-gap);
 }
 
@@ -876,7 +856,7 @@
     min-height: 104px;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 16px;
+    padding: 14px;
     color: var(--text);
     text-decoration: none;
     backdrop-filter: none;
@@ -999,8 +979,8 @@
     }
 
     .dashboard-page .dash-stats .stat-card {
-        min-height: 86px;
-        padding: 10px 12px;
+        min-height: 104px;
+        padding: 14px;
         align-items: start;
     }
 
@@ -1010,7 +990,7 @@
 
     .dashboard-page .dash-stats .stat-card-icon {
         position: absolute;
-        top: 10px;
+        top: 12px;
         right: 12px;
     }
 
@@ -1060,4 +1040,25 @@
         font-size: 12px;
         text-align: center;
     }
+}
+
+/* Keep the compact stat-card layout after the dashboard's authoritative base rules. */
+@media (max-width: 575px) {
+    .dash-stats .stat-card {
+        min-height: 92px;
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .dash-stats .stat-card-val { font-size: 1.15rem; }
+    .dash-stats .stat-card-icon {
+        width: 1.8rem;
+        height: 1.8rem;
+        font-size: var(--icon-size-sm);
+    }
+    .dash-stats .stat-card-lbl {
+        font-size: .6rem;
+        margin-top: 2px;
+    }
+    .dash-stats .stat-card-hint { font-size: .58rem; }
 }

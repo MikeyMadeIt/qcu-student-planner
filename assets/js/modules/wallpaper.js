@@ -14,6 +14,7 @@ const WP_THEMES = {
 let wpTheme = 'dark';
 let wpMode = 'list';
 let wpToggleState = { room: true, professor: true, name: true, semester: true };
+let wpStudentName = '';
 const WP_DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const WP_DAY_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 const WP_PALETTE = ['#7C6CF6', '#4F8CFF', '#34D399', '#FB7185', '#B45309', '#F472B6', '#22D3EE', '#A78BFA', '#F97316', '#10B981'];
@@ -41,6 +42,23 @@ function initWallpaper() {
     buildToggles();
     document.getElementById('wpSize').addEventListener('change', onSizeChange);
     generateWallpaper();
+    loadWallpaperStudentName();
+}
+
+async function loadWallpaperStudentName() {
+    try {
+        const { AuthService } = await import('../services/auth-service.js');
+        const result = await AuthService.getCurrentProfile();
+        const name = result.ok && result.data && result.data.full_name
+            ? String(result.data.full_name).trim()
+            : '';
+        if (name) {
+            wpStudentName = name;
+            generateWallpaper();
+        }
+    } catch (error) {
+        // Keep the locally saved name as a fallback when the profile is unavailable.
+    }
 }
 
 // Mode toggle
@@ -166,33 +184,7 @@ function drawBackground(ctx, W, H, t) {
 function drawSubjectList(ctx, W, H, t) {
     const scale = W / 1080;
     const pad = W * 0.08;
-    let y = H * 0.22;
-    const settings = DB.getSettings();
-    const sem = DB.getSemester();
-    if (wpToggleState.name) {
-        ctx.fillStyle = t.sub;
-        ctx.font = `500 ${30 * scale}px 'Inter', sans-serif`;
-        ctx.fillText((settings.name || 'Student').toUpperCase(), pad, y);
-        y += 44 * scale;
-    }
-    ctx.fillStyle = t.text;
-    ctx.font = `800 ${54 * scale}px 'Plus Jakarta Sans', sans-serif`;
-    ctx.fillText('MY SCHEDULE', pad, y + 6 * scale);
-    y += 68 * scale;
-    if (wpToggleState.semester) {
-        ctx.fillStyle = t.sub;
-        ctx.font = `${26 * scale}px 'Inter', sans-serif`;
-        ctx.fillText(`${sem.name || ''} · ${sem.schoolYear || ''}`, pad, y);
-        y += 46 * scale;
-    }
-    y += 10 * scale;
-    ctx.strokeStyle = t.line;
-    ctx.lineWidth = 1.5 * scale;
-    ctx.beginPath();
-    ctx.moveTo(pad, y);
-    ctx.lineTo(W - pad, y);
-    ctx.stroke();
-    y += 30 * scale;
+    let y = drawWallpaperHeading(ctx, W, H, t, scale, pad);
     const subjects = getAllSubjects();
     const usedDays = getAllDaysInUse(subjects);
     const dayBlocks = usedDays.map(d => ({
@@ -208,17 +200,18 @@ function drawSubjectList(ctx, W, H, t) {
     const totalClassRows = dayBlocks.reduce((s, b) => s + b.items.length, 0);
     const totalDayHeaders = dayBlocks.length;
     const effectiveRows = totalClassRows + totalDayHeaders * 0.45;
-    const itemH = Math.max(70 * scale, Math.min(110 * scale, availH / effectiveRows));
+    const rowSpace = Math.max(1, availH - totalDayHeaders * 10 * scale);
+    const itemH = Math.min(110 * scale, rowSpace / effectiveRows);
     const dayHeaderH = Math.round(itemH * 0.45);
-    const gapH = Math.round(6 * scale);
-    const accentW = Math.round(6 * scale);
-    const accentR = Math.round(3 * scale);
-    const timeFontSz = Math.max(20, Math.min(34, 28 * scale));
+    const gapH = Math.min(Math.round(6 * scale), Math.round(itemH * 0.12));
+    const accentW = Math.max(3, Math.round(6 * scale));
+    const accentR = Math.min(accentW / 2, Math.round(3 * scale));
+    const timeFontSz = Math.max(12, Math.min(34, 28 * scale, itemH * 0.52));
     const timeColW = Math.round(timeFontSz * 5.8);
     const infoX = pad + accentW + 20 * scale + timeColW + 16 * scale;
-    const codeFontSz = Math.max(20, Math.min(34, 30 * scale));
-    const metaFontSz = Math.max(15, Math.min(24, 21 * scale));
-    const dayFontSz = Math.max(15, Math.min(26, 22 * scale));
+    const codeFontSz = Math.max(12, Math.min(34, 30 * scale, itemH * 0.56));
+    const metaFontSz = Math.max(10, Math.min(24, 21 * scale, itemH * 0.34));
+    const dayFontSz = Math.max(12, Math.min(26, 22 * scale, dayHeaderH * 0.7));
     ctx.textBaseline = 'middle';
     let overflowed = false;
     dayBlocks.forEach(block => {
@@ -284,7 +277,7 @@ function drawSubjectList(ctx, W, H, t) {
 function drawTimetable(ctx, W, H, t) {
     const scale = W / 1080;
     const pad = W * 0.08;
-    const gridTop = H * 0.22;
+    const gridTop = drawWallpaperHeading(ctx, W, H, t, scale, pad);
     const subjects = getAllSubjects();
     const usedByData = getAllDaysInUse(subjects);
     const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -392,6 +385,37 @@ function drawTimetable(ctx, W, H, t) {
         });
     });
     ctx.textBaseline = 'alphabetic';
+}
+
+function drawWallpaperHeading(ctx, W, H, t, scale, pad) {
+    let y = H * 0.11;
+    const settings = DB.getSettings();
+    const name = wpStudentName || settings.name || 'Student';
+    if (wpToggleState.name) {
+        ctx.fillStyle = t.sub;
+        ctx.font = `500 ${30 * scale}px 'Inter', sans-serif`;
+        ctx.fillText(truncateText(ctx, name.toUpperCase(), W - pad * 2), pad, y);
+        y += 42 * scale;
+    }
+    ctx.fillStyle = t.text;
+    ctx.font = `800 ${54 * scale}px 'Plus Jakarta Sans', sans-serif`;
+    ctx.fillText('MY SCHEDULE', pad, y + 6 * scale);
+    y += 68 * scale;
+    if (wpToggleState.semester) {
+        const sem = DB.getSemester();
+        ctx.fillStyle = t.sub;
+        ctx.font = `${26 * scale}px 'Inter', sans-serif`;
+        ctx.fillText(`${sem.name || ''} · ${sem.schoolYear || ''}`, pad, y);
+        y += 38 * scale;
+    }
+    y += 6 * scale;
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 1.5 * scale;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(W - pad, y);
+    ctx.stroke();
+    return y + 24 * scale;
 }
 
 // EMPTY STATE

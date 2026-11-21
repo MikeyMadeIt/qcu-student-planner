@@ -94,45 +94,53 @@ function renderStatCards() {
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
     var subjectsHint = document.getElementById('statSubjectsHint');
     if (subjectsHint)
-        subjectsHint.textContent = !subjects.length ? 'No data yet'
+        subjectsHint.textContent = !subjects.length ? 'Add a subject'
             : syllabusCoverage !== null ? totalUnits + ' units \u00B7 Syllabus ' + syllabusCoverage + '%'
                 : totalUnits + ' units this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
+        var gwaValue = document.getElementById('statGwa');
+        if (gwaValue) gwaValue.classList.remove('is-unavailable');
         var gwaHint = document.getElementById('statGwaHint');
         if (gwaHint)
             gwaHint.textContent = 'Based on entered grades';
     }
     else {
         var el = document.getElementById('statGwa');
-        if (el)
-            el.textContent = '\u2013';
+        if (el) {
+            el.textContent = '0';
+            el.classList.remove('is-unavailable');
+        }
         var gwaHintEmpty = document.getElementById('statGwaHint');
         if (gwaHintEmpty)
-            gwaHintEmpty.textContent = 'No data yet';
+            gwaHintEmpty.textContent = 'Add grades';
     }
     const attRate = computeAttendanceRate(semId);
     if (attRate !== null) {
         animateCountUp('statAtt', 0, attRate, 900, function (v) { return Math.round(v) + '%'; });
+        var attValue = document.getElementById('statAtt');
+        if (attValue) attValue.classList.remove('is-unavailable');
         var attHint = document.getElementById('statAttHint');
         if (attHint)
             attHint.textContent = attRate >= 75 ? 'On track' : 'Needs attention';
     }
     else {
         var el2 = document.getElementById('statAtt');
-        if (el2)
-            el2.textContent = '\u2013';
+        if (el2) {
+            el2.textContent = '0';
+            el2.classList.remove('is-unavailable');
+        }
         var attHintEmpty = document.getElementById('statAttHint');
         if (attHintEmpty)
-            attHintEmpty.textContent = 'No data yet';
+            attHintEmpty.textContent = 'Log attendance';
     }
     var tel = document.getElementById('statTasks');
     if (tel)
-        tel.textContent = done + '/' + tasks.length;
+        tel.textContent = tasks.length ? done + '/' + tasks.length : '0';
     var tasksHint = document.getElementById('statTasksHint');
     if (tasksHint)
-        tasksHint.textContent = !tasks.length ? 'No data yet' : done === tasks.length ? 'All complete' : (tasks.length - done) + ' remaining';
+        tasksHint.textContent = !tasks.length ? 'Add a task' : done === tasks.length ? 'All complete' : (tasks.length - done) + ' remaining';
 }
 
 function animateCountUp(id, from, to, duration, fmt) {
