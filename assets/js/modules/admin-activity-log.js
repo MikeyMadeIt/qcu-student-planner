@@ -47,9 +47,9 @@ async function loadRows() {
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');

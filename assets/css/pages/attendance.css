@@ -282,7 +282,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 .att-log-form .att-subject-row .att-status-select-trigger {
     height: 33px;
     padding: 0 10px;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
 }
 
 .att-log-form .att-subject-empty {
@@ -1089,14 +1089,51 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 32px 0;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
 }
 
 .att-log-empty i {
-    font-size: 1.6rem;
-    opacity: .25;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
 }
+
+.att-log-empty strong { color: var(--text); font-size: .92rem; }
+.att-log-empty span { max-width: 28rem; color: var(--text-soft); font-size: .8rem; line-height: 1.5; }
+
+.att-card-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-3);
+    text-align: center;
+}
+
+.att-card-empty > i {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.1rem;
+}
+
+.att-card-empty strong { color: var(--text); font-size: .88rem; }
+.att-card-empty span { max-width: 25rem; color: var(--text-soft); font-size: .78rem; line-height: 1.5; }
 
 .att-log-row {
     display: grid;
@@ -2189,18 +2226,20 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 .att-log-form .att-date-bulk-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: flex-end;
-    gap: 12px;
+    gap: 8px;
 }
 
 .att-log-form .att-date-field {
-    flex: 1 1 0;
-    min-width: 180px;
+    width: 100%;
+    min-width: 0;
 }
 
 .att-bulk-panel {
-    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
     padding: 0;
     margin: 0;
     border-radius: 4px;
@@ -2210,7 +2249,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 6px;
+    width: 100%;
 }
 
 .att-bulk-label {
@@ -2224,19 +2263,25 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 .att-bulk-status {
-    flex: 0 0 160px;
-    width: 160px;
-    min-width: 140px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
     height: 33px;
     padding: 0 24px 0 10px;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .att-bulk-apply {
-    min-height: 36px;
+    align-self: end;
+    height: var(--input-height);
+    min-height: var(--input-height);
     flex-shrink: 0;
+    padding-block: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 575.98px) {
@@ -2244,30 +2289,36 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
         margin-bottom: 10px;
     }
     .att-log-form .att-date-bulk-row {
-        flex-wrap: nowrap;
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap: 6px;
     }
     .att-log-form .att-date-field {
-        flex: 1 1 0;
+        width: auto;
         min-width: 0;
     }
     .att-log-form .att-bulk-panel {
-        flex: 0 0 auto;
         width: auto;
+        min-width: 0;
     }
+    .att-log-form .att-bulk-controls { width: 100%; }
     .att-log-form .att-bulk-controls > .att-status-select {
-        flex: 0 0 126px;
-        width: 126px;
-        min-width: 120px;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
     }
     .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
-        padding-right: 8px;
-        padding-left: 8px;
-        font-size: .75rem;
+        width: 100%;
+        padding: 0 .5rem;
+        gap: 4px;
+        font-family: var(--font-body);
+        font-size: var(--input-font-size);
+    }
+    .att-log-form #attDatePicker {
+        padding-inline: .5rem;
     }
     .att-log-form .att-bulk-apply {
-        padding-right: 8px;
-        padding-left: 8px;
+        padding-inline: .4rem;
+        white-space: nowrap;
     }
 }
 
@@ -2306,7 +2357,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2368,7 +2419,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: .8125rem;
+    font-size: var(--input-font-size);
     text-align: left;
     white-space: nowrap;
     cursor: pointer;
@@ -2579,6 +2630,36 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     min-width: 0;
 }
 
+.att-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-soft);
+    text-align: center;
+}
+
+.att-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.1rem;
+}
+
+.att-empty-state > strong { color: var(--text); font-size: .88rem; }
+.att-empty-state > span:last-child { max-width: 26rem; font-size: .78rem; line-height: 1.5; }
+.att-stats-empty { grid-column: 1 / -1; min-height: 10rem; }
+.att-heatmap-empty { min-height: 9rem; }
+#attOverallRateData[hidden], #attOverallRateEmpty[hidden] { display: none !important; }
+
 .att-heatmap-filter {
     max-width: 150px;
     font-size: .75rem;
@@ -2747,22 +2828,16 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 
 .att-heatmap-empty {
     text-align: center;
-    padding: 24px 16px;
-    color: var(--text-faint);
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-soft);
     font-size: .82rem;
-}
-
-.att-heatmap-empty i {
-    font-size: 1.8rem;
-    opacity: .2;
-    display: block;
-    margin-bottom: 8px;
 }
 
 .att-heatmap-empty-sub {
     font-size: .74rem;
     margin-top: 4px;
-    opacity: .7;
+    color: var(--text-soft);
+    line-height: 1.45;
 }
 
 /* Heatmap Legend */
@@ -3498,19 +3573,31 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
 }
 
 /* Date input: same color + height as bulk status, text never clipped */
-.att-log-form #attDate {
+.att-log-form #attDate,
+.att-log-form #attDatePicker {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     min-width: 0;
     height: var(--input-height);
     min-height: var(--input-height);
-    padding: 0 10px;
-    font-size: .8125rem;
+    padding: 0 .85rem;
+    font-size: var(--input-font-size);
     line-height: normal;
     background: var(--surface) !important;
     box-sizing: border-box;
+}
+
+.att-log-form #attDatePicker .date-picker-value {
+    min-width: 0;
+    flex: 1 1 auto;
+    text-overflow: clip;
+}
+
+.att-log-form #attDatePicker .bi {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
 }
 
 .att-log-form #attDate::-webkit-date-and-time-value {
@@ -3553,16 +3640,6 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     min-height: var(--input-height);
 }
 
-.att-log-form .att-bulk-controls .att-bulk-apply {
-    height: var(--input-height);
-    min-height: var(--input-height);
-    padding-top: 0;
-    padding-bottom: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .att-log-form .att-bulk-controls {
     align-items: flex-end;
 }
@@ -3576,44 +3653,3 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
   border: 1px solid rgba(251, 113, 133, .35);
 }
 .att-edit-btn:hover { color: rgb(var(--accent, 36, 87, 214)); }
-
-@media (max-width: 479.98px) {
-    .att-log-form #attDate {
-        font-size: .75rem;
-        padding: 0 10px 0 8px;
-    }
-    .att-log-form #attDate::-webkit-calendar-picker-indicator {
-        width: 13px;
-        height: 13px;
-        margin-left: 4px;
-    }
-    .att-log-form .att-bulk-controls {
-        gap: 4px;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select {
-        flex: 0 0 104px;
-        width: 104px;
-        min-width: 0;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select .att-status-select-trigger {
-        padding-left: 8px;
-        padding-right: 8px;
-        font-size: .75rem;
-    }
-    .att-log-form .att-bulk-apply {
-        padding-left: 10px;
-        padding-right: 10px;
-        font-size: .75rem;
-    }
-}
-
-@media (max-width: 359.98px) {
-    .att-log-form #attDate {
-        font-size: .7rem;
-        padding: 0 8px 0 6px;
-    }
-    .att-log-form .att-bulk-controls > .att-status-select {
-        flex-basis: 94px;
-        width: 94px;
-    }
-}

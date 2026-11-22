@@ -112,7 +112,7 @@ label {
     .btn-sm,
     .form-control,
     .form-select {
-        font-size: 0.85rem;
+        font-size: var(--input-font-size);
     }
 
     .section-title,

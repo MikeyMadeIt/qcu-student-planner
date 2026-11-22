@@ -302,7 +302,7 @@ function confirmDeleteSemester(id) {
     confirmAction({
         title: `Delete ${sem.schoolYear} ${sem.name}?`,
         message: `${dataMsg} This cannot be undone.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         onConfirm() {
             if (!DB.deleteSemester(id)) {
                 Toast.show('Cannot delete the only semester', 'high', 'bi-exclamation-triangle');

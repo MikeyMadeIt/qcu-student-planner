@@ -112,9 +112,9 @@ function renderRows() {
         <td data-label="Date" class="adm-col-hide-mobile">${formatDateDisplay(ev.event_date)}</td>
         <td data-label="Status"><span class="status-badge event-status-${status.key}">${status.label}</span></td>
         <td class="adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${ev.id}" title="View details" aria-label="View event details"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="edit" data-id="${ev.id}" title="Edit" aria-label="Edit event"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-ghost btn-sm adm-icon-btn adm-danger" data-act="delete" data-id="${ev.id}" title="Delete" aria-label="Delete event"><i class="bi bi-trash3"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${ev.id}" title="View details" aria-label="View event details"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="edit" data-id="${ev.id}" title="Edit" aria-label="Edit event"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn adm-danger" data-act="delete" data-id="${ev.id}" title="Delete" aria-label="Delete event"><i class="bi bi-trash3" aria-hidden="true"></i></button>
         </td>
       </tr>`;
     }).join('');
@@ -129,7 +129,7 @@ const MAX_SPECIFIC_DATES = 30;
 function specificDateRowHtml(value) {
     return `<div class="d-flex gap-2 mb-2 uev-date-row">
     <input type="date" class="form-control uev-specific-date" value="${value || todayKeyLocal()}">
-    <button type="button" class="btn-icon uev-remove-date" aria-label="Remove date"><i class="bi bi-x-lg"></i></button>
+    <button type="button" class="btn-icon uev-remove-date" aria-label="Remove date"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
   </div>`;
 }
 
@@ -142,8 +142,8 @@ function modalFieldsHtml(existing) {
     const dateFieldHtml = canRange ? `
       <div class="mb-3">
         <div class="btn-group w-100" role="group">
-          <button type="button" class="btn btn-ghost btn-sm active" id="uevModeRangeBtn"><i class="bi bi-calendar-range me-1"></i>Date Range</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="uevModeMultiBtn"><i class="bi bi-calendar-plus me-1"></i>Specific Dates</button>
+          <button type="button" class="btn btn-ghost btn-sm active" id="uevModeRangeBtn"><i class="bi bi-calendar-range me-1" aria-hidden="true"></i>Date Range</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="uevModeMultiBtn"><i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>Specific Dates</button>
         </div>
       </div>
       <div id="uevRangeFields">
@@ -156,17 +156,17 @@ function modalFieldsHtml(existing) {
       <div id="uevMultiFields" class="d-none">
         <label>Dates</label>
         <div id="uevSpecificDatesList">${specificDateRowHtml(e.event_date)}</div>
-        <button type="button" class="btn btn-ghost btn-sm mt-1" id="uevAddDateBtn"><i class="bi bi-plus-lg me-1"></i>Add Another Date</button>
+        <button type="button" class="btn btn-ghost btn-sm mt-1" id="uevAddDateBtn"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Another Date</button>
       </div>` : `
       <div class="mb-2"><label>Date</label><input type="date" class="form-control" id="uevDate" value="${e.event_date || todayKeyLocal()}"></div>`;
     return `
-    <h5 class="mb-3"><i class="bi bi-bank2 me-2"></i>${existing ? 'Edit' : 'Add'} University Event</h5>
+    <h5 class="mb-3"><i class="bi bi-bank2 me-2" aria-hidden="true"></i>${existing ? 'Edit' : 'Add'} University Event</h5>
     <div class="mb-2"><label for="uevTitle">Event Title</label><input class="form-control" id="uevTitle" maxlength="150" placeholder="e.g. Semestral Break, Enrollment, Foundation Day" value="${escHtml(e.title || '')}"></div>
     <div class="mb-3"><label for="uevDescription">Note (optional)</label><textarea class="form-control" id="uevDescription" rows="2" maxlength="4000" placeholder="Additional details…">${escHtml(e.description || '')}</textarea></div>
     ${dateFieldHtml}
     <p class="text-danger mb-0 mt-3" id="uevModalMsg" hidden style="font-size:.85rem"></p>
     <div class="d-flex gap-2 mt-3">
-      <button class="btn btn-accent flex-grow-1" id="uevSaveBtn"><i class="bi bi-check2 me-1"></i>Save Event</button>
+      <button class="btn btn-accent flex-grow-1" id="uevSaveBtn"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save Event</button>
       <button class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
     </div>`;
 }
@@ -294,7 +294,7 @@ async function saveEvent() {
             return;
         }
         bootstrap.Modal.getInstance(document.getElementById('uevModal')).hide();
-        Toast.show('University event updated', 'accent', 'bi-check-circle-fill');
+        Toast.show('University event updated', 'accent', 'bi-check-circle');
         loadRows();
         return;
     }
@@ -317,9 +317,9 @@ async function saveEvent() {
     if (dates.length > 1) {
         const created = dates.length - failures;
         Toast.show(failures ? `Created ${created} of ${dates.length} days (${failures} failed).` : `Created ${created} events, one per day.`,
-            failures ? 'medium' : 'accent', failures ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill');
+            failures ? 'medium' : 'accent', failures ? 'bi-exclamation-triangle' : 'bi-check-circle');
     } else {
-        Toast.show('University event created', 'accent', 'bi-check-circle-fill');
+        Toast.show('University event created', 'accent', 'bi-check-circle');
     }
     loadRows();
 }
@@ -329,10 +329,10 @@ async function deleteEvent(id, title, triggerBtn) {
     const result = await AdminService.deleteUniversityEvent(id);
     if (!result.ok) {
         if (triggerBtn) triggerBtn.disabled = false;
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
-    Toast.show(`"${title}" was deleted.`, 'accent', 'bi-check-circle-fill');
+    Toast.show(`"${title}" was deleted.`, 'accent', 'bi-check-circle');
     loadRows();
 }
 
@@ -358,7 +358,7 @@ function onAction(e) {
             message: 'This removes the event for every student immediately. This cannot be undone.',
             confirmLabel: 'Delete event',
             danger: true,
-            icon: 'bi-trash3-fill',
+            icon: 'bi-trash3',
             onConfirm() { deleteEvent(id, title, btn); },
         });
     }
