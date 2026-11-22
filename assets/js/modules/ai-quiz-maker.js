@@ -36,7 +36,7 @@ function initAiQuizMaker() {
             infoEl: aqmEl('aqmFileInfo'),
             removeEl: aqmEl('aqmFileRemove'),
             emptyEl: aqmEl('aqmFileEmpty'),
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle-fill'),
+            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
         });
     } catch (error) {
         console.error('AI Quiz Maker: file attachment setup failed', error);
@@ -116,7 +116,7 @@ async function aqmGenerate() {
     const file = aqmAttachment.getFile();
 
     if (!topic && !notes && !file) {
-        Toast.show('Add a topic, some notes, or attach a file to generate a quiz.', 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show('Add a topic, some notes, or attach a file to generate a quiz.', 'danger', 'bi-exclamation-triangle');
         return;
     }
 
@@ -287,8 +287,8 @@ function aqmRenderQuestion() {
         let stateClass = selected ? 'is-selected' : '';
         let icon = '';
         if (aqmSubmitted) {
-            if (i === q.correctIndex) { stateClass = 'is-correct'; icon = '<i class="bi bi-check-circle-fill ai-choice-icon" aria-hidden="true"></i>'; }
-            else if (selected) { stateClass = 'is-incorrect'; icon = '<i class="bi bi-x-circle-fill ai-choice-icon" aria-hidden="true"></i>'; }
+            if (i === q.correctIndex) { stateClass = 'is-correct'; icon = '<i class="bi bi-check-circle ai-choice-icon" aria-hidden="true"></i>'; }
+            else if (selected) { stateClass = 'is-incorrect'; icon = '<i class="bi bi-x-circle ai-choice-icon" aria-hidden="true"></i>'; }
         }
         return `<button type="button" class="ai-choice ${stateClass}" data-choice="${i}" ${aqmSubmitted ? 'disabled' : ''} aria-pressed="${selected}">
             <span class="ai-choice-letter" aria-hidden="true">${letters[i]}</span>
@@ -325,7 +325,7 @@ function aqmSubmitQuiz() {
             message: `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Submit anyway?`,
             confirmLabel: 'Submit',
             danger: false,
-            icon: 'bi-send-fill',
+            icon: 'bi-send',
             onConfirm: () => aqmFinishSubmit(),
         });
         return;
@@ -358,7 +358,7 @@ function aqmShowResults() {
         const userAnswer = aqmAnswers[i];
         const wasCorrect = userAnswer === q.correctIndex;
         return `<div class="ai-review-item">
-            <div class="ai-review-item-q"><i class="bi ${wasCorrect ? 'bi-check-circle-fill ai-choice-icon' : 'bi-x-circle-fill ai-choice-icon'}" aria-hidden="true"></i><span>${i + 1}. ${escHtml(q.question)}</span></div>
+            <div class="ai-review-item-q"><i class="bi ${wasCorrect ? 'bi-check-circle ai-choice-icon' : 'bi-x-circle ai-choice-icon'}" aria-hidden="true"></i><span>${i + 1}. ${escHtml(q.question)}</span></div>
             <div class="text-soft" style="font-size:.85rem">
                 Your answer: ${userAnswer === null ? '<em>No answer</em>' : escHtml(`${letters[userAnswer]}. ${q.choices[userAnswer]}`)}
                 ${wasCorrect ? '' : `<br>Correct answer: ${escHtml(`${letters[q.correctIndex]}. ${q.choices[q.correctIndex]}`)}`}
@@ -448,17 +448,17 @@ async function aqmOpenSaved(id) {
         aqmIndex = 0; aqmSubmitted = false;
         aqmRenderQuestion(); aqmShowView('quiz');
     } catch (error) {
-        Toast.show("Couldn't open that quiz: " + error.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show("Couldn't open that quiz: " + error.message, 'danger', 'bi-exclamation-triangle');
     }
 }
 
 function aqmDeleteSaved(id) {
     confirmAction({
         title: 'Delete quiz?', message: 'This quiz and its scores will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash-fill',
+        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
         async onConfirm() {
             try { await (await aqmStore()).deleteQuiz(id); Toast.show('Quiz deleted'); aqmLoadHistory(); }
-            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle-fill'); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle'); }
         }
     });
 }

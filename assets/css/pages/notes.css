@@ -518,7 +518,7 @@ ol ol,
 .nt-search-input {
     padding-left: 32px !important;
     height: 36px !important;
-    font-size: .85rem !important;
+    font-size: var(--input-font-size) !important;
 }
 
 .nt-icon-btn {
@@ -681,10 +681,33 @@ ol ol,
     justify-content: center;
     gap: var(--space-2);
     margin: 0;
+    color: var(--text-soft);
+}
+
+.nt-empty > i {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
+}
+
+.nt-empty > strong {
+    color: var(--text);
+    font-size: .96rem;
 }
 
 .nt-empty p {
+    max-width: 30rem;
     margin: 0;
+    color: var(--text-soft);
+    font-size: .82rem;
+    line-height: 1.5;
 }
 
 .nt-empty .btn {
@@ -1130,7 +1153,7 @@ ol ol,
     border: none;
     background: transparent;
     outline: none;
-    font-size: .82rem;
+    font-size: var(--input-font-size);
     color: var(--text);
     min-width: 80px;
     flex: 1;
@@ -1896,7 +1919,7 @@ ol ol,
 /* Every control in the panel shares one height (search, select, star, filters, All) */
 .nt-search-input {
     height: var(--btn-height) !important;
-    font-size: var(--btn-font-size) !important;
+    font-size: var(--input-font-size) !important;
     border-radius: var(--btn-radius) !important;
 }
 
