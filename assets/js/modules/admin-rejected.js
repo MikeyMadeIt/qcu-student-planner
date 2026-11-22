@@ -68,7 +68,7 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
     renderAccountDetail(result.data);
@@ -81,11 +81,11 @@ async function deleteAccount(id, name, triggerBtn) {
 
     if (!result.ok) {
         if (triggerBtn) triggerBtn.disabled = false;
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
-    Toast.show(`${name} was permanently deleted.`, 'accent', 'bi-check-circle-fill');
+    Toast.show(`${name} was permanently deleted.`, 'accent', 'bi-check-circle');
     loadRows();
 }
 
@@ -109,7 +109,7 @@ function onAction(e) {
                 'This cannot be undone. Type DELETE to confirm.',
             confirmLabel: 'Delete permanently',
             danger: true,
-            icon: 'bi-trash3-fill',
+            icon: 'bi-trash3',
             reasonField: {
                 label: 'Type DELETE to confirm',
                 placeholder: 'DELETE',
@@ -118,7 +118,7 @@ function onAction(e) {
             },
             onConfirm(typed) {
                 if (typed.trim().toUpperCase() !== 'DELETE') {
-                    Toast.show('Type DELETE (in capitals) to confirm.', 'danger', 'bi-exclamation-triangle-fill');
+                    Toast.show('Type DELETE (in capitals) to confirm.', 'danger', 'bi-exclamation-triangle');
                     return;
                 }
                 deleteAccount(id, name, btn);

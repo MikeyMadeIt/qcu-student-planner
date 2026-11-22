@@ -54,12 +54,12 @@ export function mountAdminTopbar(admin) {
 }
 
 export function renderError(container, message) {
-    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
+    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
 }
 
 // Same as renderError, plus a Retry button wired to onRetry. Used wherever a failed
 export function renderErrorWithRetry(container, message, onRetry) {
-    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><br>${escHtml(message)}<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Retry</button></div>`;
+    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><br>${escHtml(message)}<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="bi bi-arrow-clockwise"></i> Retry</button></div>`;
     const btn = container.querySelector('#admErrorRetryBtn');
     if (btn) btn.addEventListener('click', onRetry, { once: true });
 }

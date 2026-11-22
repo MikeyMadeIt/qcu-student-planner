@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Dashboard · Student Planner</title>
+<title>Dashboard · QCU Student Planner</title>
 <script src="../../assets/js/core/app-guard.js"></script>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
@@ -51,7 +51,7 @@
     <!-- STAT CARDS -->
     <div class="dash-stats dash-card-anim">
       <a class="stat-card dash-stat-link" href="schedule.html" aria-label="View subjects and schedule">
-        <span class="stat-card-icon"><i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statSubjects">–</div>
           <div class="stat-card-lbl">Subjects</div>
@@ -59,7 +59,7 @@
         </div>
       </a>
       <a class="stat-card dash-stat-link" href="grades.html" aria-label="View grades">
-        <span class="stat-card-icon"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statGwa">–</div>
           <div class="stat-card-lbl">GWA</div>
@@ -67,7 +67,7 @@
         </div>
       </a>
       <a class="stat-card dash-stat-link" href="attendance.html" aria-label="View attendance">
-        <span class="stat-card-icon"><i class="bi bi-person-check-fill" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="bi bi-person-check" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statAtt">–</div>
           <div class="stat-card-lbl">Attendance</div>
@@ -111,10 +111,10 @@
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-pie-chart-fill" aria-hidden="true"></i>Attendance</div>
+            <div class="dash-section-title"><i class="bi bi-pie-chart"></i>Attendance</div>
             <a href="attendance.html" class="view-all-link">Attendance →</a>
           </div>
-          <div class="donut-legend-wrap">
+          <div class="donut-legend-wrap" id="attendanceDonutContent">
             <div class="donut-wrap">
               <svg width="130" height="130" viewBox="0 0 130 130">
                 <circle cx="65" cy="65" r="50" fill="none" stroke="var(--surface-2)" stroke-width="13"/>
@@ -133,13 +133,18 @@
               <div class="att-legend-row"><div class="att-dot" style="background:#fb7185"></div><span class="att-legend-label">Absent</span><span class="att-legend-val" id="attAbsent">–</span></div>
             </div>
           </div>
-          <div class="dash-attendance-note">No classes excluded from rate</div>
+          <div class="dash-empty" id="attendanceDonutEmpty" hidden>
+            <i class="bi bi-pie-chart" aria-hidden="true"></i>
+            <div class="dash-empty-title">No attendance data yet</div>
+            <div class="dash-empty-sub">Log attendance to see your breakdown.</div>
+          </div>
+          <div class="dash-attendance-note" id="dashAttendanceNote">No classes excluded from rate</div>
         </div>
       </div>
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i>Grade Performance</div>
+            <div class="dash-section-title"><i class="bi bi-bar-chart"></i>Grade Performance</div>
             <a href="grades.html" class="view-all-link">View Grades →</a>
           </div>
           <div id="dashGradeChart"></div>

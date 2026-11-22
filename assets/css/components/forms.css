@@ -281,6 +281,51 @@ label.checkbox-label {
     color: var(--danger);
 }
 
+/* Required markers and field errors use one treatment across every form. */
+.form-label .required-marker,
+.form-label .sch-subject-required,
+.rp-label .rp-req,
+.sch-subject-required,
+.rp-req {
+    display: inline-block;
+    margin-inline-start: .18em;
+    color: var(--text-faint) !important;
+    font: inherit;
+    line-height: 1;
+    vertical-align: baseline;
+}
+
+.form-control[aria-invalid="true"],
+.form-select[aria-invalid="true"],
+.date-picker-trigger[aria-invalid="true"] {
+    border-color: var(--danger) !important;
+}
+
+.form-control[aria-invalid="true"]:focus,
+.form-select[aria-invalid="true"]:focus,
+.date-picker-trigger[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent) !important;
+}
+
+.form-error,
+.invalid-feedback,
+.auth-error,
+.rp-error,
+.sch-subject-error {
+    color: var(--danger);
+    font-size: .78rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.form-error[hidden],
+.invalid-feedback[hidden],
+.auth-error[hidden],
+.rp-error[hidden],
+.sch-subject-error[hidden] {
+    display: none;
+}
+
 /* Input-group icons (search fields, password toggles, etc.) stay centered */
 .input-group {
     display: flex;

@@ -127,7 +127,7 @@
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
         el.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg,#111318);opacity:.97;';
-        el.innerHTML = '<i class="bi bi-mortarboard-fill" aria-hidden="true" style="font-size:1.9rem;color:rgb(var(--accent,36,87,214))"></i>' +
+        el.innerHTML = '<i class="bi bi-mortarboard" aria-hidden="true" style="font-size:1.9rem;color:rgb(var(--accent,36,87,214))"></i>' +
             '<div class="ld-typing" aria-hidden="true"><span></span><span></span><span></span></div>' +
             '<div style="color:var(--text-soft,#A1A8B5);font-size:.9rem">Loading your data…</div>';
         document.body.appendChild(el);

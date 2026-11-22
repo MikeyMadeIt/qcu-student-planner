@@ -94,45 +94,53 @@ function renderStatCards() {
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
     var subjectsHint = document.getElementById('statSubjectsHint');
     if (subjectsHint)
-        subjectsHint.textContent = !subjects.length ? 'No data yet'
+        subjectsHint.textContent = !subjects.length ? 'Add a subject'
             : syllabusCoverage !== null ? totalUnits + ' units \u00B7 Syllabus ' + syllabusCoverage + '%'
                 : totalUnits + ' units this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
+        var gwaValue = document.getElementById('statGwa');
+        if (gwaValue) gwaValue.classList.remove('is-unavailable');
         var gwaHint = document.getElementById('statGwaHint');
         if (gwaHint)
             gwaHint.textContent = 'Based on entered grades';
     }
     else {
         var el = document.getElementById('statGwa');
-        if (el)
-            el.textContent = '\u2013';
+        if (el) {
+            el.textContent = '0';
+            el.classList.remove('is-unavailable');
+        }
         var gwaHintEmpty = document.getElementById('statGwaHint');
         if (gwaHintEmpty)
-            gwaHintEmpty.textContent = 'No data yet';
+            gwaHintEmpty.textContent = 'Add grades';
     }
     const attRate = computeAttendanceRate(semId);
     if (attRate !== null) {
         animateCountUp('statAtt', 0, attRate, 900, function (v) { return Math.round(v) + '%'; });
+        var attValue = document.getElementById('statAtt');
+        if (attValue) attValue.classList.remove('is-unavailable');
         var attHint = document.getElementById('statAttHint');
         if (attHint)
             attHint.textContent = attRate >= 75 ? 'On track' : 'Needs attention';
     }
     else {
         var el2 = document.getElementById('statAtt');
-        if (el2)
-            el2.textContent = '\u2013';
+        if (el2) {
+            el2.textContent = '0';
+            el2.classList.remove('is-unavailable');
+        }
         var attHintEmpty = document.getElementById('statAttHint');
         if (attHintEmpty)
-            attHintEmpty.textContent = 'No data yet';
+            attHintEmpty.textContent = 'Log attendance';
     }
     var tel = document.getElementById('statTasks');
     if (tel)
-        tel.textContent = done + '/' + tasks.length;
+        tel.textContent = tasks.length ? done + '/' + tasks.length : '0';
     var tasksHint = document.getElementById('statTasksHint');
     if (tasksHint)
-        tasksHint.textContent = !tasks.length ? 'No data yet' : done === tasks.length ? 'All complete' : (tasks.length - done) + ' remaining';
+        tasksHint.textContent = !tasks.length ? 'Add a task' : done === tasks.length ? 'All complete' : (tasks.length - done) + ' remaining';
 }
 
 function animateCountUp(id, from, to, duration, fmt) {
@@ -224,6 +232,12 @@ function renderAttendanceDonut() {
     var counts = { Present: sum.present, Late: sum.late, Excused: sum.excused, Absent: sum.absent };
     var total = sum.counted;
     var pctNum = sum.rate;
+    var donutContent = document.getElementById('attendanceDonutContent');
+    var donutEmpty = document.getElementById('attendanceDonutEmpty');
+    var donutNote = document.getElementById('dashAttendanceNote');
+    if (donutContent) donutContent.hidden = total === 0;
+    if (donutEmpty) donutEmpty.hidden = total !== 0;
+    if (donutNote) donutNote.hidden = total === 0;
     var pctEl = document.getElementById('donutPct');
     if (pctEl)
         pctEl.textContent = pctNum !== null ? pctNum + '%' : '\u2013';
@@ -355,7 +369,7 @@ function renderUpcomingTasks() {
     }
     var html = '';
     if (overdueTasks.length) {
-        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>Overdue</div>';
+        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle me-1"></i>Overdue</div>';
         html += overdueTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
