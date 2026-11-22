@@ -29,3 +29,574 @@
         line-height: 1.45;
     }
 }
+
+/* Desktop student workspace: the sidebar has already been accounted for by
+   the flex shell, so the main column should use the remaining viewport. */
+@media (min-width: 992px) {
+    .student-app .main-content {
+        max-width: none;
+        padding: calc(var(--shell-bar-height) + 1px + clamp(1.5rem, 2vw, 2rem))
+            clamp(1.75rem, 3vw, 3.5rem) var(--space-7);
+    }
+
+    .student-app .main-content > *,
+    .student-app .main-content .row > * {
+        min-width: 0;
+    }
+
+    .student-app .main-content .page-title {
+        font-size: clamp(1.75rem, 1.35rem + .65vw, 2.15rem);
+        line-height: 1.2;
+    }
+
+    .student-app .main-content .page-sub {
+        font-size: 1rem;
+        line-height: 1.55;
+        max-width: 72ch;
+    }
+
+    .student-app .main-content label {
+        font-size: .875rem;
+    }
+
+    .student-app .main-content .form-control,
+    .student-app .main-content .form-select {
+        min-height: 2.75rem;
+        font-size: .95rem;
+    }
+
+    .student-app .main-content textarea.form-control {
+        min-height: 6rem;
+    }
+
+    .student-app .main-content table {
+        font-size: .92rem;
+    }
+
+    .student-app .main-content th {
+        font-size: .78rem;
+    }
+
+    /* Tasks: keep the page heading across the top, then place Add Task above
+       the stats rail while the task workflow starts alongside it. */
+    .student-app .main-content:has(.tk-main-body) {
+        display: grid;
+        grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+        align-content: start;
+        align-items: start;
+        column-gap: var(--page-gap);
+        row-gap: var(--grid-gap);
+    }
+
+    .student-app .tk-header { display: contents; }
+    .student-app .tk-header-text { grid-column: 1 / -1; grid-row: 1; }
+    .student-app .tk-header > .btn-accent {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100%;
+        height: 2.75rem;
+        min-height: 2.75rem;
+    }
+    .student-app .tk-main-body { display: contents; }
+    .student-app .tk-stats-row {
+        grid-column: 1;
+        grid-row: 3;
+        width: 100%;
+        margin: 0;
+    }
+    .student-app .tk-control-and-task {
+        grid-column: 2;
+        grid-row: 2 / span 2;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .student-app .tk-select-all-btn {
+        width: auto;
+        min-width: 6.5rem;
+        height: 2.75rem;
+        gap: .65rem;
+        padding-inline: .9rem;
+        font-size: .875rem;
+    }
+
+    .student-app .tk-controls > .tk-search-wrap,
+    .student-app .tk-controls > .tk-select-all-btn,
+    .student-app .tk-controls > .tk-filter-btn,
+    .student-app .tk-controls > .tk-view-toggle {
+        height: 2.75rem;
+        min-height: 2.75rem;
+        box-sizing: border-box;
+    }
+
+    .student-app .tk-controls > .tk-search-wrap { display: flex; }
+    .student-app .tk-controls .tk-search-input {
+        height: 2.75rem !important;
+        min-height: 2.75rem !important;
+    }
+
+    .student-app .tk-controls > .tk-filter-btn {
+        width: 2.75rem;
+        min-width: 2.75rem;
+    }
+
+    .student-app .tk-controls > .tk-view-toggle {
+        align-items: center;
+        padding: 2px;
+    }
+
+    .student-app .tk-controls .tk-view-btn {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+
+    /* Keep the four task summaries in a compact two-by-two block. */
+    .student-app .tk-stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: none;
+        flex: none;
+    }
+
+    .student-app .tk-control-and-task {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Settings: identity spans the page; preferences lead and account actions
+       sit in a secondary column. Sections keep their natural content height. */
+    .student-app .settings-page {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr);
+        max-width: none;
+        align-items: start;
+    }
+
+    .student-app .settings-profile {
+        grid-column: 1 / -1;
+    }
+
+    .student-app .settings-groups {
+        min-width: 0;
+    }
+
+    .student-app .settings-account-actions {
+        min-width: 0;
+    }
+
+    /* Report form is the primary action; history remains a supporting rail. */
+    .student-app .rp-layout {
+        grid-template-columns: minmax(0, 7fr) minmax(18rem, 5fr);
+    }
+
+    /* Long legal and help content reads comfortably beside its navigation
+       rail, without pinning the article to a narrow centered column. */
+    .student-app .lg-layout,
+    .student-app .help-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(17rem, 20rem);
+    }
+
+    .student-app .lg-content,
+    .student-app .help-main {
+        min-width: 0;
+    }
+
+    .student-app .notification-layout {
+        grid-template-columns: minmax(0, 1.2fr) minmax(20rem, .8fr);
+    }
+
+    /* Schedule: date navigation and the day timeline stay in the main
+       column; current class and today's tasks form the supporting column.
+       Timetable and subject-list modes keep their full working width. */
+    .student-app .main-content:has(> .sch-topbar) { display: block; }
+
+    .student-app .schedule-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 1fr);
+        align-items: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .schedule-column {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .schedule-column > * { min-width: 0; margin-block: 0 !important; }
+    .student-app #schCurriculumSetup { order: 2; }
+    .student-app #schTasksPanel { order: 1; }
+    .student-app #schSubjectList > [class*="col-"] {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    .student-app #schTasksPanel > .glass,
+    .student-app #schCurriculumSetup > .sch-curriculum-setup { margin-block: 0 !important; }
+    .student-app #schDayView > .sch-curriculum-setup { display: none !important; }
+    .student-app .sch-add-btn,
+    .student-app .sch-week-nav .sch-chevron-btn,
+    .student-app .sch-week-nav .sch-today-btn {
+        height: 2.75rem !important;
+        min-height: 2.75rem;
+    }
+
+    .student-app .sch-week-nav .sch-chevron-btn {
+        width: 2.75rem !important;
+        min-width: 2.75rem;
+    }
+
+    .student-app .sch-list-controls .sch-list-search,
+    .student-app .sch-list-controls .sch-list-archive-btn {
+        height: 2.75rem;
+        min-height: 2.75rem;
+    }
+
+    /* Dashboard panels follow their records' natural height instead of
+       constraining the whole page to one viewport. */
+    .student-app .dashboard-page {
+        height: auto;
+        max-height: none;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .student-app .dashboard-page > .dash-two-col {
+        flex: none;
+        min-height: 0;
+    }
+
+    .student-app .dashboard-page > .dash-two-col > .dash-card-anim {
+        display: flex;
+        align-self: stretch;
+        min-width: 0;
+    }
+
+    .student-app .dashboard-page > .dash-two-col { align-items: stretch; }
+
+    .student-app .dashboard-page .dash-panel {
+        height: 100% !important;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    /* Saved AI sessions/decks expand with their contents. */
+    .student-app .aqm-history {
+        height: auto;
+        min-height: 0;
+    }
+
+    .student-app .aqm-history-list {
+        max-height: none;
+        overflow: visible;
+        overscroll-behavior: auto;
+    }
+
+    .student-app .schTimetableView,
+    .student-app .schListView {
+        min-width: 0;
+    }
+
+    /* Attendance uses separate vertical stacks: records on the left, summary
+       and heatmap on the right. Each column advances on its own content flow. */
+    .student-app .attendance-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 1fr);
+        align-items: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .attendance-column-primary,
+    .student-app .attendance-column-secondary {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .attendance-columns > * > * {
+        min-width: 0;
+        margin-block: 0 !important;
+    }
+
+    .student-app .att-overall-rate-column {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--grid-gap);
+        min-width: 0;
+        width: 100%;
+    }
+
+    .student-app .att-overall-rate-card {
+        width: 100%;
+        align-self: stretch;
+        box-sizing: border-box;
+    }
+
+    /* Attendance records are data-driven; let the form and its rows grow. */
+    .student-app .att-log-form {
+        height: auto;
+        display: block;
+    }
+
+    .student-app .att-log-form > .row.g-2 {
+        display: block;
+        min-height: 0;
+        margin-inline: 0;
+    }
+
+    .student-app .att-log-form > .row.g-2 > .col-12 { padding-inline: 0; }
+
+    .student-app .att-log-form > .row.g-2 > .att-subject-list-column {
+        display: block;
+        min-height: 0;
+    }
+
+    .student-app .att-log-form .att-subject-list,
+    .student-app .att-log-form .att-subject-rows {
+        display: block;
+        flex: initial;
+        min-height: 0;
+    }
+
+    .student-app .att-log-form .att-subject-rows {
+        display: grid;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .student-app #absenceLimitsCard { margin: 0 !important; }
+
+    .student-app #consecutiveAbsenceAlerts { min-width: 0; }
+    .student-app #consecutiveAbsenceAlerts:empty { display: none; }
+
+    /* Content that is inherently wide remains a full-width section below
+       page-specific two-column workflows. */
+    .student-app .notes-page #notesGrid,
+    .student-app .calendar-page > .cal-layout,
+    .student-app .main-content:has(#gradesWrap) .grade-trend-wrap {
+        min-width: 0;
+    }
+
+    /* Keep subject breakdowns in the primary column and stack the supporting
+       GWA overview and calculator in the secondary column. */
+    .student-app .main-content:has(.grades-columns) {
+        display: block;
+    }
+
+    .student-app .grades-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 1fr);
+        align-items: start;
+        gap: var(--grid-gap);
+    }
+
+    .student-app .grades-columns > .student-column-primary,
+    .student-app .grades-columns > .student-column-secondary {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .grades-columns > * > * {
+        min-width: 0;
+        margin-block: 0 !important;
+    }
+
+    .student-app .grades-columns .mb-3:has(.gwa-overview-card) { margin: 0 !important; }
+
+    .student-app #gradesWrap {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: var(--grid-gap);
+        margin: 0;
+    }
+
+    .student-app #gradesWrap > [class*="col-"] {
+        grid-column: 1 / -1;
+        width: auto;
+        max-width: none;
+        padding-inline: 0;
+    }
+
+    .student-app .grade-subject-item,
+    .student-app .grade-subject-item .grade-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .student-app .grades-subject-column {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: start;
+        gap: var(--grid-gap);
+        min-width: 0;
+    }
+
+    .student-app .gwa-overview-card,
+    .student-app .grades-subject-panel,
+    .student-app .grades-calc-panel {
+        grid-column: auto;
+        grid-row: auto;
+        align-self: stretch;
+        width: 100%;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Calendar controls get comfortable, consistent hit areas on desktop;
+       month cells stay compact enough to leave room for the agenda. */
+    .student-app .calendar-page .cal-toolbar-row1 .btn-icon,
+    .student-app .calendar-page .cal-toolbar-row1 .btn-accent.btn-sm,
+    .student-app .calendar-page .cal-toolbar-row2 .btn-ghost.btn-sm,
+    .student-app .calendar-page .cal-toolbar-row2 .cal-filter-toggle-btn {
+        height: 2.75rem;
+        min-height: 2.75rem;
+    }
+
+    .student-app .calendar-page .cal-toolbar-row1 .btn-icon,
+    .student-app .calendar-page .cal-toolbar-row2 .btn-ghost.btn-sm,
+    .student-app .calendar-page .cal-toolbar-row2 .cal-filter-toggle-btn {
+        width: 2.875rem;
+        min-width: 2.875rem;
+    }
+
+    .student-app .calendar-page .cal-toolbar-row1 .btn-accent.btn-sm {
+        min-width: 5rem;
+        padding-inline: 1rem;
+        font-size: .9rem;
+    }
+
+    .student-app .calendar-page .cal-view-bar {
+        height: 2.75rem;
+        align-items: stretch;
+        padding: 2px;
+    }
+
+    .student-app .calendar-page .cal-view-btn {
+        flex: 1 1 0;
+        min-width: 4rem;
+        height: 100%;
+        padding-inline: .6rem;
+        text-align: center;
+    }
+
+    .student-app .calendar-page #calBody .uc-grid {
+        gap: 8px !important;
+    }
+
+    .student-app .calendar-page #calBody .uc-cell {
+        min-height: 54px;
+        aspect-ratio: 1.18;
+        padding: 5px;
+    }
+    .student-app .calendar-page .cal-daynum { font-size: .82rem; }
+}
+
+/* Restore the established mobile order: overview, subjects, calculator. */
+@media (max-width: 991.98px) {
+    .student-app .main-content:has(.attendance-columns) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .student-app .attendance-columns,
+    .student-app .attendance-column-primary,
+    .student-app .attendance-column-secondary,
+    .student-app .att-overall-rate-column {
+        display: contents;
+    }
+
+    .student-app .main-content:has(.attendance-columns) > .topbar { grid-row: 1; }
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { grid-row: 2; }
+    .student-app .main-content:has(.attendance-columns) .att-log-form { grid-row: 3; margin-bottom: var(--page-gap) !important; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { grid-row: 4; }
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { grid-row: 5; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { grid-row: 6; }
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot { grid-row: 7; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { grid-row: 8; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { grid-row: 9; }
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { margin-bottom: var(--grid-gap) !important; }
+
+    .student-app .main-content:has(.schedule-columns) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .student-app .main-content:has(.schedule-columns) > .sch-topbar,
+    .student-app .schedule-columns,
+    .student-app .schedule-column {
+        display: contents;
+    }
+
+    .student-app .main-content:has(.schedule-columns) .sch-topbar-left { grid-row: 1; margin-bottom: 10px; }
+    .student-app .main-content:has(.schedule-columns) .sch-add-btn { grid-row: 2; width: 100%; margin-bottom: calc(14px + var(--page-gap)) !important; }
+    .student-app .main-content:has(.schedule-columns) .sch-nav-card { grid-row: 3; }
+    .student-app .main-content:has(.schedule-columns) #schNextCard { grid-row: 4; }
+    .student-app .main-content:has(.schedule-columns) #schDayView { grid-row: 5; }
+    .student-app .main-content:has(.schedule-columns) #schTimetableView { grid-row: 6; }
+    .student-app .main-content:has(.schedule-columns) #schCurriculumSetup { grid-row: 7; }
+    .student-app .main-content:has(.schedule-columns) #schListView { grid-row: 8; }
+    .student-app .main-content:has(.schedule-columns) #schTasksPanel { grid-row: 9; }
+    .student-app .main-content:has(#schListView.d-none) #schCurriculumSetup { display: none !important; }
+
+    .student-app .main-content:has(.grades-columns) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .student-app .grades-columns,
+    .student-app .grades-columns > .student-column-primary,
+    .student-app .grades-columns > .student-column-secondary,
+    .student-app .grades-columns .mb-3:has(.gwa-overview-card) {
+        display: contents;
+    }
+
+    .student-app .grades-subject-column { display: contents; }
+
+    .student-app .grades-subject-column > .grade-subject-item {
+        min-width: 0;
+        padding-inline: calc(var(--bs-gutter-x, .5rem) * .5);
+    }
+
+    .student-app .grades-subject-column > .grade-subject-item {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .student-app .main-content:has(.grades-columns) > .topbar { grid-row: 1; }
+    .student-app .grades-overview-order { grid-row: 2; }
+    .student-app .grades-overview-order { margin-bottom: var(--page-gap) !important; }
+    .student-app .grades-subject-panel { grid-row: 3; }
+    .student-app .grades-calc-panel { grid-row: 4; }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .student-app .grades-subject-column > .grade-subject-item {
+        flex-basis: 50%;
+        max-width: 50%;
+    }
+
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard { grid-row: 3; }
+    .student-app .main-content:has(.attendance-columns) .att-log-form { grid-row: 4; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { grid-row: 5; }
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { grid-row: 6; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { grid-row: 7; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { grid-row: 8; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { grid-row: 9; }
+}
