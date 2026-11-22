@@ -19,7 +19,7 @@
 
 @media (min-width: 992px) {
     .shell-bar {
-        left: var(--sidebar-width);
+        display: none;
     }
 }
 
@@ -439,15 +439,6 @@
 
 .profile-panel[hidden] {
     display: none;
-}
-
-/* The sidebar footer's three-dot menu reuses .profile-panel's look, but is */
-.sidebar-profile-panel {
-    position: fixed;
-    top: auto;
-    right: auto;
-    width: min(14rem, calc(100vw - 2rem));
-    z-index: var(--layer-drawer-popover);
 }
 
 /* Current-semester info card (header avatar popup), above the theme selector. */
