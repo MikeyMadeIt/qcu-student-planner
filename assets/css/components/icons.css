@@ -1,33 +1,30 @@
-/* Icon and text alignment. Applies to every control that pairs an icon with a label. */
-
+/* Bootstrap Icons — shared sizing, alignment, and control behavior. */
 .bi {
+    display: inline-block;
+    font-size: 1em;
     line-height: 1;
-    flex-shrink: 0;
+    flex: 0 0 auto;
     vertical-align: -0.125em;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .bi::before {
+    display: inline-block;
     line-height: 1;
 }
 
-/* Explicit size utilities so icons never stretch, shrink unexpectedly, */
-.icon-sm {
-    font-size: var(--icon-size-sm) !important;
-}
-
-.icon-md {
-    font-size: var(--icon-size-md) !important;
-}
-
-.icon-lg {
-    font-size: var(--icon-size-lg) !important;
-}
+/* Explicit size utilities keep decorative and standalone icons predictable. */
+.icon-sm { font-size: var(--icon-size-sm) !important; }
+.icon-md { font-size: var(--icon-size-md) !important; }
+.icon-lg { font-size: var(--icon-size-lg) !important; }
 
 svg.icon,
 img.icon {
     width: var(--icon-size-md);
     height: var(--icon-size-md);
-    flex-shrink: 0;
+    flex: 0 0 auto;
     object-fit: contain;
 }
 
@@ -43,10 +40,12 @@ img.icon.icon-lg {
     height: var(--icon-size-lg);
 }
 
+/* Controls that pair an icon with text share one alignment and spacing rule. */
 .btn,
 .btn-accent,
 .btn-ghost,
-.btn-icon,
+.btn-danger,
+.btn-text,
 .badge,
 .chip,
 .section-title,
@@ -60,18 +59,41 @@ label.icon-label {
 
 .btn,
 .btn-accent,
-.btn-ghost {
+.btn-ghost,
+.btn-danger,
+.btn-text {
     justify-content: center;
     line-height: 1.2;
 }
 
-.btn-icon {
+/* Icon-only controls are centered and never inherit text spacing. */
+.btn-icon,
+.shell-icon-btn,
+.lp-icon-btn,
+button[class*="-icon-btn"],
+button[class*="icon-btn"] {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    gap: 0;
+    flex: 0 0 auto;
+}
+
+.btn-icon > .bi,
+.shell-icon-btn > .bi,
+.lp-icon-btn > .bi,
+button[class*="-icon-btn"] > .bi,
+button[class*="icon-btn"] > .bi {
+    font-size: inherit;
+    line-height: 1;
+    margin: 0;
 }
 
 .btn i,
 .btn-accent i,
 .btn-ghost i,
+.btn-danger i,
+.btn-text i,
 .badge i,
 .chip i,
 .section-title i,
@@ -80,12 +102,16 @@ label.icon-label {
     margin: 0 !important;
 }
 
+/* Bootstrap spacing utilities conflict with flex gap; use the shared gap. */
 .btn .me-1,
 .btn .me-2,
 .btn-accent .me-1,
+.btn-accent .me-2,
 .btn-ghost .me-1,
+.btn-ghost .me-2,
 .dropdown-item .me-2,
-.section-title .me-1 {
+.section-title .me-1,
+.section-title .me-2 {
     margin-right: 0 !important;
 }
 

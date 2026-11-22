@@ -611,27 +611,46 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    color: var(--text-faint);
+    padding: var(--space-7) var(--space-4);
+    color: var(--text-soft);
     text-align: center;
-    gap: 10px;
+    gap: var(--space-2);
 }
 
 .cal-empty-state i {
-    font-size: 2rem;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
 }
 
-.cal-empty-state div {
-    font-size: .85rem;
-    font-weight: 600;
+.cal-empty-state > strong {
+    color: var(--text);
+    font-size: .9rem;
+    line-height: 1.4;
+}
+
+.cal-empty-state > span {
+    max-width: 28rem;
+    color: var(--text-soft);
+    font-size: .8rem;
+    line-height: 1.5;
 }
 
 .cal-empty-small {
-    padding: 24px 16px;
+    padding: var(--space-5) var(--space-4);
 }
 
 .cal-empty-small i {
-    font-size: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
 }
 
 /* Drag and Drop */
@@ -1116,7 +1135,6 @@
 }
 .modal-body .sch-time-hint[hidden] { display: none; }
 
-.modal-body .sch-subject-required { color: #fb7185; }
 
 @media (max-width: 575px) {
     .tt-scroll-area {

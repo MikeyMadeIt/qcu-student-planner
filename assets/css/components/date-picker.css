@@ -1,0 +1,19 @@
+.date-picker-field { position: relative; width: 100%; }
+.date-picker-field > input[type="date"] { position: absolute; width: 1px; height: 1px; min-height: 1px; padding: 0; margin: 0; opacity: 0; pointer-events: none; }
+.date-picker-trigger { display: flex; align-items: center; justify-content: space-between; gap: .75rem; text-align: left; cursor: pointer; font-weight: 400; }
+.date-picker-trigger .bi { color: var(--text-faint); }
+.date-picker-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.date-picker-panel { position: fixed; z-index: calc(var(--layer-modal) + 5); width: min(300px, calc(100vw - 24px)); max-height: calc(100vh - 16px); overflow-y: auto; overscroll-behavior: contain; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--elevated); color: var(--text); box-shadow: 0 16px 40px rgba(0,0,0,.32); }
+.date-picker-panel[hidden] { display: none; }
+.dp-head { display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; text-align: center; margin-bottom: 10px; }
+.dp-head strong { font-size: .88rem; }
+.dp-head button { height: 34px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-2); color: var(--text); font-size: 1.25rem; cursor: pointer; }
+.dp-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 3px; }
+.dp-grid span, .dp-day { display: grid; place-items: center; min-width: 0; height: 34px; }
+.dp-week span { color: var(--text-faint); font-size: .68rem; font-weight: 700; }
+.dp-day { padding: 0; border: 1px solid transparent; border-radius: 4px; background: transparent; color: var(--text); font: inherit; font-size: .78rem; cursor: pointer; }
+.dp-day:hover:not(:disabled) { border-color: var(--border); background: var(--surface-2); }
+.dp-day.is-today { border-color: rgb(var(--accent)); }
+.dp-day.is-selected { background: rgb(var(--accent)); color: var(--on-accent); }
+.dp-day:disabled { opacity: .32; cursor: not-allowed; }
+.dp-day:focus-visible, .dp-head button:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 1px; }

@@ -47,17 +47,17 @@ async function loadRows() {
         <td data-label="Year Level" class="adm-col-hide-mobile">${escHtml(r.year_level || '—')}</td>
         <td data-label="Rejection Date" class="adm-col-hide-mobile">${formatDate(r.reviewed_at)}</td>
         <td class="text-end adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-ghost btn-sm adm-icon-btn adm-danger" data-act="delete" data-id="${r.id}" data-name="${escHtml(r.full_name || 'this account')}" title="Delete permanently" aria-label="Delete permanently"><i class="bi bi-trash3"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn adm-danger" data-act="delete" data-id="${r.id}" data-name="${escHtml(r.full_name || 'this account')}" title="Delete permanently" aria-label="Delete permanently"><i class="bi bi-trash3" aria-hidden="true"></i></button>
         </td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');
@@ -68,7 +68,7 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
     renderAccountDetail(result.data);
@@ -81,11 +81,11 @@ async function deleteAccount(id, name, triggerBtn) {
 
     if (!result.ok) {
         if (triggerBtn) triggerBtn.disabled = false;
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
-    Toast.show(`${name} was permanently deleted.`, 'accent', 'bi-check-circle-fill');
+    Toast.show(`${name} was permanently deleted.`, 'accent', 'bi-check-circle');
     loadRows();
 }
 
@@ -109,7 +109,7 @@ function onAction(e) {
                 'This cannot be undone. Type DELETE to confirm.',
             confirmLabel: 'Delete permanently',
             danger: true,
-            icon: 'bi-trash3-fill',
+            icon: 'bi-trash3',
             reasonField: {
                 label: 'Type DELETE to confirm',
                 placeholder: 'DELETE',
@@ -118,7 +118,7 @@ function onAction(e) {
             },
             onConfirm(typed) {
                 if (typed.trim().toUpperCase() !== 'DELETE') {
-                    Toast.show('Type DELETE (in capitals) to confirm.', 'danger', 'bi-exclamation-triangle-fill');
+                    Toast.show('Type DELETE (in capitals) to confirm.', 'danger', 'bi-exclamation-triangle');
                     return;
                 }
                 deleteAccount(id, name, btn);

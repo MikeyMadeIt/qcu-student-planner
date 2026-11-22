@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Notes · Student Planner</title>
+<title>Notes · QCU Student Planner</title>
 <script src="../../assets/js/core/app-guard.js"></script>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
@@ -25,7 +25,7 @@
         <h1 class="page-title">Notes</h1>
         <p class="page-sub">Markdown notes with formatting, pins, favorites &amp; checklists</p>
       </div>
-      <button class="btn btn-accent nt-add-btn" onclick="openNoteModal()" aria-label="Add new note"><i class="bi bi-plus-lg me-1"></i>Add Note</button>
+      <button class="btn btn-accent nt-add-btn" onclick="openNoteModal()" aria-label="Add new note"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Note</button>
     </div>
 
     <!-- NOTES CONTROLS -->
@@ -37,10 +37,10 @@
           <input class="form-control nt-search-input" id="noteSearch" placeholder="Search notes…" autocomplete="off" aria-label="Search notes">
         </div>
         <button class="nt-icon-btn nt-select-icon-btn" id="ntSelectBtn" onclick="toggleSelectMode()" title="Select notes" aria-label="Select notes">
-          <i class="bi bi-check2-square"></i>
+          <i class="bi bi-check2-square" aria-hidden="true"></i>
         </button>
         <button class="nt-icon-btn" id="favFilterBtn" onclick="toggleFavFilter()" title="Favorites only" aria-label="Filter favorites">
-          <i class="bi bi-star"></i>
+          <i class="bi bi-star" aria-hidden="true"></i>
         </button>
       </div>
       <!-- Row 2: filters + select-all (only in select mode) -->
