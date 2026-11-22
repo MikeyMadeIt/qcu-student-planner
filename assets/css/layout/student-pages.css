@@ -1,0 +1,31 @@
+/* Shared student page heading scale and space below the fixed shell bar. */
+.student-app .main-content {
+    padding-top: calc(var(--shell-bar-height) + 1px + var(--page-gap));
+}
+
+.student-app .main-content .page-title {
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.85rem);
+    line-height: 1.25;
+}
+
+.student-app .main-content .page-sub {
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 991.98px) {
+    .student-app .main-content {
+        padding-top: calc(var(--shell-bar-height) + 1px + var(--space-4));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .student-app .main-content .page-title {
+        font-size: 1.35rem;
+    }
+
+    .student-app .main-content .page-sub {
+        font-size: .82rem;
+        line-height: 1.45;
+    }
+}

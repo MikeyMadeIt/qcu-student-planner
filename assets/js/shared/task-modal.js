@@ -50,7 +50,7 @@ function tkTimeFieldHtml(key, id, placeholder, label) {
     return '<div class="sch-time-field" data-time-key="' + key + '">' +
         '<input type="text" class="form-control sch-time-input" id="' + id + '" autocomplete="off" placeholder="' + placeholder + '" ' +
         'role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="' + id + 'Menu">' +
-        '<button type="button" class="sch-time-btn" tabindex="-1" aria-label="' + label + '"><i class="bi bi-clock"></i></button>' +
+        '<button type="button" class="sch-time-btn" tabindex="-1" aria-label="' + label + '"><i class="bi bi-clock" aria-hidden="true"></i></button>' +
         '<div class="sch-time-menu" id="' + id + 'Menu" role="listbox" hidden></div></div>' +
         '<p class="sch-subject-error" id="' + id + 'Error" hidden></p>';
 }
@@ -62,6 +62,9 @@ function tkInitTimeField(field, cfg) {
     var menu = field.querySelector('.sch-time-menu');
     var active = -1;
     var errEl = document.getElementById(input.id + 'Error');
+    document.body.appendChild(menu);
+    function reposition() { if (!menu.hidden && window.TimeField) TimeField.position(menu, field); }
+    function stopPositioning() { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); }
 
     function setError(msg) {
     if (errEl) { errEl.textContent = msg || ''; errEl.hidden = !msg; }
@@ -95,12 +98,7 @@ function tkInitTimeField(field, cfg) {
     }
 
     function place() {
-        menu.classList.remove('is-up');
-        var host = field.closest('.modal-body') || document.documentElement;
-        var f = field.getBoundingClientRect(), b = host.getBoundingClientRect();
-        var below = Math.min(b.bottom, window.innerHeight) - f.bottom;
-        var above = f.top - Math.max(b.top, 0);
-        if (below < 236 && above > below) menu.classList.add('is-up');
+        reposition();
     }
 
     function open() {
@@ -109,6 +107,8 @@ function tkInitTimeField(field, cfg) {
         menu.hidden = false;
         input.setAttribute('aria-expanded', 'true');
         place();
+        window.addEventListener('resize', reposition);
+        window.addEventListener('scroll', reposition, true);
         var cur = field._tkValue, best = 0, bestDiff = Infinity;
         cfg.options.forEach(function (o, i) {
             var d = cur == null ? Math.abs(o - cfg.fallback) : Math.abs(o - cur);
@@ -119,6 +119,7 @@ function tkInitTimeField(field, cfg) {
 
     function close() {
         menu.hidden = true;
+        stopPositioning();
         input.setAttribute('aria-expanded', 'false');
         active = -1;
     }
@@ -141,6 +142,8 @@ function tkInitTimeField(field, cfg) {
 
     field._tkCommit = commit;
     setValue(cfg.value);
+    var modal = field.closest('.modal');
+    if (modal) modal.addEventListener('hide.bs.modal', close, { once: true });
 
     btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
     btn.addEventListener('click', function () {
@@ -216,10 +219,10 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
     var te = t && t.timeEstimate ? teHrsMins(t.timeEstimate) : { hrs: 0, mins: 0 };
     var scoreVal = (t && t.score !== null && t.score !== undefined) ? t.score : '';
     var remarksVal = t ? (t.remarks || '') : '';
-    var createdNote = t ? '<div class="col-12"><div class="tk-modal-created-note"><i class="bi bi-clock"></i> Created ' +
+    var createdNote = t ? '<div class="col-12"><div class="tk-modal-created-note"><i class="bi bi-clock" aria-hidden="true"></i> Created ' +
         new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' +
         new Date(t.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + '</div></div>' : '';
-    var parentNote = t && t.parentTaskId ? '<div class="col-12"><div class="tk-repeat-hint"><i class="bi bi-arrow-repeat me-1"></i>This is a recurring instance of another task.</div></div>' : '';
+    var parentNote = t && t.parentTaskId ? '<div class="col-12"><div class="tk-repeat-hint"><i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>This is a recurring instance of another task.</div></div>' : '';
     document.getElementById('taskModalBody').innerHTML =
         '<div class="row g-2">' +
             '<input type="hidden" id="tId" value="' + (t ? t.id : '') + '">' +
@@ -242,16 +245,16 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
             '<div class="col-6 col-md-4"><label class="form-label">Repeat</label><select class="form-select" id="tRepeat" onchange="updateRepeatHint(this)">' + repeatOptions + '</select>' + repeatDescHtml + '</div>' +
             '<div class="col-6 col-md-4"><label class="form-label" for="tEst">Time Estimate</label>' +
             tkTimeFieldHtml('Est', 'tEst', 'e.g. 1h 30m', 'Choose time estimate') + '</div>' +
-            (isEdit ? '<div class="col-6 col-md-4"><label class="form-label">Score (%)</label><input type="number" class="form-control" id="tScore" min="0" max="100" step="0.01" placeholder="Optional" value="' + escHtml(String(scoreVal)) + '"></div>' : '') +
+            (isEdit ? '<div class="col-6 col-md-4"><label class="form-label">Score (%)</label><input type="number" class="form-control" id="tScore" min="0" max="100" step="0.01" placeholder="e.g. 85" value="' + escHtml(String(scoreVal)) + '"></div>' : '') +
             (isEdit ? '<div class="col-' + (isEdit ? '6 col-md-8' : '12') + '"><label class="form-label">Remarks</label><input type="text" class="form-control" id="tRemarks" placeholder="Optional feedback or remarks…" value="' + escHtml(remarksVal) + '"></div>' : '') +
             '<div class="col-12 mt-1"><label class="form-label">Checklist</label>' +
             '<div id="modalChecklistWrap" class="tk-modal-cl-wrap">' +
             checklist.map(function (c, i) { return modalClItemHtml(c, i); }).join('') +
-            '</div><button type="button" class="tk-cl-add-btn mt-1" onclick="modalAddClItem()"><i class="bi bi-plus"></i> Add item</button></div>' +
+            '</div><button type="button" class="tk-cl-add-btn mt-1" onclick="modalAddClItem()"><i class="bi bi-plus" aria-hidden="true"></i> Add item</button></div>' +
             createdNote + parentNote +
             '</div>' +
             '<div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveTask()">' +
-            '<i class="bi bi-check2 me-1"></i>' + (t ? 'Update Task' : 'Save Task') + '</button></div>';
+            '<i class="bi bi-check2 me-1" aria-hidden="true"></i>' + (t ? 'Update Task' : 'Save Task') + '</button></div>';
 
     tkInitTaskTimeFields(t);
     new bootstrap.Modal(document.getElementById('taskModal')).show();
@@ -270,7 +273,7 @@ function modalClItemHtml(c, i) {
     return '<div class="tk-modal-cl-row" data-i="' + i + '">' +
         '<input type="checkbox" class="form-check-input" ' + (c.done ? 'checked' : '') + ' aria-label="Item done">' +
         '<input type="text" class="form-control form-control-sm" value="' + escHtml(c.text) + '" placeholder="Item…" aria-label="Checklist item">' +
-        '<button type="button" class="btn-icon" style="width:28px;height:28px;flex-shrink:0" onclick="this.closest(\'.tk-modal-cl-row\').remove()" aria-label="Remove item"><i class="bi bi-x" style="font-size:.8rem"></i></button>' +
+        '<button type="button" class="btn-icon btn-sm" style="flex-shrink:0" onclick="this.closest(\'.tk-modal-cl-row\').remove()" aria-label="Remove item"><i class="bi bi-x" style="font-size:.8rem" aria-hidden="true"></i></button>' +
         '</div>';
 }
 

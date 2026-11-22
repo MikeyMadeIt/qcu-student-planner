@@ -12,7 +12,7 @@ const Toast = {
         }
         return c;
     },
-    show(msg, type = 'accent', icon = 'bi-check-circle-fill') {
+    show(msg, type = 'accent', icon = 'bi-check-circle') {
         const c = this.container();
         const el = document.createElement('div');
         const kind = { high: 'danger', error: 'danger', danger: 'danger', medium: 'warning', warning: 'warning', info: 'info' }[type] || 'success';
@@ -65,7 +65,7 @@ function ensureConfirmModal() {
         <p class="text-soft mb-0 confirm-message" id="confirmMessage"></p>
         <div class="confirm-reason-wrap text-start mt-3" id="confirmReasonWrap" hidden>
           <label class="adm-label" id="confirmReasonLabel" for="confirmReasonInput">Reason</label>
-          <textarea class="form-control" id="confirmReasonInput" rows="2" maxlength="300"></textarea>
+          <textarea class="form-control" id="confirmReasonInput" rows="2" maxlength="300" placeholder="Enter a reason…"></textarea>
           <p class="auth-error" id="confirmReasonError" hidden></p>
         </div>
         <div class="d-flex gap-2 mt-3">
@@ -95,7 +95,7 @@ function confirmAction(opts) {
     const iconEl = document.getElementById('confirmIcon');
     iconWrap.style.background = danger ? 'rgba(251,113,133,.15)' : 'rgba(var(--accent),.15)';
     iconEl.style.color = danger ? '#fb7185' : 'rgb(var(--accent))';
-    iconEl.className = 'bi ' + (icon || (danger ? 'bi-exclamation-triangle-fill' : 'bi-question-circle-fill'));
+    iconEl.className = 'bi ' + (icon || (danger ? 'bi-exclamation-triangle' : 'bi-question-circle'));
 
     const reasonWrap = document.getElementById('confirmReasonWrap');
     const reasonLabel = document.getElementById('confirmReasonLabel');
@@ -202,7 +202,7 @@ function promptAction(opts) {
     const input = staleInput.cloneNode(true);
     staleInput.parentNode.replaceChild(input, staleInput);
     input.value = value || '';
-    input.placeholder = placeholder || '';
+    input.placeholder = placeholder || 'Enter a value…';
     input.setAttribute('aria-describedby', 'promptActionError');
 
     const staleBtn = document.getElementById('promptActionBtn');
@@ -276,7 +276,7 @@ function ensureChoiceModal() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content card-pad text-center">
         <div class="confirm-icon-wrap" id="choiceActionIconWrap">
-          <i id="choiceActionIcon" class="confirm-icon bi bi-question-circle-fill" aria-hidden="true"></i>
+          <i id="choiceActionIcon" class="confirm-icon bi bi-question-circle" aria-hidden="true"></i>
         </div>
         <h5 id="choiceActionTitle" class="mb-1">Choose an option</h5>
         <p class="text-soft mb-0 confirm-message" id="choiceActionMessage"></p>
@@ -296,7 +296,7 @@ function ensureChoiceModal() {
 
 // opts: { title, message, icon, options: [{ label, value, primary }], onChoose(value) }
 function chooseAction(opts) {
-    const { title = 'Choose an option', message = '', icon = 'bi-question-circle-fill', options = [], onChoose } = opts;
+    const { title = 'Choose an option', message = '', icon = 'bi-question-circle', options = [], onChoose } = opts;
     ensureChoiceModal();
     document.getElementById('choiceActionTitle').textContent = title;
     document.getElementById('choiceActionMessage').textContent = message;

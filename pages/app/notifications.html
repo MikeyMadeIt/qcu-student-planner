@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Notifications · Student Planner</title>
+<title>Notifications · QCU Student Planner</title>
 <script src="../../assets/js/core/app-guard.js"></script>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
@@ -21,7 +21,7 @@
     <div class="topbar">
       <div>
         <h1 class="page-title">Notifications</h1>
-        <p class="page-sub">Task reminders due soon, derived from your planner data.</p>
+        <p class="page-sub">Reminders for tasks that are due soon or overdue.</p>
       </div>
       <button class="btn btn-ghost" type="button" id="markAllReadBtn" disabled>
         <i class="bi bi-check2-all" aria-hidden="true"></i> Mark all as read
@@ -45,7 +45,7 @@
         <div class="notification-list-empty" id="notificationListEmpty" hidden>
           <i class="bi bi-bell-slash" aria-hidden="true"></i>
           <strong>No notifications here</strong>
-          <span id="notificationEmptyText">New task reminders will appear here when they are due soon.</span>
+          <span id="notificationEmptyText">Reminders for upcoming and overdue tasks will appear here.</span>
         </div>
         <button class="notification-load-more" id="notificationLoadMore" type="button" hidden>Load more</button>
       </section>
@@ -53,7 +53,7 @@
         <div class="notification-detail-empty">
           <i class="bi bi-bell" aria-hidden="true"></i>
           <strong>Select a notification</strong>
-          <span>Details for the selected reminder will appear here.</span>
+          <span>Choose a reminder to view its details.</span>
         </div>
       </section>
     </div>

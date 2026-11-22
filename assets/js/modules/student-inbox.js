@@ -73,10 +73,10 @@ function renderList() {
     list.innerHTML = pageRows.map(r => {
         const m = r.message;
         const isUnread = !r.read_at;
-        const icon = MESSAGE_CATEGORY_ICONS[m.category] || 'bi-chat-square-text-fill';
+        const icon = MESSAGE_CATEGORY_ICONS[m.category] || 'bi-chat-square-text';
         return `
         <button type="button" class="msg-row ${isUnread ? 'is-unread' : ''}" data-id="${m.id}">
-            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
             <span class="msg-row-body">
                 <span class="msg-pill">${messageCategoryBadge(escHtml, m.category)}</span>
                 <span class="msg-subject">${escHtml(m.subject)}</span>
@@ -94,9 +94,9 @@ function renderList() {
 
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="inboxPagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i> Prev</button>
+        <button class="btn btn-ghost btn-sm" id="inboxPagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i> Prev</button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="inboxPageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="inboxPageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('inboxPagePrev');
     const nextBtn = document.getElementById('inboxPageNext');
@@ -122,7 +122,7 @@ async function openMessage(messageId) {
         <div class="msg-detail-body">${escHtml(m.body)}</div>
         <div class="msg-detail-footer">
             <button type="button" class="btn btn-ghost btn-sm" id="toggleReadBtn">
-                <i class="bi ${wasUnread ? 'bi-envelope-open' : 'bi-envelope'}"></i> Mark as ${wasUnread ? 'read' : 'unread'}
+                <i class="bi ${wasUnread ? 'bi-envelope-open' : 'bi-envelope'}" aria-hidden="true"></i> Mark as ${wasUnread ? 'read' : 'unread'}
             </button>
             <p class="text-faint" style="font-size:.76rem;margin:0">This is a one-way message. You cannot reply from this inbox.</p>
         </div>`;
@@ -138,7 +138,7 @@ async function openMessage(messageId) {
             row.read_at = new Date().toISOString();
             renderList();
             const btn = document.getElementById('toggleReadBtn');
-            if (btn) btn.innerHTML = `<i class="bi bi-envelope"></i> Mark as unread`;
+            if (btn) btn.innerHTML = `<i class="bi bi-envelope" aria-hidden="true"></i> Mark as unread`;
         }
     }
 }
@@ -149,14 +149,14 @@ async function toggleRead(messageId) {
     const makeUnread = Boolean(row.read_at);
     const result = await StudentService.setMessageRead(messageId, !makeUnread);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
     row.read_at = makeUnread ? null : new Date().toISOString();
     renderList();
     const btn = document.getElementById('toggleReadBtn');
     if (btn) btn.innerHTML = `<i class="bi ${row.read_at ? 'bi-envelope-open' : 'bi-envelope'}"></i> Mark as ${row.read_at ? 'unread' : 'read'}`;
-    Toast.show(row.read_at ? 'Marked as read.' : 'Marked as unread.', 'accent', 'bi-check-circle-fill');
+    Toast.show(row.read_at ? 'Marked as read.' : 'Marked as unread.', 'accent', 'bi-check-circle');
 }
 
 // Skeleton rows shaped like the real .msg-row buttons (icon + two lines +
@@ -201,7 +201,7 @@ async function loadInbox() {
             return;
         }
         state.hidden = false;
-        state.innerHTML = `<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><strong>Could not load your inbox</strong><span>${escHtml(result.message)}</span><button type="button" class="btn btn-ghost btn-sm mt-2" id="inboxRetryBtn">Retry</button>`;
+        state.innerHTML = `<i class="bi bi-exclamation-triangle" aria-hidden="true"></i><strong>Could not load your inbox</strong><span>${escHtml(result.message)}</span><button type="button" class="btn btn-ghost btn-sm mt-2" id="inboxRetryBtn">Retry</button>`;
         const retryBtn = document.getElementById('inboxRetryBtn');
         if (retryBtn) retryBtn.addEventListener('click', loadInbox);
         return;

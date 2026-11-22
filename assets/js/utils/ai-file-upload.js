@@ -57,7 +57,7 @@ function initAiFileAttachment(opts) {
         if (infoEl) {
             if (currentFile) {
                 infoEl.hidden = false;
-                infoEl.innerHTML = `<i class="bi ${currentFile.type === 'application/pdf' ? 'bi-file-earmark-pdf-fill' : 'bi-file-earmark-image-fill'}" aria-hidden="true"></i>
+                infoEl.innerHTML = `<i class="bi ${currentFile.type === 'application/pdf' ? 'bi-file-earmark-pdf' : 'bi-file-earmark-image'}" aria-hidden="true"></i>
                     <span class="ai-file-name">${escHtml(currentFile.name)}</span>
                     <span class="ai-file-size">${aiUploadFormatSize(currentFile.size)}</span>`;
             } else {
