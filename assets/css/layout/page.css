@@ -125,3 +125,25 @@ label {
         -webkit-overflow-scrolling: touch;
     }
 }
+/* Keep soft-routed page content steady. The shell header stays mounted and
+   must not fade or move while route content is replaced. */
+body.soft-navigation-active .main-content .fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+
+body.soft-navigation-active .main-content .stagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+
+/* grid.css applies a fade/translate animation to every direct main child.
+   That includes the persistent shell bar and loading-state panels, so it
+   restarts as a visible bounce on every soft route change. */
+body.soft-navigation-active .main-content > * {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+}

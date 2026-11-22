@@ -116,7 +116,7 @@
     outline-offset: -1px;
 }
 
-/* Small unread-messages indicator on the sidebar/drawer "Inbox" entry and the */
+/* Small unread-messages indicator on the desktop sidebar Inbox entry. */
 .nav-dot {
     flex: 0 0 auto;
     width: 0.44rem;
@@ -136,33 +136,6 @@
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.nav-link-soon,
-.drawer-link-soon {
-    opacity: .72;
-}
-
-.nav-link-soon:hover,
-.drawer-link-soon:hover,
-.nav-link-soon:focus-visible,
-.drawer-link-soon:focus-visible {
-    opacity: .8;
-}
-
-.nav-pill-soon {
-    flex: 0 0 auto;
-    padding: 1px 7px;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--border);
-    color: var(--text-soft);
-    font-family: var(--font-mono);
-    font-size: .62rem;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    line-height: 1.4;
     white-space: nowrap;
 }
 

@@ -713,7 +713,7 @@ a.adm-stat-card:focus-visible {
     cursor: default;
 }
 
-/* .nav-link-label, .nav-badge, .nav-link-soon / .drawer-link-soon and .nav-pill-soon */
+/* Navigation badge */
 
 .nav-badge {
     flex: 0 0 auto;
@@ -844,47 +844,6 @@ a.adm-stat-card:focus-visible {
         margin-left: 2px;
     }
 }
-
-/* Coming-soon placeholder (sidebar sections not yet implemented) */
-
-.adm-placeholder {
-    text-align: center;
-    padding: var(--space-6) var(--space-4);
-    color: var(--text-faint);
-}
-
-.adm-placeholder i {
-    font-size: 2rem;
-    opacity: .5;
-    margin-bottom: var(--space-3);
-    display: block;
-}
-
-.adm-placeholder h2 {
-    color: var(--text);
-    font-size: 1.1rem;
-    margin-bottom: var(--space-2);
-}
-
-.adm-placeholder p {
-    max-width: 34rem;
-    margin: 0 auto;
-    font-size: .88rem;
-}
-
-.adm-placeholder-tag {
-    display: inline-block;
-    margin-bottom: var(--space-3);
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    border: 1px dashed var(--border);
-    font-family: var(--font-mono);
-    font-size: .64rem;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-}
-
 
 /* University Event modal (admin) — reuses the same markup/classes as the
    student Calendar's "Add University Event" sheet (form-control, btn-ghost,
