@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Grades · Student Planner</title>
+<title>Grades · QCU Student Planner</title>
 <script src="../../assets/js/core/app-guard.js"></script>
 <script src="../../assets/js/core/theme.js"></script>
 <meta name="theme-color" content="#0F172A">
@@ -26,20 +26,20 @@
     <div class="mb-3">
       <div class="glass card-pad fade-in gwa-overview-card">
         <div class="gwa-overview-header">
-          <div class="section-title mb-0"><i class="bi bi-mortarboard-fill"></i>GWA Overview</div>
+          <div class="section-title mb-0"><i class="bi bi-mortarboard"></i>GWA Overview</div>
           <div class="gwa-header-actions">
             <button class="btn-icon btn-icon-sm gwa-action-btn" onclick="openGradeInterpModal()" title="Grade Interpretation Reference">
-              <i class="bi bi-info-circle"></i>
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
             </button>
             <button class="btn-icon btn-icon-sm gwa-action-btn gwa-share-btn" id="gwaShareBtn" onclick="copyGwaCardAsImage()" title="Share as image">
-              <i class="bi bi-share"></i>
+              <i class="bi bi-share" aria-hidden="true"></i>
             </button>
           </div>
         </div>
         <div class="gwa-compact-grid">
           <!-- Left: Current GWA -->
           <div class="gwa-compact-main">
-            <div class="gwa-compact-label"><i class="bi bi-award"></i>Current GWA</div>
+            <div class="gwa-compact-label"><i class="bi bi-award" aria-hidden="true"></i>Current GWA</div>
             <div class="gwa-compact-num" id="gGwa">--</div>
             <div class="text-faint gwa-compact-sub" id="gGwaSub">1.00–5.00 scale</div>
             <div class="mt-1" id="gGwaStatus"></div>
@@ -50,13 +50,13 @@
           <!-- Right: Highest + Lowest stacked -->
           <div class="gwa-compact-right">
             <div class="gwa-compact-side">
-              <div class="gwa-compact-label"><i class="bi bi-arrow-up-circle"></i>Highest</div>
+              <div class="gwa-compact-label"><i class="bi bi-arrow-up-circle" aria-hidden="true"></i>Highest</div>
               <div class="gwa-compact-num gwa-hi-num" id="gHighest">--</div>
               <div class="text-faint gwa-compact-sub" id="gHighestSub">—</div>
             </div>
             <div class="gwa-compact-hdivider"></div>
             <div class="gwa-compact-side">
-              <div class="gwa-compact-label"><i class="bi bi-arrow-down-circle"></i>Lowest</div>
+              <div class="gwa-compact-label"><i class="bi bi-arrow-down-circle" aria-hidden="true"></i>Lowest</div>
               <div class="gwa-compact-num gwa-lo-num" id="gLowest">--</div>
               <div class="text-faint gwa-compact-sub" id="gLowestSub">—</div>
             </div>
@@ -68,8 +68,8 @@
     <!-- Subject grade cards -->
     <div class="glass card-pad mb-3 fade-in">
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div class="section-title mb-0"><i class="bi bi-journal-check"></i>Subjects</div>
-        <span class="text-faint" style="font-size:.76rem">Tap <i class="bi bi-pencil"></i> to set grading breakdown</span>
+        <div class="section-title mb-0"><i class="bi bi-journal-check" aria-hidden="true"></i>Subjects</div>
+        <span class="text-faint" style="font-size:.76rem">Tap <i class="bi bi-pencil" aria-hidden="true"></i> to set grading breakdown</span>
       </div>
       <div id="gradesWrap" class="row g-2 stagger" aria-busy="true">
         <div class="col-12 col-md-6" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>
@@ -83,11 +83,11 @@
       <!-- Header -->
       <div class="gwa-calc-header">
         <div class="gwa-calc-header-top">
-          <div class="section-title mb-0"><i class="bi bi-calculator-fill"></i>Manual GWA Calculator</div>
+          <div class="section-title mb-0"><i class="bi bi-calculator"></i>Manual GWA Calculator</div>
           <div class="gwa-calc-header-btns">
-            <button class="btn btn-ghost btn-sm" onclick="addGwaCalcRow()"><i class="bi bi-plus-lg me-1"></i>Add</button>
+            <button class="btn btn-ghost btn-sm" onclick="addGwaCalcRow()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add</button>
             <button class="btn btn-ghost btn-sm gwa-clear-btn" onclick="clearAllGwaRows()">
-              <i class="bi bi-trash3 me-1"></i>Clear
+              <i class="bi bi-trash3 me-1" aria-hidden="true"></i>Clear
             </button>
           </div>
         </div>
@@ -135,7 +135,7 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-list-columns-reverse me-2"></i>Grade Interpretation Reference</h5>
+        <h5 class="modal-title"><i class="bi bi-list-columns-reverse me-2" aria-hidden="true"></i>Grade Interpretation Reference</h5>
         <button class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" style="padding:16px 20px 20px">

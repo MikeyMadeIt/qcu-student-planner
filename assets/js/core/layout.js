@@ -2,25 +2,26 @@
 const NAV_ITEMS = [
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
     { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
-    { href: 'dashboard.html', icon: 'bi-grid-1x2-fill', label: 'Dashboard', key: 'dashboard', base: 'app' },
-    { href: 'schedule.html', icon: 'bi-calendar2-week-fill', label: 'Schedule', key: 'schedule', base: 'app' },
+    { href: 'dashboard.html', icon: 'bi-grid-1x2', label: 'Dashboard', key: 'dashboard', base: 'app' },
+    { href: 'news.html', icon: 'bi-megaphone', label: 'News & Announcements', key: 'news', base: 'app' },
+    { href: 'schedule.html', icon: 'bi-calendar2-week', label: 'Schedule', key: 'schedule', base: 'app' },
     { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
     { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
-    { href: 'grades.html', icon: 'bi-mortarboard-fill', label: 'Grades', key: 'grades', base: 'app' },
-    { href: 'attendance.html', icon: 'bi-person-check-fill', label: 'Attendance', key: 'attendance', base: 'app' },
+    { href: 'grades.html', icon: 'bi-mortarboard', label: 'Grades', key: 'grades', base: 'app' },
+    { href: 'attendance.html', icon: 'bi-person-check', label: 'Attendance', key: 'attendance', base: 'app' },
     { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
     { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
-    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question-fill', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
-    { href: 'ai-flashcard-maker.html', icon: 'bi-layers-fill', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
+    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
+    { href: 'ai-flashcard-maker.html', icon: 'bi-layers', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
     { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
-    { href: 'wallpaper.html', icon: 'bi-phone-fill', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
-    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'settings', base: 'app' },
+    { href: 'wallpaper.html', icon: 'bi-phone', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
+    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'settings', base: 'app' },
     { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
     { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
     { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
     { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
     { href: 'university-events.html', icon: 'bi-bank2', label: 'University Events', key: 'admin-university-events', base: 'admin' },
-    { href: 'users.html', icon: 'bi-people-fill', label: 'All Users', key: 'admin-users', base: 'admin' },
+    { href: 'users.html', icon: 'bi-people', label: 'All Users', key: 'admin-users', base: 'admin' },
     { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
     { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
@@ -28,12 +29,12 @@ const NAV_ITEMS = [
     { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin', soon: true },
     { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin', soon: true },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
-    { href: 'settings.html', icon: 'bi-gear-fill', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
+    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
 ];
 const THEME_OPTIONS = [
     { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
     { value: 'light', label: 'Light', icon: 'bi-sun' },
-    { value: 'amoled', label: 'AMOLED', icon: 'bi-circle-fill' }
+    { value: 'amoled', label: 'AMOLED', icon: 'bi-circle' }
 ];
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 
@@ -41,6 +42,7 @@ const PAGE_SECTIONS = {
     inbox: 'Communication',
     notifications: 'Communication',
     dashboard: 'Overview',
+    news: 'University',
     schedule: 'Academics',
     tasks: 'Academics',
     calendar: 'Academics',
@@ -302,10 +304,10 @@ function renderInboxPanelItems(rows, icons, categoryBadge) {
         return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
     return `<div class="msg-list msg-list-compact">` + rows.slice(0, 5).map(r => {
         const m = r.message;
-        const icon = icons[m.category] || 'bi-chat-square-text-fill';
+        const icon = icons[m.category] || 'bi-chat-square-text';
         return `
         <a class="msg-row ${r.read_at ? '' : 'is-unread'}" href="../app/inbox.html">
-            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
             <span class="msg-row-body">
                 <span class="msg-pill">${categoryBadge(escHtml, m.category)}</span>
                 <span class="msg-subject">${escHtml(m.subject)}</span>
@@ -573,7 +575,7 @@ function wireModalDefaults() {
             message: 'Discard unsaved changes and close this dialog?',
             confirmLabel: 'Discard',
             danger: true,
-            icon: 'bi-exclamation-triangle-fill',
+            icon: 'bi-exclamation-triangle',
             onConfirm: onDiscard,
         });
     };
@@ -663,6 +665,8 @@ function wireModalDefaults() {
 
 function renderShell(activeKey, admin) {
     const isAdminArea = String(activeKey).startsWith('admin-');
+    document.body.classList.toggle('student-app', !isAdminArea);
+    document.body.classList.toggle('admin-app', isAdminArea);
     if (isAdminArea) renderAdminShellBar(activeKey, admin);
     else renderShellBar(activeKey);
     const sidebar = document.getElementById('sidebar');
@@ -680,6 +684,7 @@ function renderShell(activeKey, admin) {
                 { label: 'Overview', keys: ['dashboard'] },
                 { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
                 { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
+                { label: 'University', keys: ['news'] },
                 { label: 'Personalization', keys: ['wallpaper'] },
                 { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
             ];
@@ -688,7 +693,7 @@ function renderShell(activeKey, admin) {
         const name = (sidebarSettings.name || '').trim() || 'Student';
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
-        const brandIcon = isAdminArea ? 'bi-shield-lock-fill' : 'bi-mortarboard';
+        const brandIcon = isAdminArea ? 'bi-shield-lock' : 'bi-mortarboard';
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
         sidebarGroups.forEach(g => {
@@ -879,6 +884,10 @@ async function hydrateProfileIdentity() {
         const profileResult = await AuthService.getCurrentProfile();
         if (profileResult.ok && profileResult.data && profileResult.data.full_name)
             fullName = profileResult.data.full_name;
+        fullName = String(fullName || metadata.full_name || metadata.name || [metadata.first_name || metadata.given_name, metadata.last_name || metadata.family_name].filter(Boolean).join(' ') || '').trim();
+        const greetEl = document.getElementById('greetText');
+        if (greetEl && fullName)
+            greetEl.dataset.userName = fullName;
 
         document.querySelectorAll('#sidebarUserName, #drawerUserEmail, #topbarUserEmail, #shellAdminEmail').forEach(el => {
             el.textContent = email;
@@ -899,6 +908,7 @@ const DRAWER_GROUPS = [
     { label: 'Overview', keys: ['dashboard'] },
     { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
     { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
+    { label: 'University', keys: ['news'] },
     { label: 'Personalization', keys: ['wallpaper'] },
     { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
 ];
@@ -1030,8 +1040,8 @@ function startClock(clockEl, dateEl, greetEl) {
             dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         if (greetEl) {
             const s = DB.getSettings();
-            const name = s.name ? s.name.split(' ')[0] : 'there';
-            greetEl.textContent = `${greetingText()}, ${name}`;
+            const name = String(s.name || greetEl.dataset.userName || '').trim().split(/\s+/)[0].replace(/[.,;:!?]+$/, '');
+            greetEl.textContent = name ? `${greetingText()}, ${name}!` : greetingText();
         }
     }
     tick();

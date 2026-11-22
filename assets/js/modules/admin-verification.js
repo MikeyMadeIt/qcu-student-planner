@@ -10,8 +10,8 @@ function emailFormatBadge(email) {
     if (!email) return '';
     const matches = APP_CONFIG.studentEmailPattern.test(email.trim());
     return matches
-        ? '<i class="bi bi-check-circle-fill text-success" title="Matches the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>'
-        : '<i class="bi bi-exclamation-triangle-fill text-danger" title="Does not match the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>';
+        ? '<i class="bi bi-check-circle text-success" title="Matches the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>'
+        : '<i class="bi bi-exclamation-triangle text-danger" title="Does not match the expected lastname.firstname.middlename@gmail.com format" aria-hidden="true"></i>';
 }
 
 const PAGE_SIZE = 20;
@@ -57,18 +57,18 @@ async function loadRows() {
         <td data-label="Year Level" class="adm-col-hide-mobile">${escHtml(r.year_level || '—')}</td>
         <td data-label="Registration Date" class="adm-col-hide-mobile">${formatDate(r.created_at)}</td>
         <td class="text-end adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="reject" data-id="${r.id}" title="Reject" aria-label="Reject account"><i class="bi bi-x-lg"></i></button>
-          <button class="btn btn-accent btn-sm adm-icon-btn" data-act="approve" data-id="${r.id}" title="Approve" aria-label="Approve account"><i class="bi bi-check-lg"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="reject" data-id="${r.id}" title="Reject" aria-label="Reject account"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          <button class="btn btn-accent btn-sm adm-icon-btn" data-act="approve" data-id="${r.id}" title="Approve" aria-label="Approve account"><i class="bi bi-check-lg" aria-hidden="true"></i></button>
         </td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');
@@ -79,15 +79,15 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
     renderAccountDetail(result.data);
 }
 
 const ACTION_CONFIG = {
-    approve: { title: 'Approve this account?', label: 'Approve', danger: false, icon: 'bi-check-circle-fill', status: 'approved', needsReason: false },
-    reject: { title: 'Reject this account?', label: 'Reject', danger: true, icon: 'bi-x-circle-fill', status: 'rejected', needsReason: true },
+    approve: { title: 'Approve this account?', label: 'Approve', danger: false, icon: 'bi-check-circle', status: 'approved', needsReason: false },
+    reject: { title: 'Reject this account?', label: 'Reject', danger: true, icon: 'bi-x-circle', status: 'rejected', needsReason: true },
 };
 
 function onAction(e) {
@@ -118,7 +118,7 @@ function onAction(e) {
             const result = await AdminService.reviewAccount({ targetUserId: id, newStatus: config.status, reason: reason || null });
 
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
                 return;
             }
 

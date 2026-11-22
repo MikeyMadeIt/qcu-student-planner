@@ -62,11 +62,11 @@
 
     <div class="glass card-pad">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="section-title mb-0"><i class="bi bi-inbox"></i>Sent messages</div>
+        <div class="section-title mb-0"><i class="bi bi-inbox" aria-hidden="true"></i>Sent messages</div>
         <div class="d-flex align-items-center gap-2">
           <span class="text-faint" id="admCount" aria-live="polite"></span>
           <button type="button" class="btn btn-accent btn-sm" id="composeBtn" data-bs-toggle="modal" data-bs-target="#composeModal">
-            <i class="bi bi-pencil-square"></i> Compose message
+            <i class="bi bi-pencil-square" aria-hidden="true"></i> Compose message
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-pad">
       <div class="d-flex justify-content-between align-items-start mb-2">
-        <h5 id="composeTitle" class="mb-0"><i class="bi bi-pencil-square"></i> Compose message</h5>
+        <h5 id="composeTitle" class="mb-0"><i class="bi bi-pencil-square" aria-hidden="true"></i> Compose message</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <p class="text-faint" style="font-size:.82rem">Sent to the student's own Inbox. Students can read this message but cannot reply to it.</p>
@@ -136,7 +136,7 @@
 
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-accent" id="cmSendBtn"><i class="bi bi-send"></i> Send message</button>
+          <button type="submit" class="btn btn-accent" id="cmSendBtn"><i class="bi bi-send" aria-hidden="true"></i> Send message</button>
         </div>
       </form>
     </div>
@@ -166,5 +166,6 @@
 <script src="../../assets/js/core/layout.js"></script>
 <script src="../../assets/js/core/pwa.js"></script>
 <script type="module" src="../../assets/js/modules/admin-inbox.js"></script>
+<script src="../../assets/js/core/date-picker.js"></script>
 </body>
 </html>

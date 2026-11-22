@@ -668,14 +668,20 @@
 
 .dash-empty {
     text-align: center;
-    padding: 18px 8px;
+    padding: var(--space-4) var(--space-2);
 }
 
 .dash-empty i {
-    font-size: 1.4rem;
-    color: var(--text-faint);
-    display: block;
-    margin-bottom: 6px;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.05rem;
 }
 
 .dash-empty-title {
@@ -687,7 +693,14 @@
 
 .dash-empty-sub {
     font-size: .72rem;
-    color: var(--text-faint);
+    color: var(--text-soft);
+    line-height: 1.45;
+}
+
+#attendanceDonutContent[hidden],
+#attendanceDonutEmpty[hidden],
+#dashAttendanceNote[hidden] {
+    display: none !important;
 }
 
 /* Card entrance animation */
@@ -785,26 +798,6 @@
 }
 
 @media (max-width: 575px) {
-    .dash-stats .dash-stat-link {
-        min-height: 92px;
-        padding: 12px;
-        gap: 8px;
-    }
-    .dash-stats .stat-card-val {
-        font-size: 1.15rem;
-    }
-    .dash-stats .stat-card-icon {
-        width: 1.8rem;
-        height: 1.8rem;
-        font-size: var(--icon-size-sm);
-    }
-    .dash-stats .stat-card-lbl {
-        font-size: .6rem;
-        margin-top: 2px;
-    }
-    .dash-stats .stat-card-hint {
-        font-size: .58rem;
-    }
     .att-legend-label {
         font-size: .66rem;
     }
@@ -855,7 +848,7 @@
 .dash-stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--grid-gap);
+    gap: clamp(10px, 1vw, 14px);
     margin-bottom: var(--page-gap);
 }
 
@@ -863,7 +856,7 @@
     min-height: 104px;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 16px;
+    padding: 14px;
     color: var(--text);
     text-decoration: none;
     backdrop-filter: none;
@@ -889,8 +882,8 @@
     order: 2;
     width: 1.8rem;
     height: 1.8rem;
-    background: var(--surface-2);
-    color: var(--text-faint);
+    background: rgba(var(--accent), .14);
+    color: rgb(var(--accent));
     font-size: .9rem;
 }
 
@@ -936,30 +929,15 @@
 }
 
 @media (min-width: 1024px) and (pointer: fine) {
-    /* .dashboard-page is placed by .main-content's padding-top at
-       (shell-bar-height + 1px + page-gap) from the top of the document, so
-       sizing it to a flat 100vh (the FULL viewport) always overshoots the
-       remaining space by that offset. The box used to still get its own
-       `overflow-y: auto` + `overscroll-behavior: contain`, i.e. its own
-       scroll root nested inside the document's — but since that root
-       starts shell-bar-height below the top, its bottom edge — and
-       everything in it — rendered below the viewport by that same amount,
-       with no way for the trapped 100vh box to reveal it: the document
-       itself would need to scroll that remainder, but `overscroll-behavior:
-       contain` on the inner panels (and on this element) stops scroll
-       chaining from ever reaching the document. The result was the
-       "stuck near 90%" bug: wheel/touch/trackpad scrolling over the
-       dashboard's inner panels hit their own contained boundary and never
-       handed off, so the user had to move the pointer off the panel and
-       scroll again just to nudge the outer, mostly-invisible remainder.
-       Sizing this box to exactly the viewport space left under the
-       shell-bar removes the overshoot, so the document never needs to
-       scroll and there is only ever ONE active scroll root at a time. */
+    /* The fixed shell bar's space is already reserved by .main-content's
+       padding-top, and box-sizing is border-box, so the box must be exactly
+       the viewport height. Subtracting the bar height again left an empty
+       strip at the bottom of the window. */
     .dashboard-page {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - var(--shell-bar-height) - 1px - var(--page-gap));
-        max-height: calc(100vh - var(--shell-bar-height) - 1px - var(--page-gap));
+        height: 100vh;
+        max-height: 100vh;
         min-height: 0;
         overflow-x: hidden;
         overflow-y: auto;
@@ -1001,8 +979,8 @@
     }
 
     .dashboard-page .dash-stats .stat-card {
-        min-height: 86px;
-        padding: 10px 12px;
+        min-height: 104px;
+        padding: 14px;
         align-items: start;
     }
 
@@ -1012,7 +990,7 @@
 
     .dashboard-page .dash-stats .stat-card-icon {
         position: absolute;
-        top: 10px;
+        top: 12px;
         right: 12px;
     }
 
@@ -1062,4 +1040,25 @@
         font-size: 12px;
         text-align: center;
     }
+}
+
+/* Keep the compact stat-card layout after the dashboard's authoritative base rules. */
+@media (max-width: 575px) {
+    .dash-stats .stat-card {
+        min-height: 92px;
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .dash-stats .stat-card-val { font-size: 1.15rem; }
+    .dash-stats .stat-card-icon {
+        width: 1.8rem;
+        height: 1.8rem;
+        font-size: var(--icon-size-sm);
+    }
+    .dash-stats .stat-card-lbl {
+        font-size: .6rem;
+        margin-top: 2px;
+    }
+    .dash-stats .stat-card-hint { font-size: .58rem; }
 }
