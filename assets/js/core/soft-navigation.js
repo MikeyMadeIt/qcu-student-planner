@@ -67,6 +67,18 @@ function updateShellForRoute(main, destinationMain, url) {
         if (selected) link.setAttribute('aria-current', 'page');
         else link.removeAttribute('aria-current');
     });
+    const activeSidebarLink = document.querySelector('#sidebar .nav-link.active');
+    const activeSidebarGroup = activeSidebarLink && activeSidebarLink.closest('.sidebar-nav-group');
+    if (activeSidebarGroup) {
+        document.querySelectorAll('#sidebar .sidebar-nav-group').forEach(group => {
+            const toggle = group.querySelector('.nav-group-toggle');
+            const items = group.querySelector('.sidebar-group-items');
+            if (!toggle || !items) return;
+            const expanded = group === activeSidebarGroup;
+            if (toggle) toggle.setAttribute('aria-expanded', String(expanded));
+            if (items) items.hidden = !expanded;
+        });
+    }
     main.className = destinationMain.className;
     main.id = destinationMain.id || 'main-content';
 }
@@ -205,7 +217,7 @@ async function swapTo(url, { history = true } = {}) {
     updateShellForRoute(currentMain, nextMain, url);
 
     document.querySelectorAll('[data-soft-nav-overlay]').forEach(node => {
-        if (node.id === 'mobileAppNavMenu' || node.id === 'sidebarProfilePanel')
+        if (node.id === 'mobileAppNavMenu')
             node.removeAttribute('data-soft-nav-overlay');
         else node.remove();
     });
@@ -268,7 +280,7 @@ export function initSoftNavigation() {
     });
     // The mobile menu and desktop sidebar profile popover are part of the
     // persistent shell even though layout.js mounts them directly on body.
-    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu):not(#sidebarProfilePanel)')
+    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu)')
         .forEach(node => node.dataset.softNavOverlay = 'true');
     document.addEventListener('click', onClick);
     if (window.MutationObserver && document.body) {

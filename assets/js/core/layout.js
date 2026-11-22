@@ -80,6 +80,12 @@ const ADMIN_NAV_GROUPS = [
     { label: 'Communications', keys: ['admin-inbox', 'admin-tickets'] },
     { label: 'System', keys: ['admin-activity'] },
 ];
+const NAV_GROUP_ICONS = {
+    Communication: 'bi-chat-dots', Communications: 'bi-chat-dots', Overview: 'bi-grid-1x2',
+    Academics: 'bi-mortarboard', 'AI Tools': 'bi-stars', University: 'bi-bank',
+    Personalization: 'bi-palette', 'Safety & Support': 'bi-shield-check',
+    Events: 'bi-calendar-event', 'User Management': 'bi-people', System: 'bi-cpu'
+};
 // Sign out
 async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
@@ -799,11 +805,24 @@ function renderShell(activeKey, admin) {
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
         const brandIcon = isAdminArea ? 'bi-shield-lock' : 'bi-mortarboard';
+        let hasMenuHeading = false;
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
-        sidebarGroups.forEach(g => {
-            if (g.label)
-                sidebarHtml += `<div class="nav-group-label" role="heading" aria-level="2">${g.label}</div>`;
+        sidebarGroups.forEach((g, index) => {
+            const groupId = `sidebarGroup${index}`;
+            const directGroup = ['Communication', 'Communications', 'Overview'].includes(g.label);
+            const expanded = g.keys.includes(activeKey);
+            if (!directGroup && !hasMenuHeading) {
+                sidebarHtml += `<div class="sidebar-section-label">Menu</div>`;
+                hasMenuHeading = true;
+            }
+            sidebarHtml += `<section class="sidebar-nav-group">
+                ${directGroup
+                    ? `<div class="sidebar-group-heading"><span>${escHtml(g.label || 'Navigation')}</span></div>`
+                    : `<button type="button" class="nav-group-toggle" aria-expanded="${expanded}" aria-controls="${groupId}">
+                        <i class="bi ${NAV_GROUP_ICONS[g.label] || 'bi-folder'} sidebar-group-icon" aria-hidden="true"></i><span>${escHtml(g.label || 'Navigation')}</span><i class="bi bi-chevron-down sidebar-group-chevron" aria-hidden="true"></i>
+                    </button>`}
+                <div class="sidebar-group-items${directGroup ? '' : ' sidebar-tree'}" id="${groupId}"${directGroup || expanded ? '' : ' hidden'}>`;
             g.keys.forEach(k => {
                 const n = itemMap[k];
                 if (!n)
@@ -811,27 +830,38 @@ function renderShell(activeKey, admin) {
                 const isActive = n.key === activeKey;
                 const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
                     : n.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
+                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${directGroup ? '' : ' sidebar-tree-link'}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}>${directGroup ? `<i class="bi ${n.icon}" aria-hidden="true"></i>` : ''}<span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
+            sidebarHtml += `</div></section>`;
+            if (directGroup) sidebarHtml += `<div class="sidebar-group-divider" aria-hidden="true"></div>`;
         });
         sidebarHtml += `</nav><div class="sidebar-bottom">`;
 
         if (isAdminArea) {
-            sidebarHtml += `<div class="sidebar-utility">
-      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+            const adminName = (admin && admin.full_name) || 'Administrator';
+            const adminInitial = escHtml(adminName.charAt(0).toUpperCase() || 'A');
+            sidebarHtml += `<div class="sidebar-theme-row"><span>Theme</span><div class="theme-switch" data-theme-switch role="radiogroup" aria-label="Theme"></div></div>
+    <div class="sidebar-profile sidebar-admin-profile">
+      <span class="profile-avatar js-admin-avatar js-profile-avatar" aria-hidden="true">${adminInitial}</span>
+      <div class="sidebar-profile-text">
+        <div class="sidebar-profile-name js-admin-name" id="admSidebarName">${escHtml(adminName)}</div>
+        <div class="sidebar-profile-sub">${escHtml((admin && admin.role ? admin.role.replace(/_/g, ' ') : 'Administrator'))}</div>
+      </div>
     </div>
-    <div class="sidebar-user js-admin-name" id="admSidebarName">Administrator</div>`;
+    <div class="sidebar-utility">
+      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
+    </div>`;
         } else {
-            sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
+            sidebarHtml += `<div class="sidebar-theme-row"><span>Theme</span><div class="theme-switch" data-theme-switch role="radiogroup" aria-label="Theme"></div></div>
+    <div class="sidebar-profile" id="sidebarProfile">
       <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
         <div class="sidebar-profile-name" id="sidebarProfileName">${escHtml(name)}</div>
         <div class="sidebar-profile-sub" id="sidebarUserName">Signed in on this device</div>
       </div>
-      <button type="button" class="sidebar-profile-more" id="sidebarProfileMoreBtn"
-        aria-haspopup="true" aria-expanded="false" aria-controls="sidebarProfilePanel" aria-label="Profile options">
-        <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-      </button>
+    </div>`;
+            sidebarHtml += `<div class="sidebar-utility">
+      <button type="button" class="nav-link sidebar-logout-btn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
     </div>`;
         }
         sidebarHtml += `</div>`;
@@ -840,8 +870,8 @@ function renderShell(activeKey, admin) {
     if (!softNavigation) ensureMobileAppNavMenu(activeKey, admin);
     if (!isAdminArea && !softNavigation) {
         updateNotificationBadge();
-        ensureSidebarProfileMenu();
     }
+    if (!softNavigation) wireDesktopSidebarGroups(sidebar);
     initThemeSwitches();
     initThemeOptions();
     syncThemeOptions();
@@ -857,6 +887,7 @@ function renderShell(activeKey, admin) {
         if (typeof DB.whenCloudReady === 'function') DB.whenCloudReady(function () { window.ReminderEngine.start(); });
         else window.ReminderEngine.start();
     }
+    initDesktopMainScrollFade(document.querySelector('.main-content'));
     // Keep the existing document routes directly usable while enabling
     // shell-preserving navigation for signed-in app pages.
     import('./soft-navigation.js').then(({ initSoftNavigation }) => initSoftNavigation()).catch(error => {
@@ -864,74 +895,71 @@ function renderShell(activeKey, admin) {
     });
 }
 
-// Footer profile overflow menu (Logout only) — desktop sidebar
-function ensureFooterProfileMenu(triggerId, panelId) {
-    const trigger = document.getElementById(triggerId);
-    if (!trigger) {
-        const stalePanel = document.getElementById(panelId);
-        if (stalePanel) stalePanel.hidden = true;
-        return;
-    }
-    let panel = document.getElementById(panelId);
-    if (!panel) {
-        panel = document.createElement('div');
-        panel.id = panelId;
-        panel.className = 'profile-panel sidebar-profile-panel';
-        panel.setAttribute('role', 'menu');
-        panel.setAttribute('aria-label', 'Profile options');
-        panel.hidden = true;
-        document.body.appendChild(panel);
-    }
-    panel.innerHTML = `<button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>`;
+function initDesktopMainScrollFade(main) {
+    if (!main || main.dataset.desktopScrollFadeWired) return;
+    main.dataset.desktopScrollFadeWired = 'true';
+    let frame = 0;
+    const schedule = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+            frame = 0;
+            const desktop = window.matchMedia('(min-width: 992px)').matches;
+            document.body.classList.toggle('desktop-main-overflow', desktop && main.scrollHeight > main.clientHeight + 1);
+        });
+    };
+    let resizeObserver;
+    const observeContent = () => {
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            [...main.children].forEach(child => resizeObserver.observe(child));
+        }
+        schedule();
+    };
+    if (window.ResizeObserver) resizeObserver = new ResizeObserver(schedule);
+    const mutationObserver = new MutationObserver(observeContent);
+    mutationObserver.observe(main, { childList: true, subtree: true, characterData: true, attributes: true });
+    observeContent();
+    window.addEventListener('resize', schedule, { passive: true });
+    main.addEventListener('load', schedule, true);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+}
 
-    function closeOthers() {
-        document.querySelectorAll('.header-panel, .profile-panel').forEach(p => {
-            if (p.id !== panelId && !p.hidden) {
-                p.hidden = true;
-                const t = document.querySelector('[aria-controls="' + p.id + '"]');
-                if (t) t.setAttribute('aria-expanded', 'false');
-            }
+function wireDesktopSidebarGroups(sidebar) {
+    if (!sidebar) return;
+    const activeLink = sidebar.querySelector('.nav-link.active');
+    const activeGroup = activeLink && activeLink.closest('.sidebar-nav-group');
+    if (activeGroup) {
+        sidebar.querySelectorAll('.sidebar-nav-group').forEach(group => {
+            const toggle = group.querySelector('.nav-group-toggle');
+            const items = group.querySelector('.sidebar-group-items');
+            if (!toggle || !items) return;
+            const expanded = group === activeGroup;
+            toggle.setAttribute('aria-expanded', String(expanded));
+            items.hidden = !expanded;
         });
     }
-    function positionPanel() {
-        const rect = trigger.getBoundingClientRect();
-        const panelRect = panel.getBoundingClientRect();
-        const gutter = 8;
-        const spaceAbove = rect.top;
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const openUp = spaceAbove >= (panelRect.height + gutter) || spaceAbove >= spaceBelow;
-        const top = openUp
-            ? Math.max(gutter, rect.top - panelRect.height - 8)
-            : Math.min(window.innerHeight - panelRect.height - gutter, rect.bottom + 8);
-        let left = rect.right - panelRect.width;
-        left = Math.min(Math.max(left, gutter), window.innerWidth - panelRect.width - gutter);
-        panel.style.top = `${top}px`;
-        panel.style.left = `${left}px`;
-    }
-    function setOpen(isOpen) {
-        if (isOpen) closeOthers();
-        panel.hidden = !isOpen;
-        trigger.setAttribute('aria-expanded', String(isOpen));
-        if (isOpen) positionPanel();
-    }
-    trigger.addEventListener('click', event => {
-        event.stopPropagation();
-        setOpen(panel.hidden);
-    });
-    window.addEventListener('resize', () => { if (!panel.hidden) positionPanel(); });
-    document.addEventListener('click', event => {
-        if (!panel.hidden && !trigger.contains(event.target) && !panel.contains(event.target))
-            setOpen(false);
-    });
-    document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && !panel.hidden) {
-            setOpen(false);
-            trigger.focus();
+    if (sidebar.dataset.groupsWired) return;
+    sidebar.dataset.groupsWired = 'true';
+    sidebar.addEventListener('click', event => {
+        const toggle = event.target.closest('.nav-group-toggle');
+        if (!toggle) return;
+        const group = toggle.closest('.sidebar-nav-group');
+        const items = group && group.querySelector('.sidebar-group-items');
+        if (!items) return;
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        if (!expanded) {
+            sidebar.querySelectorAll('.sidebar-nav-group').forEach(otherGroup => {
+                const otherToggle = otherGroup.querySelector('.nav-group-toggle');
+                const otherItems = otherGroup.querySelector('.sidebar-group-items');
+                if (otherGroup !== group && otherToggle && otherItems) {
+                    otherToggle.setAttribute('aria-expanded', 'false');
+                    otherItems.hidden = true;
+                }
+            });
         }
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        items.hidden = expanded;
     });
-}
-function ensureSidebarProfileMenu() {
-    ensureFooterProfileMenu('sidebarProfileMoreBtn', 'sidebarProfilePanel');
 }
 // Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
 async function refreshAdminNavBadges() {

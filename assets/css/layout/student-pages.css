@@ -1,6 +1,6 @@
 /* Shared student page heading scale and space below the fixed shell bar. */
 .student-app .main-content {
-    padding-top: calc(var(--shell-bar-height) + 1px + var(--page-gap));
+    padding-top: var(--space-6);
 }
 
 .student-app .main-content .page-title {
@@ -35,7 +35,7 @@
 @media (min-width: 992px) {
     .student-app .main-content {
         max-width: none;
-        padding: calc(var(--shell-bar-height) + 1px + clamp(1.5rem, 2vw, 2rem))
+        padding: clamp(1.5rem, 2vw, 2rem)
             clamp(1.75rem, 3vw, 3.5rem) var(--space-7);
     }
 
