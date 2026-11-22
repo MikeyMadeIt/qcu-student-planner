@@ -26,12 +26,13 @@
         <h1 class="page-title">Schedule</h1>
         <p class="page-sub">Manage your classes, timetable, and weekly academic schedule.</p>
       </div>
-      <!-- Add Subject: full width, same size as the Tasks page's Add Task button -->
-      <button class="btn btn-accent sch-add-btn" onclick="openSubjectModal()" aria-label="Add new subject">
-        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject
-      </button>
     </div>
 
+    <div class="schedule-columns">
+      <div class="schedule-column schedule-column-primary">
+    <button class="btn btn-accent sch-add-btn" onclick="openSubjectModal()" aria-label="Add new subject">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject
+    </button>
     <!-- Week navigation -->
     <div class="glass card-pad mb-3 fade-in sch-nav-card">
       <div class="sch-week-nav">
@@ -79,7 +80,6 @@
 
     <!-- Subject list view -->
     <div id="schListView" class="d-none" role="region" aria-label="Subject list">
-      <div id="schCurriculumSetup" class="d-none mb-3" aria-live="polite"></div>
       <div class="glass card-pad mb-3 fade-in">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <div class="section-title mb-0"><i class="bi bi-journal-bookmark" aria-hidden="true"></i>All Subjects</div>
@@ -96,8 +96,14 @@
       </div>
     </div>
 
+      </div>
+      <div class="schedule-column schedule-column-secondary">
+      <div id="schCurriculumSetup" class="d-none mb-3" aria-live="polite"></div>
     <!-- Today's tasks panel (day view only) -->
     <div id="schTasksPanel" class="mb-3"></div>
+
+      </div>
+    </div>
 
   </main>
 </div>
