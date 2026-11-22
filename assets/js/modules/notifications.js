@@ -86,7 +86,7 @@ function renderNotifications() {
             const label = item.overdue ? 'Overdue' : 'Due soon';
             return `<button type="button" class="notification-row ${read ? 'is-read' : 'is-unread'} ${item.id === notificationSelection ? 'is-selected' : ''}"
                     data-notification-id="${escHtml(item.id)}" aria-pressed="${item.id === notificationSelection}" role="listitem">
-                <span class="notification-row-icon ${item.overdue ? 'is-overdue' : ''}" aria-hidden="true"><i class="bi bi-journal-check"></i></span>
+                <span class="notification-row-icon ${item.overdue ? 'is-overdue' : ''}" aria-hidden="true"><i class="bi bi-journal-check" aria-hidden="true"></i></span>
                 <span class="notification-row-copy">
                     <span class="notification-row-top"><strong>${escHtml(item.title)}</strong><span class="notification-unread-dot" aria-hidden="true"></span></span>
                     <span class="notification-row-meta">${escHtml(item.category)} · ${label} · ${escHtml(item.due.toLocaleDateString([], { month: 'short', day: 'numeric' }))}</span>
@@ -97,7 +97,7 @@ function renderNotifications() {
         const empty = document.getElementById('notificationListEmpty');
         empty.hidden = filtered.length !== 0;
         document.getElementById('notificationEmptyText').textContent = notifications.length === 0
-            ? 'Task reminders appear here when an active task is due within the next three days.'
+            ? 'Reminders appear here for active tasks due soon or overdue.'
             : 'No notifications match this filter.';
         const loadMore = document.getElementById('notificationLoadMore');
         loadMore.hidden = filtered.length <= shown.length;
@@ -114,7 +114,7 @@ function renderNotificationDetail(item, readMap) {
         detail.innerHTML = `<div class="notification-detail-empty">
             <i class="bi bi-bell" aria-hidden="true"></i>
             <strong>Select a notification</strong>
-            <span>Details for the selected reminder will appear here.</span>
+            <span>Choose a reminder to view its details.</span>
         </div>`;
         return;
     }

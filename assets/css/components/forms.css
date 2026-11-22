@@ -1,7 +1,15 @@
 /* FORM CONTROLS */
 
+input,
+textarea,
+select,
+button {
+    font-family: var(--font-body);
+}
+
 .form-control,
-.form-select {
+.form-select,
+.date-picker-trigger {
     height: var(--input-height);
     min-height: var(--input-height);
     padding: 0 0.85rem;
@@ -9,8 +17,14 @@
     border: 1px solid var(--border) !important;
     color: var(--text) !important;
     border-radius: var(--input-radius) !important;
-    font-size: .9rem;
-    line-height: calc(var(--input-height) - 2px);
+    font-family: var(--font-body);
+    font-size: var(--input-font-size);
+    font-weight: 400;
+    font-variant-numeric: normal;
+    /* The previous outer-height line box was larger than the content area,
+       clipping font ascenders/descenders on single-line controls. */
+    line-height: normal;
+    box-sizing: border-box;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
@@ -26,6 +40,11 @@ textarea.form-control {
 .form-control::placeholder,
 textarea::placeholder,
 input::placeholder {
+    font: inherit;
+    font-family: var(--font-body);
+    font-size: inherit;
+    font-weight: 400;
+    letter-spacing: inherit;
     color: var(--input-placeholder-color);
     opacity: 1;
 }
@@ -35,7 +54,23 @@ input::placeholder {
 }
 
 .form-control::-ms-input-placeholder {
+    font-family: var(--font-body);
+    font-size: inherit;
     color: var(--input-placeholder-color);
+}
+
+.sch-time-input {
+    font-family: var(--font-body);
+    font-size: var(--input-font-size);
+    font-weight: 400;
+    font-variant-numeric: normal;
+}
+
+.sch-time-input::placeholder {
+    font: inherit;
+    font-family: var(--font-body);
+    font-size: inherit;
+    letter-spacing: inherit;
 }
 
 .form-control:disabled,
@@ -65,6 +100,9 @@ input::placeholder {
 select option {
     background-color: var(--elevated) !important;
     color: var(--text) !important;
+    font-family: var(--font-body);
+    font-size: var(--input-font-size);
+    font-weight: 400;
 }
 
 input[type="checkbox"],
@@ -243,6 +281,51 @@ label.checkbox-label {
     color: var(--danger);
 }
 
+/* Required markers and field errors use one treatment across every form. */
+.form-label .required-marker,
+.form-label .sch-subject-required,
+.rp-label .rp-req,
+.sch-subject-required,
+.rp-req {
+    display: inline-block;
+    margin-inline-start: .18em;
+    color: var(--text-faint) !important;
+    font: inherit;
+    line-height: 1;
+    vertical-align: baseline;
+}
+
+.form-control[aria-invalid="true"],
+.form-select[aria-invalid="true"],
+.date-picker-trigger[aria-invalid="true"] {
+    border-color: var(--danger) !important;
+}
+
+.form-control[aria-invalid="true"]:focus,
+.form-select[aria-invalid="true"]:focus,
+.date-picker-trigger[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent) !important;
+}
+
+.form-error,
+.invalid-feedback,
+.auth-error,
+.rp-error,
+.sch-subject-error {
+    color: var(--danger);
+    font-size: .78rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.form-error[hidden],
+.invalid-feedback[hidden],
+.auth-error[hidden],
+.rp-error[hidden],
+.sch-subject-error[hidden] {
+    display: none;
+}
+
 /* Input-group icons (search fields, password toggles, etc.) stay centered */
 .input-group {
     display: flex;
@@ -261,13 +344,14 @@ label.checkbox-label {
 }
 
 .input-icon-wrap .form-control {
-    padding-left: 2.5rem;
+    padding-right: 2.5rem;
 }
 
 .input-icon-wrap > i,
 .input-icon-wrap > .input-icon {
     position: absolute;
-    left: 0.85rem;
+    right: 0.85rem;
+    left: auto;
     top: 50%;
     transform: translateY(-50%);
     font-size: var(--icon-size-md);
@@ -282,4 +366,16 @@ label.checkbox-label {
     transform: translateY(-50%);
     width: 2rem;
     height: 2rem;
+}
+
+/* Search affordances stay leading; other field icons/actions trail the value. */
+.input-icon-wrap.is-search .form-control {
+    padding-right: 0.85rem;
+    padding-left: 2.5rem;
+}
+
+.input-icon-wrap.is-search > i,
+.input-icon-wrap.is-search > .input-icon {
+    right: auto;
+    left: 0.85rem;
 }

@@ -57,7 +57,7 @@ function renderErrorBox(container, message, withRetry) {
     container.hidden = false;
     container.innerHTML = `
         <div class="rp-error-box" role="alert">
-            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <p>${escHtml(message)}</p>
             ${withRetry ? '<button type="button" class="btn btn-ghost btn-sm" data-retry><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again</button>' : ''}
         </div>`;
@@ -140,7 +140,7 @@ async function loadHistory({ silent = false } = {}) {
         if (silent && hasResults) {
             // Keep the list that is already on screen and just tell the user.
             results.hidden = false;
-            toast('Your reports could not be refreshed.', 'danger', 'bi-exclamation-triangle-fill');
+            toast('Your reports could not be refreshed.', 'danger', 'bi-exclamation-triangle');
             return;
         }
         hasResults = false;
@@ -239,13 +239,13 @@ function clearFormMessages() {
 
 function showFormError(message) {
     const box = $('rpFormError');
-    box.innerHTML = `<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><span>${escHtml(message)}</span>`;
+    box.innerHTML = `<i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>${escHtml(message)}</span>`;
     box.hidden = false;
 }
 
 function showSuccess(ticketRef) {
     const box = $('rpSuccess');
-    box.innerHTML = `<i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Report sent. Your ticket reference is <strong>${escHtml(ticketRef)}</strong>. You can follow its status under Your reports.</span>`;
+    box.innerHTML = `<i class="bi bi-check-circle" aria-hidden="true"></i><span>Report sent. Your ticket reference is <strong>${escHtml(ticketRef)}</strong>. You can follow its status under Your reports.</span>`;
     box.hidden = false;
 }
 
@@ -304,11 +304,11 @@ async function onSubmit(e) {
         if (result.message === NOT_SIGNED_IN)
             $('rpSignInNotice').hidden = false;
         showFormError(result.message || 'Could not send your report. Please try again.');
-        toast(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        toast(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
-    toast(`Report submitted. Your ticket reference is ${result.data.ticketRef}.`, 'accent', 'bi-check-circle-fill');
+    toast(`Report submitted. Your ticket reference is ${result.data.ticketRef}.`, 'accent', 'bi-check-circle');
     $('reportForm').reset();
     updateCounter('rpSubject', 'rpSubjectCount', SUBJECT_MAX);
     updateCounter('rpDetails', 'rpDetailsCount', DETAILS_MAX);

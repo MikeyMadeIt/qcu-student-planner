@@ -367,12 +367,15 @@ select.cs-native-hidden {
     overflow-wrap: anywhere;
     text-align: left;
     white-space: normal;
+    font-family: var(--font-body);
+    font-size: var(--input-font-size);
+    font-weight: 400;
 }
 
 .cs-option.active {
     background: var(--surface-2);
     color: var(--text);
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .cs-option.active::after {
