@@ -69,7 +69,7 @@
 .cur-search-input {
     padding-left: 36px !important;
     height: 38px !important;
-    font-size: .88rem !important;
+    font-size: var(--input-font-size) !important;
 }
 
 /* Year block */
@@ -2477,12 +2477,12 @@
     font-size: .66rem;
 }
 .cur-program-switcher .cur-program-group .form-select {
-    font-size: .82rem;
+    font-size: var(--input-font-size);
     line-height: 1.25;
     font-weight: 600;
 }
 .cur-program-switcher .cur-program-group .form-select option {
-    font-size: .82rem;
+    font-size: var(--input-font-size);
 }
 
 /* Progress and reminder spacing refinements. */
@@ -2526,7 +2526,7 @@
     .cur-program-switcher .cur-program-group .form-select {
         width: 100%;
         min-width: 0;
-        font-size: .8rem;
+        font-size: var(--input-font-size);
         white-space: nowrap;
     }
     .cur-program-switcher .cur-program-group .form-select option {
@@ -2586,7 +2586,7 @@
     .cur-subject-top .cur-search-input {
         height: 100% !important;
         min-height: 58px;
-        font-size: .86rem !important;
+        font-size: var(--input-font-size) !important;
     }
     .cur-subject-panel .cur-nav-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3139,7 +3139,7 @@
     .cur-program-switcher .cur-program-group .form-select {
         width: 100%;
         min-width: 0;
-        font-size: .78rem;
+        font-size: var(--input-font-size);
         white-space: nowrap;
     }
 

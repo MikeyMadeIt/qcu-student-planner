@@ -60,10 +60,10 @@ async function loadRows() {
 
     body.hidden = false;
     body.innerHTML = rows.map(r => {
-        const icon = MESSAGE_CATEGORY_ICONS[r.category] || 'bi-chat-square-text-fill';
+        const icon = MESSAGE_CATEGORY_ICONS[r.category] || 'bi-chat-square-text';
         return `
       <div class="msg-row" data-id="${r.id}">
-        <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}"></i></span>
+        <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
         <div class="msg-row-body">
           <span class="msg-pill">${messageCategoryBadge(escHtml, r.category)}</span>
           <div class="msg-subject">${escHtml(r.subject)}</div>
@@ -71,7 +71,7 @@ async function loadRows() {
         </div>
         <div class="msg-row-side">
           <span class="msg-time">${formatTime(r.sent_at)}</span>
-          <button type="button" class="msg-action-btn danger" data-act="archive" data-id="${r.id}" data-subject="${escHtml(r.subject)}" title="Archive" aria-label="Archive message"><i class="bi bi-archive"></i></button>
+          <button type="button" class="msg-action-btn danger" data-act="archive" data-id="${r.id}" data-subject="${escHtml(r.subject)}" title="Archive" aria-label="Archive message"><i class="bi bi-archive" aria-hidden="true"></i></button>
         </div>
       </div>`;
     }).join('');
@@ -79,9 +79,9 @@ async function loadRows() {
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i> Prev</button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i> Prev</button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');
@@ -93,7 +93,7 @@ async function loadRows() {
 
 async function viewMessage(id) {
     const bodyEl = document.getElementById('msgDetailBody');
-    bodyEl.innerHTML = `<div class="adm-loading"><i class="bi bi-hourglass-split"></i> Loading…</div>`;
+    bodyEl.innerHTML = `<div class="adm-loading"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Loading…</div>`;
     const modal = new bootstrap.Modal(document.getElementById('messageDetailModal'));
     modal.show();
 
@@ -125,9 +125,9 @@ async function viewMessage(id) {
             <dt>Recipients</dt><dd>${totalCount}</dd>
             <dt>Read / Unread</dt><dd>${readCount} read &middot; ${totalCount - readCount} unread</dd>
         </div>
-        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-file-text"></i>Message</div>
+        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-file-text" aria-hidden="true"></i>Message</div>
         <div class="glass card-pad mb-3" style="white-space:pre-wrap;font-size:.88rem">${escHtml(message.body)}</div>
-        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-people"></i>Recipients (${totalCount})</div>
+        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-people" aria-hidden="true"></i>Recipients (${totalCount})</div>
         <div class="adm-table-wrap" style="max-height:16rem;overflow-y:auto">
             <table class="adm-table">
                 <thead><tr><th scope="col">Student</th><th scope="col">Email</th><th scope="col">Status</th></tr></thead>
@@ -142,14 +142,14 @@ async function archiveMessage(id, subject) {
         message: `"${subject}" will be hidden from every recipient's inbox and from this list. Recipient read history and the audit trail are preserved.`,
         confirmLabel: 'Archive',
         danger: true,
-        icon: 'bi-archive-fill',
+        icon: 'bi-archive',
         async onConfirm() {
             const result = await AdminService.archiveMessage(id);
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
                 return;
             }
-            Toast.show('Message archived.', 'accent', 'bi-check-circle-fill');
+            Toast.show('Message archived.', 'accent', 'bi-check-circle');
             loadRows();
         },
     });
@@ -278,22 +278,22 @@ async function onComposeSubmit(e) {
     isSending = true;
     const sendBtn = document.getElementById('cmSendBtn');
     sendBtn.disabled = true;
-    sendBtn.innerHTML = `<i class="bi bi-hourglass-split"></i> Sending…`;
+    sendBtn.innerHTML = `<i class="bi bi-hourglass-split" aria-hidden="true"></i> Sending…`;
 
     const studentIds = scope === 'all' ? null : [...selectedStudents.keys()];
     const result = await AdminService.sendMessage({ subject, body, category, recipientScope: scope, studentIds });
 
     isSending = false;
     sendBtn.disabled = false;
-    sendBtn.innerHTML = `<i class="bi bi-send"></i> Send message`;
+    sendBtn.innerHTML = `<i class="bi bi-send" aria-hidden="true"></i> Send message`;
 
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle-fill');
+        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
         return;
     }
 
     bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
-    Toast.show('Message sent.', 'accent', 'bi-check-circle-fill');
+    Toast.show('Message sent.', 'accent', 'bi-check-circle');
     resetComposeForm();
     currentPage = 1;
     loadRows();
@@ -315,6 +315,7 @@ function wireFilters() {
         document.getElementById('admCategory').value = 'all';
         document.getElementById('admDateFrom').value = '';
         document.getElementById('admDateTo').value = '';
+        if (window.DatePicker) { DatePicker.refresh('admDateFrom'); DatePicker.refresh('admDateTo'); }
         document.getElementById('admSort').value = 'sent_desc';
         currentPage = 1;
         loadRows();

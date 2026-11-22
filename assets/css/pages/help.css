@@ -67,7 +67,7 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 0.92rem;
+    font-size: var(--input-font-size);
 }
 
 .help-search-input::placeholder {

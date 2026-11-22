@@ -265,7 +265,7 @@
 
 .gwa-table-header {
     display: grid;
-    grid-template-columns: 1fr 64px 100px 32px;
+    grid-template-columns: minmax(0, 1fr) 64px 120px 34px;
     gap: 8px;
     padding: 6px 16px 3px;
     font-size: .68rem;
@@ -282,7 +282,7 @@
 
 .gwa-input-row {
     display: grid;
-    grid-template-columns: 1fr 64px 100px 32px;
+    grid-template-columns: minmax(0, 1fr) 64px 120px 34px;
     gap: 8px;
     align-items: center;
     padding: 5px 0;
@@ -293,12 +293,40 @@
     border-bottom: none;
 }
 
+.gwa-input-row > * {
+    min-width: 0;
+}
+
+.gwa-input-row > .custom-select {
+    width: 100%;
+}
+
+.gwa-input-row > .custom-select > .cs-trigger {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 8px !important;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.gwa-input-row > button.btn-icon.btn-icon-sm {
+    box-sizing: border-box;
+    align-self: stretch;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0 !important;
+}
+
 .gwa-input-row .form-control,
 .gwa-input-row .form-select {
     height: 34px !important;
+    min-height: 34px !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    font-size: .85rem !important;
+    font-size: var(--input-font-size) !important;
 }
 
 .gwa-col-units,
@@ -1261,11 +1289,44 @@
 }
 
 .gwa-table-header > :last-child {
-    width: 40px;
+    width: auto;
 }
 
 .gwa-input-row > :last-child {
-    width: 40px;
+    width: auto;
+}
+
+@media (max-width: 575.98px) {
+    .gwa-table-header,
+    .gwa-input-row {
+        grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr) 34px;
+        gap: 4px;
+    }
+
+    .gwa-table-header {
+        padding-inline: 12px;
+        font-size: .62rem;
+        letter-spacing: 0;
+    }
+
+    #gwaCalcRows {
+        padding-inline: 12px;
+    }
+
+    .gwa-input-row > .custom-select > .cs-trigger {
+        padding-inline: 6px !important;
+        font-size: .66rem;
+        gap: 3px;
+        font-weight: 400 !important;
+    }
+
+    .gwa-input-row > .gwa-col-code {
+        padding-inline: 6px !important;
+        font-size: .75rem !important;
+    }
+
+    .gwa-input-row > .gwa-col-units { padding-inline: 6px !important; }
+
 }
 
 /* Weight-warning badge (always-visible card header, MAJ-04) */
@@ -1284,3 +1345,27 @@
     border: 1px solid rgba(251,191,36,.28);
     margin-top: 3px;
 }
+.grade-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+    color: var(--text-soft);
+}
+
+.grade-empty > i {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+    font-size: 1.25rem;
+}
+
+.grade-empty > strong { color: var(--text); font-size: .96rem; }
+.grade-empty > span { max-width: 30rem; font-size: .82rem; line-height: 1.5; }

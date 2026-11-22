@@ -544,7 +544,7 @@
               "title": "Auditing in a CIS Environment",
               "units": 3,
               "prerequisites": [
-                "AE7"
+                "AE18"
               ],
               "lecHours": 1,
               "labHours": 2
@@ -554,7 +554,7 @@
               "title": "Valuation Concepts and Methods",
               "units": 3,
               "prerequisites": [
-                "AE18"
+                "AE7"
               ],
               "lecHours": 3,
               "labHours": 0
