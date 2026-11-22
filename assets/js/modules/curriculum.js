@@ -52,7 +52,7 @@ function curCard(bodyHtml) {
 function curProgramSelectHtml(selected) {
     return `
         <div class="cur-nav-group cur-program-group">
-            <div class="cur-nav-label"><i class="bi bi-mortarboard"></i> Select Program</div>
+            <div class="cur-nav-label"><i class="bi bi-mortarboard" aria-hidden="true"></i> Select Program</div>
             <select id="curProgramSelect" class="form-select">
                 <option value="">Select a program</option>
                 ${Object.entries(CURRICULA).map(([code, d]) =>
@@ -78,7 +78,7 @@ function renderEmptyState() {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml('')}
         <div class="cur-empty">
-            <i class="bi bi-journal-bookmark"></i>
+            <i class="bi bi-journal-bookmark" aria-hidden="true"></i>
             <p>Select a program above to view its curriculum.</p>
         </div>`);
     bindProgramSelect();
@@ -90,7 +90,7 @@ function renderUnavailable(code, c) {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
         <div class="cur-empty">
-            <i class="bi bi-hourglass-split"></i>
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
             <p>The curriculum for <strong>${escHtml(c.title)}</strong> is not available yet.</p>
         </div>`);
     bindProgramSelect();
@@ -100,10 +100,10 @@ function curPdfActionsHtml(file) {
     return `
         <div class="curv-actions mt-3">
             <a class="curv-btn curv-btn-accent" href="${file}" download>
-                <i class="bi bi-download"></i> Download PDF
+                <i class="bi bi-download" aria-hidden="true"></i> Download PDF
             </a>
             <a class="curv-btn" href="${file}" target="_blank" rel="noopener">
-                <i class="bi bi-box-arrow-up-right"></i> Open PDF
+                <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Open PDF
             </a>
         </div>`;
 }
@@ -115,7 +115,7 @@ function renderPdfOnly(code, c) {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
         <div class="cur-empty">
-            <i class="bi bi-file-earmark-pdf"></i>
+            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
             <p>A structured view isn't available for <strong>${escHtml(c.title)}</strong> yet. Use the buttons below to view the official curriculum PDF.</p>
         </div>
         ${curPdfActionsHtml(c.file)}`);
@@ -201,7 +201,7 @@ async function renderStructuredCurriculum(code, meta) {
     const container = curEl('curriculumContainer');
     container.innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
-        <div class="cur-empty"><i class="bi bi-hourglass-split"></i><p>Loading curriculum…</p></div>`);
+        <div class="cur-empty"><i class="bi bi-hourglass-split" aria-hidden="true"></i><p>Loading curriculum…</p></div>`);
     bindProgramSelect();
 
     let data;
@@ -211,7 +211,7 @@ async function renderStructuredCurriculum(code, meta) {
         container.innerHTML = curCard(`
             ${curProgramSelectHtml(code)}
             <div class="cur-empty">
-                <i class="bi bi-exclamation-triangle"></i>
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
                 <p>Could not load the curriculum data. Please try again later.</p>
             </div>`);
         bindProgramSelect();
@@ -256,7 +256,7 @@ async function renderStructuredCurriculum(code, meta) {
                             <span class="cur-panel-note">Select subjects to add to your active semester</span>
                         </div>
                         <div class="cur-search-wrap cur-search-standalone cur-area-search">
-                            <i class="bi bi-search cur-search-icon"></i>
+                            <i class="bi bi-search cur-search-icon" aria-hidden="true"></i>
                             <input type="text" class="form-control cur-search-input" id="curSearchInput"
                                 placeholder="Search subjects…" value="${escHtml(curViewState.query)}">
                         </div>
@@ -305,14 +305,14 @@ function renderCurNav(data) {
 
     wrap.innerHTML = `
         <div class="cur-nav-grid">
-            <div class="cur-nav-label cur-nav-year-label"><i class="bi bi-calendar-event"></i> Select Year Level</div>
+            <div class="cur-nav-label cur-nav-year-label"><i class="bi bi-calendar-event" aria-hidden="true"></i> Select Year Level</div>
             <div class="cur-pill-row cur-pill-row-years">
                 ${data.years.map(y => `
                     <button type="button" class="cur-pill-btn${y.yearLevel === curViewState.activeYear ? ' active' : ''}"
                         data-year="${y.yearLevel}">${escHtml(y.yearLabel)}</button>
                 `).join('')}
             </div>
-            <div class="cur-nav-label cur-nav-sem-label"><i class="bi bi-calendar2-week"></i> Select Semester</div>
+            <div class="cur-nav-label cur-nav-sem-label"><i class="bi bi-calendar2-week" aria-hidden="true"></i> Select Semester</div>
             <div class="cur-pill-row cur-pill-row-sems">
                 ${activeYear.semesters.map((s, i) => `
                     <button type="button" class="cur-pill-btn cur-pill-btn-sem${(i + 1) === curViewState.activeSemester ? ' active' : ''}"
@@ -356,7 +356,7 @@ function curProgramReminderHtml() {
 // header = code + title + units, body = lec/lab hours + prerequisites.
 function curCourseAccordionHtml(courses, groupId) {
     if (!courses.length) {
-        return `<div class="cur-empty"><i class="bi bi-search"></i><p>No subjects found.</p></div>`;
+        return `<div class="cur-empty"><i class="bi bi-search" aria-hidden="true"></i><p>No subjects found.</p></div>`;
     }
 
     const items = courses.map((c, i) => {
@@ -380,12 +380,12 @@ function curCourseAccordionHtml(courses, groupId) {
                     </span>
                     <span class="cur-course-btn-title">${escHtml(c.title)}</span>
                 </span>
-                <span class="cur-chevron-box"><i class="bi bi-chevron-down"></i></span>
+                <span class="cur-chevron-box"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
             </button>
             <div class="collapse" id="${id}">
                 <div class="cur-course-body">
-                    ${c.lecHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-easel"></i> ${c.lecHours} Lecture hrs</div>` : ''}
-                    ${c.labHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-pc-display"></i> ${c.labHours} Lab hrs</div>` : ''}
+                    ${c.lecHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-easel" aria-hidden="true"></i> ${c.lecHours} Lecture hrs</div>` : ''}
+                    ${c.labHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-pc-display" aria-hidden="true"></i> ${c.labHours} Lab hrs</div>` : ''}
                     <div class="cur-course-detail-req"><span class="cur-req-label">Pre-requisite / Co-requisite</span><div class="cur-card-req-chips">${c.prerequisites.length ? c.prerequisites.map(p => `<span class="cur-badge">${escHtml(p)}</span>`).join('') : '<span class="cur-num">NONE</span>'}</div></div>
                 </div>
             </div>
@@ -450,7 +450,7 @@ function curSelectionSummary(courses) {
 
 function curCourseListBlockHtml(courses, groupId, hasHours) {
     if (!courses.length) {
-        return `<div class="cur-empty"><i class="bi bi-search"></i><p>No subjects found.</p></div>`;
+        return `<div class="cur-empty"><i class="bi bi-search" aria-hidden="true"></i><p>No subjects found.</p></div>`;
     }
     return `
         <div class="d-none d-lg-block">${curCourseTableHtml(courses, hasHours)}</div>
@@ -475,7 +475,7 @@ function renderCurResults(data) {
         if (!groups.length) {
             el.innerHTML = `
                 <div class="cur-empty">
-                    <i class="bi bi-search"></i>
+                    <i class="bi bi-search" aria-hidden="true"></i>
                     <p>No subjects match "<strong>${escHtml(q)}</strong>".</p>
                 </div>`;
             return;
@@ -512,7 +512,7 @@ function renderCurResults(data) {
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curSelectAll()" ${curCanImport() ? '' : 'disabled'}>Select All</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curDeselectAll()" ${curCanImport() ? '' : 'disabled'}>Deselect All</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curClearSelection()" ${curCanImport() ? '' : 'disabled'}>Clear Selection</button>
-                <button type="button" class="btn btn-accent btn-sm" onclick="curAddSelected()" ${summary.count ? '' : 'disabled'}><i class="bi bi-plus-lg me-1"></i>Add Selected</button>
+                <button type="button" class="btn btn-accent btn-sm" onclick="curAddSelected()" ${summary.count ? '' : 'disabled'}><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Selected</button>
             </div>
         </div>
         ${curCourseListBlockHtml(sem.courses, groupId, hasHours)}`;
@@ -787,7 +787,7 @@ function trackerSubjectRowHtml(item) {
     const grade = item.grade.pct !== null ? `${item.grade.pct.toFixed(1)}%` : 'No verified grade';
     const prereqs = (item.course.prerequisites || []).length ? item.course.prerequisites.map(p => `<span class="cur-badge">${escHtml(p)}</span>`).join('') : '<span class="cur-num">NONE</span>';
     const trackerKey = `subject-${item.year.yearLevel}-${item.semesterIndex}-${trackerNormalizeCode(item.course.code)}`;
-    return `<details class="cur-tracker-subject" data-tracker-key="${escHtml(trackerKey)}"><summary><span class="cur-tracker-subject-main"><span class="cur-tracker-subject-code">${escHtml(item.course.code)}</span><span class="cur-tracker-subject-name">${escHtml(item.course.title)}</span></span><span class="cur-tracker-subject-meta"><span class="cur-tracker-subject-units">${item.course.units} units</span>${trackerStatusBadge(item)}</span></summary><div class="cur-tracker-subject-detail"><div><span class="cur-tracker-detail-label">Curriculum</span>${escHtml(item.year.yearLabel)} · ${escHtml(item.semester.semesterLabel)}</div><div><span class="cur-tracker-detail-label">Grade</span>${grade}</div><div><span class="cur-tracker-detail-label">Prerequisites</span><span class="cur-tracker-prereqs">${prereqs}</span></div><p>${escHtml(item.detail)}</p>${trackerStatusEditorHtml(item)}<div class="cur-tracker-links"><a class="btn btn-ghost btn-sm" href="schedule.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-calendar2-week me-1"></i>View Subject</a><a class="btn btn-ghost btn-sm" href="grades.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-mortarboard me-1"></i>View Grade</a></div></div></details>`;
+    return `<details class="cur-tracker-subject" data-tracker-key="${escHtml(trackerKey)}"><summary><span class="cur-tracker-subject-main"><span class="cur-tracker-subject-code">${escHtml(item.course.code)}</span><span class="cur-tracker-subject-name">${escHtml(item.course.title)}</span></span><span class="cur-tracker-subject-meta"><span class="cur-tracker-subject-units">${item.course.units} units</span>${trackerStatusBadge(item)}</span></summary><div class="cur-tracker-subject-detail"><div><span class="cur-tracker-detail-label">Curriculum</span>${escHtml(item.year.yearLabel)} · ${escHtml(item.semester.semesterLabel)}</div><div><span class="cur-tracker-detail-label">Grade</span>${grade}</div><div><span class="cur-tracker-detail-label">Prerequisites</span><span class="cur-tracker-prereqs">${prereqs}</span></div><p>${escHtml(item.detail)}</p>${trackerStatusEditorHtml(item)}<div class="cur-tracker-links"><a class="btn btn-ghost btn-sm" href="schedule.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-calendar2-week me-1" aria-hidden="true"></i>View Subject</a><a class="btn btn-ghost btn-sm" href="grades.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i>View Grade</a></div></div></details>`;
 }
 
 function trackerBreakdownHtml(model, data, activeSemester) {

@@ -23,15 +23,26 @@
         <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
     </button>
 
-    <main class="auth-main" id="main">
-        <div class="auth-card">
+    <main class="auth-main auth-login-main" id="main">
+        <section class="auth-login-intro" aria-label="About QCU Student Planner">
+            <span class="auth-intro-kicker"><span aria-hidden="true"></span> STUDY WITH A PLAN</span>
+            <h1>Make room for<br><span>what matters.</span></h1>
+            <p>Keep your classes, tasks, grades and study materials together in one place.</p>
+            <div class="auth-feature-list" aria-label="Planner features">
+                <span><i class="bi bi-calendar2-week" aria-hidden="true"></i> Class schedule</span>
+                <span><i class="bi bi-check2-square" aria-hidden="true"></i> Tasks and deadlines</span>
+                <span><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Academic progress</span>
+            </div>
+        </section>
+
+        <div class="auth-card auth-login-card">
             <a class="auth-brand" href="login.html">
-                <span class="dot" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+                <span class="dot" aria-hidden="true"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
                 <span>QCU Student Planner</span>
             </a>
 
-            <h1 class="auth-title">Welcome back</h1>
-            <p class="auth-sub">Sign in using your registered QCU student Google account to access your academic planner.</p>
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-sub">Access your planner with your QCU student Google account.</p>
             <div class="auth-alert error" data-alert role="alert" hidden></div>
 
             <button type="button" class="btn btn-google auth-submit" data-google-signin>
@@ -44,12 +55,18 @@
                 Continue with Google
             </button>
 
+            <p class="auth-consent-note">
+                By continuing with Google, you agree to our
+                <a href="../../pages/app/legal-policies.html#terms-of-service">Terms of Service</a>
+                and acknowledge our
+                <a href="../../pages/app/legal-policies.html#privacy-policy">Privacy Policy</a>.
+            </p>
+
             <p class="auth-hint">
-                <span class="auth-hint-label">Use your QCU student email</span>
-                Sign in with the Google account registered under <code class="auth-inline-code">lastname.firstname.middlename@gmail.com</code>. Other Google accounts won't be accepted, and new accounts need admin approval before access is granted.
+                <span class="auth-hint-label">Account access</span>
+                Use your registered QCU student Google account, usually <code class="auth-inline-code">lastname.firstname.middlename@gmail.com</code>. New accounts require administrator approval.
             </p>
         </div>
-        <p class="auth-note">Your sign-in is verified securely and your information is kept private.</p>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>

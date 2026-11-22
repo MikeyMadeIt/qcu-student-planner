@@ -204,3 +204,26 @@ with a single shared `university_events` table:
   (`assets/js/modules/calendar.js`) now fetches published events directly
   from this table (read-only — no create/edit/delete controls) instead of
   reading `localStorage`.
+
+## 7. QCU News & Announcements cache
+
+Apply `0030_qcu_news.sql` and deploy `sync-qcu-news`. The function fetches only
+public WordPress REST metadata from QCU (two pages per category during scheduled
+runs, one page for normal page visits, up to five for a manual refresh), upserts
+by the original article URL, and never deletes cached rows on source failures.
+Approved accounts can select cached records; only the function's service-role
+client can write. The database lock prevents overlapping runs. Automatic page
+visits may synchronize at most once per 30 minutes. Reloading the News page
+requests a refresh, with a server-enforced five-minute cooldown and database
+lock to prevent repeated or simultaneous source fetches.
+
+Set `ALLOWED_ORIGIN` to the exact deployed app origins as described above, and
+set a random `QCU_NEWS_CRON_SECRET` Edge Function secret. The function uses this
+secret to distinguish scheduled jobs from authenticated user refreshes. To
+enable hourly automatic synchronization, configure a Supabase Scheduled
+Function (or `pg_cron`/`pg_net` job) to POST to
+`https://<project-ref>.supabase.co/functions/v1/sync-qcu-news` every hour with
+headers `Content-Type: application/json` and `x-cron-secret: <configured secret>`
+and body `{}`. The repository has no active scheduler configuration, so this
+dashboard/project-level schedule must be enabled after deployment. If a QCU
+request fails, the function records the failure and retains all prior articles.

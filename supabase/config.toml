@@ -4,6 +4,10 @@
 # working directory name when running `supabase init`.
 project_id = "qcu-student-planner"
 
+[functions.sync-qcu-news]
+# The function verifies either an approved user's JWT or the private cron secret.
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.
