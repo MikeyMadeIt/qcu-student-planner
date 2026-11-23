@@ -26,10 +26,7 @@ const NAV_ITEMS = [
     { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
     { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
     { href: 'tickets.html', icon: 'bi-life-preserver', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
-    { href: 'email.html', icon: 'bi-envelope', label: 'Email Center', key: 'admin-email', base: 'admin', soon: true },
-    { href: 'reports.html', icon: 'bi-bar-chart-line', label: 'Reports & Analytics', key: 'admin-reports', base: 'admin', soon: true },
     { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
-    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'admin-settings', base: 'admin', soon: true },
 ];
 const THEME_OPTIONS = [
     { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
@@ -65,10 +62,29 @@ const PAGE_SECTIONS = {
     'admin-rejected': 'User Management',
     'admin-inbox': 'Communications',
     'admin-tickets': 'Communications',
-    'admin-email': 'Communications',
-    'admin-reports': 'System',
     'admin-activity': 'System',
-    'admin-settings': 'System',
+};
+const STUDENT_NAV_GROUPS = [
+    { label: 'Communication', keys: ['inbox', 'notifications'] },
+    { label: 'Overview', keys: ['dashboard'] },
+    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
+    { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
+    { label: 'University', keys: ['news'] },
+    { label: 'Personalization', keys: ['wallpaper'] },
+    { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
+];
+const ADMIN_NAV_GROUPS = [
+    { label: 'Overview', keys: ['admin-dashboard'] },
+    { label: 'Events', keys: ['admin-university-events'] },
+    { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
+    { label: 'Communications', keys: ['admin-inbox', 'admin-tickets'] },
+    { label: 'System', keys: ['admin-activity'] },
+];
+const NAV_GROUP_ICONS = {
+    Communication: 'bi-chat-dots', Communications: 'bi-chat-dots', Overview: 'bi-grid-1x2',
+    Academics: 'bi-mortarboard', 'AI Tools': 'bi-stars', University: 'bi-bank',
+    Personalization: 'bi-palette', 'Safety & Support': 'bi-shield-check',
+    Events: 'bi-calendar-event', 'User Management': 'bi-people', System: 'bi-cpu'
 };
 // Sign out
 async function signOutAndRedirect(button) {
@@ -159,6 +175,10 @@ function syncThemeOptions() {
     document.querySelectorAll('[data-theme-options] .theme-option').forEach(btn => {
         btn.setAttribute('aria-checked', String(btn.dataset.themeValue === currentTheme));
     });
+    const option = THEME_OPTIONS.find(item => item.value === currentTheme) || THEME_OPTIONS[0];
+    document.querySelectorAll('[data-mobile-theme-icon]').forEach(icon => {
+        icon.className = `bi ${option.icon}`;
+    });
 }
 function initThemeOptions() {
     document.querySelectorAll('[data-theme-options]').forEach(el => {
@@ -175,21 +195,43 @@ function initThemeOptions() {
     });
 }
 
+function initMobileThemeMenu() {
+    const wrapper = document.getElementById('mobileThemeMenu');
+    const trigger = document.getElementById('mobileThemeTrigger');
+    const panel = document.getElementById('mobileThemePanel');
+    if (!wrapper || !trigger || !panel || trigger.dataset.wired) return;
+    trigger.dataset.wired = '1';
+    const setOpen = open => {
+        panel.hidden = !open;
+        trigger.setAttribute('aria-expanded', String(open));
+    };
+    trigger.addEventListener('click', event => {
+        event.stopPropagation();
+        setOpen(panel.hidden);
+    });
+    document.addEventListener('click', event => {
+        if (!panel.hidden && !wrapper.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('sp:themechange', syncThemeOptions);
+}
+
 // Sidebar toggle (header)
 function toggleSidebar() {
-    const drawer = document.getElementById('navDrawer');
-    if (drawer && drawer.classList.contains('is-open'))
-        closeNavDrawer();
-    else
-        openNavDrawer();
+    const menu = document.getElementById('mobileAppNavMenu');
+    if (menu && menu.classList.contains('is-open')) closeMobileAppNavMenu();
+    else openMobileAppNavMenu();
 }
 function syncSidebarToggleIcon(isOpen) {
     document.querySelectorAll('[data-sidebar-toggle]').forEach(btn => {
         btn.setAttribute('aria-expanded', String(isOpen));
         btn.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
         const icon = btn.querySelector('i');
-        if (icon)
-            icon.className = isOpen ? 'bi bi-layout-sidebar-reverse' : 'bi bi-layout-sidebar';
+        if (icon) {
+            const isMobileApp = document.body.classList.contains('mobile-nav-app');
+            icon.className = isMobileApp
+                ? (isOpen ? 'bi bi-x-lg' : 'bi bi-list')
+                : (isOpen ? 'bi bi-layout-sidebar-reverse' : 'bi bi-layout-sidebar');
+        }
     });
 }
 function wireSidebarToggles() {
@@ -259,16 +301,24 @@ function markAllNotificationsRead() {
 function updateNotificationBadge() {
     const trigger = document.getElementById('notifTrigger');
     const badge = document.getElementById('notificationUnreadCount');
-    if (!trigger || !badge) return;
     try {
         const count = getUnreadNotificationCount();
-        badge.textContent = count > 99 ? '99+' : String(count);
-        badge.hidden = count === 0;
-        trigger.setAttribute('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
+        const label = count > 99 ? '99+' : String(count);
+        document.querySelectorAll('[data-notification-badge]').forEach(item => {
+            item.textContent = String(count);
+            item.setAttribute('aria-label', `${count} unread notifications`);
+            item.hidden = count === 0;
+        });
+        if (badge) {
+            badge.textContent = label;
+            badge.hidden = count === 0;
+        }
+        if (trigger) trigger.setAttribute('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
     } catch (error) {
         console.error('Unable to load notification read states.', error);
-        badge.hidden = true;
-        trigger.setAttribute('aria-label', 'Notifications, status unavailable');
+        document.querySelectorAll('[data-notification-badge]').forEach(item => { item.hidden = true; });
+        if (badge) badge.hidden = true;
+        if (trigger) trigger.setAttribute('aria-label', 'Notifications, status unavailable');
     }
 }
 
@@ -318,45 +368,79 @@ function renderInboxPanelItems(rows, icons, categoryBadge) {
 }
 
 // Fetches the signed-in student's real inbox preview + unread count from Supabase
-async function refreshInboxPreview() {
+let lastInboxBadgeRefresh = 0;
+async function refreshInboxPreview({ refreshList = true, throttle = false } = {}) {
+    const now = Date.now();
+    if (throttle && now - lastInboxBadgeRefresh < 4000) return;
+    lastInboxBadgeRefresh = now;
     const badge = document.getElementById('inboxUnreadCount');
     const body = document.querySelector('#inboxPanel .header-panel-body');
-    if (!badge || !body) return;
 
     try {
         const { StudentService } = await import('../services/student-service.js');
         const { MESSAGE_CATEGORY_ICONS, messageCategoryBadge } = await import('../modules/comms-shared.js');
-        const [countResult, listResult] = await Promise.all([
-            StudentService.getUnreadCount(),
-            StudentService.listInboxMessages({ pageSize: 5 }),
-        ]);
+        const requests = [StudentService.getUnreadCount()];
+        if (body && refreshList) requests.push(StudentService.listInboxMessages({ pageSize: 5 }));
+        const [countResult, listResult] = await Promise.all(requests);
 
         if (!countResult.ok) {
             console.error('Inbox unread count failed:', countResult.message);
-            badge.hidden = true;
+            if (badge) badge.hidden = true;
+            document.querySelectorAll('[data-inbox-badge]').forEach(item => { item.hidden = true; });
             document.querySelectorAll('[data-inbox-dot]').forEach(d => { d.hidden = true; });
-            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(countResult.message || '')}</span></div>`;
+            if (body) body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(countResult.message || '')}</span></div>`;
             return;
         }
 
         const count = countResult.data;
-        badge.textContent = count > 99 ? '99+' : String(count);
-        badge.hidden = count === 0;
+        const label = count > 99 ? '99+' : String(count);
+        if (badge) {
+            badge.textContent = label;
+            badge.hidden = count === 0;
+        }
+        document.querySelectorAll('[data-inbox-badge]').forEach(item => {
+            item.textContent = String(count);
+            item.setAttribute('aria-label', `${count} unread messages`);
+            item.hidden = count === 0;
+        });
         document.querySelectorAll('[data-inbox-dot]').forEach(d => { d.hidden = count === 0; });
-        document.getElementById('inboxTrigger').setAttribute('aria-label', count ? `Inbox, ${count} unread` : 'Inbox');
+        const trigger = document.getElementById('inboxTrigger');
+        if (trigger) trigger.setAttribute('aria-label', count ? `Inbox, ${count} unread` : 'Inbox');
 
-        if (listResult.ok) {
+        if (body && listResult && listResult.ok) {
             body.innerHTML = renderInboxPanelItems(listResult.data.rows, MESSAGE_CATEGORY_ICONS, messageCategoryBadge);
-        } else {
+        } else if (body && listResult) {
             console.error('Inbox preview list failed:', listResult.message);
             body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(listResult.message || '')}</span></div>`;
         }
     } catch (error) {
         console.error('Could not load inbox preview.', error);
-        badge.hidden = true;
-        if (body.innerHTML.includes('bi-hourglass-split')) {
+        if (badge) badge.hidden = true;
+        document.querySelectorAll('[data-inbox-badge]').forEach(item => { item.hidden = true; });
+        if (body && body.innerHTML.includes('bi-hourglass-split')) {
             body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml((error && error.message) || '')}</span></div>`;
         }
+    }
+}
+
+let inboxBadgeChannelStarted = false;
+async function setupInboxBadgeRealtime() {
+    if (inboxBadgeChannelStarted) return;
+    inboxBadgeChannelStarted = true;
+    try {
+        const { getSupabase } = await import('./supabase-client.js');
+        const supabase = getSupabase();
+        const { data } = await supabase.auth.getSession();
+        const userId = data && data.session && data.session.user && data.session.user.id;
+        if (!userId) return;
+        supabase.channel(`student-inbox-nav-${userId}`)
+            .on('postgres_changes', {
+                event: '*', schema: 'public', table: 'admin_message_recipients',
+                filter: `student_id=eq.${userId}`,
+            }, () => refreshInboxPreview({ refreshList: false }))
+            .subscribe();
+    } catch (error) {
+        // The focus/visibility refresh remains available when realtime is unavailable.
     }
 }
 
@@ -373,12 +457,29 @@ function renderAdminShellBar(activeKey, admin) {
     bar.id = 'shellBar';
     bar.className = 'shell-bar';
     bar.innerHTML = `
+        <a class="mobile-shell-brand" href="../admin/dashboard.html" aria-label="QCU Planner Admin home">
+            <span class="dot"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+            <span>Planner Admin</span>
+        </a>
         <div class="shell-bar-left">
             <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
-                aria-expanded="false" aria-controls="navDrawer" aria-label="Open navigation">
+                aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
                 <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
             </button>
             <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
+        </div>
+        <div class="mobile-shell-actions">
+            <div class="mobile-theme-menu" id="mobileThemeMenu">
+                <button type="button" class="mobile-shell-icon-btn" id="mobileThemeTrigger" aria-haspopup="true"
+                    aria-expanded="false" aria-controls="mobileThemePanel" aria-label="Choose theme">
+                    <i class="bi bi-moon-stars" data-mobile-theme-icon aria-hidden="true"></i>
+                </button>
+                <div class="mobile-theme-panel" id="mobileThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
+            </div>
+            <button type="button" class="shell-menu-btn mobile-nav-trigger" data-sidebar-toggle aria-haspopup="true"
+                aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
         </div>
         <div class="shell-bar-right">
             <span class="role-pill js-admin-role" id="shellRolePill"${roleLabel ? '' : ' hidden'}>${escHtml(roleLabel)}</span>
@@ -400,7 +501,6 @@ function renderAdminShellBar(activeKey, admin) {
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
                     </div>
                     <div class="profile-panel-section">
-                        <a class="profile-item" role="menuitem" href="settings.html"><i class="bi bi-sliders" aria-hidden="true"></i>Settings</a>
                         <button type="button" class="profile-item profile-item-btn js-admin-logout" role="menuitem"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
                     </div>
                 </div>
@@ -408,6 +508,7 @@ function renderAdminShellBar(activeKey, admin) {
         </div>`;
     main.insertBefore(bar, main.firstChild);
     initHeaderPanel(bar, 'profileTrigger', 'profilePanel', 'profileMenu');
+    initMobileThemeMenu();
 }
 
 function renderShellBar(activeKey) {
@@ -422,12 +523,29 @@ function renderShellBar(activeKey) {
     bar.id = 'shellBar';
     bar.className = 'shell-bar';
     bar.innerHTML = `
+        <a class="mobile-shell-brand" href="../app/dashboard.html" aria-label="QCU Student Planner home">
+            <span class="dot"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
+            <span>QCU Student Planner</span>
+        </a>
         <div class="shell-bar-left">
             <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
-                aria-expanded="false" aria-controls="navDrawer" aria-label="Open navigation">
+                aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
                 <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
             </button>
             <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
+        </div>
+        <div class="mobile-shell-actions">
+            <div class="mobile-theme-menu" id="mobileThemeMenu">
+                <button type="button" class="mobile-shell-icon-btn" id="mobileThemeTrigger" aria-haspopup="true"
+                    aria-expanded="false" aria-controls="mobileThemePanel" aria-label="Choose theme">
+                    <i class="bi bi-moon-stars" data-mobile-theme-icon aria-hidden="true"></i>
+                </button>
+                <div class="mobile-theme-panel" id="mobileThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
+            </div>
+            <button type="button" class="shell-menu-btn mobile-nav-trigger" data-sidebar-toggle aria-haspopup="true"
+                aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
         </div>
         <div class="shell-bar-right">
             <div class="header-panel-wrap" id="notifMenu">
@@ -492,7 +610,14 @@ function renderShellBar(activeKey) {
     });
     window.addEventListener('planner:notifications-changed', refreshNotificationPreview);
     window.addEventListener('planner:tasks-changed', refreshNotificationPreview);
+    window.addEventListener('planner:inbox-changed', () => refreshInboxPreview({ refreshList: false }));
+    window.addEventListener('focus', () => refreshInboxPreview({ refreshList: false, throttle: true }));
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshInboxPreview({ refreshList: false, throttle: true });
+    });
     window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
+    setupInboxBadgeRealtime();
+    initMobileThemeMenu();
 }
 
 function refreshShellSemesterCard() {
@@ -664,169 +789,178 @@ function wireModalDefaults() {
 }
 
 function renderShell(activeKey, admin) {
+    const softNavigation = window.__spSoftNavigating === true || window.__spSoftRouteActive === true;
     const isAdminArea = String(activeKey).startsWith('admin-');
+    document.body.classList.add('mobile-nav-app');
     document.body.classList.toggle('student-app', !isAdminArea);
     document.body.classList.toggle('admin-app', isAdminArea);
     if (isAdminArea) renderAdminShellBar(activeKey, admin);
     else renderShellBar(activeKey);
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = softNavigation ? null : document.getElementById('sidebar');
     if (sidebar) {
-        const sidebarGroups = isAdminArea
-            ? [
-                { label: 'Overview', keys: ['admin-dashboard'] },
-                { label: 'Events', keys: ['admin-university-events'] },
-                { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
-                { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
-                { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
-            ]
-            : [
-                { label: 'Communication', keys: ['inbox', 'notifications'] },
-                { label: 'Overview', keys: ['dashboard'] },
-                { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
-                { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
-                { label: 'University', keys: ['news'] },
-                { label: 'Personalization', keys: ['wallpaper'] },
-                { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] },
-            ];
+        const sidebarGroups = isAdminArea ? ADMIN_NAV_GROUPS : STUDENT_NAV_GROUPS;
         const itemMap = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n]));
         const sidebarSettings = (typeof DB !== 'undefined') ? DB.getSettings() : {};
         const name = (sidebarSettings.name || '').trim() || 'Student';
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
         const brandIcon = isAdminArea ? 'bi-shield-lock' : 'bi-mortarboard';
+        let hasMenuHeading = false;
         let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
-        sidebarGroups.forEach(g => {
-            if (g.label)
-                sidebarHtml += `<div class="nav-group-label" role="heading" aria-level="2">${g.label}</div>`;
+        sidebarGroups.forEach((g, index) => {
+            const groupId = `sidebarGroup${index}`;
+            const directGroup = ['Communication', 'Communications', 'Overview'].includes(g.label);
+            const expanded = g.keys.includes(activeKey);
+            if (!directGroup && !hasMenuHeading) {
+                sidebarHtml += `<div class="sidebar-section-label">Menu</div>`;
+                hasMenuHeading = true;
+            }
+            sidebarHtml += `<section class="sidebar-nav-group">
+                ${directGroup
+                    ? `<div class="sidebar-group-heading"><span>${escHtml(g.label || 'Navigation')}</span></div>`
+                    : `<button type="button" class="nav-group-toggle" aria-expanded="${expanded}" aria-controls="${groupId}">
+                        <i class="bi ${NAV_GROUP_ICONS[g.label] || 'bi-folder'} sidebar-group-icon" aria-hidden="true"></i><span>${escHtml(g.label || 'Navigation')}</span><i class="bi bi-chevron-down sidebar-group-chevron" aria-hidden="true"></i>
+                    </button>`}
+                <div class="sidebar-group-items${directGroup ? '' : ' sidebar-tree'}" id="${groupId}"${directGroup || expanded ? '' : ' hidden'}>`;
             g.keys.forEach(k => {
                 const n = itemMap[k];
                 if (!n)
                     return;
                 const isActive = n.key === activeKey;
-                const badgeHtml = n.soon ? `<span class="nav-pill-soon">Soon</span>`
-                    : isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
+                const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
                     : n.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${n.soon ? ' nav-link-soon' : ''}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}><i class="bi ${n.icon}" aria-hidden="true"></i><span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
+                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${directGroup ? '' : ' sidebar-tree-link'}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}>${directGroup ? `<i class="bi ${n.icon}" aria-hidden="true"></i>` : ''}<span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
+            sidebarHtml += `</div></section>`;
+            if (directGroup) sidebarHtml += `<div class="sidebar-group-divider" aria-hidden="true"></div>`;
         });
         sidebarHtml += `</nav><div class="sidebar-bottom">`;
 
         if (isAdminArea) {
-            sidebarHtml += `<div class="sidebar-utility">
-      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+            const adminName = (admin && admin.full_name) || 'Administrator';
+            const adminInitial = escHtml(adminName.charAt(0).toUpperCase() || 'A');
+            sidebarHtml += `<div class="sidebar-theme-row"><span>Theme</span><div class="theme-switch" data-theme-switch role="radiogroup" aria-label="Theme"></div></div>
+    <div class="sidebar-profile sidebar-admin-profile">
+      <span class="profile-avatar js-admin-avatar js-profile-avatar" aria-hidden="true">${adminInitial}</span>
+      <div class="sidebar-profile-text">
+        <div class="sidebar-profile-name js-admin-name" id="admSidebarName">${escHtml(adminName)}</div>
+        <div class="sidebar-profile-sub">${escHtml((admin && admin.role ? admin.role.replace(/_/g, ' ') : 'Administrator'))}</div>
+      </div>
     </div>
-    <div class="sidebar-user js-admin-name" id="admSidebarName">Administrator</div>`;
+    <div class="sidebar-utility">
+      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
+    </div>`;
         } else {
-            sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
+            sidebarHtml += `<div class="sidebar-theme-row"><span>Theme</span><div class="theme-switch" data-theme-switch role="radiogroup" aria-label="Theme"></div></div>
+    <div class="sidebar-profile" id="sidebarProfile">
       <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
         <div class="sidebar-profile-name" id="sidebarProfileName">${escHtml(name)}</div>
         <div class="sidebar-profile-sub" id="sidebarUserName">Signed in on this device</div>
       </div>
-      <button type="button" class="sidebar-profile-more" id="sidebarProfileMoreBtn"
-        aria-haspopup="true" aria-expanded="false" aria-controls="sidebarProfilePanel" aria-label="Profile options">
-        <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-      </button>
+    </div>`;
+            sidebarHtml += `<div class="sidebar-utility">
+      <button type="button" class="nav-link sidebar-logout-btn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
     </div>`;
         }
         sidebarHtml += `</div>`;
         sidebar.innerHTML = sidebarHtml;
     }
-    ensureNavDrawer(activeKey);
-    if (!isAdminArea) {
-        ensureSidebarProfileMenu();
-        ensureDrawerProfileMenu();
+    if (!softNavigation) ensureMobileAppNavMenu(activeKey, admin);
+    if (!isAdminArea && !softNavigation) {
+        updateNotificationBadge();
     }
+    if (!softNavigation) wireDesktopSidebarGroups(sidebar);
     initThemeSwitches();
     initThemeOptions();
-    wireSidebarToggles();
+    syncThemeOptions();
+    if (!softNavigation) wireSidebarToggles();
     wireModalDefaults();
-    hydrateProfileIdentity();
-    if (isAdminArea) refreshAdminNavBadges();
+    if (!softNavigation) hydrateProfileIdentity();
+    if (isAdminArea && !softNavigation) refreshAdminNavBadges();
     // Upcoming Classes / Task Reminders / Low Attendance Warning (Settings >
     // Notifications): started once per page load from here, since every
     // signed-in app page calls renderShell(). See notification-engine.js
     // for why this runs on a foreground timer instead of real push.
-    if (!isAdminArea && typeof DB !== 'undefined' && window.ReminderEngine) {
+    if (!softNavigation && !isAdminArea && typeof DB !== 'undefined' && window.ReminderEngine) {
         if (typeof DB.whenCloudReady === 'function') DB.whenCloudReady(function () { window.ReminderEngine.start(); });
         else window.ReminderEngine.start();
     }
+    initDesktopMainScrollFade(document.querySelector('.main-content'));
+    // Keep the existing document routes directly usable while enabling
+    // shell-preserving navigation for signed-in app pages.
+    import('./soft-navigation.js').then(({ initSoftNavigation }) => initSoftNavigation()).catch(error => {
+        console.error('Could not initialize app navigation.', error);
+    });
 }
 
-// Footer profile overflow menu (Logout only) — desktop sidebar + mobile drawer
-function ensureFooterProfileMenu(triggerId, panelId) {
-    const trigger = document.getElementById(triggerId);
-    if (!trigger) {
-        const stalePanel = document.getElementById(panelId);
-        if (stalePanel) stalePanel.hidden = true;
-        return;
-    }
-    let panel = document.getElementById(panelId);
-    if (!panel) {
-        panel = document.createElement('div');
-        panel.id = panelId;
-        panel.className = 'profile-panel sidebar-profile-panel';
-        panel.setAttribute('role', 'menu');
-        panel.setAttribute('aria-label', 'Profile options');
-        panel.hidden = true;
-        document.body.appendChild(panel);
-    }
-    panel.innerHTML = `<button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>`;
+function initDesktopMainScrollFade(main) {
+    if (!main || main.dataset.desktopScrollFadeWired) return;
+    main.dataset.desktopScrollFadeWired = 'true';
+    let frame = 0;
+    const schedule = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+            frame = 0;
+            const desktop = window.matchMedia('(min-width: 992px)').matches;
+            document.body.classList.toggle('desktop-main-overflow', desktop && main.scrollHeight > main.clientHeight + 1);
+        });
+    };
+    let resizeObserver;
+    const observeContent = () => {
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            [...main.children].forEach(child => resizeObserver.observe(child));
+        }
+        schedule();
+    };
+    if (window.ResizeObserver) resizeObserver = new ResizeObserver(schedule);
+    const mutationObserver = new MutationObserver(observeContent);
+    mutationObserver.observe(main, { childList: true, subtree: true, characterData: true, attributes: true });
+    observeContent();
+    window.addEventListener('resize', schedule, { passive: true });
+    main.addEventListener('load', schedule, true);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+}
 
-    function closeOthers() {
-        document.querySelectorAll('.header-panel, .profile-panel').forEach(p => {
-            if (p.id !== panelId && !p.hidden) {
-                p.hidden = true;
-                const t = document.querySelector('[aria-controls="' + p.id + '"]');
-                if (t) t.setAttribute('aria-expanded', 'false');
-            }
+function wireDesktopSidebarGroups(sidebar) {
+    if (!sidebar) return;
+    const activeLink = sidebar.querySelector('.nav-link.active');
+    const activeGroup = activeLink && activeLink.closest('.sidebar-nav-group');
+    if (activeGroup) {
+        sidebar.querySelectorAll('.sidebar-nav-group').forEach(group => {
+            const toggle = group.querySelector('.nav-group-toggle');
+            const items = group.querySelector('.sidebar-group-items');
+            if (!toggle || !items) return;
+            const expanded = group === activeGroup;
+            toggle.setAttribute('aria-expanded', String(expanded));
+            items.hidden = !expanded;
         });
     }
-    function positionPanel() {
-        const rect = trigger.getBoundingClientRect();
-        const panelRect = panel.getBoundingClientRect();
-        const gutter = 8;
-        const spaceAbove = rect.top;
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const openUp = spaceAbove >= (panelRect.height + gutter) || spaceAbove >= spaceBelow;
-        const top = openUp
-            ? Math.max(gutter, rect.top - panelRect.height - 8)
-            : Math.min(window.innerHeight - panelRect.height - gutter, rect.bottom + 8);
-        let left = rect.right - panelRect.width;
-        left = Math.min(Math.max(left, gutter), window.innerWidth - panelRect.width - gutter);
-        panel.style.top = `${top}px`;
-        panel.style.left = `${left}px`;
-    }
-    function setOpen(isOpen) {
-        if (isOpen) closeOthers();
-        panel.hidden = !isOpen;
-        trigger.setAttribute('aria-expanded', String(isOpen));
-        if (isOpen) positionPanel();
-    }
-    trigger.addEventListener('click', event => {
-        event.stopPropagation();
-        setOpen(panel.hidden);
-    });
-    window.addEventListener('resize', () => { if (!panel.hidden) positionPanel(); });
-    document.addEventListener('click', event => {
-        if (!panel.hidden && !trigger.contains(event.target) && !panel.contains(event.target))
-            setOpen(false);
-    });
-    document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && !panel.hidden) {
-            setOpen(false);
-            trigger.focus();
+    if (sidebar.dataset.groupsWired) return;
+    sidebar.dataset.groupsWired = 'true';
+    sidebar.addEventListener('click', event => {
+        const toggle = event.target.closest('.nav-group-toggle');
+        if (!toggle) return;
+        const group = toggle.closest('.sidebar-nav-group');
+        const items = group && group.querySelector('.sidebar-group-items');
+        if (!items) return;
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        if (!expanded) {
+            sidebar.querySelectorAll('.sidebar-nav-group').forEach(otherGroup => {
+                const otherToggle = otherGroup.querySelector('.nav-group-toggle');
+                const otherItems = otherGroup.querySelector('.sidebar-group-items');
+                if (otherGroup !== group && otherToggle && otherItems) {
+                    otherToggle.setAttribute('aria-expanded', 'false');
+                    otherItems.hidden = true;
+                }
+            });
         }
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        items.hidden = expanded;
     });
 }
-function ensureSidebarProfileMenu() {
-    ensureFooterProfileMenu('sidebarProfileMoreBtn', 'sidebarProfilePanel');
-}
-function ensureDrawerProfileMenu() {
-    ensureFooterProfileMenu('drawerProfileMoreBtn', 'drawerProfilePanel');
-}
-
 // Real open-ticket count on the "Support Tickets" sidebar entry (desktop sidebar
 async function refreshAdminNavBadges() {
     const badges = document.querySelectorAll('[data-admin-badge="admin-tickets"]');
@@ -889,135 +1023,111 @@ async function hydrateProfileIdentity() {
         if (greetEl && fullName)
             greetEl.dataset.userName = fullName;
 
-        document.querySelectorAll('#sidebarUserName, #drawerUserEmail, #topbarUserEmail, #shellAdminEmail').forEach(el => {
+        document.querySelectorAll('#sidebarUserName, #mobileProfileEmail, #topbarUserEmail, #shellAdminEmail').forEach(el => {
             el.textContent = email;
             el.title = email;
         });
 
         const initial = escHtml(((fullName || email).charAt(0) || 'S').toUpperCase());
         if (fullName) {
-            document.querySelectorAll('#sidebarProfileName, #drawerProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; el.title = fullName; });
+            document.querySelectorAll('#sidebarProfileName, #mobileProfileName, #topbarProfileName').forEach(el => { el.textContent = fullName; el.title = fullName; });
             document.querySelectorAll('.js-admin-fullname').forEach(el => { el.textContent = fullName; el.title = fullName; });
         }
         document.querySelectorAll('.js-profile-avatar').forEach(el => setAvatarPhoto(el, photoUrl, initial));
     } catch (error) {
     }
 }
-const DRAWER_GROUPS = [
-    { label: 'Communication', keys: ['inbox', 'notifications'] },
-    { label: 'Overview', keys: ['dashboard'] },
-    { label: 'Academics', keys: ['schedule', 'tasks', 'calendar', 'grades', 'attendance', 'notes', 'curriculum'] },
-    { label: 'AI Tools', keys: ['ai-quiz-maker', 'ai-flashcard-maker', 'ai-study-assistant'] },
-    { label: 'University', keys: ['news'] },
-    { label: 'Personalization', keys: ['wallpaper'] },
-    { label: 'Safety & Support', keys: ['settings', 'help', 'report', 'legal-policies'] }
-];
-const ADMIN_DRAWER_GROUPS = [
-    { label: 'Overview', keys: ['admin-dashboard'] },
-    { label: 'Events', keys: ['admin-university-events'] },
-    { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
-    { label: 'Communications', keys: ['admin-inbox', 'admin-tickets', 'admin-email'] },
-    { label: 'System', keys: ['admin-reports', 'admin-activity', 'admin-settings'] },
-];
-function ensureNavDrawer(activeKey) {
-    const existing = document.getElementById('navDrawer');
-    if (existing)
-        existing.remove();
+function ensureMobileAppNavMenu(activeKey, admin) {
+    const existing = document.getElementById('mobileAppNavMenu');
+    if (existing) existing.remove();
     const isAdminArea = String(activeKey).startsWith('admin-');
-    const groups = isAdminArea ? ADMIN_DRAWER_GROUPS : DRAWER_GROUPS;
-    const itemMap = Object.fromEntries(NAV_ITEMS.map(item => [item.key, item]));
+    const groups = isAdminArea ? ADMIN_NAV_GROUPS : STUDENT_NAV_GROUPS;
+    const itemMap = Object.fromEntries(NAV_ITEMS.filter(item => item.base === (isAdminArea ? 'admin' : 'app')).map(item => [item.key, item]));
     const groupsHtml = groups.map(group => `
-        <div class="drawer-group">
-            <div class="drawer-group-label">${group.label}</div>
-            ${group.keys.map(key => {
-        const item = itemMap[key];
-        const isActive = key === activeKey;
-        const badgeHtml = item.soon ? `<span class="nav-pill-soon">Soon</span>`
-            : isAdminArea ? `<span class="nav-badge" data-admin-badge="${item.key}" hidden></span>`
-            : item.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-        return `<a class="drawer-link${isActive ? ' active' : ''}${item.soon ? ' drawer-link-soon' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
-                    <i class="bi ${item.icon}" aria-hidden="true"></i>
-                    <span>${item.label}</span>${badgeHtml}
-                </a>`;
-    }).join('')}
-        </div>`).join('');
-    const sidebarSettingsForDrawer = (!isAdminArea && typeof DB !== 'undefined') ? DB.getSettings() : {};
-    const drawerName = (sidebarSettingsForDrawer.name || '').trim() || 'Student';
-    const drawerInitial = escHtml(drawerName.charAt(0).toUpperCase() || 'S');
-    const bottomHtml = isAdminArea ? `
-            <div class="drawer-group drawer-bottom">
-                <button type="button" class="drawer-link drawer-link-danger js-admin-logout" id="admDrawerLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
-            </div>` : `
-            <div class="drawer-profile" id="drawerProfile">
-                <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="drawerProfileAvatar">${drawerInitial}</span>
-                <div class="drawer-profile-text">
-                    <div class="drawer-profile-name" id="drawerProfileName">${escHtml(drawerName)}</div>
-                    <div class="drawer-profile-sub" id="drawerUserEmail">Signed in on this device</div>
-                </div>
-                <button type="button" class="drawer-profile-more" id="drawerProfileMoreBtn"
-                    aria-haspopup="true" aria-expanded="false" aria-controls="drawerProfilePanel" aria-label="Profile options">
-                    <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                </button>
-            </div>`;
-    const drawer = document.createElement('div');
-    drawer.id = 'navDrawer';
-    drawer.className = 'nav-drawer';
-    drawer.hidden = true;
-    drawer.innerHTML = `
-        <div class="nav-drawer-backdrop" data-drawer-close></div>
-        <aside class="nav-drawer-panel" role="dialog" aria-modal="true" aria-label="Site navigation">
-            <div class="nav-drawer-head">
-                <span class="shell-brand-inline">
-                    <span class="dot"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
-                    <span>QCU Planner</span>
-                </span>
-                <button type="button" class="drawer-close" data-drawer-close aria-label="Close navigation">
-                    <i class="bi bi-layout-sidebar-reverse" aria-hidden="true"></i>
-                </button>
+        <section class="mobile-nav-group" aria-labelledby="mobile-nav-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">
+            <h2 class="mobile-nav-heading" id="mobile-nav-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}">${escHtml(group.label)}</h2>
+            <div class="mobile-nav-grid">
+                ${group.keys.map(key => {
+            const item = itemMap[key];
+            if (!item) return '';
+            const isActive = key === activeKey;
+            const badge = isAdminArea
+                ? key === 'admin-tickets' ? '<span class="nav-badge" data-admin-badge="admin-tickets" hidden></span>' : ''
+                : key === 'inbox' ? '<span class="mobile-nav-badge" data-inbox-badge hidden></span>'
+                    : key === 'notifications' ? '<span class="mobile-nav-badge" data-notification-badge hidden></span>' : '';
+            return `<a class="mobile-nav-card${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
+                <i class="bi ${item.icon}" aria-hidden="true"></i><span class="mobile-nav-card-label">${escHtml(item.label)}</span>${badge}
+            </a>`;
+        }).join('')}
             </div>
-            <nav class="nav-drawer-body" aria-label="All pages">${groupsHtml}</nav>
-            ${bottomHtml}
-        </aside>`;
-    document.body.appendChild(drawer);
-    drawer.querySelectorAll('[data-drawer-close]').forEach(el => {
-        el.addEventListener('click', closeNavDrawer);
-    });
-    drawer.querySelectorAll('.drawer-link[href]').forEach(el => {
-        el.addEventListener('click', closeNavDrawer);
-    });
+        </section>`).join('');
+    const settings = (!isAdminArea && typeof DB !== 'undefined') ? DB.getSettings() : {};
+    const name = isAdminArea ? ((admin && admin.full_name) || 'Administrator') : ((settings.name || '').trim() || 'Student');
+    const initial = escHtml(name.charAt(0).toUpperCase() || (isAdminArea ? 'A' : 'S'));
+    const accountLine = isAdminArea
+        ? `<span>${escHtml(admin && admin.role ? admin.role.replace(/_/g, ' ') : 'Administrator')}</span>`
+        : '<span id="mobileProfileEmail">Signed in on this device</span>';
+    const logoutButton = isAdminArea
+        ? '<button type="button" class="mobile-nav-logout js-admin-logout" id="admMobileMenuLogoutBtn" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>'
+        : '<button type="button" class="mobile-nav-logout" onclick="signOutAndRedirect(this);return false;" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>';
+    const menu = document.createElement('div');
+    menu.id = 'mobileAppNavMenu';
+    menu.className = 'mobile-app-nav-menu';
+    menu.hidden = true;
+    menu.innerHTML = `
+        <nav class="mobile-app-nav-scroll" aria-label="${isAdminArea ? 'Admin' : 'Student'} navigation">
+            <div class="mobile-app-nav-groups">${groupsHtml}</div>
+            <div class="mobile-nav-account">
+                <span class="profile-avatar${isAdminArea ? ' js-admin-avatar js-profile-avatar' : ' js-profile-avatar'}" aria-hidden="true">${initial}</span>
+                <span class="mobile-nav-account-copy">
+                    <strong${isAdminArea ? ' class="js-admin-fullname"' : ' id="mobileProfileName"'}>${escHtml(name)}</strong>
+                    ${accountLine}
+                </span>
+                ${logoutButton}
+            </div>
+        </nav>`;
+    document.body.appendChild(menu);
 }
-let drawerReturnFocus = null;
-function openNavDrawer() {
-    const drawer = document.getElementById('navDrawer');
-    if (!drawer)
-        return;
-    drawerReturnFocus = document.activeElement;
-    drawer.hidden = false;
-    requestAnimationFrame(() => drawer.classList.add('is-open'));
-    document.body.classList.add('drawer-open');
+let mobileAppMenuReturnFocus = null;
+function openMobileAppNavMenu() {
+    const menu = document.getElementById('mobileAppNavMenu');
+    if (!menu) return;
+    mobileAppMenuReturnFocus = document.activeElement;
+    menu.hidden = false;
+    requestAnimationFrame(() => menu.classList.add('is-open'));
+    document.body.classList.add('mobile-nav-open');
     syncSidebarToggleIcon(true);
-    const firstLink = drawer.querySelector('.drawer-link.active, .drawer-link');
-    if (firstLink)
-        firstLink.focus();
+    const firstLink = menu.querySelector('.mobile-nav-card.active, .mobile-nav-card');
+    if (firstLink) firstLink.focus({ preventScroll: true });
 }
-function closeNavDrawer() {
-    const drawer = document.getElementById('navDrawer');
-    if (!drawer || drawer.hidden)
-        return;
-    drawer.classList.remove('is-open');
-    document.body.classList.remove('drawer-open');
+function closeMobileAppNavMenu(restoreFocus = true) {
+    const menu = document.getElementById('mobileAppNavMenu');
+    if (!menu || menu.hidden) return;
+    menu.classList.remove('is-open');
+    menu.hidden = true;
+    document.body.classList.remove('mobile-nav-open');
     syncSidebarToggleIcon(false);
-    setTimeout(() => { drawer.hidden = true; }, 220);
-    if (drawerReturnFocus)
-        drawerReturnFocus.focus();
+    if (restoreFocus && mobileAppMenuReturnFocus && mobileAppMenuReturnFocus.isConnected)
+        mobileAppMenuReturnFocus.focus({ preventScroll: true });
+}
+function closeMobileAppNavMenuForNavigation() {
+    const menu = document.getElementById('mobileAppNavMenu');
+    if (!menu || menu.hidden || !menu.classList.contains('is-open')) return;
+    menu.classList.remove('is-open');
+    document.body.classList.remove('mobile-nav-open');
+    syncSidebarToggleIcon(false);
+    window.setTimeout(() => {
+        if (menu.classList.contains('is-open')) return;
+        menu.hidden = true;
+        const trigger = document.querySelector('.mobile-nav-trigger');
+        if (trigger) trigger.focus({ preventScroll: true });
+    }, 230);
 }
 document.addEventListener('keydown', event => {
-    if (event.key === 'Escape')
-        closeNavDrawer();
+    if (event.key === 'Escape') closeMobileAppNavMenu();
 });
 window.matchMedia('(min-width: 992px)').addEventListener('change', event => {
-    if (event.matches)
-        closeNavDrawer();
+    if (event.matches) closeMobileAppNavMenu(false);
 });
 function greetingText() {
     const h = new Date().getHours();

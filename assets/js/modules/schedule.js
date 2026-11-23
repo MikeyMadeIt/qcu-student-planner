@@ -351,6 +351,7 @@ function buildTimeline(classes) {
 
 function renderAllViews() {
     renderNextCard();
+    renderCurriculumSetup('schCurriculumSetup');
     if (schedView === 'day') {
         renderDaySummary();
         renderTasksPanel();
