@@ -12,6 +12,35 @@ function ok(data) {
     return { ok: true, data };
 }
 
+function abortError(signal) {
+    if (signal && signal.reason instanceof Error) return signal.reason;
+    const error = new Error('The operation was aborted.');
+    error.name = 'AbortError';
+    return error;
+}
+
+function awaitWithAbort(value, signal) {
+    if (!signal) return Promise.resolve(value);
+    if (signal.aborted) return Promise.reject(abortError(signal));
+
+    return new Promise((resolve, reject) => {
+        let settled = false;
+        const finish = (callback, result) => {
+            if (settled) return;
+            settled = true;
+            signal.removeEventListener('abort', onAbort);
+            callback(result);
+        };
+        const onAbort = () => finish(reject, abortError(signal));
+
+        signal.addEventListener('abort', onAbort, { once: true });
+        Promise.resolve(value).then(
+            result => finish(resolve, result),
+            error => finish(reject, error),
+        );
+    });
+}
+
 // Maps a Supabase/Postgres error into a message safe to show a user. Known cases get a
 function readableAuthError(error) {
     if (!error) return 'Something went wrong. Please try again.';
@@ -179,23 +208,47 @@ export const AuthService = {
         }
     },
 
-    async getCurrentProfile() {
+    async getCurrentProfile({ signal } = {}) {
         try {
             const supabase = getSupabase();
-            const { data: sessionData } = await supabase.auth.getSession();
+            const { data: sessionData } = await awaitWithAbort(supabase.auth.getSession(), signal);
 
             if (!sessionData.session) return fail('Not signed in.', 'NO_SESSION');
+            if (signal && signal.aborted) throw abortError(signal);
 
-            const { data: profile, error } = await supabase
+            let profileQuery = supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', sessionData.session.user.id)
                 .maybeSingle();
 
-            if (error || !profile) return fail('Could not load your profile.', 'PROFILE_ERROR');
+            // The protected-page guard supplies a signal so a timed-out
+            // validation can be cancelled before the student retries. Other
+            // callers keep the existing no-argument behavior.
+            if (signal && typeof profileQuery.abortSignal === 'function') {
+                profileQuery = profileQuery.abortSignal(signal);
+            }
+
+            const { data: profile, error } = await awaitWithAbort(profileQuery, signal);
+
+            if (error) {
+                const errorMessage = String(error.message || '').toLowerCase();
+                if (error.status === 401 || error.status === 403 || error.code === '42501') {
+                    return fail('Your session or account is not authorized.', 'ACCOUNT_UNAUTHORIZED');
+                }
+                if (/failed to fetch|network|load failed|offline|timeout|timed out/.test(errorMessage)) {
+                    return fail('Could not reach the server. Check your connection and try again.', 'NETWORK_ERROR');
+                }
+                return fail('Could not load your profile.', 'PROFILE_ERROR');
+            }
+            if (!profile) return fail('Could not load your profile.', 'NO_PROFILE');
 
             return ok(profile);
         } catch (error) {
+            // Cancellation belongs to the caller; keep it distinct from
+            // authentication and profile failures so stale work cannot be
+            // mistaken for a result that should update the page.
+            if (signal && signal.aborted) throw abortError(signal);
             return fail(readableAuthError(error), 'AUTH_ERROR');
         }
     },
