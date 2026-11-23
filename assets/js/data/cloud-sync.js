@@ -403,9 +403,32 @@
     // exist) is queued here by theme.js so it survives the first hydrate().
     const PENDING_APPEARANCE_KEY = 'sp_pending_appearance';
 
+    // The dirty flag is stamped with the id of the user who made the edit,
+    // so one person's unsynced settings can never be pushed into (or
+    // override the saved settings of) a different account that signs in on
+    // the same device. sign-out wipes LAST_USER_KEY, so the stamp has to
+    // live on the flag itself.
+    let _sessionUserId = null;
+    function markPrefsDirty() {
+        let owner = _sessionUserId;
+        if (!owner) { try { owner = localStorage.getItem(LAST_USER_KEY); } catch (e) { /* ignore */ } }
+        try { localStorage.setItem(LOCAL_PREFS_DIRTY_KEY, owner || '1'); } catch (e) { /* ignore */ }
+    }
+    // previousUserId = the last user recorded on this device BEFORE this
+    // hydrate. An unowned legacy '1' flag is only trusted when it provably
+    // belongs to the same person.
+    function prefsDirtyFor(userId, previousUserId) {
+        let flag = null;
+        try { flag = localStorage.getItem(LOCAL_PREFS_DIRTY_KEY); } catch (e) { /* ignore */ }
+        if (!flag) return false;
+        if (flag === userId) return true;
+        return flag === '1' && previousUserId === userId;
+    }
+
     async function hydrate() {
         const userId = await getUserId();
         if (!userId) return;
+        _sessionUserId = userId;
         await _subjQueue;
         await _attQueue;
 
@@ -445,6 +468,12 @@
             // table block the whole hydrate — everything else still loads,
             // settings just stay local-only (same as before this feature).
             const prefsTableMissing = prefRes && prefRes.error && /relation .* does not exist/i.test(prefRes.error.message || '');
+            // Any OTHER failure fetching the row (RLS, network blip, ...)
+            // means we don't know what the server holds. Treating that as
+            // "nothing saved yet" would push this device's settings over a
+            // perfectly good saved copy, so leave settings alone this time.
+            const prefsFetchFailed = !!(prefRes && prefRes.error) && !prefsTableMissing;
+            if (prefsFetchFailed) console.warn('Cloud sync (settings) could not be loaded; keeping local settings', prefRes.error);
             const firstError = [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes]
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
@@ -516,9 +545,12 @@
                 _lastCancelledJson = JSON.stringify(coRes.data.occurrences);
             }
 
-            if (!prefsTableMissing) {
+            if (!prefsTableMissing && !prefsFetchFailed) {
                 let localPrefsDirty = false;
-                try { localPrefsDirty = localStorage.getItem(LOCAL_PREFS_DIRTY_KEY) === '1'; } catch (e) { /* ignore */ }
+                localPrefsDirty = prefsDirtyFor(userId, lastUserId);
+                // A flag left by someone else is stale for this account: drop
+                // it so it can't later be mistaken for this user's edit.
+                if (!localPrefsDirty) { try { localStorage.removeItem(LOCAL_PREFS_DIRTY_KEY); } catch (e) { /* ignore */ } }
                 let pendingAppearance = null;
                 try {
                     const rawPending = JSON.parse(localStorage.getItem(PENDING_APPEARANCE_KEY));
@@ -841,7 +873,8 @@
             if (error) throw error;
             _lastPrefsJson = json;
             try {
-                if (localStorage.getItem(LOCAL_PREFS_DIRTY_KEY) === '1' && JSON.stringify(DB.getSettings()) === json)
+                const dirtyOwner = localStorage.getItem(LOCAL_PREFS_DIRTY_KEY);
+                if ((dirtyOwner === userId || dirtyOwner === '1') && JSON.stringify(DB.getSettings()) === json)
                     localStorage.removeItem(LOCAL_PREFS_DIRTY_KEY);
             } catch (e) { /* ignore */ }
             clearSyncError('settings');
@@ -1100,7 +1133,7 @@
     const _saveSettings = DB.saveSettings.bind(DB);
     DB.saveSettings = function (s) {
         const r = _saveSettings(s);
-        try { localStorage.setItem(LOCAL_PREFS_DIRTY_KEY, '1'); } catch (e) { /* ignore */ }
+        markPrefsDirty();
         pushSettings(DB.getSettings());
         return r;
     };
