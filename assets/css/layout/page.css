@@ -9,6 +9,51 @@
     padding: calc(var(--shell-bar-height) + 1px + var(--page-gap)) var(--content-padding-x) var(--space-6);
 }
 
+@media (min-width: 992px) {
+    body.student-app .main-content,
+    body.admin-app .main-content {
+        align-self: flex-start;
+        width: auto;
+        max-width: none;
+        height: calc(100vh - 2rem);
+        margin: 1rem 1rem 1rem 1rem;
+        padding-top: var(--space-6);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        position: relative;
+        z-index: 1;
+        scrollbar-gutter: stable;
+    }
+
+    body.student-app .main-content {
+        padding: clamp(1.5rem, 2vw, 2rem) clamp(1.75rem, 3vw, 3.5rem) var(--space-7);
+    }
+
+    body.admin-app .main-content {
+        padding: var(--space-6) var(--content-padding-x);
+    }
+}
+
+@media (min-width: 992px) {
+    body.desktop-main-overflow::after {
+        position: fixed;
+        z-index: 30;
+        right: 1rem;
+        bottom: 1rem;
+        left: calc(var(--sidebar-width) + 2rem);
+        height: 3rem;
+        border-radius: 0 0 1rem 1rem;
+        background: linear-gradient(to bottom, transparent, var(--surface) 82%);
+        content: '';
+        pointer-events: none;
+    }
+}
+
 @media (max-width: 991.98px) {
     .main-content {
         padding-top: calc(var(--shell-bar-height) + 1px + var(--space-4));
@@ -124,4 +169,26 @@ label {
     .overflow-auto {
         -webkit-overflow-scrolling: touch;
     }
+}
+/* Keep soft-routed page content steady. The shell header stays mounted and
+   must not fade or move while route content is replaced. */
+body.soft-navigation-active .main-content .fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+
+body.soft-navigation-active .main-content .stagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+
+/* grid.css applies a fade/translate animation to every direct main child.
+   That includes the persistent shell bar and loading-state panels, so it
+   restarts as a visible bounce on every soft route change. */
+body.soft-navigation-active .main-content > * {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
 }

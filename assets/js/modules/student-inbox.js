@@ -137,6 +137,7 @@ async function openMessage(messageId) {
         if (result.ok) {
             row.read_at = new Date().toISOString();
             renderList();
+            window.dispatchEvent(new Event('planner:inbox-changed'));
             const btn = document.getElementById('toggleReadBtn');
             if (btn) btn.innerHTML = `<i class="bi bi-envelope" aria-hidden="true"></i> Mark as unread`;
         }
@@ -154,6 +155,7 @@ async function toggleRead(messageId) {
     }
     row.read_at = makeUnread ? null : new Date().toISOString();
     renderList();
+    window.dispatchEvent(new Event('planner:inbox-changed'));
     const btn = document.getElementById('toggleReadBtn');
     if (btn) btn.innerHTML = `<i class="bi ${row.read_at ? 'bi-envelope-open' : 'bi-envelope'}"></i> Mark as ${row.read_at ? 'unread' : 'read'}`;
     Toast.show(row.read_at ? 'Marked as read.' : 'Marked as unread.', 'accent', 'bi-check-circle');

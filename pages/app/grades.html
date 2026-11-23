@@ -22,9 +22,25 @@
       <div><h1 class="page-title">Grade Tracker</h1><p class="page-sub">Customizable per-subject grading, weighted GWA, and grade tools</p></div>
     </div>
 
+    <div class="student-page-columns grades-columns">
+      <div class="student-column-primary">
+    <!-- Subject grade cards -->
+    <div class="glass card-pad mb-3 fade-in grades-subject-panel">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="section-title mb-0"><i class="bi bi-journal-check" aria-hidden="true"></i>Subjects</div>
+        <span class="text-faint" style="font-size:.76rem">Tap <i class="bi bi-pencil" aria-hidden="true"></i> to set grading breakdown</span>
+      </div>
+      <div id="gradesWrap" class="row g-2 stagger" aria-busy="true">
+        <div class="col-12 col-md-6" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>
+        <div class="col-12 col-md-6" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>
+      </div>
+    </div>
+
+      </div>
+      <div class="student-column-secondary">
     <!-- Current GWA Overview — full-width with 3 stat blocks -->
     <div class="mb-3">
-      <div class="glass card-pad fade-in gwa-overview-card">
+      <div class="glass card-pad fade-in gwa-overview-card grades-overview-order">
         <div class="gwa-overview-header">
           <div class="section-title mb-0"><i class="bi bi-mortarboard"></i>GWA Overview</div>
           <div class="gwa-header-actions">
@@ -65,20 +81,8 @@
       </div>
     </div>
 
-    <!-- Subject grade cards -->
-    <div class="glass card-pad mb-3 fade-in">
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div class="section-title mb-0"><i class="bi bi-journal-check" aria-hidden="true"></i>Subjects</div>
-        <span class="text-faint" style="font-size:.76rem">Tap <i class="bi bi-pencil" aria-hidden="true"></i> to set grading breakdown</span>
-      </div>
-      <div id="gradesWrap" class="row g-2 stagger" aria-busy="true">
-        <div class="col-12 col-md-6" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>
-        <div class="col-12 col-md-6" aria-hidden="true"><div class="skel-card skel-stack"><div class="skel skel-title"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>
-      </div>
-    </div>
-
     <!-- GWA Calculator (Manual) -->
-    <div class="glass mb-3 fade-in" style="overflow:hidden">
+    <div class="glass mb-3 fade-in grades-calc-panel" style="overflow:hidden">
 
       <!-- Header -->
       <div class="gwa-calc-header">
@@ -125,6 +129,9 @@
         </div>
       </div>
 
+    </div>
+
+      </div>
     </div>
 
   </main>
