@@ -5,9 +5,19 @@
 
     var HIDE_CLASS = 'app-guard-pending';
     var PROFILE_TIMEOUT_MS = 15000;
+    var SUPABASE_LIBRARY_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
     var checking = false;
     var attempt = 0;
     var recovery = null;
+    var recoveryAction = 'retry';
+    var activeSupabaseLoad = null;
+    var observedSupabaseScripts = new WeakMap();
+
+    // The dashboard's parser-inserted SDK tag may still be loading when the
+    // recovery screen appears. Observe its terminal event so retry can join that
+    // request instead of racing it with another SDK script.
+    document.addEventListener('load', observeSupabaseScript, true);
+    document.addEventListener('error', observeSupabaseScript, true);
 
     if (!document.getElementById('appGuardStyle')) {
         var style = document.createElement('style');
@@ -51,6 +61,114 @@
         });
     }
 
+    function observeSupabaseScript(event) {
+        var script = event.target;
+        if (script && script.src === SUPABASE_LIBRARY_URL) {
+            observedSupabaseScripts.set(script, event.type === 'load' ? 'loaded' : 'failed');
+        }
+    }
+
+    function findExistingSupabaseScript() {
+        if (typeof document.getElementsByTagName !== 'function') return null;
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i += 1) {
+            if (scripts[i].src === SUPABASE_LIBRARY_URL) return scripts[i];
+        }
+        return null;
+    }
+
+    function waitForActiveLoad(load) {
+        // The guard's ten-second timeout belongs to this validation attempt,
+        // not the shared script request. Leave a pending request registered so
+        // later retries join it instead of injecting a duplicate.
+        return Promise.race([load.promise, waitForSupabaseLibrary(10000)]);
+    }
+
+    function clearCachedSupabaseSdk() {
+        try {
+            if (!window.caches || typeof window.caches.keys !== 'function') return Promise.resolve();
+            return Promise.resolve(window.caches.keys()).then(function (keys) {
+                return Promise.all(keys.map(function (key) {
+                    return window.caches.open(key).then(function (cache) {
+                        return cache.delete(SUPABASE_LIBRARY_URL);
+                    });
+                }));
+            }).catch(function () { /* cache cleanup must not block recovery */ });
+        } catch (error) {
+            return Promise.resolve();
+        }
+    }
+
+    function hasPendingSupabaseScript() {
+        if (activeSupabaseLoad && activeSupabaseLoad.status === 'loading') return true;
+        var existingScript = findExistingSupabaseScript();
+        return !!existingScript && !observedSupabaseScripts.get(existingScript);
+    }
+
+    function watchSupabaseScript(script) {
+        var load = { script: script, status: 'loading', promise: null };
+        load.promise = new Promise(function (resolve, reject) {
+            function finish(error) {
+                // Ignore late events from any script that is no longer the
+                // active load; only its own terminal event may clear state.
+                if (activeSupabaseLoad !== load || load.status !== 'loading') return;
+                load.status = error ? 'failed' : 'loaded';
+                activeSupabaseLoad = null;
+                if (error) {
+                    if (load.script.parentNode) load.script.parentNode.removeChild(load.script);
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            }
+
+            script.onload = function () {
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    finish(null);
+                } else {
+                    finish(makeGuardError('SUPABASE_LOAD_FAILED'));
+                }
+            };
+            script.onerror = function () { finish(makeGuardError('SUPABASE_LOAD_FAILED')); };
+            activeSupabaseLoad = load;
+        });
+        return load;
+    }
+
+    function reloadSupabaseLibrary() {
+        if (window.supabase && typeof window.supabase.createClient === 'function') return Promise.resolve();
+        if (activeSupabaseLoad && activeSupabaseLoad.status === 'loading') {
+            return waitForActiveLoad(activeSupabaseLoad);
+        }
+
+        var existingScript = findExistingSupabaseScript();
+        var existingStatus = existingScript && observedSupabaseScripts.get(existingScript);
+        if (existingScript && !existingStatus) {
+            // No load/error event has been observed, so treat the parser-added
+            // element as in-flight and attach to it rather than duplicating it.
+            return waitForActiveLoad(watchSupabaseScript(existingScript));
+        }
+
+        // Remove only this SDK URL from Cache Storage. Cache failures must not
+        // prevent the explicit network retry.
+        return clearCachedSupabaseSdk().then(function () {
+            if (window.supabase && typeof window.supabase.createClient === 'function') return;
+            if (activeSupabaseLoad && activeSupabaseLoad.status === 'loading') {
+                return waitForActiveLoad(activeSupabaseLoad);
+            }
+
+            var load = watchSupabaseScript(document.createElement('script'));
+            load.script.src = SUPABASE_LIBRARY_URL;
+            load.script.async = true;
+            try {
+                document.head.appendChild(load.script);
+            } catch (error) {
+                load.script.onerror();
+            }
+            return waitForActiveLoad(load);
+        });
+    }
+
     function makeGuardError(code) {
         var error = new Error(code);
         error.code = code;
@@ -74,7 +192,7 @@
         var retry = document.createElement('button');
         retry.type = 'button';
         retry.textContent = 'Retry verification';
-        retry.addEventListener('click', check);
+        retry.addEventListener('click', handleRecoveryAction);
 
         panel.appendChild(title);
         panel.appendChild(message);
@@ -86,11 +204,33 @@
         return recovery;
     }
 
-    function showRecovery(message) {
+    function showRecovery(message, reloadDashboard) {
         var ui = ensureRecovery();
+        recoveryAction = reloadDashboard ? 'reload' : 'retry';
         ui.message.textContent = message;
         ui.retry.disabled = false;
-        ui.retry.textContent = 'Retry verification';
+        ui.retry.textContent = reloadDashboard ? 'Reload dashboard' : 'Retry verification';
+    }
+
+    function handleRecoveryAction() {
+        if (recoveryAction !== 'reload') {
+            check(true);
+            return;
+        }
+
+        var ui = ensureRecovery();
+        ui.retry.disabled = true;
+        ui.retry.textContent = 'Reloading…';
+        clearCachedSupabaseSdk().then(function () {
+            // Reload the current URL so this page starts a fresh SDK load and
+            // account verification without losing its deployment origin/path.
+            location.reload();
+        }).catch(function () {
+            // clearCachedSupabaseSdk is intentionally best-effort; retain a
+            // usable action if an unexpected error occurs before reload.
+            ui.retry.disabled = false;
+            ui.retry.textContent = 'Reload dashboard';
+        });
     }
 
     function showChecking() {
@@ -119,6 +259,9 @@
         if (error && error.code === 'SUPABASE_TIMEOUT') {
             return 'Planner services did not finish loading. Check your connection and try again.';
         }
+        if (error && error.code === 'SUPABASE_LOAD_FAILED') {
+            return 'Could not load Planner services. Check your connection and try again.';
+        }
         if (isNetworkFailure(result) || error && error.code === 'NETWORK_ERROR') {
             return 'We couldn’t reach Planner services. Check your connection and try again.';
         }
@@ -143,7 +286,7 @@
         });
     }
 
-    function check() {
+    function check(isRetry) {
         if (checking) return;
         checking = true;
         document.documentElement.classList.add(HIDE_CLASS);
@@ -151,7 +294,11 @@
         var controller = new AbortController();
         showChecking();
 
-        waitForSupabaseLibrary(10000)
+        var libraryReady = isRetry && !(window.supabase && typeof window.supabase.createClient === 'function')
+            ? reloadSupabaseLibrary()
+            : waitForSupabaseLibrary(10000);
+
+        libraryReady
             .then(function () {
                 return Promise.all([
                     import('../services/auth-service.js'),
@@ -202,7 +349,13 @@
             })
             .catch(function (error) {
                 if (thisAttempt !== attempt) return;
-                showRecovery(failureMessage(error));
+                var stalledSdk = error && error.code === 'SUPABASE_TIMEOUT' && hasPendingSupabaseScript();
+                showRecovery(
+                    stalledSdk
+                        ? 'Planner services are still loading. Reload the dashboard to start a fresh verification.'
+                        : failureMessage(error),
+                    stalledSdk
+                );
             })
             .finally(function () {
                 if (thisAttempt !== attempt) return;
