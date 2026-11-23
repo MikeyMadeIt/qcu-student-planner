@@ -45,6 +45,8 @@ export function mountAdminTopbar(admin) {
     });
 
     document.querySelectorAll('.js-admin-logout').forEach(logoutBtn => {
+        if (logoutBtn.dataset.adminLogoutWired) return;
+        logoutBtn.dataset.adminLogoutWired = 'true';
         logoutBtn.addEventListener('click', async () => {
             document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = true);
             await AuthService.signOut();
