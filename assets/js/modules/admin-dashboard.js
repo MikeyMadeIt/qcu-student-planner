@@ -11,7 +11,7 @@ let trendChartInstance = null;
 let programChartInstance = null;
 let campusChartInstance = null;
 
-const CAMPUS_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#f472b6', '#2dd4bf'];
+const CAMPUS_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#f472b6', '#2dd4bf', '#facc15', '#818cf8', '#4ade80'];
 
 function readCssVar(name, fallback) {
     const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -21,7 +21,7 @@ function readCssVar(name, fallback) {
 function renderCharts(counts, all) {
     const textSoft = readCssVar('--text-soft', '#94a3b8');
     const gridColor = readCssVar('--border', 'rgba(148,163,184,.2)');
-    const statusColors = { pending: '#b45309', approved: '#34d399', rejected: '#fb7185', suspended: '#94a3b8' };
+    const statusColors = { pending: '#f59e0b', approved: '#22c55e', rejected: '#f43f5e', suspended: '#94a3b8' };
     const segments = ['pending', 'approved', 'rejected', 'suspended'];
 
     const distLegend = document.getElementById('distLegend');
@@ -45,13 +45,15 @@ function renderCharts(counts, all) {
                 datasets: [{
                     data: segments.map(s => counts[s]),
                     backgroundColor: segments.map(s => statusColors[s]),
-                    borderWidth: 0,
+                    borderWidth: 2,
+                    borderColor: readCssVar('--surface', '#fff'),
                 }],
             },
             options: {
                 plugins: { legend: { display: false } },
                 cutout: '65%',
                 maintainAspectRatio: false,
+                animation: { duration: 850, easing: 'easeOutQuart', animateRotate: true, animateScale: true },
             },
         });
     }
@@ -79,13 +81,16 @@ function renderCharts(counts, all) {
             datasets: [{
                 label: 'Registrations',
                 data: days.map(d => buckets[dayKey(d)]),
-                backgroundColor: 'rgb(var(--accent))',
-                borderRadius: 4,
+                backgroundColor: 'rgba(var(--accent), .78)',
+                hoverBackgroundColor: 'rgb(var(--accent))',
+                borderRadius: 7,
+                borderSkipped: false,
                 maxBarThickness: 22,
             }],
         },
         options: {
             maintainAspectRatio: false,
+            animation: { duration: 750, easing: 'easeOutQuart', delay: ctx => Math.min(ctx.dataIndex * 28, 280) },
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: textSoft, font: { size: 10 } }, grid: { display: false } },
@@ -132,14 +137,17 @@ function renderBreakdownCharts(all) {
                 labels: programEntries.map(([label]) => label),
                 datasets: [{
                     data: programEntries.map(([, count]) => count),
-                    backgroundColor: 'rgb(var(--accent))',
-                    borderRadius: 4,
+                    backgroundColor: programEntries.map((_, i) => CAMPUS_COLORS[i % CAMPUS_COLORS.length]),
+                    hoverBackgroundColor: programEntries.map((_, i) => CAMPUS_COLORS[i % CAMPUS_COLORS.length]),
+                    borderRadius: 7,
+                    borderSkipped: false,
                     maxBarThickness: 18,
                 }],
             },
             options: {
                 indexAxis: 'y',
                 maintainAspectRatio: false,
+                animation: { duration: 750, easing: 'easeOutQuart', delay: ctx => Math.min(ctx.dataIndex * 35, 280) },
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { beginAtZero: true, ticks: { color: textSoft, precision: 0 }, grid: { color: gridColor } },
@@ -169,13 +177,15 @@ function renderBreakdownCharts(all) {
                 datasets: [{
                     data: campusEntries.map(([, count]) => count),
                     backgroundColor: campusEntries.map((_, i) => CAMPUS_COLORS[i % CAMPUS_COLORS.length]),
-                    borderWidth: 0,
+                    borderWidth: 2,
+                    borderColor: readCssVar('--surface', '#fff'),
                 }],
             },
             options: {
                 plugins: { legend: { display: false } },
                 cutout: '65%',
                 maintainAspectRatio: false,
+                animation: { duration: 850, easing: 'easeOutQuart', animateRotate: true, animateScale: true },
             },
         });
     }
