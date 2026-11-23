@@ -399,6 +399,9 @@
     // server write is pending. Otherwise hydrate() can restore the older
     // server value and erase the user's most recent theme choice.
     const LOCAL_PREFS_DIRTY_KEY = 'sp_cloud_local_prefs_dirty';
+    // Theme/accent picked on the landing or login page (before DB/cloud-sync
+    // exist) is queued here by theme.js so it survives the first hydrate().
+    const PENDING_APPEARANCE_KEY = 'sp_pending_appearance';
 
     async function hydrate() {
         const userId = await getUserId();
@@ -516,6 +519,16 @@
             if (!prefsTableMissing) {
                 let localPrefsDirty = false;
                 try { localPrefsDirty = localStorage.getItem(LOCAL_PREFS_DIRTY_KEY) === '1'; } catch (e) { /* ignore */ }
+                let pendingAppearance = null;
+                try {
+                    const rawPending = JSON.parse(localStorage.getItem(PENDING_APPEARANCE_KEY));
+                    if (rawPending && typeof rawPending === 'object') {
+                        pendingAppearance = {};
+                        if (['dark', 'light', 'amoled'].indexOf(rawPending.theme) > -1) pendingAppearance.theme = rawPending.theme;
+                        if (typeof rawPending.accent === 'string') pendingAppearance.accent = rawPending.accent;
+                        if (!Object.keys(pendingAppearance).length) pendingAppearance = null;
+                    }
+                } catch (e) { /* ignore */ }
                 if (prefRes && prefRes.data && prefRes.data.prefs && typeof prefRes.data.prefs === 'object') {
                     // Server has a saved copy: it wins (same last-write-wins
                     // rule as cancelled occurrences) since settings are a
@@ -532,6 +545,15 @@
                         DB.set('settings', localPrefs);
                         _lastPrefsJson = JSON.stringify(merged);
                         pushSettings(localPrefs);
+                    } else if (pendingAppearance) {
+                        // The person picked a theme/accent before signing in.
+                        // Keep it on top of the server copy (per-field, so the
+                        // rest of their saved settings are untouched) and sync
+                        // it up, instead of letting the older saved theme win.
+                        const withPending = { ...merged, ...pendingAppearance };
+                        DB.set('settings', withPending);
+                        _lastPrefsJson = JSON.stringify(merged);
+                        pushSettings(withPending);
                     } else {
                         DB.set('settings', merged);
                         _lastPrefsJson = JSON.stringify(merged);
@@ -541,6 +563,13 @@
                     // device now so the row exists for next time.
                     pushSettings(DB.getSettings());
                 }
+                try { localStorage.removeItem(PENDING_APPEARANCE_KEY); } catch (e) { /* ignore */ }
+                // Keep the live page in step with what is now stored, so the
+                // DOM never disagrees with the theme the next page will load.
+                try {
+                    if (typeof window.applyTheme === 'function') window.applyTheme();
+                    document.dispatchEvent(new CustomEvent('sp:themechange'));
+                } catch (e) { /* ignore */ }
             }
 
             last.subjects = new Map(serverSubjects.map(s => [s.id, true]));
