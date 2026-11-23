@@ -160,7 +160,7 @@ function renderGradeCards() {
         wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
         return;
     }
-    wrap.innerHTML = subs.map(s => {
+    const gradeCards = subs.map(s => {
         const g = grades.find(x => x.subjectId === s.id) || { components: [] };
         const pct = computeSubjectFinalPct(g.components);
         const point = pct !== null ? percentToGWA(pct) : null;
@@ -184,7 +184,7 @@ function renderGradeCards() {
         const equivBadge = gradeEquivBadgeHtml(point);
         const sparkPoints = getSparklineDatapoints(g.components);
         const hasSparkline = sparkPoints.length >= 2;
-        return `<div class="col-md-6 col-xl-4">
+        return `<div class="grade-subject-item">
       <div class="grade-card hover-lift" style="border-left:3px solid ${s.color}">
         <!-- Card top: compact three-column layout -->
         <div class="grade-card-top">
@@ -230,7 +230,10 @@ function renderGradeCards() {
         </div>
       </div>
     </div>`;
-    }).join('');
+    });
+    const splitAt = Math.ceil(gradeCards.length / 2);
+    wrap.innerHTML = `<div class="grades-subject-column">${gradeCards.slice(0, splitAt).join('')}</div>
+      <div class="grades-subject-column">${gradeCards.slice(splitAt).join('')}</div>`;
 }
 
 // SVG Sparkline (inline, below grade display)
