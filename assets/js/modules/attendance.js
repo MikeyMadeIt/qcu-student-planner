@@ -1165,7 +1165,7 @@ function renderSubjectBreakdown() {
         return { s, present, presentOnline, late, excused, absent, noClass, relevant, rate, limit, limitPct, limitColor, consec, rateLabel };
     }).filter(d => d.relevant > 0 || d.noClass > 0);
     if (!subData.length) {
-        wrap.innerHTML = `<div class="text-faint text-center py-3" style="font-size:.82rem">Log attendance to see subject breakdown.</div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-calendar2-x" aria-hidden="true"></i><strong>No attendance logged yet</strong><span>Log attendance to see subject breakdown.</span></div>`;
         return;
     }
     wrap.innerHTML = subData.map(({ s, present, presentOnline, late, excused, absent, noClass, rate, limit, limitPct, limitColor, consec, rateLabel }) => {

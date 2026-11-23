@@ -121,8 +121,7 @@ button[class*="icon-btn"] > .bi {
     align-items: center;
 }
 
-.profile-item,
-.drawer-link {
+.profile-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
