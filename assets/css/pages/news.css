@@ -1,5 +1,8 @@
 .news-page { max-width: 1240px; }
 .student-app .main-content.news-page { padding-top:calc(var(--shell-bar-height) + 1px + var(--page-gap)); }
+@media (min-width:992px) {
+  .student-app .main-content.news-page { padding-top:var(--space-6); }
+}
 .student-app .news-heading .page-title { font-size:clamp(1.4rem, 1.1rem + 1vw, 1.85rem); line-height:1.25; }
 .news-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:var(--page-gap); }
 .news-heading .page-sub { margin-bottom:0; }
