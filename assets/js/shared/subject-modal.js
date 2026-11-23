@@ -46,16 +46,14 @@ function openSubjectModal(id, opts) {
     const sem = DB.getActiveSemester();
     const body = document.getElementById('subjectModalBody');
     const days = s ? s.days : (opts.presetDays || []);
-    const isOnline = s ? !!s.online : false;
     body.innerHTML = `
     <input type="hidden" id="subId" value="${s ? s.id : ''}">
     <div class="row g-2">
       <div class="col-5"><label class="form-label" style="font-size:.82rem">Subject Code <span class="sch-subject-required" aria-hidden="true">*</span></label><input class="form-control sch-subject-code" id="subCode" value="${s ? escHtml(s.code) : ''}" placeholder="CS101" aria-label="Subject Code" aria-invalid="false" aria-describedby="subCodeError"><p class="sch-subject-error" id="subCodeError" hidden>Subject code is required</p></div>
       <div class="col-7"><label class="form-label" style="font-size:.82rem">Description</label><input class="form-control" id="subDesc" value="${s ? escHtml(s.desc) : ''}" placeholder="Introduction to Computing" aria-label="Subject Description"></div>
-      <div class="col-4"><label class="form-label" style="font-size:.82rem">Type</label>
+      <div class="col-6"><label class="form-label" style="font-size:.82rem">Type</label>
         <select class="form-select" id="subType" aria-label="Subject Type">${['Lecture', 'Laboratory', 'Seminar', 'Hybrid'].map(t => `<option ${s && s.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
-      <div class="col-4"><label class="form-label" style="font-size:.82rem">Units</label><input type="number" step="0.5" class="form-control" id="subUnits" value="${s ? s.units : 3}" aria-label="Units"></div>
-      <div class="col-4"><label class="form-label" style="font-size:.82rem">Section</label><input class="form-control" id="subSection" value="${s ? escHtml(s.section) : ''}" placeholder="BSCS-1A" aria-label="Section"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.82rem">Units</label><input type="number" step="0.5" class="form-control" id="subUnits" value="${s ? s.units : 3}" aria-label="Units"></div>
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Days <span class="sch-subject-required" aria-hidden="true">*</span></label>
         <div class="sch-subject-days" id="subDaysGroup" role="group" aria-label="Select class days" aria-describedby="subDaysError" aria-invalid="false">
         <div class="day-selector">
@@ -75,13 +73,8 @@ function openSubjectModal(id, opts) {
         </div>
         <p class="sch-time-hint" id="subTimeHint" data-start="subStart" data-end="subEnd" aria-live="polite"></p>
       </div>
-        <div class="col-12"><div class="form-check form-switch mb-1">
-          <input class="form-check-input" type="checkbox" id="subOnline" ${isOnline ? 'checked' : ''} aria-label="Online class">
-          <label class="form-check-label" for="subOnline" style="font-size:.82rem"><i class="bi bi-wifi me-1" aria-hidden="true"></i>Online Class</label>
-        </div>
-      </div>
-      <div class="col-4 sub-physical-field"><label class="form-label" style="font-size:.82rem">Room</label><input class="form-control" id="subRoom" value="${s && !s.online ? escHtml(s.room) : ''}" placeholder="302" aria-label="Room number"></div>
-      <div class="col-8 sub-physical-field"><label class="form-label" style="font-size:.82rem">Building</label><input class="form-control" id="subBuilding" value="${s && !s.online ? escHtml(s.building) : ''}" placeholder="Engineering Building" aria-label="Building name"></div>
+      <div class="col-4"><label class="form-label" style="font-size:.82rem">Room</label><input class="form-control" id="subRoom" value="${s ? escHtml(s.room || '') : ''}" placeholder="302" aria-label="Room number"></div>
+      <div class="col-8"><label class="form-label" style="font-size:.82rem">Building</label><input class="form-control" id="subBuilding" value="${s ? escHtml(s.building || '') : ''}" placeholder="Engineering Building" aria-label="Building name"></div>
       <div class="col-6"><label class="form-label" style="font-size:.82rem">Professor</label><input class="form-control" id="subProf" value="${s ? escHtml(s.professor) : ''}" placeholder="e.g. Juan Dela Cruz" aria-label="Professor"></div>
       <div class="col-6"><label class="form-label" style="font-size:.82rem">Email</label><input type="email" class="form-control" id="subEmail" value="${s ? escHtml(s.email) : ''}" placeholder="e.g. juan.delacruz@qcu.edu.ph" aria-label="Professor email"></div>
       <div class="col-12"><label class="form-label" style="font-size:.82rem">Color Label</label>
@@ -97,13 +90,6 @@ function openSubjectModal(id, opts) {
       <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
       ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
     </div>`;
-    const onlineCheck = body.querySelector('#subOnline');
-    function togglePhysical() {
-        const isOn = onlineCheck.checked;
-        body.querySelectorAll('.sub-physical-field').forEach(el => el.classList.toggle('d-none', isOn));
-    }
-    togglePhysical();
-    onlineCheck.addEventListener('change', togglePhysical);
     const codeInput = body.querySelector('#subCode');
     const codeError = body.querySelector('#subCodeError');
     const daysGroup = body.querySelector('#subDaysGroup');
@@ -178,17 +164,18 @@ function saveSubject() {
     }
     const start = startInput.value;
     const end = endInput.value;
-    const isOnline = document.getElementById('subOnline').checked;
     const sem = DB.getActiveSemester();
     const data = {
         code, desc: document.getElementById('subDesc').value.trim(),
         type: document.getElementById('subType').value,
         units: parseFloat(document.getElementById('subUnits').value) || 0,
-        section: document.getElementById('subSection').value.trim(),
+        // Section and Online Class are no longer editable. The keys stay in the
+        // saved record (same shape) so cloud sync and older data keep working.
+        section: existing ? (existing.section || '') : '',
         days, start, end,
-        online: isOnline,
-        room: isOnline ? '' : document.getElementById('subRoom').value.trim(),
-        building: isOnline ? '' : document.getElementById('subBuilding').value.trim(),
+        online: false,
+        room: document.getElementById('subRoom').value.trim(),
+        building: document.getElementById('subBuilding').value.trim(),
         professor: document.getElementById('subProf').value.trim(),
         email: document.getElementById('subEmail').value.trim(),
         color: document.getElementById('subColor').value,
