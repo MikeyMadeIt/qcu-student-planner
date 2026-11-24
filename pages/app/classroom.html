@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Google Classroom · QCU Student Planner</title>
+<script src="../../assets/js/core/app-guard.js"></script>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
+<link href="../../assets/css/main.css" rel="stylesheet">
+<style>
+.classroom-wrap { max-width: 760px; margin: 0 auto; }
+.classroom-panel { padding: clamp(20px, 5vw, 34px); }
+.classroom-heading { display:flex; gap:14px; align-items:center; margin-bottom:20px; }
+.classroom-mark { width:48px; height:48px; display:grid; place-items:center; border-radius:14px; background:var(--accent-soft,rgba(59,130,246,.15)); color:var(--accent,#60a5fa); font-size:1.35rem; }
+.classroom-panel p { max-width: 62ch; }
+.classroom-meta { display:grid; gap:12px; margin:20px 0; }
+.classroom-meta-row { display:flex; justify-content:space-between; gap:16px; border-top:1px solid var(--border,rgba(255,255,255,.1)); padding-top:12px; }
+.classroom-meta-label { color:var(--text-muted,#94a3b8); }
+.classroom-meta-value { text-align:right; overflow-wrap:anywhere; }
+.classroom-actions { display:flex; gap:10px; flex-wrap:wrap; }
+#classroomMessage { min-height:1.5em; }
+@media(max-width:575px){.classroom-meta-row{display:grid;gap:3px}.classroom-meta-value{text-align:left}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="topbar"><div><h1 class="page-title">Google Classroom</h1><p class="page-sub">Connect a Classroom account separately from your Planner sign-in.</p></div></div>
+    <section class="classroom-wrap glass card-pad fade-in" aria-labelledby="classroomTitle">
+      <div class="classroom-heading"><span class="classroom-mark"><i class="bi bi-google" aria-hidden="true"></i></span><div><h2 id="classroomTitle" class="section-title mb-1">Classroom connection</h2><span class="text-faint">Optional account connection</span></div></div>
+      <div id="classroomContent" aria-live="polite" aria-busy="true">
+        <p id="classroomMessage">Checking connection status…</p>
+        <div id="classroomActions" class="classroom-actions" hidden></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/data/cloud-sync.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script type="module" src="../../assets/js/modules/classroom.js"></script>
+<script>renderShell('classroom'); applyTheme();</script>
+</body>
+</html>
