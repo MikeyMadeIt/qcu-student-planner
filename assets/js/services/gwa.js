@@ -50,14 +50,18 @@ function gwaLabel(point) {
 function assessmentPct(a) {
     if (!a || !isNum(a.score) || !isNum(a.totalItems) || a.totalItems <= 0 || a.score < 0)
         return null;
-    return (a.score / a.totalItems) * 100;
+    return Math.min(100, (a.score / a.totalItems) * 100);
 }
 
 function componentAvgPct(c) {
-    const valid = ((c && c.assessments) || []).map(assessmentPct).filter(p => p !== null);
+    const valid = ((c && c.assessments) || []).filter(a => assessmentPct(a) !== null);
     if (!valid.length)
         return null;
-    return valid.reduce((s, p) => s + p, 0) / valid.length;
+    // Aggregate earned points over possible points so a 2-point quiz does not
+    // count as much as a 100-point exam just because both are one assessment.
+    const earned = valid.reduce((sum, a) => sum + Math.min(a.score, a.totalItems), 0);
+    const possible = valid.reduce((sum, a) => sum + a.totalItems, 0);
+    return possible > 0 ? (earned / possible) * 100 : null;
 }
 
 function componentWeightedScore(c) {
@@ -82,7 +86,9 @@ function computeSubjectFinalPct(components) {
     return scoredWeight > 0 ? (weightedSum * 100) / scoredWeight : null;
 }
 
-function sumWeights(components) { return (components || []).reduce((s, c) => s + (+c.weight || 0), 0); }
+function sumWeights(components) {
+    return roundTo((components || []).reduce((s, c) => s + (+c.weight || 0), 0), 2);
+}
 
 // Normalise a stored grade record in place (handles legacy single-score components).
 function normalizeGradeRecord(g) {

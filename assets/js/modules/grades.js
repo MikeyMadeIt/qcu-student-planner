@@ -271,7 +271,7 @@ function renderSparklineHtml(points) {
 }
 
 let gradeDraft = null, gradeDraftSubjectId = null;
-const ASSESS_GRID = '1fr 56px 56px 52px 28px';
+const ASSESS_GRID = 'minmax(0, 1fr) 56px 56px 52px 28px';
 
 function openGradeModal(subjectId) {
     const s = DB.getSubject(subjectId);
@@ -304,8 +304,8 @@ function renderGradeModalBody() {
     <button type="button" class="btn btn-ghost btn-sm mt-3 w-100" onclick="addComponent()">
       <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Component
     </button>
-    <div id="modalWeightWarn" class="mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2));${weightWarn ? '' : 'display:none'}">
-      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : ''}
+    <div id="modalWeightWarn" class="grade-weight-total mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2))">
+      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`}
     </div>
     <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--border)">
       <div class="text-faint" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Computed Final Grade</div>
@@ -330,22 +330,23 @@ function componentBlockHtml(c, ci) {
     const ws = componentWeightedScore(c);
     return `<div class="comp-block" style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;overflow:hidden">
     <!-- Header: name + weight input-group + delete -->
-    <div class="d-flex align-items-center gap-2 p-2" style="border-bottom:1px solid var(--border)">
+    <div class="component-header d-flex align-items-center gap-2 p-2" style="border-bottom:1px solid var(--border)">
       <input class="form-control form-control-sm" style="flex:1" placeholder="Component name (e.g., Quizzes)"
         value="${escapeHtml(c.name)}" oninput="gradeDraft.components[${ci}].name=this.value;refreshGradePreview()">
-      <div class="input-group input-group-sm" style="width:88px;flex-shrink:0">
-        <input type="number" min="0" max="100" step="1" class="form-control text-center" placeholder="Wt."
+      <label class="component-weight input-group input-group-sm" title="Component weight percentage">
+        <span class="component-weight-label">Weight</span>
+        <input type="number" min="0" max="100" step="0.1" class="component-weight-input form-control text-center" placeholder="Wt."
           value="${c.weight === 0 || c.weight === '' ? '' : c.weight}"
-          oninput="gradeDraft.components[${ci}].weight=this.value===''?0:+this.value;refreshGradePreview()"
-          title="Weight %">
-        <span class="input-group-text" style="background: transparent; color: white; border: none;">%</span>
-      </div>
+          oninput="onComponentWeightInput(${ci},this.value)"
+          aria-label="Component weight percentage">
+        <span class="input-group-text" aria-hidden="true"><i class="bi bi-percent"></i></span>
+      </label>
       <button type="button" class="btn-icon btn-icon-sm" onclick="removeComponent(${ci})" title="Remove">
         <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
       </button>
     </div>
     <!-- Assessment column headers -->
-    <div style="display:grid;grid-template-columns:${ASSESS_GRID};gap:5px;padding:6px 10px 3px;font-size:.66rem;color:var(--text-faint);font-weight:700;text-transform:uppercase;letter-spacing:.04em">
+    <div class="assessment-grid-head" style="display:grid;grid-template-columns:${ASSESS_GRID};gap:5px;padding:6px 10px 3px;font-size:.66rem;color:var(--text-faint);font-weight:700;text-transform:uppercase;letter-spacing:.04em">
       <div>Assessment</div>
       <div class="text-center">Score</div>
       <div class="text-center">Out of</div>
@@ -376,7 +377,7 @@ function compSummaryHtml(avg, ws) {
 function assessmentRowHtml(ci, ai, a) {
     const pct = assessmentPct(a);
     const pctColor = pct === null ? 'var(--text-faint)' : isPassingPct(pct) ? 'rgb(52,211,153)' : 'rgb(251,113,133)';
-    return `<div id="assessRow-${ci}-${ai}" style="display:grid;grid-template-columns:${ASSESS_GRID};gap:5px;padding:3px 10px;align-items:center">
+    return `<div id="assessRow-${ci}-${ai}" class="assessment-grid-row" style="display:grid;grid-template-columns:${ASSESS_GRID};gap:5px;padding:3px 10px;align-items:center">
     <input class="form-control form-control-sm" placeholder="e.g., Quiz 1"
       value="${escapeHtml(a.name || '')}"
       oninput="gradeDraft.components[${ci}].assessments[${ai}].name=this.value">
@@ -417,6 +418,13 @@ function updateCompSummary(ci) {
         el.innerHTML = compSummaryHtml(avg, ws);
 }
 
+function onComponentWeightInput(ci, value) {
+    if (!gradeDraft || !gradeDraft.components[ci]) return;
+    gradeDraft.components[ci].weight = value === '' ? 0 : Math.max(0, Math.min(100, Number(value) || 0));
+    updateCompSummary(ci);
+    refreshGradePreview();
+}
+
 function addAssessment(ci) {
     gradeDraft.components[ci].assessments.push({ id: DB.uid(), name: '', score: null, totalItems: null });
     rerenderAssessRows(ci);
@@ -438,8 +446,19 @@ function rerenderAssessRows(ci) {
 }
 
 function addComponent() {
+    // Preserve the live form values before rebuilding the modal. This also
+    // protects weight edits that are still focused when Add Component is tapped.
+    syncComponentWeightsFromInputs();
     gradeDraft.components.push({ id: DB.uid(), name: '', weight: 0, assessments: [] });
     renderGradeModalBody();
+}
+
+function syncComponentWeightsFromInputs() {
+    if (!gradeDraft) return;
+    document.querySelectorAll('#componentAccordion .component-weight-input').forEach((input, index) => {
+        if (gradeDraft.components[index])
+            gradeDraft.components[index].weight = input.value === '' ? 0 : Math.max(0, Math.min(100, Number(input.value) || 0));
+    });
 }
 
 function removeComponent(ci) {
@@ -450,15 +469,16 @@ function removeComponent(ci) {
 }
 
 function refreshGradePreview() {
+    syncComponentWeightsFromInputs();
     const finalPct = computeSubjectFinalPct(gradeDraft.components);
     const isPassing = finalPct !== null ? isPassingPct(finalPct) : null;
     const totalWeight = sumWeights(gradeDraft.components);
     const weightWarnEl = document.getElementById('modalWeightWarn');
     if (weightWarnEl) {
-        const hasComponents = gradeDraft.components.length > 0;
-        const warn = hasComponents && totalWeight !== 100 && totalWeight !== 0;
-        weightWarnEl.style.display = warn ? '' : 'none';
-        if (warn) weightWarnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> \u2014 should add up to 100%.`;
+        const warn = totalWeight !== 100 && totalWeight !== 0;
+        weightWarnEl.innerHTML = warn
+            ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.`
+            : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`;
     }
     const pctEl = document.getElementById('modalFinalPct');
     const gwaEl = document.getElementById('modalFinalGwa');
@@ -488,6 +508,7 @@ function saveGradeComponents() {
     // push a duplicate grade record before the first one commits.
     if (gcSaving) return;
     gcSaving = true;
+    syncComponentWeightsFromInputs();
     const cleaned = gradeDraft.components
         .map((c, i) => ({
         id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
