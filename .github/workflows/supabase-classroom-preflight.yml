@@ -192,6 +192,388 @@ jobs:
                  and c.relname = 'decrypted_secrets'
                  and c.relkind = 'v'
             ) as vault_decrypted_view_exists;
+
+          \echo 'Classroom and profile table columns (catalog metadata only)'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 a.attnum as ordinal_position,
+                 a.attname as column_name,
+                 pg_catalog.format_type(a.atttypid, a.atttypmod) as data_type,
+                 not a.attnotnull as is_nullable,
+                 pg_catalog.pg_get_expr(d.adbin, d.adrelid) as column_default,
+                 a.attidentity as identity_kind,
+                 a.attgenerated as generated_kind
+            from pg_catalog.pg_attribute a
+            join pg_catalog.pg_class c on c.oid = a.attrelid
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            left join pg_catalog.pg_attrdef d
+              on d.adrelid = a.attrelid and d.adnum = a.attnum
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions'),
+                   ('public', 'profiles')
+                 )
+             and a.attnum > 0
+             and not a.attisdropped
+           order by n.nspname, c.relname, a.attnum;
+
+          \echo 'profiles.account_status column existence'
+          select exists (
+            select 1
+              from pg_catalog.pg_attribute a
+              join pg_catalog.pg_class c on c.oid = a.attrelid
+              join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+             where n.nspname = 'public'
+               and c.relname = 'profiles'
+               and a.attname = 'account_status'
+               and a.attnum > 0
+               and not a.attisdropped
+          ) as profiles_account_status_exists;
+
+          \echo 'Classroom and profile constraints'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 con.conname as constraint_name,
+                 case con.contype
+                   when 'p' then 'PRIMARY KEY'
+                   when 'f' then 'FOREIGN KEY'
+                   when 'u' then 'UNIQUE'
+                   when 'c' then 'CHECK'
+                   when 'x' then 'EXCLUSION'
+                   else con.contype::text
+                 end as constraint_type,
+                 con.convalidated as is_validated,
+                 pg_catalog.pg_get_constraintdef(con.oid, true) as definition
+            from pg_catalog.pg_constraint con
+            join pg_catalog.pg_class c on c.oid = con.conrelid
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions'),
+                   ('public', 'profiles')
+                 )
+           order by n.nspname, c.relname, con.conname;
+
+          \echo 'Classroom and profile indexes'
+          select n.nspname as schema_name,
+                 tbl.relname as table_name,
+                 idx.relname as index_name,
+                 i.indisprimary as is_primary,
+                 i.indisunique as is_unique,
+                 i.indisvalid as is_valid,
+                 i.indisready as is_ready,
+                 pg_catalog.pg_get_indexdef(i.indexrelid) as definition
+            from pg_catalog.pg_index i
+            join pg_catalog.pg_class tbl on tbl.oid = i.indrelid
+            join pg_catalog.pg_namespace n on n.oid = tbl.relnamespace
+            join pg_catalog.pg_class idx on idx.oid = i.indexrelid
+           where (n.nspname, tbl.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions'),
+                   ('public', 'profiles')
+                 )
+           order by n.nspname, tbl.relname, idx.relname;
+
+          \echo 'Classroom table ownership and row security state'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 pg_catalog.pg_get_userbyid(c.relowner) as owner,
+                 c.relrowsecurity as row_level_security_enabled,
+                 c.relforcerowsecurity as row_level_security_forced
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+           order by n.nspname, c.relname;
+
+          \echo 'Classroom table RLS policies'
+          select schemaname as schema_name,
+                 tablename as table_name,
+                 policyname as policy_name,
+                 permissive,
+                 roles,
+                 cmd as command,
+                 qual as using_expression,
+                 with_check as check_expression
+            from pg_catalog.pg_policies
+           where (schemaname, tablename) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+           order by schemaname, tablename, policyname;
+
+          \echo 'Classroom table ACL entries'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 case when acl.grantee = 0 then 'PUBLIC'
+                      else grantee.rolname end as grantee,
+                 grantor.rolname as grantor,
+                 acl.privilege_type,
+                 acl.is_grantable
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join lateral pg_catalog.aclexplode(
+              coalesce(c.relacl, pg_catalog.acldefault('r', c.relowner))
+            ) as acl
+            left join pg_catalog.pg_roles grantee on grantee.oid = acl.grantee
+            join pg_catalog.pg_roles grantor on grantor.oid = acl.grantor
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+           order by n.nspname, c.relname, grantee, acl.privilege_type;
+
+          \echo 'Effective Classroom table privileges for expected roles'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 roles.role_name,
+                 privileges.privilege,
+                 pg_catalog.has_table_privilege(
+                   roles.role_name::name, c.oid, privileges.privilege
+                 ) as is_available
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+            cross join (values ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'),
+                               ('TRUNCATE'), ('REFERENCES'), ('TRIGGER'))
+              as privileges(privilege)
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+           order by n.nspname, c.relname, roles.role_name, privileges.privilege;
+
+          \echo 'Explicit column-level ACL entries for Classroom tables'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 a.attname as column_name,
+                 case when acl.grantee = 0 then 'PUBLIC'
+                      else grantee.rolname end as grantee,
+                 grantor.rolname as grantor,
+                 acl.privilege_type,
+                 acl.is_grantable
+            from pg_catalog.pg_attribute a
+            join pg_catalog.pg_class c on c.oid = a.attrelid
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join lateral pg_catalog.aclexplode(a.attacl) as acl
+            left join pg_catalog.pg_roles grantee on grantee.oid = acl.grantee
+            join pg_catalog.pg_roles grantor on grantor.oid = acl.grantor
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+             and a.attnum > 0
+             and not a.attisdropped
+           order by n.nspname, c.relname, a.attname, grantee, acl.privilege_type;
+
+          \echo 'Effective column privileges for expected roles'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 a.attname as column_name,
+                 roles.role_name,
+                 privileges.privilege,
+                 pg_catalog.has_column_privilege(
+                   roles.role_name::name, c.oid, a.attname::text, privileges.privilege
+                 ) as is_available
+            from pg_catalog.pg_attribute a
+            join pg_catalog.pg_class c on c.oid = a.attrelid
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+            cross join (values ('SELECT'), ('INSERT'), ('UPDATE'), ('REFERENCES'))
+              as privileges(privilege)
+           where (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+             and a.attnum > 0
+             and not a.attisdropped
+           order by n.nspname, c.relname, a.attnum, roles.role_name, privileges.privilege;
+
+          \echo 'ACL and effective privileges for public, private, and vault schemas'
+          select n.nspname as schema_name,
+                 pg_catalog.pg_get_userbyid(n.nspowner) as owner,
+                 case when acl.grantee = 0 then 'PUBLIC'
+                      else grantee.rolname end as grantee,
+                 grantor.rolname as grantor,
+                 acl.privilege_type,
+                 acl.is_grantable
+            from pg_catalog.pg_namespace n
+            cross join lateral pg_catalog.aclexplode(
+              coalesce(n.nspacl, pg_catalog.acldefault('n', n.nspowner))
+            ) as acl
+            left join pg_catalog.pg_roles grantee on grantee.oid = acl.grantee
+            join pg_catalog.pg_roles grantor on grantor.oid = acl.grantor
+           where n.nspname in ('public', 'private', 'vault')
+           order by n.nspname, grantee, acl.privilege_type;
+
+          select n.nspname as schema_name,
+                 roles.role_name,
+                 pg_catalog.has_schema_privilege(roles.role_name::name, n.oid, 'USAGE') as can_use,
+                 pg_catalog.has_schema_privilege(roles.role_name::name, n.oid, 'CREATE') as can_create
+            from pg_catalog.pg_namespace n
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+           where n.nspname in ('public', 'private', 'vault')
+           order by n.nspname, roles.role_name;
+
+          \echo 'Relevant public/private functions, owners, and ACLs (source omitted)'
+          select n.nspname as schema_name,
+                 p.proname as function_name,
+                 pg_catalog.pg_get_function_identity_arguments(p.oid) as signature_arguments,
+                 pg_catalog.pg_get_function_result(p.oid) as return_type,
+                 p.prosecdef as security_definer,
+                 p.proconfig as function_settings,
+                 pg_catalog.pg_get_userbyid(p.proowner) as owner,
+                 coalesce((
+                   select pg_catalog.jsonb_agg(jsonb_build_object(
+                     'grantee', case when acl.grantee = 0 then 'PUBLIC'
+                                     else grantee.rolname end,
+                     'grantor', grantor.rolname,
+                     'privilege', acl.privilege_type,
+                     'grantable', acl.is_grantable
+                   ))
+                     from pg_catalog.aclexplode(
+                       coalesce(p.proacl, pg_catalog.acldefault('f', p.proowner))
+                     ) as acl
+                     left join pg_catalog.pg_roles grantee on grantee.oid = acl.grantee
+                     join pg_catalog.pg_roles grantor on grantor.oid = acl.grantor
+                 ), '[]'::jsonb) as acl_entries
+            from pg_catalog.pg_proc p
+            join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+           where n.nspname in ('public', 'private')
+             and (
+               p.proname like 'classroom_%'
+               or p.proname = 'delete_classroom_refresh_secret'
+               or exists (
+                 select 1
+                   from pg_catalog.pg_trigger t
+                   join pg_catalog.pg_class c on c.oid = t.tgrelid
+                   join pg_catalog.pg_namespace tn on tn.oid = c.relnamespace
+                  where t.tgfoid = p.oid
+                    and not t.tgisinternal
+                    and (tn.nspname, c.relname) in (
+                      ('public', 'classroom_connections'),
+                      ('private', 'classroom_oauth_transactions')
+                    )
+               )
+             )
+           order by n.nspname, p.proname, signature_arguments;
+
+          \echo 'Effective execute privileges for relevant functions'
+          select n.nspname as schema_name,
+                 p.proname as function_name,
+                 pg_catalog.pg_get_function_identity_arguments(p.oid) as signature_arguments,
+                 roles.role_name,
+                 pg_catalog.has_function_privilege(roles.role_name::name, p.oid, 'EXECUTE') as can_execute
+            from pg_catalog.pg_proc p
+            join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+           where n.nspname in ('public', 'private')
+             and (p.proname like 'classroom_%'
+                  or p.proname = 'delete_classroom_refresh_secret')
+           order by n.nspname, p.proname, signature_arguments, roles.role_name;
+
+          \echo 'Triggers attached to the Classroom tables'
+          select n.nspname as schema_name,
+                 c.relname as table_name,
+                 t.tgname as trigger_name,
+                 t.tgenabled as enabled_state,
+                 pg_catalog.pg_get_triggerdef(t.oid, true) as definition,
+                 pn.nspname as function_schema,
+                 p.proname as function_name,
+                 pg_catalog.pg_get_userbyid(p.proowner) as function_owner,
+                 p.prosecdef as function_security_definer,
+                 p.proconfig as function_settings
+            from pg_catalog.pg_trigger t
+            join pg_catalog.pg_class c on c.oid = t.tgrelid
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            join pg_catalog.pg_proc p on p.oid = t.tgfoid
+            join pg_catalog.pg_namespace pn on pn.oid = p.pronamespace
+           where not t.tgisinternal
+             and (n.nspname, c.relname) in (
+                   ('public', 'classroom_connections'),
+                   ('private', 'classroom_oauth_transactions')
+                 )
+           order by n.nspname, c.relname, t.tgname;
+
+          \echo 'Vault extension installation metadata'
+          select e.extname as extension_name,
+                 e.extversion as extension_version,
+                 n.nspname as installed_schema,
+                 pg_catalog.pg_get_userbyid(e.extowner) as extension_owner
+            from pg_catalog.pg_extension e
+            join pg_catalog.pg_namespace n on n.oid = e.extnamespace
+           where e.extname = 'supabase_vault';
+
+          \echo 'Required Vault object metadata only; no secret rows or names queried'
+          select n.nspname as schema_name,
+                 c.relname as object_name,
+                 case c.relkind when 'v' then 'view'
+                                when 'r' then 'table'
+                                when 'm' then 'materialized view'
+                                else c.relkind::text end as object_type,
+                 pg_catalog.pg_get_userbyid(c.relowner) as owner
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'vault'
+             and c.relname in ('secrets', 'decrypted_secrets')
+           order by c.relname;
+
+          \echo 'Vault object ACL entries'
+          select c.relname as object_name,
+                 case when acl.grantee = 0 then 'PUBLIC'
+                      else grantee.rolname end as grantee,
+                 grantor.rolname as grantor,
+                 acl.privilege_type,
+                 acl.is_grantable
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join lateral pg_catalog.aclexplode(
+              coalesce(c.relacl, pg_catalog.acldefault('r', c.relowner))
+            ) as acl
+            left join pg_catalog.pg_roles grantee on grantee.oid = acl.grantee
+            join pg_catalog.pg_roles grantor on grantor.oid = acl.grantor
+           where n.nspname = 'vault'
+             and c.relname in ('secrets', 'decrypted_secrets')
+           order by c.relname, grantee, acl.privilege_type;
+
+          select c.relname as object_name,
+                 roles.role_name,
+                 privileges.privilege,
+                 pg_catalog.has_table_privilege(
+                   roles.role_name::name, c.oid, privileges.privilege
+                 ) as is_available
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+            cross join (values ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'))
+              as privileges(privilege)
+           where n.nspname = 'vault'
+             and c.relname in ('secrets', 'decrypted_secrets')
+           order by c.relname, roles.role_name, privileges.privilege;
+
+          \echo 'Vault create_secret function metadata and execution grants'
+          select p.proname as function_name,
+                 pg_catalog.pg_get_function_identity_arguments(p.oid) as signature_arguments,
+                 pg_catalog.pg_get_function_result(p.oid) as return_type,
+                 p.prosecdef as security_definer,
+                 p.proconfig as function_settings,
+                 pg_catalog.pg_get_userbyid(p.proowner) as owner,
+                 roles.role_name,
+                 pg_catalog.has_function_privilege(roles.role_name::name, p.oid, 'EXECUTE') as can_execute
+            from pg_catalog.pg_proc p
+            join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+            cross join (values ('anon'), ('authenticated'), ('service_role'), ('postgres'))
+              as roles(role_name)
+           where n.nspname = 'vault'
+             and p.proname = 'create_secret'
+           order by signature_arguments, roles.role_name;
           SQL
 
       - name: Show remote migration status
