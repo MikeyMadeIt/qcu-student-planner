@@ -349,7 +349,7 @@ test('external load and runtime failures reach the existing full-page fallback',
     }
 });
 
-test('inline initializer runtime failures reach the diagnostic pause-before-fallback path', async () => {
+test('inline initializer runtime failures reach the full-page fallback', async () => {
     const assigned = [];
     let resolveFallback;
     const fallbackReached = new Promise(resolve => { resolveFallback = resolve; });
@@ -389,9 +389,6 @@ test('inline initializer runtime failures reach the diagnostic pause-before-fall
     harness.window.history = { pushState() {} };
     harness.window.scrollTo = () => {};
     harness.window.matchMedia = () => ({ matches: true });
-    harness.window.__spNavigationDiagnostics = {
-        beforeFallback(path, callback) { callback(); return true; },
-    };
     harness.window.location.assign = destination => { assigned.push(destination); resolveFallback(); };
     const anchor = {
         href: 'https://planner.example/pages/app/tasks.html', target: '',
