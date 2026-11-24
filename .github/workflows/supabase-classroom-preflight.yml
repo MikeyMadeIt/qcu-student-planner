@@ -164,8 +164,8 @@ jobs:
                      case when d.adbin is not null
                        then ' DEFAULT ' || pg_catalog.pg_get_expr(d.adbin, d.adrelid)
                        else '' end,
-                     case when a.attidentity <> '' then ' IDENTITY ' || a.attidentity else '' end,
-                     case when a.attgenerated <> '' then ' GENERATED ' || a.attgenerated else '' end
+                     case when a.attidentity <> '' then ' IDENTITY ' || a.attidentity::text else '' end,
+                     case when a.attgenerated <> '' then ' GENERATED ' || a.attgenerated::text else '' end
                    ), '; ' order by a.attnum)
                      from pg_catalog.pg_attribute a
                      join pg_catalog.pg_class tc on tc.oid = a.attrelid
