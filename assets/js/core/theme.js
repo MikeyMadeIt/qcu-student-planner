@@ -9,12 +9,33 @@
     catch (e) {
         return {};
     } }
+    var PENDING_KEY = 'sp_pending_appearance';
     function write(patch) {
         try {
             var s = read();
             for (var k in patch)
                 s[k] = patch[k];
             localStorage.setItem(KEY, JSON.stringify(s));
+        }
+        catch (e) { }
+        queuePending(patch);
+    }
+    // Landing/login pages don't load storage.js or cloud-sync.js, so DB is
+    // undefined there and persistSettings() is a no-op: nothing records that
+    // the person just picked a theme. After sign-in, cloud-sync's hydrate()
+    // then sees an older server copy and overwrites the choice. Remember the
+    // pre-sign-in choice here so hydrate() can apply it on top of the server
+    // prefs (cloud-sync.js reads and clears this key).
+    function queuePending(patch) {
+        try {
+            if (typeof DB !== 'undefined' && DB && typeof DB.saveSettings === 'function')
+                return;
+            var pending = JSON.parse(localStorage.getItem(PENDING_KEY)) || {};
+            if (patch.theme && THEMES.indexOf(patch.theme) > -1)
+                pending.theme = patch.theme;
+            if (typeof patch.accent === 'string')
+                pending.accent = patch.accent;
+            localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
         }
         catch (e) { }
     }
