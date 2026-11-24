@@ -43,7 +43,6 @@ function openSubjectModal(id, opts) {
     opts = opts || {};
     const s = id ? DB.getSubject(id) : null;
     document.getElementById('subjectModalTitle').textContent = s && s.source === 'curriculum' && s.setupStatus === 'needs_setup' ? 'Set Up Subject' : (s ? 'Edit Subject' : 'Add Subject');
-    const sem = DB.getActiveSemester();
     const body = document.getElementById('subjectModalBody');
     const days = s ? s.days : (opts.presetDays || []);
     body.innerHTML = `
@@ -132,7 +131,6 @@ function saveSubject() {
     // subject before the modal's fade-out finishes.
     if (subSaving) return;
     const id = document.getElementById('subId').value;
-    const existing = id ? DB.getSubject(id) : null;
     const codeInput = document.getElementById('subCode');
     const code = codeInput.value.trim();
     const codeInvalid = !code;
@@ -164,29 +162,17 @@ function saveSubject() {
     }
     const start = startInput.value;
     const end = endInput.value;
-    const sem = DB.getActiveSemester();
     const data = {
         code, desc: document.getElementById('subDesc').value.trim(),
         type: document.getElementById('subType').value,
         units: parseFloat(document.getElementById('subUnits').value) || 0,
-        // Section and Online Class are no longer editable. The keys stay in the
-        // saved record (same shape) so cloud sync and older data keep working.
-        section: existing ? (existing.section || '') : '',
         days, start, end,
-        online: false,
         room: document.getElementById('subRoom').value.trim(),
         building: document.getElementById('subBuilding').value.trim(),
         professor: document.getElementById('subProf').value.trim(),
         email: document.getElementById('subEmail').value.trim(),
         color: document.getElementById('subColor').value,
         notes: document.getElementById('subNotes').value.trim(),
-        semester: sem ? sem.name : '1st Semester',
-        schoolYear: sem ? sem.schoolYear : '2026-2027',
-        semesterId: existing ? existing.semesterId : (sem ? sem.id : DB.getActiveSemesterId()),
-        archived: false,
-        source: existing ? (existing.source || 'manual') : 'manual',
-        setupStatus: existing && existing.source === 'curriculum' ? 'completed' : (existing ? (existing.setupStatus || 'completed') : 'completed'),
-        curriculumKey: existing ? (existing.curriculumKey || '') : '',
     };
     subSaving = true;
     const conflicts = checkSaveConflict(data, id || null);
@@ -202,11 +188,29 @@ function saveSubject() {
     const subjects = DB.getSubjects();
     if (id) {
         const idx = subjects.findIndex(s => s.id === id);
-        if (idx !== -1)
-            subjects[idx] = { ...subjects[idx], ...data };
+        if (idx !== -1) {
+            const current = subjects[idx];
+            subjects[idx] = { ...current, ...data };
+            if (current.source === 'curriculum' && current.setupStatus === 'needs_setup')
+                subjects[idx].setupStatus = 'completed';
+        }
     }
-    else
-        subjects.push({ id: DB.uid(), ...data });
+    else {
+        const sem = DB.getActiveSemester();
+        subjects.push({
+            id: DB.uid(),
+            section: '',
+            online: false,
+            semester: sem ? sem.name : '1st Semester',
+            schoolYear: sem ? sem.schoolYear : '2026-2027',
+            semesterId: sem ? sem.id : DB.getActiveSemesterId(),
+            archived: false,
+            source: 'manual',
+            setupStatus: 'completed',
+            curriculumKey: '',
+            ...data,
+        });
+    }
     if (DB.saveSubjects(subjects) === false) {
         Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
         subSaving = false;
