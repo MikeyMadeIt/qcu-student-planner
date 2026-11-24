@@ -403,7 +403,6 @@ function renderNextCard() {
     const timeStr = `${fmtTime(s.start)} – ${fmtTime(s.end)}`;
     const attRecord = getAttendanceRecord(s.id, todayStr);
     const attStatus = attRecord ? attRecord.status : null;
-    const onlineChip = s.online ? `<span class="sch-online-chip" aria-label="Online class"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>` : '';
     const attBtn = buildAttendanceBtn(s.id, todayStr, attStatus, 'small');
     if (info.type === 'now') {
         const elapsed = nm - toMins(s.start);
@@ -415,7 +414,7 @@ function renderNextCard() {
       <div class="sch-next-body">
         <div class="sch-next-label">NOW IN SESSION</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>
-        <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span>${onlineChip}</div>
+        <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span></div>
         ${location ? `<div class="sch-next-loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</div>` : ''}
         <div class="sch-now-progress-wrap mt-2">
           <div class="d-flex justify-content-between mb-1" style="font-size:.7rem;color:var(--text-faint)">
@@ -438,7 +437,7 @@ function renderNextCard() {
       <div class="sch-next-body">
         <div class="sch-next-label">NEXT CLASS</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>
-        <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span>${onlineChip}</div>
+        <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span></div>
         ${location ? `<div class="sch-next-loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</div>` : ''}
         <div class="sch-next-away">${awayStr}</div>
       </div>
@@ -453,8 +452,6 @@ function renderNextCard() {
 // Build location string
 
 function buildLocation(s) {
-    if (s.online)
-        return null;
     const parts = [];
     if (s.building)
         parts.push(s.building);
@@ -790,7 +787,7 @@ function renderDaySummary() {
             <div class="sch-tl-dot" style="background:${s.color}" aria-hidden="true"></div>
             <div class="sch-tl-info">
               <div class="sch-tl-title ${cancelled ? 'sch-cancelled-text' : ''}">${esc(s.desc)}</div>
-              <div class="sch-tl-code">${esc(s.code)}${s.online ? '<span class="sch-online-chip ms-1"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}</div>
+              <div class="sch-tl-code">${esc(s.code)}</div>
             </div>
             <div class="d-flex gap-1 ms-auto flex-shrink-0">
               ${!cancelled && isToday ? buildAttendanceIconBtn(s.id, dateStr, attStatus) : ''}
@@ -801,7 +798,6 @@ function renderDaySummary() {
           ${!cancelled ? `<div class="sch-tl-meta">
             <span><i class="bi bi-clock" aria-hidden="true"></i>${fmtTime(s.start)} – ${fmtTime(s.end)}</span>
             ${location ? `<span><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</span>` : ''}
-            ${s.online ? `<span><i class="bi bi-wifi" aria-hidden="true"></i>Online class</span>` : ''}
             ${s.professor ? `<span><i class="bi bi-person" aria-hidden="true"></i>${esc(s.professor)}</span>` : ''}
           </div>` : ''}
           ${isNow ? `<div class="sch-tl-now-bar mt-2" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div class="sch-tl-now-fill" style="width:${pct}%;background:${s.color}"></div></div>` : ''}
@@ -930,7 +926,7 @@ function renderTimetable() {
             const wpct = 100 / cols;
             const isNowClass = isToday && !cancelled && toMins(s.start) <= nm && toMins(s.end) > nm;
             const hasConflict = conflictIds.has(s.id);
-            const locationShort = s.room ? `R${s.room}` : (s.online ? '🌐' : '');
+            const locationShort = s.room ? `R${s.room}` : '';
             html += `<div class="tt-block ${isNowClass ? 'tt-block-now' : ''} ${cancelled ? 'tt-block-cancelled' : ''} ${hasConflict && !cancelled ? 'tt-block-conflict' : ''}"
         title="${esc(s.code)}: ${esc(s.desc)}${locationShort ? ' · ' + locationShort : ''}"
         style="top:${top}px;height:${height}px;left:calc(${col * wpct}% + 2px);width:calc(${wpct}% - 4px);background:${cancelled ? 'var(--surface-alt)' : s.color};opacity:${cancelled ? 0.5 : isNowClass ? 1 : .88}"
@@ -973,7 +969,6 @@ function showTimetablePopup(subjectId, dateStr) {
       <div class="d-flex align-items-center gap-2 flex-wrap" style="flex:1;min-width:0">
         <span style="width:9px;height:9px;border-radius:50%;background:${s.color};display:inline-block;flex-shrink:0" aria-hidden="true"></span>
         <span class="fw-bold" style="font-size:.82rem;font-family:var(--font-mono);color:var(--text-faint)">${esc(s.code)}</span>
-        ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
         ${cancelled ? '<span class="sch-cancelled-chip"><i class="bi bi-ban" aria-hidden="true"></i> CANCELLED</span>' : ''}
       </div>
       <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -989,18 +984,14 @@ function showTimetablePopup(subjectId, dateStr) {
           <i class="bi bi-geo-alt" aria-hidden="true"></i>
           <span>${esc(location)}</span>
         </div>` : ''}
-        ${s.online ? `<div class="sch-tt-popup-row">
-          <i class="bi bi-wifi" aria-hidden="true"></i>
-          <span>Online class</span>
-        </div>` : ''}
         ${s.professor ? `<div class="sch-tt-popup-row">
           <i class="bi bi-person" aria-hidden="true"></i>
           <span>${esc(s.professor)}${s.email ? ' · ' + esc(s.email) : ''}</span>
         </div>` : ''}
-        ${s.section ? `<div class="sch-tt-popup-row">
-          <i class="bi bi-people" aria-hidden="true"></i>
-          <span>${esc(s.section)} · ${s.units} units · ${s.type}</span>
-        </div>` : ''}
+        <div class="sch-tt-popup-row">
+          <i class="bi bi-mortarboard" aria-hidden="true"></i>
+          <span>${s.units || 0} unit${s.units === 1 ? '' : 's'}${s.type ? ' · ' + esc(s.type) : ''}</span>
+        </div>
         ${s.notes ? `<div class="sch-tt-popup-row">
           <i class="bi bi-sticky" aria-hidden="true"></i>
           <span>${esc(s.notes)}</span>
@@ -1101,9 +1092,7 @@ function renderListView() {
         const gradeAvg = getSubjectGradeAvg(s.id);
         const attRate = getSubjectAttendanceRate(s.id);
         const location = buildLocation(s);
-        const locationLine = s.online
-            ? `<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>`
-            : (location ? `<span><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</span>` : '');
+        const locationLine = location ? `<span><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</span>` : '';
         return `<div class="col-md-6 col-xl-4">
       <div class="glass subject-card hover-lift ${s.archived ? 'subject-card-archived' : ''}" style="--sc-color:${s.color}">
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -1192,7 +1181,6 @@ function showSubjectDetail(id) {
       <div class="d-flex align-items-center gap-2">
         <span style="width:10px;height:10px;border-radius:50%;background:${s.color};display:inline-block;flex-shrink:0" aria-hidden="true"></span>
         <h5 class="modal-title mb-0">${esc(s.code)}</h5>
-        ${s.online ? '<span class="sch-online-chip"><i class="bi bi-wifi" aria-hidden="true"></i> ONLINE</span>' : ''}
       </div>
       <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
@@ -1200,9 +1188,8 @@ function showSubjectDetail(id) {
     <div class="d-flex flex-column gap-2 mb-3" style="font-size:.83rem">
       <div class="d-flex gap-2"><i class="bi bi-clock text-faint" aria-hidden="true"></i><span>${s.days.join(', ')} · ${fmtTime(s.start)}–${fmtTime(s.end)}</span></div>
       ${location ? `<div class="d-flex gap-2"><i class="bi bi-geo-alt text-faint" aria-hidden="true"></i><span>${esc(location)}</span></div>` : ''}
-      ${s.online ? `<div class="d-flex gap-2"><i class="bi bi-wifi text-faint" aria-hidden="true"></i><span>Online class</span></div>` : ''}
       ${s.professor ? `<div class="d-flex gap-2"><i class="bi bi-person text-faint" aria-hidden="true"></i><span>${esc(s.professor)}${s.email ? ' · ' + esc(s.email) : ''}</span></div>` : ''}
-      <div class="d-flex gap-2"><i class="bi bi-mortarboard text-faint" aria-hidden="true"></i><span>${s.units} units · ${s.type} · ${s.section}</span></div>
+      <div class="d-flex gap-2"><i class="bi bi-mortarboard text-faint" aria-hidden="true"></i><span>${s.units} units · ${s.type}</span></div>
       ${s.notes ? `<div class="d-flex gap-2"><i class="bi bi-sticky text-faint" aria-hidden="true"></i><span>${esc(s.notes)}</span></div>` : ''}
     </div>
     <div class="sch-subject-stats mb-3">

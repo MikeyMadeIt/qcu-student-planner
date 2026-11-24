@@ -189,7 +189,7 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-You can also paste each file into the Supabase SQL Editor in order. The walkthrough in [`supabase/README.md`](supabase/README.md) covers the early migrations. Later ones explain themselves in their header comments, and [`DATABASE_MIGRATION_REPORT.md`](DATABASE_MIGRATION_REPORT.md) summarizes the ones it covers.
+You can also paste each file into the Supabase SQL Editor in order. Each migration explains itself in its header comments.
 
 > **A fresh project cannot be built from this repository alone.** No migration creates the core planner tables (`profiles`, `subjects`, `tasks`, `notes`, `calendar_events`, `attendance`, `grades`, `semesters` and related tables) or the AI tables, and no migration defines the AI save functions such as `save_ai_quiz`. They exist only in the live project. To start from scratch, dump the baseline first (for example `supabase db dump --schema public` against the existing project) and apply it before the migrations.
 
@@ -199,7 +199,7 @@ You can also paste each file into the Supabase SQL Editor in order. The walkthro
 supabase functions deploy admin-delete-account --project-ref <your-project-ref>
 ```
 
-Then set its secrets in the Supabase dashboard under Edge Functions, then Secrets. The values are listed in the [configuration reference](#configuration-reference), and `supabase/README.md` explains the `SERVICE_ROLE_KEY` setup and the grants in migration 0007.
+Then set its secrets in the Supabase dashboard under Edge Functions, then Secrets. The values are listed in the [configuration reference](#configuration-reference).
 
 **Provide an `ai-study` function.** The AI pages call an Edge Function named `ai-study`. Its source is not in this repository, so the AI tools only work on your own project once you deploy a function with that name. It must accept a signed-in user's request and return the response shape below.
 
@@ -270,11 +270,8 @@ qcu-student-planner/
 ├── supabase/
 │   ├── migrations/       Numbered SQL migrations (0001 to 0025)
 │   ├── functions/        admin-delete-account Edge Function
-│   ├── config.toml       Supabase CLI configuration for local development
-│   ├── README.md         Deployment guide for the Supabase side
-│   └── SECURITY_VALIDATION.md   Manual security test checklist
+│   └── config.toml       Supabase CLI configuration for local development
 ├── tests/                Node tests for the notes editor
-├── docs/security-audit/  Notes from the data-isolation security audit
 └── .github/workflows/    Manual workflow that merges `develop` into member branches
 ```
 
@@ -353,8 +350,6 @@ There are two roles, `student` and `admin`, and four account statuses: `pending`
 - The audit log is append-only. Clients cannot edit or clear it.
 - Only the `admin-delete-account` function uses a service-role key. That key stays in the function's server-side secrets.
 
-For the full reasoning and test steps, read [`supabase/SECURITY_VALIDATION.md`](supabase/SECURITY_VALIDATION.md) and [`docs/security-audit/README.md`](docs/security-audit/README.md). The audit notes are a snapshot from one point in time, so check them against the current code before relying on a specific finding.
-
 ## Contributing
 
 This section summarizes [`CONTRIBUTING.md`](CONTRIBUTING.md). That file is the source of truth if the two differ.
@@ -426,8 +421,6 @@ Do not add keys or secrets to any deployed file or to `vercel.json`.
 - The `ai-study` Edge Function is not in the repository.
 - Test coverage is limited to the notes editor. There is no automated test pipeline.
 - Student pages use classic scripts and the login and admin pages use ES modules. Do not change a page's script style without checking every file that depends on its globals.
-- The migration walkthrough in `supabase/README.md` covers the early migrations only.
-- The root-level audit reports (`CODEBASE_AUDIT_REPORT.md`, `DATABASE_MIGRATION_REPORT.md`, `FINAL_AUDIT_REPORT.md`, `SECURITY_AUDIT.md`) are snapshots from when they were written. Re-run their checks after significant changes.
 
 ## Additional documentation
 
@@ -436,9 +429,6 @@ Do not add keys or secrets to any deployed file or to `vercel.json`.
 - [Security policy](SECURITY.md)
 - [Accessibility](ACCESSIBILITY.md)
 - [License](LICENSE)
-- [Supabase deployment guide](supabase/README.md)
-- [Supabase security validation checklist](supabase/SECURITY_VALIDATION.md)
-- [Data-isolation security audit](docs/security-audit/README.md)
 - [GitHub Issues](https://github.com/MikeyMadeIt/qcu-student-planner/issues)
 
 ## Disclaimer

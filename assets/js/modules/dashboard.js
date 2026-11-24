@@ -191,10 +191,10 @@ function renderGradePerformance() {
     var html = display.map(function (r, i) {
         var perfPct = Math.max(0, Math.min(100, Math.round(r.pct * 10) / 10));
         r.perfPct = perfPct;
-        var barColor = r.point <= 1.75 ? 'linear-gradient(90deg,#34d399,#22d3ee)'
-            : r.point <= 2.75 ? 'linear-gradient(90deg,rgb(var(--accent)),rgb(var(--accent-2)))'
-                : r.point <= 3.00 ? 'linear-gradient(90deg,#b45309,#f472b6)'
-                    : 'linear-gradient(90deg,#fb7185,#92400e)';
+        var barColor = r.pct >= 90 ? 'linear-gradient(90deg,#22c55e,#2dd4bf)'
+            : r.pct >= 75 ? 'linear-gradient(90deg,rgb(var(--accent)),rgb(var(--accent-2)))'
+                : r.pct >= 60 ? 'linear-gradient(90deg,#f59e0b,#fb923c)'
+                    : 'linear-gradient(90deg,#f43f5e,#e11d48)';
         var tooltip = escHtml(r.subject.desc || r.subject.code) + ' — ' + (r.pct !== null ? r.pct.toFixed(1) + '% raw · GWA ' + (r.point !== null ? r.point.toFixed(2) : '–') : '–');
         return '<div class="grade-bar-row" title="' + tooltip + '">' +
             '<div class="grade-bar-label" title="' + escHtml(r.subject.desc) + '">' + escHtml(r.subject.code) + '</div>' +
@@ -211,8 +211,10 @@ function renderGradePerformance() {
             var perfPct = r.perfPct;
             var el = document.getElementById('gbar' + i);
             var pctEl = document.getElementById('gbarpct' + i);
-            if (el)
+            if (el) {
+                el.style.transitionDelay = (i * 55) + 'ms';
                 el.style.width = perfPct + '%';
+            }
             if (pctEl)
                 pctEl.textContent = perfPct + '%';
         });
@@ -271,7 +273,7 @@ function renderAttendanceDonut() {
         return;
     }
     var cumAngle = 0;
-    order.forEach(function (seg) {
+    order.forEach(function (seg, i) {
         var el = document.getElementById(seg.id);
         if (!el)
             return;
@@ -279,6 +281,7 @@ function renderAttendanceDonut() {
         var gap = circ - slice;
         el.setAttribute('stroke-dasharray', slice + ' ' + gap);
         el.setAttribute('stroke-dashoffset', circ - cumAngle + '');
+        el.style.transitionDelay = (i * 100) + 'ms';
         cumAngle += slice;
     });
 }

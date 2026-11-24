@@ -658,6 +658,21 @@ a.adm-stat-card:focus-visible {
 .adm-chart-wrap {
     position: relative;
     height: 220px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: linear-gradient(145deg, rgba(var(--accent),.035), transparent 65%);
+}
+
+.adm-chart-wrap canvas { animation: adm-chart-enter .5s var(--ease) both; }
+
+@keyframes adm-chart-enter {
+    from { opacity: 0; transform: translateY(7px) scale(.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .adm-chart-wrap canvas { animation: none; }
 }
 
 .adm-chart-wrap-sm {
