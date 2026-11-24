@@ -1047,7 +1047,6 @@ function openScheduleModal(id, presetDay) {
         <select class="form-select" id="csType">${['Lecture', 'Laboratory', 'Seminar', 'Hybrid'].map(t => `<option ${s && s.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
       </div>
       <div class="col-md-4"><label>Units</label><input type="number" step="0.5" class="form-control" id="csUnits" value="${s ? s.units : 3}"></div>
-      <div class="col-md-4"><label>Section</label><input class="form-control" id="csSection" value="${s ? escapeHtml(s.section) : ''}" placeholder="BSCS-1A"></div>
       <div class="col-12"><label>Days</label>
         <div class="day-selector" role="group" aria-label="Select class days">
           ${DAY_NAMES.slice(1).concat(DAY_NAMES[0]).map(d => `
@@ -1111,7 +1110,6 @@ function saveScheduleEntry() {
         code, desc: document.getElementById('csDesc').value.trim(),
         type: document.getElementById('csType').value,
         units: parseFloat(document.getElementById('csUnits').value) || 0,
-        section: document.getElementById('csSection').value.trim(),
         days, start: document.getElementById('csStart').value, end: document.getElementById('csEnd').value,
         room: document.getElementById('csRoom').value.trim(), building: document.getElementById('csBuilding').value.trim(),
         professor: document.getElementById('csProf').value.trim(), email: document.getElementById('csEmail').value.trim(),
@@ -1124,7 +1122,7 @@ function saveScheduleEntry() {
         subjects[idx] = { ...subjects[idx], ...data };
     }
     else {
-        subjects.push({ id: DB.uid(), archived: false, semesterId: semId, ...data });
+        subjects.push({ id: DB.uid(), archived: false, semesterId: semId, section: '', online: false, ...data });
     }
     DB.saveSubjects(subjects);
     bootstrap.Modal.getInstance(document.getElementById('calSubjectModal')).hide();

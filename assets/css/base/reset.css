@@ -1,4 +1,3 @@
-
 /* Border-box sizing everywhere: percentage widths must include padding, */
 *,
 *::before,
@@ -85,4 +84,68 @@ textarea:focus-visible,
 .form-control:focus-visible {
     outline: 2px solid rgb(var(--accent));
     outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Clickable UI must never show a text caret / start a text selection.
+   Tapping or clicking buttons, rows, cards and nav items was dropping a
+   blinking text cursor next to the label (desktop caret browsing / stray
+   selection) and, on phones, triggering the long-press selection magnifier,
+   the iOS callout and the grey tap flash. Interactive chrome is therefore
+   unselectable; real text fields, the notes editor and read-only content
+   (paragraphs, notes, AI replies) stay selectable.
+   --------------------------------------------------------------------------- */
+html {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+summary,
+label,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="option"],
+[tabindex]:not([tabindex="-1"]):not(input):not(textarea):not([contenteditable]),
+.btn,
+.btn-icon,
+.badge,
+.nav-link,
+.dash-section-title,
+.card-header-row,
+.list-row,
+.task-row,
+.task-row-dash,
+.sched-row,
+.grade-bar-row,
+.task-days-left {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* No blinking caret anywhere except where the user can actually type. */
+body {
+    caret-color: transparent;
+}
+
+input,
+textarea,
+select,
+[contenteditable]:not([contenteditable="false"]),
+.form-control {
+    -webkit-user-select: text;
+    user-select: text;
+    caret-color: auto;
+}
+
+/* Checkboxes/radios/buttons rendered as <input> are not text fields. */
+input[type="checkbox"],
+input[type="radio"],
+input[type="button"],
+input[type="submit"],
+input[type="range"],
+input[type="color"],
+input[type="file"] {
+    caret-color: transparent;
 }
