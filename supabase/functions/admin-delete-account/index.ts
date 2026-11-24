@@ -69,7 +69,7 @@ async function handle(req) {
             error: `Server misconfiguration: missing required Edge Function secret(s): ${missing}. ` +
                 `SUPABASE_URL/SUPABASE_ANON_KEY are normally auto-provisioned; SERVICE_ROLE_KEY must be set ` +
                 `manually under Edge Functions -> Secrets, using a secret key (Project Settings -> API Keys) with ` +
-                `"Bypass Row Level Security" and Auth admin permissions enabled. See supabase/README.md.`,
+                `"Bypass Row Level Security" and Auth admin permissions enabled.`,
         });
     }
 
