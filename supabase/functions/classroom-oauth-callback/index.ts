@@ -4,6 +4,11 @@ import { createAdmin, safeRedirect, sha256 } from '../_shared/classroom.ts';
 const GOOGLE_KEYS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'));
 const fail = (returnOrigin?: string | null) => safeRedirect('error', returnOrigin);
 const GOOGLE_USERINFO_EMAIL_SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
+type CallbackFailureCategory = 'token_exchange' | 'identity_validation' | 'scope_validation' | 'connection_save' | 'unexpected';
+
+function logCallbackFailure(category: CallbackFailureCategory): void {
+  console.error(JSON.stringify({ category }));
+}
 
 function hasRequiredScopes(grantedScopes: string[], requiredScopes: string[]): boolean {
   const normalizeScope = (scope: string) => scope === GOOGLE_USERINFO_EMAIL_SCOPE ? 'email' : scope;
@@ -37,7 +42,9 @@ Deno.serve(async req => {
   if (!code || code.length > 4096) return fail(consumedReturnOrigin);
 
   let exchangedTokens: Record<string, unknown> | null = null;
+  let failureCategory: CallbackFailureCategory = 'unexpected';
   try {
+    failureCategory = 'token_exchange';
     const clientId = Deno.env.get('GOOGLE_CLASSROOM_CLIENT_ID');
     const clientSecret = Deno.env.get('GOOGLE_CLASSROOM_CLIENT_SECRET');
     if (!clientId || !clientSecret) throw new Error('configuration');
@@ -59,6 +66,7 @@ Deno.serve(async req => {
     exchangedTokens = tokens;
     if (!tokens.id_token || !tokens.access_token || !Number.isFinite(Number(tokens.expires_in))) throw new Error('token response');
 
+    failureCategory = 'identity_validation';
     const { payload } = await jwtVerify(tokens.id_token, GOOGLE_KEYS, {
       issuer: ['https://accounts.google.com', 'accounts.google.com'],
       audience: clientId,
@@ -67,9 +75,12 @@ Deno.serve(async req => {
     if (typeof payload.sub !== 'string' || !payload.sub || payload.email_verified !== true || typeof payload.email !== 'string') throw new Error('identity');
     if (typeof payload.nonce !== 'string' || await sha256(payload.nonce) !== transaction.nonce_hash) throw new Error('nonce');
 
+    failureCategory = 'scope_validation';
     const grantedScopes = typeof tokens.scope === 'string' ? tokens.scope.split(/\s+/).filter(Boolean) : [];
     const requiredScopes = transaction.requested_scopes as string[];
     if (!hasRequiredScopes(grantedScopes, requiredScopes)) throw new Error('scope');
+
+    failureCategory = 'unexpected';
     const { data: profile, error: profileError } = await admin.from('profiles').select('account_status').eq('id', transaction.user_id).maybeSingle();
     if (profileError || profile?.account_status !== 'approved') {
       await revokeGoogleCredential(tokens.refresh_token || tokens.access_token);
@@ -88,6 +99,7 @@ Deno.serve(async req => {
     }
 
     const expiresAt = new Date(Date.now() + Number(tokens.expires_in) * 1000).toISOString();
+    failureCategory = 'connection_save';
     const { error: saveError } = await admin.rpc('classroom_save_connection', {
       p_user_id: transaction.user_id,
       p_google_subject: payload.sub,
@@ -97,6 +109,7 @@ Deno.serve(async req => {
       p_granted_scopes: grantedScopes,
     });
     if (saveError) throw new Error('save');
+    failureCategory = 'unexpected';
     if (priorToken) {
       try {
         await fetch('https://oauth2.googleapis.com/revoke', {
@@ -107,7 +120,8 @@ Deno.serve(async req => {
     }
     return safeRedirect('connected', consumedReturnOrigin);
   } catch {
-    // Provider payloads, OAuth codes, tokens, claims and internal DB errors are never logged or reflected.
+    // Log only the controlled category; never include provider or credential data.
+    logCallbackFailure(failureCategory);
     await revokeGoogleCredential(exchangedTokens?.refresh_token || exchangedTokens?.access_token);
     return fail(consumedReturnOrigin);
   }
