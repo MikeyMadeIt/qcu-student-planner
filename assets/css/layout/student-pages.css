@@ -577,6 +577,8 @@
     .student-app .grades-subject-column > .grade-subject-item {
         flex: 0 0 100%;
         max-width: 100%;
+        padding-inline: 6px;
+        margin-bottom: 10px;
     }
 
     .student-app .main-content:has(.grades-columns) > .topbar { grid-row: 1; }

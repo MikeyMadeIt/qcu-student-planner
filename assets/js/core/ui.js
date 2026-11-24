@@ -27,6 +27,7 @@ const Toast = {
     },
     confirmExport() { window.exportData ? window.exportData() : this.show('Open Settings to export data', 'accent', 'bi-download'); }
 };
+window.Toast = Toast;
 
 // CONFETTI
 

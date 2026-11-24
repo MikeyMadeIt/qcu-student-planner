@@ -386,8 +386,9 @@
     height: 100%;
     border-radius: 6px;
     background: rgb(var(--accent));
-    transition: width 1.1s cubic-bezier(.22,.9,.35,1);
+    transition: width .9s cubic-bezier(.22,.9,.35,1);
     width: 0%;
+    box-shadow: 0 0 12px rgba(var(--accent),.16);
 }
 
 .grade-bar-val {
@@ -407,6 +408,14 @@
     display: block;
     width: 100%;
     height: 100%;
+}
+
+.donut-wrap circle[id^="donut"] {
+    transition: stroke-dasharray 1s cubic-bezier(.22,.9,.35,1), stroke-dashoffset 1s cubic-bezier(.22,.9,.35,1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grade-bar-fill, .donut-wrap circle[id^="donut"] { transition-duration: .01ms !important; }
 }
 
 /* SVG text elements need counter-rotation to be readable */
