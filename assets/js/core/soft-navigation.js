@@ -127,23 +127,146 @@ async function updatePageStyles(pageDocument, currentUrl, signal) {
     });
 }
 
-function exposeClassicFunctions(source, context) {
-    const names = new Set();
-    const pattern = /^(?:\s*)(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/gm;
-    let match;
-    while ((match = pattern.exec(source))) names.add(match[1]);
-    if (!names.size) return;
-    const assignments = [...names].map(name => `if (typeof ${name} === 'function') window[${JSON.stringify(name)}] = ${name};`).join('\n');
-    try {
-        window.__spPersistentEvents = /\/assets\/js\/core\//.test(context);
-        new Function(`${source}\n${assignments}\n//# sourceURL=${context}`)();
+function copyScriptAttributes(source, destination) {
+    for (const attribute of source.attributes || []) {
+        const name = attribute.name.toLowerCase();
+        // Dynamic scripts are ordered explicitly below; the source's async
+        // setting must not re-enable parallel execution.
+        if (name === 'src' || name === 'async') continue;
+        destination.setAttribute(attribute.name, attribute.value);
     }
-    catch (error) { console.error(`Could not initialize ${context}`, error); throw error; }
-    finally { window.__spPersistentEvents = false; }
+}
+
+function scriptRuntimeError(event, expectedUrl) {
+    if (event.target !== window) return null;
+    // An empty filename cannot be safely attributed to this script (browsers
+    // use it for opaque cross-origin errors and unrelated global failures).
+    if (!event.filename) return null;
+    try {
+        if (new URL(event.filename, location.href).href !== expectedUrl) return null;
+    } catch { return null; }
+    const cause = event.error;
+    const error = new Error(event.message || cause?.message || 'Uncaught script runtime error.');
+    error.name = cause?.name || 'Error';
+    return error;
+}
+
+function appendClassicExternalScript(source, src, signal) {
+    return new Promise((resolve, reject) => {
+        const external = document.createElement('script');
+        copyScriptAttributes(source, external);
+        external.async = false;
+        external.src = src;
+
+        let settled = false;
+        let runtimeError = null;
+        const previousPersistentEvents = window.__spPersistentEvents === true;
+        const persistentScript = new URL(src).origin !== location.origin
+            || /\/assets\/js\/core\//.test(new URL(src).pathname);
+        const cleanup = () => {
+            window.removeEventListener('error', onRuntimeError, true);
+            external.removeEventListener('load', onLoad);
+            external.removeEventListener('error', onError);
+            signal.removeEventListener('abort', onAbort);
+            window.__spPersistentEvents = previousPersistentEvents;
+        };
+        const finish = (error) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            if (error) reject(error);
+            else resolve();
+        };
+        const onRuntimeError = event => {
+            const error = scriptRuntimeError(event, src);
+            if (error) runtimeError = error;
+        };
+        const onLoad = () => {
+            if (signal.aborted) {
+                finish(new DOMException('Navigation superseded.', 'AbortError'));
+                return;
+            }
+            finish(runtimeError);
+        };
+        const onError = () => finish(new Error(`Failed to load script: ${src}`));
+        const onAbort = () => {
+            // Removing this exact pending element prevents it from being used
+            // by a superseded navigation. It is never treated as a loaded URL.
+            external.remove();
+            finish(new DOMException('Navigation superseded.', 'AbortError'));
+        };
+
+        window.addEventListener('error', onRuntimeError, true);
+        external.addEventListener('load', onLoad, { once: true });
+        external.addEventListener('error', onError, { once: true });
+        signal.addEventListener('abort', onAbort, { once: true });
+        if (persistentScript) window.__spPersistentEvents = true;
+        if (signal.aborted) {
+            onAbort();
+            return;
+        }
+        try { document.head.appendChild(external); }
+        catch (error) { finish(error); }
+    });
+}
+
+function inlineHandlerFunctionNames(pageDocument) {
+    const names = new Set();
+    pageDocument.querySelectorAll('*').forEach(element => {
+        for (const attribute of element.attributes || []) {
+            if (!/^on/i.test(attribute.name)) continue;
+            const pattern = /\b([A-Za-z_$][\w$]*)\s*\(/g;
+            let match;
+            while ((match = pattern.exec(attribute.value))) names.add(match[1]);
+        }
+    });
+    return names;
+}
+
+function declaredInlineHandlerFunctions(source, handlerNames) {
+    // Only expose named declarations that an inline HTML handler actually
+    // calls. Keep all other declarations and bindings inside the wrapper.
+    const names = [];
+    for (const name of handlerNames) {
+        const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const declaration = new RegExp(`(?:^|\\n)\\s*(?:async\\s+)?function\\s+${escapedName}\\s*\\(`);
+        if (declaration.test(source)) names.push(name);
+    }
+    return names;
+}
+
+function appendInlineClassicScript(source, pageUrl, handlerNames) {
+    const inline = document.createElement('script');
+    copyScriptAttributes(source, inline);
+    inline.async = false;
+    // A function body preserves the isolated lexical scope that the previous
+    // Function constructor provided, while the browser executes this as a real
+    // inline script under the site's existing script-src policy.
+    const exposed = declaredInlineHandlerFunctions(source, handlerNames)
+        .map(name => `window[${JSON.stringify(name)}] = ${name};`).join('\n');
+    inline.textContent = `(function () {\n${source}\n${exposed}\n}).call(window);\n//# sourceURL=${pageUrl.origin}${pageUrl.pathname}#soft-navigation-inline`;
+
+    let runtimeError = null;
+    // This listener covers synchronous execution while appendChild runs.
+    // Errors from later callbacks are deliberately outside navigation failure
+    // handling because they cannot be reliably attributed to this initializer.
+    const onRuntimeError = event => {
+        const error = scriptRuntimeError(event, `${pageUrl.origin}${pageUrl.pathname}#soft-navigation-inline`);
+        if (error) runtimeError = error;
+    };
+    window.addEventListener('error', onRuntimeError, true);
+    try { document.head.appendChild(inline); }
+    catch (error) { runtimeError = error; }
+    finally {
+        window.removeEventListener('error', onRuntimeError, true);
+        inline.remove();
+    }
+    if (runtimeError) throw runtimeError;
 }
 
 async function runPageScripts(pageDocument, pageUrl, signal) {
     const scripts = [...pageDocument.querySelectorAll('script[src], script:not([src])')];
+    const handlerNames = inlineHandlerFunctionNames(pageDocument);
     for (const script of scripts) {
         if (signal.aborted) throw new DOMException('Navigation superseded.', 'AbortError');
         if (script.src) {
@@ -156,28 +279,11 @@ async function runPageScripts(pageDocument, pageUrl, signal) {
                 continue;
             }
             if (loadedScripts.has(src)) continue;
+            await appendClassicExternalScript(script, src, signal);
             loadedScripts.add(src);
-            if (!new URL(src).origin || new URL(src).origin !== location.origin) {
-                await new Promise((resolve, reject) => {
-                    window.__spPersistentEvents = true;
-                    const external = document.createElement('script');
-                    external.src = src;
-                    external.onload = () => { window.__spPersistentEvents = false; resolve(); };
-                    external.onerror = error => { window.__spPersistentEvents = false; reject(error); };
-                    document.head.appendChild(external);
-                });
-                continue;
-            }
-            const response = await fetch(src, { credentials: 'same-origin' });
-            if (!response.ok) throw new Error(`Failed to load ${src}`);
-            const source = await response.text();
-            exposeClassicFunctions(source, src);
         } else if (!script.type || script.type === 'text/javascript') {
             const source = script.textContent.trim();
-            if (source) {
-                try { new Function(`${source}\n//# sourceURL=${pageUrl.href}#inline`)(); }
-                catch (error) { console.error('Could not run page initialization script', error); throw error; }
-            }
+            if (source) appendInlineClassicScript(source, pageUrl, handlerNames);
         }
     }
 }
@@ -187,14 +293,17 @@ async function swapTo(url, { history = true } = {}) {
     const controller = new AbortController();
     activeNavigation = controller;
     const response = await fetch(url.href, { credentials: 'same-origin', signal: controller.signal });
-    if (!response.ok || !response.headers.get('content-type')?.includes('text/html'))
+    const contentType = response.headers.get('content-type') || '(missing)';
+    const htmlResponse = response.ok && contentType.toLowerCase().includes('text/html');
+    if (!htmlResponse)
         throw new Error('Destination page could not be loaded as HTML.');
     const html = await response.text();
     if (controller.signal.aborted) throw new DOMException('Navigation superseded.', 'AbortError');
     const pageDocument = new DOMParser().parseFromString(html, 'text/html');
     const nextMain = pageDocument.querySelector('.main-content');
     const currentMain = document.querySelector('.main-content');
-    if (!nextMain || !currentMain || !pageDocument.querySelector('#sidebar'))
+    const hasSidebar = Boolean(pageDocument.querySelector('#sidebar'));
+    if (!nextMain || !currentMain || !hasSidebar)
         throw new Error('Destination does not use the shared app shell.');
 
     const currentPath = location.pathname;
@@ -256,7 +365,6 @@ async function swapTo(url, { history = true } = {}) {
     }
     activeNavigation = null;
 }
-
 function onClick(event) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target.closest('a[href]');
@@ -297,6 +405,8 @@ export function initSoftNavigation() {
             location.assign(url.href);
             return;
         }
-        swapTo(url, { history: false }).catch(() => location.reload());
+        swapTo(url, { history: false }).catch(error => {
+            location.reload();
+        });
     });
 }
