@@ -89,6 +89,11 @@ jobs:
           console.log('Staging pooler URL validation passed.');
           NODE
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
       - name: Link only the confirmed staging project
         shell: bash
         env:
@@ -119,6 +124,75 @@ jobs:
             echo "- Project: QCU Student Planner staging"
             echo "- Project ref: ${EXPECTED_PROJECT_REF}"
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Inspect staging database read-only
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          PGOPTIONS='-c default_transaction_read_only=on' psql \
+            --dbname "$SUPABASE_DB_URL" \
+            --no-psqlrc \
+            --set=ON_ERROR_STOP=1 \
+            --pset=pager=off <<'SQL'
+          \echo 'Database identity'
+          select current_database() as database_name, current_user as connected_user;
+
+          \echo 'Migration history table existence and recorded versions'
+          select to_regclass('supabase_migrations.schema_migrations') is not null as migration_table_exists \gset
+          \if :migration_table_exists
+            select version from supabase_migrations.schema_migrations order by version;
+          \else
+          \echo 'supabase_migrations.schema_migrations does not exist.'
+          \endif
+
+          \echo 'Non-system schemas'
+          select nspname as schema_name
+            from pg_catalog.pg_namespace
+           where nspname <> 'information_schema'
+             and left(nspname, 3) <> 'pg_'
+           order by nspname;
+
+          \echo 'Application tables in public and private'
+          select n.nspname as schema_name, c.relname as table_name
+            from pg_catalog.pg_class c
+            join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+           where n.nspname in ('public', 'private')
+             and c.relkind in ('r', 'p')
+           order by n.nspname, c.relname;
+
+          \echo 'Important application object existence'
+          select objects.object_name,
+                 to_regclass(objects.object_name) is not null as exists
+            from (values
+              ('public.profiles'),
+              ('public.classroom_connections'),
+              ('public.user_preferences'),
+              ('public.university_events'),
+              ('public.qcu_news')
+            ) as objects(object_name)
+           order by objects.object_name;
+
+          \echo 'Private schema existence'
+          select exists (
+            select 1 from pg_catalog.pg_namespace where nspname = 'private'
+          ) as private_schema_exists;
+
+          \echo 'Vault extension and decrypted view existence (no secret data queried)'
+          select
+            exists (
+              select 1 from pg_catalog.pg_extension where extname = 'supabase_vault'
+            ) as vault_extension_exists,
+            exists (
+              select 1
+                from pg_catalog.pg_class c
+                join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+               where n.nspname = 'vault'
+                 and c.relname = 'decrypted_secrets'
+                 and c.relkind = 'v'
+            ) as vault_decrypted_view_exists;
+          SQL
 
       - name: Show remote migration status
         env:
