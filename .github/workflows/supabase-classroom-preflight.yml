@@ -146,14 +146,27 @@ jobs:
             --field-separator=' | ' \
             --pset=pager=off <<'SQL' | tee -a "$GITHUB_STEP_SUMMARY"
           \echo '=== Google Classroom OAuth database security summary ==='
-          \echo 'Migration history'
+          \echo 'Migration history evidence (read-only; no baseline inferred)'
           select to_regclass('supabase_migrations.schema_migrations') is not null as migration_table_exists \gset
           \if :migration_table_exists
-            select format('history table present; versions=%s; latest=%s',
-                          count(*), coalesce(max(version)::text, 'none'))
-              from supabase_migrations.schema_migrations;
+            select exists (
+              select 1 from pg_catalog.pg_attribute a
+              join pg_catalog.pg_class c on c.oid = a.attrelid
+              join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+              where n.nspname = 'supabase_migrations' and c.relname = 'schema_migrations'
+                and a.attname = 'version' and a.attnum > 0 and not a.attisdropped
+            ) as migration_version_column_exists \gset
+            \if :migration_version_column_exists
+              select format('history table present; recorded=%s; latest=%s; migration_0031=%s',
+                            count(*), coalesce(max(version::text), 'none'),
+                            case when count(*) filter (where version::text = '0031') > 0
+                                 then 'recorded' else 'not recorded' end)
+                from supabase_migrations.schema_migrations;
+            \else
+              \echo 'ALERT: history table exists but version column is missing'
+            \endif
           \else
-          \echo 'ALERT: supabase_migrations.schema_migrations is missing'
+          \echo 'ALERT: supabase_migrations.schema_migrations is missing; applied history cannot be verified'
           \endif
 
           \echo 'Classroom table definitions: columns, constraints, indexes'
@@ -263,6 +276,101 @@ jobs:
                       else 'OK' end)
             from checked group by nspname, relname, role_name order by nspname, relname, role_name;
 
+          \echo 'Direct ACL grantors on Classroom and Vault objects (effective inherited grants shown separately)'
+          with recursive inherited(role_oid, role_name, path, visited) as (
+            select r.oid, r.rolname, r.rolname::text, array[r.oid]
+              from pg_catalog.pg_roles r where r.rolname = 'service_role'
+            union all
+            select parent.oid, parent.rolname, i.path || ' -> ' || parent.rolname::text,
+                   i.visited || parent.oid
+              from inherited i
+              join pg_catalog.pg_auth_members m on m.member = i.role_oid
+              join pg_catalog.pg_roles parent on parent.oid = m.roleid
+             where not parent.oid = any(i.visited)
+          ), effective_roles as (
+            select distinct role_oid, role_name from inherited i
+             where pg_catalog.pg_has_role('service_role'::name, i.role_name::name, 'USAGE')
+          ), objects as (
+            select n.nspname, c.relname, c.oid, c.relowner, c.relacl
+              from pg_catalog.pg_class c
+              join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+             where (n.nspname, c.relname) in (
+               ('public','classroom_connections'), ('vault','secrets'), ('vault','decrypted_secrets'))
+          ), grants as (
+            select o.nspname, o.relname, acl.grantee, acl.grantor,
+                   acl.privilege_type, acl.is_grantable
+              from objects o
+              cross join lateral pg_catalog.aclexplode(
+                coalesce(o.relacl, pg_catalog.acldefault('r', o.relowner))) acl
+             where acl.grantee = 0 or acl.grantee in (select role_oid from effective_roles)
+          )
+          select format('%I.%I | grantee=%s | grantor=%I | privileges=%s',
+                 nspname, relname,
+                 case when g.grantee = 0 then 'PUBLIC' else grantee.rolname end,
+                 grantor.rolname,
+                 string_agg(g.privilege_type || case when g.is_grantable then ' (grantable)' else '' end,
+                            ',' order by g.privilege_type))
+            from grants g
+            left join pg_catalog.pg_roles grantee on grantee.oid = g.grantee
+            join pg_catalog.pg_roles grantor on grantor.oid = g.grantor
+           group by nspname, relname, g.grantee, grantee.rolname, grantor.rolname
+           order by nspname, relname, grantee.rolname;
+
+          \echo 'service_role membership paths (only paths effective for privilege inheritance)'
+          with recursive inherited(role_oid, role_name, path, visited) as (
+            select r.oid, r.rolname, r.rolname::text, array[r.oid]
+              from pg_catalog.pg_roles r where r.rolname = 'service_role'
+            union all
+            select parent.oid, parent.rolname, i.path || ' -> ' || parent.rolname::text,
+                   i.visited || parent.oid
+              from inherited i
+              join pg_catalog.pg_auth_members m on m.member = i.role_oid
+              join pg_catalog.pg_roles parent on parent.oid = m.roleid
+             where not parent.oid = any(i.visited)
+          )
+          select distinct path from inherited i
+           where pg_catalog.pg_has_role('service_role'::name, i.role_name::name, 'USAGE')
+           order by path;
+
+          \echo 'Relevant default ACLs (future creation only; no rows means none; not retroactive)'
+          with recursive inherited(role_oid, role_name, visited) as (
+            select r.oid, r.rolname, array[r.oid]
+              from pg_catalog.pg_roles r where r.rolname = 'service_role'
+            union all
+            select parent.oid, parent.rolname, i.visited || parent.oid
+              from inherited i
+              join pg_catalog.pg_auth_members m on m.member = i.role_oid
+              join pg_catalog.pg_roles parent on parent.oid = m.roleid
+             where not parent.oid = any(i.visited)
+          ), effective_roles as (
+            select distinct role_oid from inherited i
+             where pg_catalog.pg_has_role('service_role'::name, i.role_name::name, 'USAGE')
+          ), defaults as (
+            select d.defaclrole, d.defaclnamespace, d.defaclobjtype,
+                   acl.grantee, acl.grantor, acl.privilege_type, acl.is_grantable
+              from pg_catalog.pg_default_acl d
+              cross join lateral pg_catalog.aclexplode(d.defaclacl) acl
+             where d.defaclobjtype = 'r'
+               and (d.defaclnamespace = 0 or exists (
+                 select 1 from pg_catalog.pg_namespace ns
+                  where ns.oid = d.defaclnamespace and ns.nspname in ('public','private','vault')))
+               and (acl.grantee = 0 or acl.grantee in (select role_oid from effective_roles))
+          )
+          select format('creator=%I schema=%s object_type=%s grantee=%s grantor=%I privileges=%s',
+                 pg_catalog.pg_get_userbyid(defaclrole),
+                 coalesce(n.nspname, '*'), defaclobjtype,
+                 case when grantee = 0 then 'PUBLIC' else grantee_role.rolname end,
+                 grantor_role.rolname,
+                 string_agg(privilege_type || case when is_grantable then ' (grantable)' else '' end,
+                            ',' order by privilege_type))
+            from defaults d
+            left join pg_catalog.pg_namespace n on n.oid = d.defaclnamespace
+            left join pg_catalog.pg_roles grantee_role on grantee_role.oid = d.grantee
+            join pg_catalog.pg_roles grantor_role on grantor_role.oid = d.grantor
+           group by defaclrole, n.nspname, defaclobjtype, grantee, grantee_role.rolname, grantor_role.rolname
+           order by pg_catalog.pg_get_userbyid(defaclrole), n.nspname, defaclobjtype,
+                    coalesce(grantee_role.rolname, 'PUBLIC');
+
           \echo 'Effective column-only privileges (table-wide rights are summarized above)'
           with roles(role_name) as (values ('anon'), ('authenticated'), ('service_role'), ('postgres')),
           privileges(privilege) as (values ('SELECT'), ('INSERT'), ('UPDATE'), ('REFERENCES')),
@@ -337,6 +445,29 @@ jobs:
              ('public','classroom_disconnect_connection'), ('public','classroom_mark_reauthorization_required'),
              ('public','classroom_record_token_refresh'), ('private','delete_classroom_refresh_secret'))
            order by n.nspname, p.proname, pg_catalog.pg_get_function_identity_arguments(p.oid);
+
+          \echo 'Classroom function body fingerprint comparison (MD5 only; source is never emitted)'
+          with wanted_functions(function_name, identity_arguments, expected_hash) as (values
+            ('classroom_create_oauth_transaction', 'p_state_hash text, p_user_id uuid, p_nonce_hash text, p_pkce_verifier text, p_redirect_uri text, p_requested_scopes text[], p_expires_at timestamp with time zone', 'ae87affe7915f4f8499f4aeac29b5c0f'),
+            ('classroom_consume_oauth_transaction', 'p_state_hash text', '647634d22ff33db4a6b0bbdd9e133617'),
+            ('classroom_save_connection', 'p_user_id uuid, p_google_subject text, p_google_email text, p_refresh_token text, p_token_expires_at timestamp with time zone, p_granted_scopes text[]', '720a7620bebbebb7f479bf5f16e80dc0'),
+            ('classroom_get_refresh_token', 'p_user_id uuid, p_connection_id uuid', 'bae8c119f311876bf49752482daa673f'),
+            ('classroom_disconnect_connection', 'p_user_id uuid, p_connection_id uuid', 'd6ec33f69341489700b0468d03b76350'),
+            ('classroom_mark_reauthorization_required', 'p_user_id uuid, p_connection_id uuid', '1a8aec32f6f5e45ebc3ca6cdcef7f6b0'),
+            ('classroom_record_token_refresh', 'p_user_id uuid, p_connection_id uuid, p_token_expires_at timestamp with time zone, p_refresh_token text', '4df1ae24ced146f88f9914f45e06992f')
+          ), actual as (
+            select e.function_name, e.identity_arguments, e.expected_hash,
+                   pg_catalog.md5(p.prosrc) as live_hash
+              from wanted_functions e
+              left join pg_catalog.pg_proc p on p.pronamespace = 'public'::regnamespace
+                and p.proname = e.function_name
+                and pg_catalog.pg_get_function_identity_arguments(p.oid) = e.identity_arguments
+          )
+          select format('public.%I(%s) | expected=%s live=%s | %s', function_name,
+                 identity_arguments, expected_hash, coalesce(live_hash, 'MISSING'),
+                 case when live_hash is null then 'MISSING'
+                      when live_hash = expected_hash then 'MATCH' else 'DIFFERENT' end)
+            from actual order by function_name;
 
           \echo 'Missing expected Classroom functions (no row means none)'
           with expected(schema_name, function_name) as (values
