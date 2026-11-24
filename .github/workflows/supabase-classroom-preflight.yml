@@ -1,0 +1,86 @@
+name: Supabase Classroom Staging Preflight
+
+on:
+  push:
+    branches:
+      - dev/mikey
+    paths:
+      - .github/workflows/supabase-classroom-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  staging-preflight:
+    if: github.ref == 'refs/heads/dev/mikey'
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_PROJECT_REF: pjafmgabajqqozdxhzvz
+
+    steps:
+      - name: Check out dev/mikey
+        uses: actions/checkout@v4
+
+      - name: Print run identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Branch: ${GITHUB_REF_NAME}"
+          echo "Commit: $(git rev-parse HEAD)"
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 3.2.0
+
+      - name: Print CLI version
+        run: supabase --version
+
+      - name: Require staging credentials
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SUPABASE_ACCESS_TOKEN}" ]]; then
+            echo "Missing required repository secret: SUPABASE_ACCESS_TOKEN" >&2
+            exit 1
+          fi
+          if [[ -z "${SUPABASE_DB_PASSWORD}" ]]; then
+            echo "Missing required repository secret: SUPABASE_DB_PASSWORD" >&2
+            exit 1
+          fi
+
+      - name: Link only the confirmed staging project
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [[ "${GITHUB_REF}" == "refs/heads/dev/mikey" ]] || {
+            echo "Refusing to run outside dev/mikey." >&2
+            exit 1
+          }
+          supabase link \
+            --project-ref "${EXPECTED_PROJECT_REF}"
+
+          linked_ref="$(cat supabase/.temp/project-ref)"
+          echo "Linked project ref: ${linked_ref}"
+          if [[ "${linked_ref}" != "${EXPECTED_PROJECT_REF}" ]]; then
+            echo "Linked project reference does not match the expected staging project." >&2
+            exit 1
+          fi
+
+      - name: Show remote migration status
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase migration list --remote
+
+      - name: Preview pending migrations without applying them
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase db push --dry-run --remote
