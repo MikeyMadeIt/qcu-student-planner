@@ -179,6 +179,9 @@ function syncThemeOptions() {
     document.querySelectorAll('[data-mobile-theme-icon]').forEach(icon => {
         icon.className = `bi ${option.icon}`;
     });
+    document.querySelectorAll('[data-desktop-theme-icon]').forEach(icon => {
+        icon.className = `bi ${option.icon}`;
+    });
 }
 function initThemeOptions() {
     document.querySelectorAll('[data-theme-options]').forEach(el => {
@@ -213,6 +216,27 @@ function initMobileThemeMenu() {
         if (!panel.hidden && !wrapper.contains(event.target)) setOpen(false);
     });
     document.addEventListener('sp:themechange', syncThemeOptions);
+}
+
+function ensureDesktopFloatingTools() {
+    if (document.getElementById('desktopFloatingTools')) return;
+    const tools = document.createElement('div');
+    tools.id = 'desktopFloatingTools';
+    tools.className = 'desktop-floating-tools';
+    tools.innerHTML = `<div class="desktop-floating-theme" id="desktopFloatingTheme">
+        <button type="button" class="shell-icon-btn desktop-floating-theme-trigger" id="desktopFloatingThemeTrigger" aria-haspopup="true" aria-expanded="false" aria-controls="desktopFloatingThemePanel" aria-label="Choose theme" title="Choose theme">
+            <i class="bi bi-moon-stars" data-desktop-theme-icon aria-hidden="true"></i>
+        </button>
+        <div class="desktop-floating-theme-panel" id="desktopFloatingThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
+    </div>`;
+    document.body.appendChild(tools);
+    const trigger = tools.querySelector('#desktopFloatingThemeTrigger');
+    const panel = tools.querySelector('#desktopFloatingThemePanel');
+    const setOpen = open => { panel.hidden = !open; trigger.setAttribute('aria-expanded', String(open)); };
+    trigger.addEventListener('click', event => { event.stopPropagation(); setOpen(panel.hidden); });
+    panel.addEventListener('click', event => { if (event.target.closest('.theme-option')) setOpen(false); });
+    document.addEventListener('click', event => { if (!panel.hidden && !tools.contains(event.target)) setOpen(false); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !panel.hidden) { setOpen(false); trigger.focus(); } });
 }
 
 // Sidebar toggle (header)
@@ -535,6 +559,9 @@ function renderShellBar(activeKey) {
             <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
         </div>
         <div class="mobile-shell-actions">
+            <button type="button" class="mobile-shell-icon-btn pomodoro-mobile-trigger" data-pomodoro-trigger aria-label="Open Pomodoro timer" title="Pomodoro timer" aria-expanded="false">
+                <i class="bi bi-stopwatch" aria-hidden="true"></i>
+            </button>
             <div class="mobile-theme-menu" id="mobileThemeMenu">
                 <button type="button" class="mobile-shell-icon-btn" id="mobileThemeTrigger" aria-haspopup="true"
                     aria-expanded="false" aria-controls="mobileThemePanel" aria-label="Choose theme">
@@ -852,8 +879,7 @@ function renderShell(activeKey, admin) {
       <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
     </div>`;
         } else {
-            sidebarHtml += `<div class="sidebar-theme-row"><span>Theme</span><div class="theme-switch" data-theme-switch role="radiogroup" aria-label="Theme"></div></div>
-    <div class="sidebar-profile" id="sidebarProfile">
+            sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
       <span class="profile-avatar js-profile-avatar" aria-hidden="true" id="sidebarProfileAvatar">${initial}</span>
       <div class="sidebar-profile-text">
         <div class="sidebar-profile-name" id="sidebarProfileName">${escHtml(name)}</div>
@@ -872,6 +898,7 @@ function renderShell(activeKey, admin) {
         updateNotificationBadge();
     }
     if (!softNavigation) wireDesktopSidebarGroups(sidebar);
+    if (!isAdminArea) ensureDesktopFloatingTools();
     initThemeSwitches();
     initThemeOptions();
     syncThemeOptions();
@@ -893,6 +920,7 @@ function renderShell(activeKey, admin) {
     import('./soft-navigation.js').then(({ initSoftNavigation }) => initSoftNavigation()).catch(error => {
         console.error('Could not initialize app navigation.', error);
     });
+    if (!isAdminArea) import('../modules/pomodoro.js').then(({ mountPomodoro }) => mountPomodoro()).catch(error => console.error('Could not initialize Pomodoro timer.', error));
 }
 
 function initDesktopMainScrollFade(main) {
