@@ -3,7 +3,7 @@
    - Cache-first only for images, icons and pinned CDN files.
    - Auth and admin pages and non-GET requests are never cached. */
 
-const CACHE = 'qcu-planner-v8';
+const CACHE = 'qcu-planner-v9';
 const PRECACHE = [
     'manifest.json',
     'assets/icons/icon-192.png',
