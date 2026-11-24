@@ -8,6 +8,10 @@ project_id = "qcu-student-planner"
 # The function verifies either an approved user's JWT or the private cron secret.
 verify_jwt = false
 
+[functions.classroom-oauth-callback]
+# Google redirects here without the Planner JWT; OAuth state is single-use and bound server-side.
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.
