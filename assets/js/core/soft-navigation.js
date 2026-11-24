@@ -11,6 +11,10 @@ let activeNavigation = null;
 let pageScope = null;
 const originalSetInterval = window.setInterval.bind(window);
 
+function recordNavigationDiagnostic(eventName, details) {
+    try { window.__spNavigationDiagnostics?.record(eventName, details); } catch (error) { /* Diagnostics must not affect navigation. */ }
+}
+
 window.setInterval = function (callback, delay, ...args) {
     const timer = originalSetInterval(callback, delay, ...args);
     if (pageScope) pageScope.intervals.push(timer);
@@ -183,23 +187,40 @@ async function runPageScripts(pageDocument, pageUrl, signal) {
 }
 
 async function swapTo(url, { history = true } = {}) {
+    let stage = 'destination-fetch';
+    recordNavigationDiagnostic('swap-started', { destination: url.pathname, fetchSucceeded: false });
+    try {
     if (activeNavigation) activeNavigation.abort();
     const controller = new AbortController();
     activeNavigation = controller;
     const response = await fetch(url.href, { credentials: 'same-origin', signal: controller.signal });
-    if (!response.ok || !response.headers.get('content-type')?.includes('text/html'))
+    const contentType = response.headers.get('content-type') || '(missing)';
+    const htmlResponse = response.ok && contentType.toLowerCase().includes('text/html');
+    recordNavigationDiagnostic('destination-response', {
+        destination: url.pathname,
+        fetchSucceeded: htmlResponse,
+        httpStatus: response.status,
+        contentType,
+    });
+    if (!htmlResponse)
         throw new Error('Destination page could not be loaded as HTML.');
     const html = await response.text();
     if (controller.signal.aborted) throw new DOMException('Navigation superseded.', 'AbortError');
+    stage = 'destination-shell-validation';
     const pageDocument = new DOMParser().parseFromString(html, 'text/html');
     const nextMain = pageDocument.querySelector('.main-content');
     const currentMain = document.querySelector('.main-content');
-    if (!nextMain || !currentMain || !pageDocument.querySelector('#sidebar'))
+    const hasSidebar = Boolean(pageDocument.querySelector('#sidebar'));
+    const shellElements = `destination .main-content=${Boolean(nextMain)}, current .main-content=${Boolean(currentMain)}, destination #sidebar=${hasSidebar}`;
+    recordNavigationDiagnostic('destination-shell-elements', { destination: url.pathname, shellElements });
+    if (!nextMain || !currentMain || !hasSidebar)
         throw new Error('Destination does not use the shared app shell.');
 
     const currentPath = location.pathname;
+    stage = 'destination-styles';
     await updatePageStyles(pageDocument, url, controller.signal);
     if (controller.signal.aborted) throw new DOMException('Navigation superseded.', 'AbortError');
+    stage = 'shell-update';
     document.dispatchEvent(new CustomEvent('sp:pageleave', { detail: { from: currentPath, to: url.pathname } }));
     if (pageScope) {
         pageScope.controller.abort();
@@ -213,10 +234,11 @@ async function swapTo(url, { history = true } = {}) {
         closeMobileAppNavMenuForNavigation();
     else closeMobileNavigation();
     const contentNodes = [...nextMain.childNodes].map(node => node.cloneNode(true));
+    stage = 'page-content-replacement';
     currentMain.replaceChildren(...(shellBar ? [shellBar] : []), ...contentNodes);
     updateShellForRoute(currentMain, nextMain, url);
 
-    document.querySelectorAll('[data-soft-nav-overlay]').forEach(node => {
+    document.querySelectorAll('[data-soft-nav-overlay]:not(#sp-navigation-debug)').forEach(node => {
         if (node.id === 'mobileAppNavMenu')
             node.removeAttribute('data-soft-nav-overlay');
         else node.remove();
@@ -232,10 +254,12 @@ async function swapTo(url, { history = true } = {}) {
         });
     }
 
+    stage = 'history-and-scroll';
     if (history) window.history.pushState({ softNavigation: true }, '', url.href);
     if (url.hash) requestAnimationFrame(() => document.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView());
     else window.scrollTo({ top: 0, behavior: 'auto' });
 
+    stage = 'destination-scripts';
     window.__spSoftNavigating = true;
     window.__spSoftRouteActive = true;
     try {
@@ -255,6 +279,16 @@ async function swapTo(url, { history = true } = {}) {
         });
     }
     activeNavigation = null;
+    recordNavigationDiagnostic('swap-succeeded', { destination: url.pathname });
+    } catch (error) {
+        recordNavigationDiagnostic('swap-failed', {
+            destination: url.pathname,
+            failedStage: stage,
+            errorName: error?.name || 'Error',
+            errorMessage: error?.message || String(error),
+        });
+        throw error;
+    }
 }
 
 function onClick(event) {
@@ -264,9 +298,11 @@ function onClick(event) {
     const url = new URL(anchor.href, location.href);
     if (!isAppRoute(url) || url.pathname === location.pathname && url.search === location.search) return;
     event.preventDefault();
+    recordNavigationDiagnostic('internal-link-intercepted', { intercepted: true, destination: url.pathname });
     swapTo(url).catch(error => {
         if (error.name === 'AbortError') return;
         console.error('Soft navigation failed; using the page route directly.', error);
+        if (window.__spNavigationDiagnostics?.beforeFallback(url.pathname, () => location.assign(url.href))) return;
         location.assign(url.href);
     });
 }
@@ -280,7 +316,7 @@ export function initSoftNavigation() {
     });
     // The mobile menu and desktop sidebar profile popover are part of the
     // persistent shell even though layout.js mounts them directly on body.
-    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu)')
+    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu):not(#sp-navigation-debug)')
         .forEach(node => node.dataset.softNavOverlay = 'true');
     document.addEventListener('click', onClick);
     if (window.MutationObserver && document.body) {
@@ -294,9 +330,13 @@ export function initSoftNavigation() {
     window.addEventListener('popstate', () => {
         const url = new URL(location.href);
         if (!isAppRoute(url)) {
+            if (window.__spNavigationDiagnostics?.beforeFallback(url.pathname, () => location.assign(url.href))) return;
             location.assign(url.href);
             return;
         }
-        swapTo(url, { history: false }).catch(() => location.reload());
+        swapTo(url, { history: false }).catch(error => {
+            if (window.__spNavigationDiagnostics?.beforeFallback(url.pathname, () => location.reload())) return;
+            location.reload();
+        });
     });
 }

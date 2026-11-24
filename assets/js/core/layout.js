@@ -917,10 +917,190 @@ function renderShell(activeKey, admin) {
     initDesktopMainScrollFade(document.querySelector('.main-content'));
     // Keep the existing document routes directly usable while enabling
     // shell-preserving navigation for signed-in app pages.
-    import('./soft-navigation.js').then(({ initSoftNavigation }) => initSoftNavigation()).catch(error => {
+    const navigationDiagnostics = initSoftNavigationDiagnostics();
+    navigationDiagnostics?.record('module-import-started', {
+        initialized: window.__spSoftNavigationInitialized === true,
+    });
+    import('./soft-navigation.js').then(({ initSoftNavigation }) => {
+        initSoftNavigation();
+        navigationDiagnostics?.record('module-import-succeeded', {
+            initialized: window.__spSoftNavigationInitialized === true,
+        });
+    }).catch(error => {
+        navigationDiagnostics?.record('module-import-failed', {
+            initialized: window.__spSoftNavigationInitialized === true,
+            errorName: error?.name,
+            errorMessage: error?.message,
+        });
         console.error('Could not initialize app navigation.', error);
     });
     if (!isAdminArea) import('../modules/pomodoro.js').then(({ mountPomodoro }) => mountPomodoro()).catch(error => console.error('Could not initialize Pomodoro timer.', error));
+}
+
+// Temporary, opt-in diagnostics for soft-navigation failures. All diagnostic
+// state stays in memory and the helper does no work unless explicitly enabled.
+function initSoftNavigationDiagnostics() {
+    let enabled = false;
+    try {
+        enabled = new URLSearchParams(window.location.search).get('debugNavigation') === '1';
+    } catch (error) {
+        return null;
+    }
+    if (!enabled) return null;
+    if (window.__spNavigationDiagnostics) return window.__spNavigationDiagnostics;
+
+    const state = {
+        initialized: window.__spSoftNavigationInitialized === true,
+        moduleImport: 'pending',
+        intercepted: 'not observed',
+        destination: '—',
+        destinationFetch: 'not started',
+        httpStatus: '—',
+        contentType: '—',
+        shellElements: 'not checked',
+        failedStage: '—',
+        errorName: '—',
+        errorMessage: '—',
+        fallback: 'not triggered',
+        events: [],
+    };
+    const safeText = value => String(value ?? '—')
+        .replace(/https?:\/\/[^\s"'<>]+/gi, raw => {
+            try {
+                const url = new URL(raw);
+                return `${url.origin}${url.pathname}`;
+            } catch (error) { return '[URL]'; }
+        })
+        .replace(/((?:access_token|refresh_token|token|code|state|secret|password|key)=)[^&\s]+/gi, '$1[redacted]')
+        .replace(/[\r\n\t]+/g, ' ')
+        .slice(0, 320);
+    const safePath = value => {
+        const raw = String(value ?? '—');
+        try { return new URL(raw, window.location.href).pathname.slice(0, 320); }
+        catch (error) { return raw.split(/[?#]/, 1)[0].slice(0, 320); }
+    };
+    let panel;
+    let reportNode;
+    let eventsNode;
+    let pauseToggle;
+    let continueButton;
+    let pendingFallback = null;
+
+    const render = () => {
+        if (!panel) return;
+        state.initialized = window.__spSoftNavigationInitialized === true;
+        reportNode.textContent = [
+            `Soft navigation initialized: ${state.initialized}`,
+            `Module import: ${state.moduleImport}`,
+            `Internal link intercepted: ${state.intercepted}`,
+            `Destination path: ${state.destination}`,
+            `Destination HTML fetch: ${state.destinationFetch}`,
+            `HTTP status: ${state.httpStatus}`,
+            `Content-Type: ${state.contentType}`,
+            `Destination shell elements: ${state.shellElements}`,
+            `Failed stage: ${state.failedStage}`,
+            `Error: ${state.errorName}: ${state.errorMessage}`,
+            `location.assign() fallback: ${state.fallback}`,
+        ].join('\n');
+        eventsNode.textContent = state.events.slice(-12).join('\n');
+    };
+    const api = {
+        record(eventName, details = {}) {
+            if (!enabled) return;
+            const event = String(eventName || 'event');
+            if (event === 'module-import-started') state.moduleImport = 'loading';
+            if (event === 'module-import-succeeded') state.moduleImport = 'succeeded';
+            if (event === 'module-import-failed') state.moduleImport = 'failed';
+            if (Object.hasOwn(details, 'initialized')) state.initialized = details.initialized === true;
+            if (event === 'swap-started') {
+                state.httpStatus = '—';
+                state.contentType = '—';
+                state.shellElements = 'not checked';
+                state.failedStage = '—';
+                state.errorName = '—';
+                state.errorMessage = '—';
+                state.fallback = 'not triggered';
+            }
+            if (Object.hasOwn(details, 'intercepted')) state.intercepted = details.intercepted ? 'yes' : 'no';
+            const destination = Object.hasOwn(details, 'destination') ? safePath(details.destination) : '';
+            if (destination) state.destination = destination;
+            if (Object.hasOwn(details, 'fetchSucceeded')) state.destinationFetch = details.fetchSucceeded ? 'succeeded' : 'failed';
+            if (Object.hasOwn(details, 'httpStatus')) state.httpStatus = safeText(details.httpStatus);
+            if (Object.hasOwn(details, 'contentType')) state.contentType = safeText(details.contentType);
+            if (Object.hasOwn(details, 'shellElements')) state.shellElements = safeText(details.shellElements);
+            if (Object.hasOwn(details, 'failedStage')) state.failedStage = safeText(details.failedStage);
+            if (Object.hasOwn(details, 'errorName')) state.errorName = safeText(details.errorName);
+            if (Object.hasOwn(details, 'errorMessage')) state.errorMessage = safeText(details.errorMessage);
+            if (Object.hasOwn(details, 'fallback')) state.fallback = typeof details.fallback === 'string'
+                ? safeText(details.fallback)
+                : details.fallback ? 'triggered' : 'not triggered';
+            state.events.push(`${new Date().toISOString()} ${event}${destination ? ` · ${destination}` : ''}`);
+            render();
+        },
+        report() {
+            render();
+            return reportNode ? `${reportNode.textContent}\n\nRecent events:\n${eventsNode.textContent}` : '';
+        },
+        beforeFallback(destinationPath, continueFallback) {
+            if (!enabled) return false;
+            const destination = safePath(destinationPath);
+            if (pauseToggle?.checked) {
+                if (pendingFallback) return true;
+                pendingFallback = continueFallback;
+                continueButton.hidden = false;
+                api.record('fallback-paused', {
+                    destination,
+                    fallback: 'paused; awaiting Continue navigation',
+                });
+                return true;
+            }
+            api.record('fallback-triggered', { destination, fallback: true });
+            return false;
+        },
+    };
+
+    const style = document.createElement('style');
+    style.textContent = '#sp-navigation-debug{position:fixed;z-index:2147483647;left:8px;right:8px;bottom:8px;max-height:44vh;overflow:auto;padding:12px;border:1px solid #64748b;border-radius:10px;background:#0b1220;color:#f8fafc;font:12px/1.45 system-ui,sans-serif;box-shadow:0 4px 24px #0008}#sp-navigation-debug button{min-height:38px;margin:0 8px 8px 0;padding:6px 12px;border:1px solid #94a3b8;border-radius:6px;background:#1e293b;color:#fff;font:inherit}#sp-navigation-debug pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0;color:#e2e8f0}#sp-navigation-debug summary{cursor:pointer;font-weight:700}';
+    panel = document.createElement('aside');
+    panel.id = 'sp-navigation-debug';
+    panel.setAttribute('aria-label', 'Soft navigation diagnostics');
+    panel.innerHTML = '<strong>Navigation diagnostics (temporary)</strong><div><label><input type="checkbox" data-pause> Pause before fallback</label> <button type="button" data-copy>Copy diagnostic report</button> <button type="button" data-continue hidden>Continue navigation</button></div><details open><summary>Current report</summary><pre data-report></pre></details><details><summary>Recent events</summary><pre data-events></pre></details>';
+    document.head.appendChild(style);
+    document.body.appendChild(panel);
+    reportNode = panel.querySelector('[data-report]');
+    eventsNode = panel.querySelector('[data-events]');
+    pauseToggle = panel.querySelector('[data-pause]');
+    continueButton = panel.querySelector('[data-continue]');
+    pauseToggle.checked = false;
+    continueButton.hidden = true;
+    continueButton.addEventListener('click', () => {
+        if (typeof pendingFallback !== 'function') return;
+        const resume = pendingFallback;
+        pendingFallback = null;
+        continueButton.hidden = true;
+        api.record('fallback-continued', { destination: state.destination, fallback: true });
+        resume();
+    });
+    panel.querySelector('[data-copy]').addEventListener('click', async () => {
+        const report = api.report();
+        try {
+            if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(report);
+            else throw new Error('Clipboard API unavailable');
+        } catch (error) {
+            const field = document.createElement('textarea');
+            field.value = report;
+            field.setAttribute('readonly', '');
+            field.style.position = 'fixed';
+            field.style.opacity = '0';
+            document.body.appendChild(field);
+            field.select();
+            try { document.execCommand('copy'); } catch (copyError) { /* Keep report visible for manual copy. */ }
+            field.remove();
+        }
+    });
+    window.__spNavigationDiagnostics = api;
+    render();
+    return api;
 }
 
 function initDesktopMainScrollFade(main) {
