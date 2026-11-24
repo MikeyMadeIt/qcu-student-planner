@@ -1414,32 +1414,40 @@
 .assessment-grid-row > :last-child { justify-self: center; }
 
 @media (max-width: 575.98px) {
+    /* Height of every input and button in the Grading Breakdown modal on phones.
+       Change this one value to make them taller or slimmer. */
+    #gradeModal { --grade-input-h: 2.25rem; }
+
     .component-header { flex-wrap: nowrap; }
-    .component-header > .form-control { flex: 1 1 auto !important; width: auto; }
+    .component-header > .form-control { flex: 1 1 auto !important; width: auto; min-width: 0 !important; }
     .component-header .component-weight { flex: 0 0 88px; width: 88px; }
     .assessment-grid-head,
     .assessment-grid-row {
-        grid-template-columns: minmax(40px, 1fr) 48px 52px 46px 44px !important;
+        grid-template-columns: minmax(40px, 1fr) 48px 52px 46px var(--grade-input-h) !important;
         gap: 3px !important;
         padding-inline: 7px !important;
     }
     .assessment-grid-head { font-size: .56rem !important; letter-spacing: 0 !important; }
     .assessment-grid-row input { padding-inline: 3px; font-size: .72rem; }
+    /* More room on the left so the "e.g., Quiz 1" placeholder is not stuck to the edge. */
+    #gradeModal .assessment-grid-row > input:first-child {
+        padding-left: 10px;
+        padding-right: 6px;
+    }
     #gradeModal .component-weight,
-    #gradeModal .component-weight input.form-control,
     #gradeModal .component-header > .form-control,
     #gradeModal .component-header > .btn-icon-sm,
     #gradeModal .assessment-grid-row input,
     #gradeModal .assessment-grid-row > .btn-icon-sm {
-        height: 2.75rem !important;
-        min-height: 2.75rem !important;
+        height: var(--grade-input-h) !important;
+        min-height: var(--grade-input-h) !important;
     }
     #gradeModal .component-header > .btn-icon-sm,
     #gradeModal .assessment-grid-row > .btn-icon-sm {
-        width: 2.75rem !important;
-        height: 2.75rem !important;
-        min-height: 2.75rem !important;
-        flex: 0 0 2.75rem;
+        width: var(--grade-input-h) !important;
+        height: var(--grade-input-h) !important;
+        min-height: var(--grade-input-h) !important;
+        flex: 0 0 var(--grade-input-h);
     }
     #gradeModal .modal-dialog { margin: 8px; }
     #gradeModal .modal-content { border-radius: 12px; }
@@ -1449,7 +1457,7 @@
 @media (max-width: 359.98px) {
     .assessment-grid-head,
     .assessment-grid-row {
-        grid-template-columns: minmax(36px, 1fr) 44px 46px 42px 44px !important;
+        grid-template-columns: minmax(36px, 1fr) 44px 46px 42px var(--grade-input-h) !important;
         gap: 2px !important;
         padding-inline: 6px !important;
     }
@@ -1480,3 +1488,58 @@
 
 .grade-empty > strong { color: var(--text); font-size: .96rem; }
 .grade-empty > span { max-width: 30rem; font-size: .82rem; line-height: 1.5; }
+
+/* DESKTOP FIX 1 (screens 576px and wider): wider number columns.
+   Score / Out of were too narrow, so "100" showed as "10" in the Grading Breakdown
+   and the Units placeholder was cut off in the Manual GWA calculator.
+   Delete this block to go back to the phone-only changes. */
+@media (min-width: 576px) {
+    .assessment-grid-head,
+    .assessment-grid-row {
+        grid-template-columns: minmax(0, 1fr) 72px 72px 56px 36px !important;
+    }
+
+    .gwa-table-header,
+    .gwa-input-row {
+        grid-template-columns: minmax(0, 1fr) 76px 120px 34px;
+    }
+
+    .assessment-grid-row input[type="number"],
+    .gwa-input-row input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .assessment-grid-row input[type="number"]::-webkit-outer-spin-button,
+    .assessment-grid-row input[type="number"]::-webkit-inner-spin-button,
+    .gwa-input-row input[type="number"]::-webkit-outer-spin-button,
+    .gwa-input-row input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
+
+/* DESKTOP FIX 2: narrow subject cards.
+   When a card is narrow (two columns on a laptop), the code was squeezed to one letter
+   and the badges overlapped. Now the percent / GWA / badges move to a second line.
+   Delete this block to remove it. */
+.grade-subject-item {
+    container-type: inline-size;
+}
+
+@container (max-width: 299px) {
+    .grade-card-top {
+        grid-template-columns: minmax(0, 1fr) auto;
+        row-gap: 4px;
+    }
+
+    .grade-card-center {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 2px 10px;
+    }
+}
