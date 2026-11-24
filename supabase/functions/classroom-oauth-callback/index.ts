@@ -3,6 +3,13 @@ import { createAdmin, safeRedirect, sha256 } from '../_shared/classroom.ts';
 
 const GOOGLE_KEYS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'));
 const fail = (returnOrigin?: string | null) => safeRedirect('error', returnOrigin);
+const GOOGLE_USERINFO_EMAIL_SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
+
+function hasRequiredScopes(grantedScopes: string[], requiredScopes: string[]): boolean {
+  const normalizeScope = (scope: string) => scope === GOOGLE_USERINFO_EMAIL_SCOPE ? 'email' : scope;
+  const normalizedGrantedScopes = new Set(grantedScopes.map(normalizeScope));
+  return requiredScopes.every(scope => normalizedGrantedScopes.has(normalizeScope(scope)));
+}
 
 async function revokeGoogleCredential(token: unknown) {
   if (typeof token !== 'string' || !token) return;
@@ -62,7 +69,7 @@ Deno.serve(async req => {
 
     const grantedScopes = typeof tokens.scope === 'string' ? tokens.scope.split(/\s+/).filter(Boolean) : [];
     const requiredScopes = transaction.requested_scopes as string[];
-    if (!requiredScopes.every(scope => grantedScopes.includes(scope))) throw new Error('scope');
+    if (!hasRequiredScopes(grantedScopes, requiredScopes)) throw new Error('scope');
     const { data: profile, error: profileError } = await admin.from('profiles').select('account_status').eq('id', transaction.user_id).maybeSingle();
     if (profileError || profile?.account_status !== 'approved') {
       await revokeGoogleCredential(tokens.refresh_token || tokens.access_token);
