@@ -131,6 +131,12 @@ jobs:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
+          {
+            echo ''
+            echo '### Classroom OAuth security inspection'
+            echo ''
+            echo '```text'
+          } >> "$GITHUB_STEP_SUMMARY"
           PGOPTIONS='-c default_transaction_read_only=on' psql \
             --dbname "$SUPABASE_DB_URL" \
             --no-psqlrc \
@@ -138,7 +144,7 @@ jobs:
             --no-align \
             --tuples-only \
             --field-separator=' | ' \
-            --pset=pager=off <<'SQL'
+            --pset=pager=off <<'SQL' | tee -a "$GITHUB_STEP_SUMMARY"
           \echo '=== Google Classroom OAuth database security summary ==='
           \echo 'Migration history'
           select to_regclass('supabase_migrations.schema_migrations') is not null as migration_table_exists \gset
@@ -418,6 +424,7 @@ jobs:
              join pg_catalog.pg_namespace n on n.oid = p.pronamespace
              where n.nspname = 'vault' and p.proname = 'create_secret');
           SQL
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Show remote migration status
         env:
