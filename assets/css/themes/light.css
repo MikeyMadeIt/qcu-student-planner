@@ -1,17 +1,17 @@
 [data-theme="light"] {
     color-scheme: light;
-    --bg: #F7F8FA;
-    --bg-grad: #F7F8FA;
+    --bg: #F5F6F8;
+    --bg-grad: #F5F6F8;
     --surface: #FFFFFF;
     --surface-solid: #FFFFFF;
-    --surface-2: #F1F3F6;
+    --surface-2: #F3F4F6;
     --elevated: #FFFFFF;
-    --border: #E1E4E9;
-    --text: #171A21;
-    --text-soft: #596170;
-    --text-faint: #7D8592;
-    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.025);
+    --border: #E3E6EB;
+    --text: #20242C;
+    --text-soft: #5D6572;
+    --text-faint: #818996;
+    --shadow: 0 1px 2px rgba(15,23,42,.035), 0 4px 14px rgba(15,23,42,.025);
     --nav-bg: #FFFFFF;
     --tint-rgb: 23, 25, 29;
-    --input-placeholder-color: #7D8592;
+    --input-placeholder-color: #818996;
 }
