@@ -917,9 +917,7 @@ function renderShell(activeKey, admin) {
     initDesktopMainScrollFade(document.querySelector('.main-content'));
     // Keep the existing document routes directly usable while enabling
     // shell-preserving navigation for signed-in app pages.
-    import('./soft-navigation.js').then(({ initSoftNavigation }) => {
-        initSoftNavigation();
-    }).catch(error => {
+    import('./soft-navigation.js').then(({ initSoftNavigation }) => initSoftNavigation()).catch(error => {
         console.error('Could not initialize app navigation.', error);
     });
     if (!isAdminArea) import('../modules/pomodoro.js').then(({ mountPomodoro }) => mountPomodoro()).catch(error => console.error('Could not initialize Pomodoro timer.', error));
