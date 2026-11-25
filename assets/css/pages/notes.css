@@ -1805,18 +1805,6 @@ ol ol,
     background: var(--surface-2) !important;
 }
 
-[data-theme="dark"] .note-card.glass {
-    background: rgba(255,255,255,.07) !important;
-}
-
-[data-theme="light"] .note-card.glass {
-    background: rgba(255,255,255,.90) !important;
-}
-
-[data-theme="amoled"] .note-card.glass {
-    background: rgba(255,255,255,.04) !important;
-}
-
 @media (max-width: 575.98px) {
     .nt-card-actions {
         gap: 3px;
@@ -1856,21 +1844,9 @@ ol ol,
 /* Note preview panel: solid background */
 
 .nt-preview-panel {
-    background: var(--bg) !important;
+    background: var(--elevated) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-}
-
-[data-theme="dark"] .nt-preview-panel {
-    background: #141824 !important;
-}
-
-[data-theme="light"] .nt-preview-panel {
-    background: #ffffff !important;
-}
-
-[data-theme="amoled"] .nt-preview-panel {
-    background: #0e0e0e !important;
 }
 
 /* Remove old conflicting rules */
