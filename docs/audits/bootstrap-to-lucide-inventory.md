@@ -12,7 +12,7 @@
 
 ## Migration map
 
-The table below records the complete pre-edit inventory, its Lucide 1.79.0 replacement, and token occurrences. `bi-google` had no brand equivalent in Lucide 1.x and maps to `school` in the Classroom context. `bi-github` maps to `code-2`, which retains the code and repository context without drawing a different brand logo. The one dynamic chevron prefix maps to Lucide's up and down chevrons.
+The table below records the complete pre-edit inventory, its Lucide 1.79.0 replacement, and token occurrences. `bi-google` had no brand equivalent in Lucide 1.x and maps to `school` in an educational context. `bi-github` maps to `code-2`, which retains the code and repository context without drawing a different brand logo. The one dynamic chevron prefix maps to Lucide's up and down chevrons.
 
 | Bootstrap token | Lucide symbol | Occurrences | Contexts |
 |---|---|---:|---|
