@@ -10,9 +10,9 @@
 <link rel="manifest" href="../../manifest.json">
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/admin.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -20,9 +20,9 @@
   <main class="main-content">
 
     <div class="d-flex justify-content-between align-items-center mb-3 adm-dash-head">
-      <div class="section-title mb-0"><i class="bi bi-speedometer2" aria-hidden="true"></i>Overview</div>
+      <div class="section-title mb-0"><i class="icon-lucide-gauge" aria-hidden="true"></i>Overview</div>
       <button type="button" class="btn btn-ghost btn-sm" id="admRefreshBtn" aria-label="Refresh dashboard">
-        <i class="bi bi-arrow-clockwise" id="admRefreshIcon" aria-hidden="true"></i> Refresh
+        <i class="icon-lucide-rotate-cw" id="admRefreshIcon" aria-hidden="true"></i> Refresh
       </button>
     </div>
 
@@ -41,42 +41,42 @@
 
       <div class="adm-stats-grid">
         <a class="glass card-pad adm-stat-card total" href="users.html">
-          <i class="bi bi-people adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-users-round adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statTotal">0</div>
           <div class="adm-stat-label">Total users</div>
         </a>
         <a class="glass card-pad adm-stat-card pending" href="verification.html?status=pending">
-          <i class="bi bi-hourglass-split adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-hourglass adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statPending">0</div>
           <div class="adm-stat-label">Pending approvals</div>
         </a>
         <a class="glass card-pad adm-stat-card approved" href="users.html?status=approved">
-          <i class="bi bi-check-circle adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-circle-check adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statApproved">0</div>
           <div class="adm-stat-label">Approved accounts</div>
         </a>
         <a class="glass card-pad adm-stat-card rejected" href="rejected.html">
-          <i class="bi bi-x-circle adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-circle-x adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statRejected">0</div>
           <div class="adm-stat-label">Rejected accounts</div>
         </a>
         <a class="glass card-pad adm-stat-card suspended" href="users.html?status=suspended">
-          <i class="bi bi-pause-circle adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-circle-pause adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statSuspended">0</div>
           <div class="adm-stat-label">Suspended</div>
         </a>
         <a class="glass card-pad adm-stat-card new" href="users.html">
-          <i class="bi bi-calendar-plus adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-calendar-plus-2 adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statNew7">0</div>
           <div class="adm-stat-label">New, last 7 days</div>
         </a>
         <a class="glass card-pad adm-stat-card" href="inbox.html">
-          <i class="bi bi-envelope adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-mail adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statUnreadMsgs">0</div>
           <div class="adm-stat-label">Unread messages (all students)</div>
         </a>
         <a class="glass card-pad adm-stat-card" href="tickets.html?status=open">
-          <i class="bi bi-life-preserver adm-stat-icon" aria-hidden="true"></i>
+          <i class="icon-lucide-life-buoy adm-stat-icon" aria-hidden="true"></i>
           <div class="adm-stat-value" id="statOpenTickets">0</div>
           <div class="adm-stat-label">Open support tickets</div>
         </a>
@@ -84,46 +84,46 @@
 
       <div class="adm-chart-grid mb-3">
         <div class="glass card-pad">
-          <div class="section-title mb-2"><i class="bi bi-pie-chart"></i>Account status distribution</div>
+          <div class="section-title mb-2"><i class="icon-lucide-chart-pie"></i>Account status distribution</div>
           <div class="adm-dist-row">
             <div class="adm-chart-wrap adm-chart-wrap-sm"><canvas id="distChart"></canvas></div>
             <div class="adm-dist-legend" id="distLegend"></div>
           </div>
         </div>
         <div class="glass card-pad">
-          <div class="section-title mb-2"><i class="bi bi-graph-up" aria-hidden="true"></i>Registrations, last 14 days</div>
+          <div class="section-title mb-2"><i class="icon-lucide-chart-no-axes-column-increasing" aria-hidden="true"></i>Registrations, last 14 days</div>
           <div class="adm-chart-wrap"><canvas id="trendChart"></canvas></div>
         </div>
       </div>
 
       <div class="adm-chart-grid mb-3">
         <div class="glass card-pad">
-          <div class="section-title mb-2"><i class="bi bi-mortarboard"></i>Accounts by program</div>
+          <div class="section-title mb-2"><i class="icon-lucide-graduation-cap"></i>Accounts by program</div>
           <div class="adm-chart-wrap adm-chart-wrap-lg" id="programChartWrap"><canvas id="programChart"></canvas></div>
           <div class="empty-state" id="programChartEmpty" hidden>No program data yet.</div>
         </div>
         <div class="glass card-pad">
-          <div class="section-title mb-2"><i class="bi bi-building"></i>Accounts by campus</div>
+          <div class="section-title mb-2"><i class="icon-lucide-building"></i>Accounts by campus</div>
           <div class="adm-chart-wrap adm-chart-wrap-sm"><canvas id="campusChart"></canvas></div>
           <div class="adm-dist-legend" id="campusLegend"></div>
         </div>
       </div>
 
       <div class="glass card-pad mb-3">
-        <div class="section-title mb-2"><i class="bi bi-lightning-charge"></i>Quick actions</div>
+        <div class="section-title mb-2"><i class="icon-lucide-zap"></i>Quick actions</div>
         <div class="adm-quick-links">
-          <a class="btn btn-accent btn-sm" href="verification.html?status=pending"><i class="bi bi-person-check"></i> Review pending approvals</a>
-          <a class="btn btn-ghost btn-sm" href="users.html"><i class="bi bi-people"></i> View all users</a>
-          <a class="btn btn-ghost btn-sm" href="inbox.html"><i class="bi bi-inbox"></i> Open inbox</a>
-          <a class="btn btn-ghost btn-sm" href="tickets.html"><i class="bi bi-life-preserver"></i> View support tickets</a>
-          <a class="btn btn-ghost btn-sm" href="activity-log.html"><i class="bi bi-clock-history"></i> Review audit logs</a>
+          <a class="btn btn-accent btn-sm" href="verification.html?status=pending"><i class="icon-lucide-user-round-check"></i> Review pending approvals</a>
+          <a class="btn btn-ghost btn-sm" href="users.html"><i class="icon-lucide-users-round"></i> View all users</a>
+          <a class="btn btn-ghost btn-sm" href="inbox.html"><i class="icon-lucide-inbox"></i> Open inbox</a>
+          <a class="btn btn-ghost btn-sm" href="tickets.html"><i class="icon-lucide-life-buoy"></i> View support tickets</a>
+          <a class="btn btn-ghost btn-sm" href="activity-log.html"><i class="icon-lucide-history"></i> Review audit logs</a>
         </div>
       </div>
 
       <div class="adm-stack-grid mb-3">
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-person-plus"></i>Recent registrations</div>
+            <div class="section-title mb-0"><i class="icon-lucide-user-round-plus"></i>Recent registrations</div>
             <a class="text-faint" style="font-size:.8rem" href="users.html">View all &rarr;</a>
           </div>
           <div class="adm-table-wrap">
@@ -137,10 +137,10 @@
 
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-clock-history" aria-hidden="true"></i>Recent admin activity</div>
+            <div class="section-title mb-0"><i class="icon-lucide-history" aria-hidden="true"></i>Recent admin activity</div>
             <a class="text-faint" style="font-size:.8rem" href="activity-log.html">View all &rarr;</a>
           </div>
-          <div id="activityLoading" class="adm-loading" hidden><i class="bi bi-hourglass-split" aria-hidden="true"></i> Loading…</div>
+          <div id="activityLoading" class="adm-loading" hidden><i class="icon-lucide-hourglass" aria-hidden="true"></i> Loading…</div>
           <div class="adm-table-wrap">
             <table class="adm-table adm-table-compact">
               <thead><tr><th scope="col">When</th><th scope="col">Admin</th><th scope="col">Action</th><th scope="col">Account</th></tr></thead>
@@ -153,7 +153,7 @@
 
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-envelope-paper"></i>Recent administrative messages</div>
+            <div class="section-title mb-0"><i class="icon-lucide-mail"></i>Recent administrative messages</div>
             <a class="text-faint" style="font-size:.8rem" href="inbox.html">View all &rarr;</a>
           </div>
           <p class="text-faint mb-2" style="font-size:.78rem" id="msgsTotalLine"></p>
@@ -168,7 +168,7 @@
 
         <div class="glass card-pad">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="section-title mb-0"><i class="bi bi-life-preserver" aria-hidden="true"></i>Recent reports</div>
+            <div class="section-title mb-0"><i class="icon-lucide-life-buoy" aria-hidden="true"></i>Recent reports</div>
             <a class="text-faint" style="font-size:.8rem" href="tickets.html">View all &rarr;</a>
           </div>
           <p class="text-faint mb-2" style="font-size:.78rem" id="ticketsTotalLine"></p>

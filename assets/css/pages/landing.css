@@ -515,7 +515,7 @@ html {
     padding-top: 0;
 }
 
-.lp-points > li > i {
+.lp-points > li > .lucide-icon {
     flex: 0 0 auto;
     width: 2rem;
     color: rgb(var(--accent));
@@ -572,7 +572,7 @@ html {
     border-color: rgb(var(--accent));
 }
 
-.lp-link-card > i:first-child {
+.lp-link-card > .lucide-icon:first-child {
     flex: 0 0 auto;
     color: rgb(var(--accent));
     font-size: 1.4rem;

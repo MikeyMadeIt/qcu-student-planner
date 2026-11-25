@@ -11,7 +11,7 @@
     font-size: .84rem;
 }
 
-.auth-alert-inline i {
+.auth-alert-inline .lucide-icon {
     color: var(--info);
     margin-top: 2px;
 }
@@ -97,19 +97,6 @@
     color: var(--text-soft);
     padding: var(--space-6) var(--space-4);
     font-size: .88rem;
-}
-
-.empty-state > i {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
 }
 
 @media (max-width:720px) {

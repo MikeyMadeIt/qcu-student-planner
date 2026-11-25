@@ -50,7 +50,7 @@ function tkTimeFieldHtml(key, id, placeholder, label) {
     return '<div class="sch-time-field" data-time-key="' + key + '">' +
         '<input type="text" class="form-control sch-time-input" id="' + id + '" autocomplete="off" placeholder="' + placeholder + '" ' +
         'role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="' + id + 'Menu">' +
-        '<button type="button" class="sch-time-btn" tabindex="-1" aria-label="' + label + '"><i class="bi bi-clock" aria-hidden="true"></i></button>' +
+        '<button type="button" class="sch-time-btn" tabindex="-1" aria-label="' + label + '"><i class="icon-lucide-clock" aria-hidden="true"></i></button>' +
         '<div class="sch-time-menu" id="' + id + 'Menu" role="listbox" hidden></div></div>' +
         '<p class="sch-subject-error" id="' + id + 'Error" hidden></p>';
 }
@@ -219,10 +219,10 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
     var te = t && t.timeEstimate ? teHrsMins(t.timeEstimate) : { hrs: 0, mins: 0 };
     var scoreVal = (t && t.score !== null && t.score !== undefined) ? t.score : '';
     var remarksVal = t ? (t.remarks || '') : '';
-    var createdNote = t ? '<div class="col-12"><div class="tk-modal-created-note"><i class="bi bi-clock" aria-hidden="true"></i> Created ' +
+    var createdNote = t ? '<div class="col-12"><div class="tk-modal-created-note"><i class="icon-lucide-clock" aria-hidden="true"></i> Created ' +
         new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' +
         new Date(t.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + '</div></div>' : '';
-    var parentNote = t && t.parentTaskId ? '<div class="col-12"><div class="tk-repeat-hint"><i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>This is a recurring instance of another task.</div></div>' : '';
+    var parentNote = t && t.parentTaskId ? '<div class="col-12"><div class="tk-repeat-hint"><i class="icon-lucide-repeat me-1" aria-hidden="true"></i>This is a recurring instance of another task.</div></div>' : '';
     document.getElementById('taskModalBody').innerHTML =
         '<div class="row g-2">' +
             '<input type="hidden" id="tId" value="' + (t ? t.id : '') + '">' +
@@ -250,11 +250,11 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
             '<div class="col-12 mt-1"><label class="form-label">Checklist</label>' +
             '<div id="modalChecklistWrap" class="tk-modal-cl-wrap">' +
             checklist.map(function (c, i) { return modalClItemHtml(c, i); }).join('') +
-            '</div><button type="button" class="tk-cl-add-btn mt-1" onclick="modalAddClItem()"><i class="bi bi-plus" aria-hidden="true"></i> Add item</button></div>' +
+            '</div><button type="button" class="tk-cl-add-btn mt-1" onclick="modalAddClItem()"><i class="icon-lucide-plus" aria-hidden="true"></i> Add item</button></div>' +
             createdNote + parentNote +
             '</div>' +
             '<div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveTask()">' +
-            '<i class="bi bi-check2 me-1" aria-hidden="true"></i>' + (t ? 'Update Task' : 'Save Task') + '</button></div>';
+            '<i class="icon-lucide-check me-1" aria-hidden="true"></i>' + (t ? 'Update Task' : 'Save Task') + '</button></div>';
 
     tkInitTaskTimeFields(t);
     new bootstrap.Modal(document.getElementById('taskModal')).show();
@@ -273,7 +273,7 @@ function modalClItemHtml(c, i) {
     return '<div class="tk-modal-cl-row" data-i="' + i + '">' +
         '<input type="checkbox" class="form-check-input" ' + (c.done ? 'checked' : '') + ' aria-label="Item done">' +
         '<input type="text" class="form-control form-control-sm" value="' + escHtml(c.text) + '" placeholder="Item…" aria-label="Checklist item">' +
-        '<button type="button" class="btn-icon btn-sm" style="flex-shrink:0" onclick="this.closest(\'.tk-modal-cl-row\').remove()" aria-label="Remove item"><i class="bi bi-x" style="font-size:.8rem" aria-hidden="true"></i></button>' +
+        '<button type="button" class="btn-icon btn-sm" style="flex-shrink:0" onclick="this.closest(\'.tk-modal-cl-row\').remove()" aria-label="Remove item"><i class="icon-lucide-x" style="font-size:.8rem" aria-hidden="true"></i></button>' +
         '</div>';
 }
 
@@ -293,7 +293,7 @@ function saveTask() {
     if (tkSaving) return;
     var title = document.getElementById('tTitle').value.trim();
     if (!title) {
-        Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
+        Toast.show('Please enter a title', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     if (!TimeField.validate(['tDueTime'])) return;

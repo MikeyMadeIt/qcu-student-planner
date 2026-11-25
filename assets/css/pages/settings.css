@@ -156,11 +156,11 @@
     margin-top: var(--space-2);
 }
 
-/* bi-download sits flush at the left of its glyph box (unlike most bootstrap
+/* icon-lucide-download sits flush at the left of its glyph box (unlike most bootstrap
    icons, which have built-in breathing room), so it reads as touching the
    button text even with the same gap as other buttons — nudge it over to
    match. */
-#settingsExportBtn i {
+#settingsExportBtn .lucide-icon {
     margin-right: .5rem !important;
 }
 

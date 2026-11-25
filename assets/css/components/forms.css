@@ -347,7 +347,7 @@ label.checkbox-label {
     padding-right: 2.5rem;
 }
 
-.input-icon-wrap > i,
+.input-icon-wrap > .lucide-icon,
 .input-icon-wrap > .input-icon {
     position: absolute;
     right: 0.85rem;
@@ -374,7 +374,7 @@ label.checkbox-label {
     padding-left: 2.5rem;
 }
 
-.input-icon-wrap.is-search > i,
+.input-icon-wrap.is-search > .lucide-icon,
 .input-icon-wrap.is-search > .input-icon {
     right: auto;
     left: 0.85rem;

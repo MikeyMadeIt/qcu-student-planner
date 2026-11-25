@@ -58,7 +58,7 @@
     color: var(--text-soft);
 }
 
-.section-title i {
+.section-title .lucide-icon {
     flex-shrink: 0;
     color: rgb(var(--accent));
     font-size: 0.88rem;
