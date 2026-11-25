@@ -36,7 +36,7 @@ function initAiQuizMaker() {
             infoEl: aqmEl('aqmFileInfo'),
             removeEl: aqmEl('aqmFileRemove'),
             emptyEl: aqmEl('aqmFileEmpty'),
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
+            onError: msg => Toast.show(msg, 'danger', 'icon-lucide-triangle-alert'),
         });
     } catch (error) {
         console.error('AI Quiz Maker: file attachment setup failed', error);
@@ -104,8 +104,8 @@ function aqmSetBusy(busy) {
     const btn = aqmEl('aqmGenerateBtn');
     btn.disabled = busy;
     btn.innerHTML = busy
-        ? `<i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i> Generating…`
-        : `<i class="bi bi-stars" aria-hidden="true"></i> Generate Quiz`;
+        ? `<i class="icon-lucide-repeat ai-spin" aria-hidden="true"></i> Generating…`
+        : `<i class="icon-lucide-sparkles" aria-hidden="true"></i> Generate Quiz`;
 }
 
 async function aqmGenerate() {
@@ -116,7 +116,7 @@ async function aqmGenerate() {
     const file = aqmAttachment.getFile();
 
     if (!topic && !notes && !file) {
-        Toast.show('Add a topic, some notes, or attach a file to generate a quiz.', 'danger', 'bi-exclamation-triangle');
+        Toast.show('Add a topic, some notes, or attach a file to generate a quiz.', 'danger', 'icon-lucide-triangle-alert');
         return;
     }
 
@@ -287,8 +287,8 @@ function aqmRenderQuestion() {
         let stateClass = selected ? 'is-selected' : '';
         let icon = '';
         if (aqmSubmitted) {
-            if (i === q.correctIndex) { stateClass = 'is-correct'; icon = '<i class="bi bi-check-circle ai-choice-icon" aria-hidden="true"></i>'; }
-            else if (selected) { stateClass = 'is-incorrect'; icon = '<i class="bi bi-x-circle ai-choice-icon" aria-hidden="true"></i>'; }
+            if (i === q.correctIndex) { stateClass = 'is-correct'; icon = '<i class="icon-lucide-circle-check ai-choice-icon" aria-hidden="true"></i>'; }
+            else if (selected) { stateClass = 'is-incorrect'; icon = '<i class="icon-lucide-circle-x ai-choice-icon" aria-hidden="true"></i>'; }
         }
         return `<button type="button" class="ai-choice ${stateClass}" data-choice="${i}" ${aqmSubmitted ? 'disabled' : ''} aria-pressed="${selected}">
             <span class="ai-choice-letter" aria-hidden="true">${letters[i]}</span>
@@ -304,7 +304,7 @@ function aqmRenderQuestion() {
     const explanationEl = aqmEl('aqmExplanation');
     if (aqmSubmitted && q.explanation) {
         explanationEl.hidden = false;
-        explanationEl.innerHTML = `<i class="bi bi-lightbulb" aria-hidden="true"></i> ${escHtml(q.explanation)}`;
+        explanationEl.innerHTML = `<i class="icon-lucide-lightbulb" aria-hidden="true"></i> ${escHtml(q.explanation)}`;
     } else {
         explanationEl.hidden = true;
     }
@@ -325,7 +325,7 @@ function aqmSubmitQuiz() {
             message: `You have ${unanswered} unanswered question${unanswered === 1 ? '' : 's'}. Submit anyway?`,
             confirmLabel: 'Submit',
             danger: false,
-            icon: 'bi-send',
+            icon: 'icon-lucide-send',
             onConfirm: () => aqmFinishSubmit(),
         });
         return;
@@ -358,7 +358,7 @@ function aqmShowResults() {
         const userAnswer = aqmAnswers[i];
         const wasCorrect = userAnswer === q.correctIndex;
         return `<div class="ai-review-item">
-            <div class="ai-review-item-q"><i class="bi ${wasCorrect ? 'bi-check-circle ai-choice-icon' : 'bi-x-circle ai-choice-icon'}" aria-hidden="true"></i><span>${i + 1}. ${escHtml(q.question)}</span></div>
+            <div class="ai-review-item-q"><i class="${wasCorrect ? 'icon-lucide-circle-check ai-choice-icon' : 'icon-lucide-circle-x ai-choice-icon'}" aria-hidden="true"></i><span>${i + 1}. ${escHtml(q.question)}</span></div>
             <div class="text-soft" style="font-size:.85rem">
                 Your answer: ${userAnswer === null ? '<em>No answer</em>' : escHtml(`${letters[userAnswer]}. ${q.choices[userAnswer]}`)}
                 ${wasCorrect ? '' : `<br>Correct answer: ${escHtml(`${letters[q.correctIndex]}. ${q.choices[q.correctIndex]}`)}`}
@@ -381,7 +381,7 @@ function aqmPersistQuiz(quiz, meta) {
             aqmLoadHistory();
         } catch (error) {
             console.warn('AI Quiz Maker: could not save quiz', error);
-            Toast.show("Quiz generated, but it couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+            Toast.show("Quiz generated, but it couldn't be saved: " + error.message, 'danger', 'icon-lucide-cloud-off');
         }
     })();
 }
@@ -395,7 +395,7 @@ async function aqmPersistAttempt(correct, total, percent) {
         aqmLoadHistory();
     } catch (error) {
         console.warn('AI Quiz Maker: could not save attempt', error);
-        Toast.show("Your score couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+        Toast.show("Your score couldn't be saved: " + error.message, 'danger', 'icon-lucide-cloud-off');
     }
 }
 
@@ -417,14 +417,14 @@ async function aqmLoadHistory() {
               </div>
             </div>
             <div class="aqm-history-card-actions">
-              <button type="button" class="btn-icon btn-sm" onclick="aqmOpenSaved('${q.id}')" aria-label="Open ${escHtml(q.title)}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
-              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm" onclick="aqmOpenSaved('${q.id}')" aria-label="Open ${escHtml(q.title)}"><i class="icon-lucide-external-link" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="aqmDeleteSaved('${q.id}')" aria-label="Delete ${escHtml(q.title)}"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>
             </div>
           </div>`).join('')
-          : aqmHistoryEmptyMarkup('bi-journal-text', 'Generate a quiz and it will show up here.');
+          : aqmHistoryEmptyMarkup('icon-lucide-notebook-text', 'Generate a quiz and it will show up here.');
     } catch (error) {
         host.removeAttribute('aria-busy');
-        host.innerHTML = aqmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved quizzes", null, true);
+        host.innerHTML = aqmHistoryEmptyMarkup('icon-lucide-triangle-alert', "Couldn't load your saved quizzes", null, true);
         const retryBtn = document.getElementById('aqmHistoryRetryBtn');
         if (retryBtn) retryBtn.addEventListener('click', aqmLoadHistory);
     }
@@ -433,7 +433,7 @@ async function aqmLoadHistory() {
 // Shared markup for the history list's empty / error states —
 function aqmHistoryEmptyMarkup(icon, title, subtext, withRetry) {
     return `<div class="aqm-history-empty">
-        <i class="bi ${icon}" aria-hidden="true"></i>
+        <div class="aqm-history-empty-icon empty-icon-circle" aria-hidden="true"><i class="${icon}"></i></div>
         <p>${escHtml(title)}</p>
         ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
         ${withRetry ? `<button type="button" class="btn btn-ghost btn-sm mt-2" id="aqmHistoryRetryBtn">Retry</button>` : ''}
@@ -448,17 +448,17 @@ async function aqmOpenSaved(id) {
         aqmIndex = 0; aqmSubmitted = false;
         aqmRenderQuestion(); aqmShowView('quiz');
     } catch (error) {
-        Toast.show("Couldn't open that quiz: " + error.message, 'danger', 'bi-exclamation-triangle');
+        Toast.show("Couldn't open that quiz: " + error.message, 'danger', 'icon-lucide-triangle-alert');
     }
 }
 
 function aqmDeleteSaved(id) {
     confirmAction({
         title: 'Delete quiz?', message: 'This quiz and its scores will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         async onConfirm() {
             try { await (await aqmStore()).deleteQuiz(id); Toast.show('Quiz deleted'); aqmLoadHistory(); }
-            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle'); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'icon-lucide-triangle-alert'); }
         }
     });
 }

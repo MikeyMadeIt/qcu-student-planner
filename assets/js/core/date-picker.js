@@ -29,7 +29,7 @@
             if (compactMobile.addEventListener) compactMobile.addEventListener('change', syncOnBreakpoint);
             else if (compactMobile.addListener) compactMobile.addListener(syncOnBreakpoint);
         }
-        var icon = document.createElement('i'); icon.className = 'bi bi-calendar3'; icon.setAttribute('aria-hidden','true'); button.append(text, icon); wrap.appendChild(button);
+        var icon = document.createElement('i'); icon.className = 'icon-lucide-calendar-days'; icon.setAttribute('aria-hidden','true'); button.append(text, icon); wrap.appendChild(button);
         var panel = document.createElement('div'); panel.id = button.id ? button.id + 'Panel' : ''; panel.className = 'date-picker-panel'; panel.hidden = true; panel.setAttribute('role','dialog'); panel.setAttribute('aria-label','Choose date');
         button.setAttribute('aria-controls',panel.id); document.body.appendChild(panel);
         var viewDate = parse(input.value) || new Date();

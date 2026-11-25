@@ -173,18 +173,11 @@
     display: none;
 }
 
-.notification-list-empty > i,
-.notification-detail-empty > i {
-    display: grid;
-    place-items: center;
+.notification-list-empty > .empty-icon-circle,
+.notification-detail-empty > .empty-icon-circle {
     width: 3rem;
     height: 3rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.2rem;
 }
 
 .notification-list-empty strong,
@@ -241,7 +234,7 @@
     line-height: 1.6;
 }
 
-.notification-detail-date i {
+.notification-detail-date .lucide-icon {
     margin-right: var(--space-1);
 }
 

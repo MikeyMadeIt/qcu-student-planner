@@ -187,7 +187,7 @@ function doJumpDate() {
         return;
     const d = new Date(inp.value + 'T00:00');
     if (isNaN(d.getTime())) {
-        Toast.show('Invalid date', 'high', 'bi-exclamation-triangle');
+        Toast.show('Invalid date', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     calDate = d;
@@ -419,7 +419,7 @@ function weekTimetableHtml() {
             const timeLabel = timeStart + (timeEnd ? '\n' + timeEnd : '');
             const timeLabelHtml = timeStart + (timeEnd ? '<br>' + timeEnd : '');
             const isShort = height < 45;
-            const typeIcon = { class: 'bi-calendar2-week', task: 'bi-check2-square', event: 'bi-calendar-event', univ: 'bi-bank2' }[e.type] || 'bi-circle';
+            const typeIcon = { class: 'icon-lucide-calendar-days', task: 'icon-lucide-list-check', event: 'icon-lucide-calendar-days', univ: 'icon-lucide-landmark' }[e.type] || 'icon-lucide-circle';
             const zIdx = 5 + colIdx;
             html += `<div class="tt-event-block ${e.draggable ? 'tt-draggable' : ''} tt-type-${e.type}"
         style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px);background:${hexWithAlpha(e.color, 0.82)};color:#fff;z-index:${zIdx}"
@@ -512,7 +512,7 @@ function dayHtml() {
     renderAgenda(dateStr);
     if (!evts.length) {
         return `<div class="cal-empty-state">
-      <i class="bi bi-calendar-x" aria-hidden="true"></i>
+      <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-x-2"></i></div>
       <strong>Nothing scheduled for this day</strong>
       <span>Add an event or task to plan this day.</span>
     </div>`;
@@ -577,22 +577,22 @@ function renderAgenda(dateStr) {
         groups[e.type].push(e); });
     let html = '';
     const groupDefs = [
-        { key: 'class', label: 'Classes', icon: 'bi-calendar2-week' },
-        { key: 'task', label: 'Tasks', icon: 'bi-check2-square' },
-        { key: 'event', label: 'Events', icon: 'bi-calendar-event' },
-        { key: 'univ', label: 'University', icon: 'bi-bank2' }
+        { key: 'class', label: 'Classes', icon: 'icon-lucide-calendar-days' },
+        { key: 'task', label: 'Tasks', icon: 'icon-lucide-list-check' },
+        { key: 'event', label: 'Events', icon: 'icon-lucide-calendar-days' },
+        { key: 'univ', label: 'University', icon: 'icon-lucide-landmark' }
     ];
     groupDefs.forEach(g => {
         if (!groups[g.key].length)
             return;
-        html += `<div class="agenda-group-label"><i class="bi ${g.icon}" aria-hidden="true"></i>${g.label}</div>`;
+        html += `<div class="agenda-group-label"><i class="${g.icon}" aria-hidden="true"></i>${g.label}</div>`;
         groups[g.key].forEach(e => {
             html += renderAgendaItem(e, dateStr);
         });
     });
     if (!html) {
         html = `<div class="cal-empty-state cal-empty-small">
-      <i class="bi bi-calendar3" aria-hidden="true"></i>
+      <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-days"></i></div>
       <strong>Nothing scheduled</strong>
       <span>Use the Add menu above to plan this day.</span>
     </div>
@@ -660,19 +660,19 @@ function openDayModal(dateStr) {
             groups[e.type].push(e); });
         let sectionsHtml = '';
         const groupDefs = [
-            { key: 'class', label: 'Classes', icon: 'bi-calendar2-week' },
-            { key: 'task', label: 'Tasks', icon: 'bi-check2-square' },
-            { key: 'event', label: 'Events', icon: 'bi-calendar-event' },
-            { key: 'univ', label: 'University', icon: 'bi-bank2' }
+            { key: 'class', label: 'Classes', icon: 'icon-lucide-calendar-days' },
+            { key: 'task', label: 'Tasks', icon: 'icon-lucide-list-check' },
+            { key: 'event', label: 'Events', icon: 'icon-lucide-calendar-days' },
+            { key: 'univ', label: 'University', icon: 'icon-lucide-landmark' }
         ];
         groupDefs.forEach(g => {
             if (!groups[g.key].length)
                 return;
-            sectionsHtml += `<div class="day-modal-section-title"><i class="bi ${g.icon}" aria-hidden="true"></i>${g.label}</div>` +
+            sectionsHtml += `<div class="day-modal-section-title"><i class="${g.icon}" aria-hidden="true"></i>${g.label}</div>` +
                 groups[g.key].map(e => renderDayEventRow(e, dateStr)).join('');
         });
         if (!sectionsHtml) {
-            sectionsHtml = `<div class="cal-empty-state cal-empty-small"><i class="bi bi-calendar-x" aria-hidden="true"></i><strong>Nothing scheduled</strong><span>Add an event or task to plan this day.</span></div>`;
+            sectionsHtml = `<div class="cal-empty-state cal-empty-small"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-x-2"></i></div><strong>Nothing scheduled</strong><span>Add an event or task to plan this day.</span></div>`;
         }
         body.innerHTML = `
       <div class="d-flex justify-content-between align-items-start mb-3">
@@ -681,8 +681,8 @@ function openDayModal(dateStr) {
       </div>
       ${sectionsHtml}
       <div class="d-flex gap-2 mt-3 flex-wrap">
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Event</button>
-        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="bi bi-check2-square me-1" aria-hidden="true"></i>Add Task</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalEventModal(null,'${dateStr}');bootstrap.Modal.getInstance(document.getElementById('dayModal')).hide()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Event</button>
+        <button class="btn btn-ghost btn-sm flex-grow-1" onclick="openCalendarTaskModal('${dateStr}')"><i class="icon-lucide-list-check me-1" aria-hidden="true"></i>Add Task</button>
       </div>`;
         new bootstrap.Modal(document.getElementById('dayModal')).show();
     }
@@ -938,7 +938,7 @@ function exportICS() {
     lines.push('END:VCALENDAR');
     const total = calEvents.length + tasks.length + univEvents.length;
     if (total === 0) {
-        Toast.show('No events to export', 'high', 'bi-exclamation-triangle');
+        Toast.show('No events to export', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
@@ -976,7 +976,7 @@ function exportGoogleCalendar() {
     const semId = DB.getActiveSemesterId();
     const calEvents = DB.getCalendarEventsForSemester(semId);
     if (!calEvents.length) {
-        Toast.show('No exportable events. Use .ics for tasks & university events.', 'medium', 'bi-info-circle');
+        Toast.show('No exportable events. Use .ics for tasks & university events.', 'medium', 'icon-lucide-info');
         return;
     }
     const first = calEvents[0];
@@ -990,7 +990,7 @@ function exportGoogleCalendar() {
         chooseAction({
             title: 'Multiple events found',
             message: `You have ${calEvents.length} events. Open the first event in Google Calendar, or download the .ics file for bulk import.`,
-            icon: 'bi-calendar2-week',
+            icon: 'icon-lucide-calendar-days',
             options: [
                 { label: 'Open first event in Google Calendar', value: 'google', primary: true },
                 { label: 'Download .ics file', value: 'ics' },
@@ -1038,7 +1038,7 @@ function openScheduleModal(id, presetDay) {
     const color = s ? s.color : DB.colors[0];
     const body = document.getElementById('calSubjectModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
+    <h5 class="mb-3"><i class="icon-lucide-calendar-days me-2" aria-hidden="true"></i>${s ? 'Edit' : 'Add'} Schedule</h5>
     <input type="hidden" id="csId" value="${s ? s.id : ''}">
     <div class="row g-2">
       <div class="col-md-4"><label>Subject Code</label><input class="form-control" id="csCode" value="${s ? escapeHtml(s.code) : ''}" placeholder="CS101"></div>
@@ -1074,8 +1074,8 @@ function openScheduleModal(id, presetDay) {
       <div class="col-12"><label>Notes</label><textarea class="form-control" id="csNotes" rows="2" placeholder="Optional notes about this subject…">${s ? escapeHtml(s.notes || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Schedule</button>
-      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveScheduleEntry()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Schedule</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteScheduleEntry('${s.id}')" aria-label="Delete schedule"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);
@@ -1099,7 +1099,7 @@ function saveScheduleEntry() {
     const id = document.getElementById('csId').value;
     const code = document.getElementById('csCode').value.trim();
     if (!code) {
-        Toast.show('Subject code is required', 'high', 'bi-exclamation-triangle');
+        Toast.show('Subject code is required', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     if (!TimeField.validate(['csStart', 'csEnd'])) return;
@@ -1152,7 +1152,7 @@ function openCalEventModal(id, presetDate) {
     calEventModalColor = existing ? (existing.color || EVENT_CAT_COLORS['Event']) : EVENT_CAT_COLORS['Event'];
     const body = document.getElementById('calEventModalBody');
     body.innerHTML = `
-    <h5 class="mb-3"><i class="bi bi-calendar-event me-2" aria-hidden="true"></i>${existing ? 'Edit' : 'Add'} Event</h5>
+    <h5 class="mb-3"><i class="icon-lucide-calendar-days me-2" aria-hidden="true"></i>${existing ? 'Edit' : 'Add'} Event</h5>
     <div class="row g-2">
       <div class="col-12"><label>Event Title</label><input class="form-control" id="ceTitle" placeholder="e.g. Study Session, Project Meeting" value="${existing ? escapeHtml(existing.title) : ''}"></div>
       <div class="col-md-6"><label>Category</label>
@@ -1167,8 +1167,8 @@ function openCalEventModal(id, presetDate) {
       <div class="col-12"><label>Description (optional)</label><textarea class="form-control" id="ceDesc" rows="2" placeholder="Additional details…">${existing ? escapeHtml(existing.description || '') : ''}</textarea></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${existing ? 'Update' : 'Save'} Event</button>
-      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveCalEvent()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>${existing ? 'Update' : 'Save'} Event</button>
+      ${existing ? `<button class="btn btn-ghost" onclick="deleteCalEvent('${existing.id}')" aria-label="Delete event"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
     </div>`;
 
     TimeField.init(body);
@@ -1184,13 +1184,13 @@ function saveCalEvent() {
     if (ceSaving) return;
     const title = document.getElementById('ceTitle').value.trim();
     if (!title) {
-        Toast.show('Please enter a title', 'high', 'bi-exclamation-triangle');
+        Toast.show('Please enter a title', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     if (!TimeField.validate(['ceStart', 'ceEnd'])) return;
     const date = document.getElementById('ceDate').value;
     if (!date) {
-        Toast.show('Please select a date', 'high', 'bi-exclamation-triangle');
+        Toast.show('Please select a date', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     ceSaving = true;
@@ -1275,7 +1275,7 @@ async function fetchUnivEvents() {
 function openUnivEventModal(id) {
     const existing = _univEventsCache.find(e => e.id === id);
     if (!existing) {
-        Toast.show('This event is no longer available', 'medium', 'bi-info-circle');
+        Toast.show('This event is no longer available', 'medium', 'icon-lucide-info');
         return;
     }
     openUnivEventDetailsModal(existing, { showAdminHint: true });

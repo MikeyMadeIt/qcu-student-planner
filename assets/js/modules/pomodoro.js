@@ -64,7 +64,7 @@ function makeDesktopTrigger() {
     button.setAttribute('aria-label', 'Open Pomodoro timer');
     button.setAttribute('aria-expanded', 'false');
     button.title = 'Pomodoro timer';
-    button.innerHTML = '<i class="bi bi-stopwatch" aria-hidden="true"></i>';
+    button.innerHTML = '<i class="icon-lucide-timer" aria-hidden="true"></i>';
     return button;
 }
 
@@ -76,11 +76,11 @@ function ensureWidget() {
     widget.setAttribute('aria-label', 'Pomodoro timer');
     widget.innerHTML = `
       <header class="pomodoro-head" data-drag-handle>
-        <div class="pomodoro-heading"><i class="bi bi-stopwatch" aria-hidden="true"></i><span>Pomodoro</span></div>
+        <div class="pomodoro-heading"><i class="icon-lucide-timer" aria-hidden="true"></i><span>Pomodoro</span></div>
         <div class="pomodoro-head-actions">
-          <button type="button" data-action="minimize" aria-label="Minimize timer" title="Minimize"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-          <button type="button" data-action="maximize" aria-label="Maximize timer" title="Maximize"><i class="bi bi-fullscreen" aria-hidden="true"></i></button>
-          <button type="button" data-action="close" aria-label="Close timer" title="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          <button type="button" data-action="minimize" aria-label="Minimize timer" title="Minimize"><i class="icon-lucide-minus" aria-hidden="true"></i></button>
+          <button type="button" data-action="maximize" aria-label="Maximize timer" title="Maximize"><i class="icon-lucide-maximize" aria-hidden="true"></i></button>
+          <button type="button" data-action="close" aria-label="Close timer" title="Close"><i class="icon-lucide-x" aria-hidden="true"></i></button>
         </div>
       </header>
       <div class="pomodoro-content">
@@ -101,9 +101,9 @@ function ensureWidget() {
         <div class="pomodoro-cycle" role="group" aria-label="Long break interval"><span>Long break every</span><button type="button" data-interval="2">2</button><button type="button" data-interval="4">4</button><button type="button" data-interval="custom">Custom</button></div>
         <div class="pomodoro-count" id="pomodoroCount" aria-live="polite"></div>
         <div class="pomodoro-controls">
-          <button type="button" class="pomodoro-primary" data-action="toggle"><i class="bi bi-play-fill" aria-hidden="true"></i><span>Start</span></button>
-          <button type="button" data-action="reset" aria-label="Reset session" title="Reset"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button>
-          <button type="button" data-action="skip" aria-label="Skip session" title="Skip"><i class="bi bi-skip-forward-fill" aria-hidden="true"></i></button>
+          <button type="button" class="pomodoro-primary" data-action="toggle"><i class="icon-lucide-play" aria-hidden="true"></i><span>Start</span></button>
+          <button type="button" data-action="reset" aria-label="Reset session" title="Reset"><i class="icon-lucide-rotate-ccw" aria-hidden="true"></i></button>
+          <button type="button" data-action="skip" aria-label="Skip session" title="Skip"><i class="icon-lucide-skip-forward" aria-hidden="true"></i></button>
         </div>
 
       </div>
@@ -166,7 +166,7 @@ function advance(completedNaturally = false) {
     state.running = false; state.endTimestamp = null; state.remainingMs = sessionDuration();
     persist();
     if (completedNaturally) {
-        window.Toast?.show(`${LABELS[state.session]} started.`, 'info', 'bi-stopwatch');
+        window.Toast?.show(`${LABELS[state.session]} started.`, 'info', 'icon-lucide-timer');
     }
     render();
 }
@@ -265,9 +265,9 @@ function render() {
     widget.querySelector('#pomodoroCount').textContent = `Completed focus sessions: ${state.completed} · Cycle ${state.cycle % state.longInterval}/${state.longInterval}`;
     widget.querySelectorAll('[data-session]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.session === state.session)));
     widget.querySelector('[data-action="toggle"]').innerHTML = state.running
-        ? '<i class="bi bi-pause-fill" aria-hidden="true"></i><span>Pause</span>'
-        : '<i class="bi bi-play-fill" aria-hidden="true"></i><span>Start</span>';
-    widget.querySelector('[data-action="maximize"] i').className = state.maximized ? 'bi bi-fullscreen-exit' : 'bi bi-fullscreen';
+        ? '<i class="icon-lucide-pause" aria-hidden="true"></i><span>Pause</span>'
+        : '<i class="icon-lucide-play" aria-hidden="true"></i><span>Start</span>';
+    window.setLucideIcon(widget.querySelector('[data-action="maximize"] .lucide-icon'), state.maximized ? 'minimize' : 'maximize');
     widget.querySelectorAll('[data-interval]').forEach(button => {
         const isCustom = button.dataset.interval === 'custom';
         button.setAttribute('aria-pressed', String(isCustom ? ![2, 4].includes(state.longInterval) : button.dataset.interval === String(state.longInterval)));

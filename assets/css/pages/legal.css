@@ -39,7 +39,7 @@ html:has(.legal-page) {
     background: var(--surface);
 }
 
-.lg-notice > i {
+.lg-notice > .lucide-icon {
     flex: 0 0 auto;
     margin-top: 2px;
     color: rgb(var(--accent));
@@ -73,7 +73,7 @@ html:has(.legal-page) {
     color: var(--text);
 }
 
-.lg-toc-title i {
+.lg-toc-title .lucide-icon {
     color: rgb(var(--accent));
 }
 
@@ -167,11 +167,11 @@ html:has(.legal-page) {
     display: none;
 }
 
-.lg-toc-details summary i {
+.lg-toc-details summary .lucide-icon {
     transition: transform var(--transition-fast);
 }
 
-.lg-toc-details[open] summary i {
+.lg-toc-details[open] summary .lucide-icon {
     transform: rotate(180deg);
 }
 

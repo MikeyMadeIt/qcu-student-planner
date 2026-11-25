@@ -22,11 +22,11 @@ function getPageSize() { return window.matchMedia('(min-width: 992px)').matches 
 function validUrl(value) { try { const u = new URL(value); return u.protocol === 'https:' && u.hostname === 'qcu.edu.ph' ? u.href : null; } catch { return null; } }
 function date(value) { const d = new Date(value); return Number.isFinite(d.getTime()) ? d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : ''; }
 function renderState(icon, title, message, modifier = '') {
-  return `<div class="ld-state news-state ${modifier}" role="status"><span class="ld-state-icon"><i class="bi ${icon}" aria-hidden="true"></i></span><strong class="ld-state-title">${escapeHtml(title)}</strong><p class="ld-state-msg">${escapeHtml(message)}</p></div>`;
+  return `<div class="ld-state news-state ${modifier}" role="status"><span class="ld-state-icon"><i class="${icon}" aria-hidden="true"></i></span><strong class="ld-state-title">${escapeHtml(title)}</strong><p class="ld-state-msg">${escapeHtml(message)}</p></div>`;
 }
 function renderSkeleton(message = 'Loading cached QCU publications…', syncing = false) {
   const skeleton = '<div class="news-skeleton" aria-hidden="true"><div class="skel news-skeleton-image"></div><div class="news-skeleton-body"><div class="skel skel-text news-skeleton-category"></div><div class="skel skel-title"></div><div class="skel skel-text"></div><div class="skel skel-text"></div><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div>';
-  const state = renderState(syncing ? 'bi-arrow-repeat' : 'bi-hourglass-split', syncing ? 'Syncing QCU publications' : 'Loading publications', message, syncing ? 'news-state-syncing' : 'news-state-loading');
+  const state = renderState(syncing ? 'icon-lucide-repeat' : 'icon-lucide-hourglass', syncing ? 'Syncing QCU publications' : 'Loading publications', message, syncing ? 'news-state-syncing' : 'news-state-loading');
   grid.innerHTML = state + Array.from({ length: pageSize }, () => skeleton).join('');
   grid.setAttribute('aria-busy','true');
 }
@@ -35,7 +35,7 @@ function renderArticle(row) {
   if (!link) return '';
   const image = validUrl(row.featured_image_url);
   const label = row.category === 'news' ? 'News' : 'Announcement';
-  return `<article class="news-card${image ? ' has-image' : ''}">${image ? `<img class="news-image" src="${escapeHtml(image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<div class="news-card-body"><span class="news-category">${label}</span><h2>${escapeHtml(row.title)}</h2>${row.excerpt ? `<p>${escapeHtml(row.excerpt)}</p>` : ''}<div class="news-meta"><span>${escapeHtml(date(row.published_at))} · Quezon City University</span><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Read Article <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a></div></div></article>`;
+  return `<article class="news-card${image ? ' has-image' : ''}">${image ? `<img class="news-image" src="${escapeHtml(image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<div class="news-card-body"><span class="news-category">${label}</span><h2>${escapeHtml(row.title)}</h2>${row.excerpt ? `<p>${escapeHtml(row.excerpt)}</p>` : ''}<div class="news-meta"><span>${escapeHtml(date(row.published_at))} · Quezon City University</span><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Read Article <i class="icon-lucide-external-link" aria-hidden="true"></i></a></div></div></article>`;
 }
 async function load(reset = false) {
   if (reset) currentPage = 1;
@@ -48,21 +48,21 @@ async function load(reset = false) {
   if (search) query = query.ilike('title', `%${search.replace(/[%,()]/g, ' ')}%`);
   const { data, error, count } = await query;
   if (error) {
-    grid.innerHTML = renderState('bi-wifi-off', 'Could not load publications', error.message, 'news-state-error');
+    grid.innerHTML = renderState('icon-lucide-wifi-off', 'Could not load publications', error.message, 'news-state-error');
     pagination.hidden = true;
     newsCount.textContent = '';
   } else {
     const html = (data || []).map(renderArticle).join('');
     if (reset && !html && lastSyncCount > 0) {
-      grid.innerHTML = renderState('bi-eye-slash', 'Publications are not visible', `The sync processed ${lastSyncCount} QCU records, but no cached rows are visible to this account. Check that migration 0030_qcu_news.sql was applied and that the account is approved.`, 'news-state-error');
+      grid.innerHTML = renderState('icon-lucide-eye-off', 'Publications are not visible', `The sync processed ${lastSyncCount} QCU records, but no cached rows are visible to this account. Check that migration 0030_qcu_news.sql was applied and that the account is approved.`, 'news-state-error');
     } else {
       const empty = search
-        ? ['bi-search', 'No matching publications', 'Try another title or clear your search.']
+        ? ['icon-lucide-search', 'No matching publications', 'Try another title or clear your search.']
         : category !== 'all'
-          ? ['bi-megaphone', 'No publications in this category yet', 'Check back later for more QCU updates.']
+          ? ['icon-lucide-megaphone', 'No publications in this category yet', 'Check back later for more QCU updates.']
           : syncError
-            ? ['bi-cloud-slash', 'Could not sync QCU publications', 'Cached articles will appear here when available. Reload this page to try again.']
-            : ['bi-newspaper', 'No QCU publications yet', 'Reload this page later to check for the latest news and announcements.'];
+            ? ['icon-lucide-cloud-off', 'Could not sync QCU publications', 'Cached articles will appear here when available. Reload this page to try again.']
+            : ['icon-lucide-newspaper', 'No QCU publications yet', 'Reload this page later to check for the latest news and announcements.'];
       grid.innerHTML = html || renderState(empty[0], empty[1], empty[2], syncError && !search && category === 'all' ? 'news-state-error' : '');
     }
     const totalPages = Math.ceil((count || 0) / pageSize);

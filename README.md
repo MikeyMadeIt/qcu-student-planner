@@ -125,7 +125,7 @@ Screenshots live in `docs/screenshots/`.
 |---|---|
 | HTML, CSS, JavaScript | The whole frontend. There is no framework and no build step. Student pages (`pages/app/`) load classic scripts. Login and admin pages load ES modules. |
 | Bootstrap 5.3.3 | Layout and form basics, loaded from the jsDelivr CDN. Components use the project's own styles. |
-| Bootstrap Icons 1.11.3 | Icons across the app, loaded from jsDelivr. |
+| Lucide 1.79.0 | Icons across the app, rendered from the locally bundled SVG sprite. |
 | Chart.js 4.4.4 | Charts on the admin dashboard, loaded from jsDelivr. |
 | PDF.js 3.11.174 | Renders curriculum PDFs in the browser, loaded from cdnjs. |
 | Supabase Authentication | Google sign-in and session management, through `supabase-js` 2.45.4. |

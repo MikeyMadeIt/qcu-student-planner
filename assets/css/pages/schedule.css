@@ -98,7 +98,7 @@ body {
     gap: 5px;
 }
 
-.sched-meta i {
+.sched-meta .lucide-icon {
     font-size: .68rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -634,7 +634,7 @@ body {
     gap: 5px;
 }
 
-.sch-tl-meta i {
+.sch-tl-meta .lucide-icon {
     font-size: .7rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -738,17 +738,10 @@ body {
     gap: var(--space-2);
 }
 
-.sch-empty-day > i {
-    display: grid;
-    place-items: center;
+.sch-empty-day > .empty-icon-circle {
     width: 3rem;
     height: 3rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
 }
 
 .sch-empty-day > .fw-bold {
@@ -791,7 +784,7 @@ body {
     border-radius: 50%;
     background: var(--surface-2);
     color: rgb(var(--accent));
-    font-size: 1.1rem;
+    font-size: 1.15rem;
 }
 
 .sch-tasks-empty strong { color: var(--text); font-size: .88rem; }
@@ -1177,7 +1170,7 @@ body {
     color: var(--text);
 }
 
-.sch-cancel-info i {
+.sch-cancel-info .lucide-icon {
     color: #fb7185;
     font-size: 1rem;
     margin-top: 1px;
@@ -1246,7 +1239,7 @@ body {
     min-height: 64px;
 }
 
-.sch-att-status-btn i {
+.sch-att-status-btn .lucide-icon {
     font-size: 1.1rem;
 }
 
@@ -1745,7 +1738,7 @@ body {
     line-height: 1.4;
 }
 
-.sch-tt-popup-row i {
+.sch-tt-popup-row .lucide-icon {
     font-size: .8rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -1870,7 +1863,7 @@ body {
 .sch-time-opt:hover, .sch-time-opt.is-active { background: rgba(var(--accent, 36, 87, 214), .16); }
 .sch-time-opt[aria-selected="true"] { font-weight: 400; color: rgb(var(--accent, 36, 87, 214)); }
 .sch-time-hint { margin: .4rem 0 0; font-size: .75rem; color: var(--text-faint); }
-.sch-time-hint .bi { margin-right: .15rem; }
+.sch-time-hint .lucide-icon { margin-right: .15rem; }
 @media (max-width: 575.98px) {
   .sch-time-opt { padding: .7rem .7rem; }
 }

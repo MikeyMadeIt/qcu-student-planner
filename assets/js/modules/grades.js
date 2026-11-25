@@ -124,11 +124,11 @@ function renderGradesOverview() {
             gwaStatusSubEl.textContent = 'Add assessments to compute GWA';
         }
         else if (scoredSubjects < totalSubjects) {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Incomplete</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="icon-lucide-hourglass me-1" aria-hidden="true"></i>Incomplete</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} of ${totalSubjects} subject${totalSubjects !== 1 ? 's' : ''}`;
         }
         else {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>All Subjects</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="icon-lucide-circle-check me-1" aria-hidden="true"></i>All Subjects</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} subject${scoredSubjects !== 1 ? 's' : ''}`;
         }
     }
@@ -157,7 +157,7 @@ function renderGradeCards() {
     const grades = DB.getGrades().map(normalizeGradeRecord);
     if (!subs.length) {
         const msg = sem ? `Add subjects in Schedule to start tracking grades for ${sem.schoolYear} · ${sem.name}.` : 'Add subjects in Schedule to start tracking grades.';
-        wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
+        wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-column"></i></div><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
         return;
     }
     const gradeCards = subs.map(s => {
@@ -172,14 +172,14 @@ function renderGradeCards() {
         const hasAnyScores = hasComponents && g.components.some(c => c.assessments && c.assessments.some(a => assessmentPct(a) !== null));
         if (pct !== null) {
             if (isPassingPct(pct)) {
-                statusBadge = `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing</span>`;
+                statusBadge = `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing</span>`;
             }
             else {
-                statusBadge = `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk</span>`;
+                statusBadge = `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk</span>`;
             }
         }
         else if (hasComponents && !hasAnyScores) {
-            statusBadge = `<span class="grade-pass-badge no-data"><i class="bi bi-dash-circle" aria-hidden="true"></i> No data</span>`;
+            statusBadge = `<span class="grade-pass-badge no-data"><i class="icon-lucide-circle-minus" aria-hidden="true"></i> No data</span>`;
         }
         const equivBadge = gradeEquivBadgeHtml(point);
         const sparkPoints = getSparklineDatapoints(g.components);
@@ -195,11 +195,11 @@ function renderGradeCards() {
           <div class="grade-card-center">
             <div class="grade-card-pct">${pct === null ? '--' : pct.toFixed(1) + '%'}</div>
             <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}${equivBadge}</div>
-            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle me-1"></i>${totalWeight}%</div>` : ''}
+            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="icon-lucide-triangle-alert me-1"></i>${totalWeight}%</div>` : ''}
           </div>
           <div class="grade-card-actions">
-            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
+            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="icon-lucide-chevron-down" aria-hidden="true"></i></button>
           </div>
         </div>
         ${hasSparkline ? renderSparklineHtml(sparkPoints) : ''}
@@ -223,9 +223,9 @@ function renderGradeCards() {
                   </div>`;
         }).join('')}
               </div>
-              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
-              ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="bi bi-exclamation-triangle me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
-            ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="bi bi-pencil"></i> to add.</div>`}
+              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="icon-lucide-triangle-alert me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
+              ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="icon-lucide-triangle-alert me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
+            ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="icon-lucide-pencil"></i> to add.</div>`}
           </div>
         </div>
       </div>
@@ -263,7 +263,7 @@ function renderSparklineHtml(points) {
         svg += `</circle>`;
     });
     svg += `</svg>`;
-    const dirIcon = dir === 'up' ? '<i class="bi bi-graph-up-arrow" style="color:#34d399" aria-hidden="true"></i>' : dir === 'down' ? '<i class="bi bi-graph-down-arrow" style="color:#fb7185" aria-hidden="true"></i>' : '<i class="bi bi-dash-lg" style="color:#94a3b8" aria-hidden="true"></i>';
+    const dirIcon = dir === 'up' ? '<i class="icon-lucide-chart-no-axes-combined" style="color:#34d399" aria-hidden="true"></i>' : dir === 'down' ? '<i class="icon-lucide-chart-no-axes-column-decreasing" style="color:#fb7185" aria-hidden="true"></i>' : '<i class="icon-lucide-minus" style="color:#94a3b8" aria-hidden="true"></i>';
     return `<div class="grade-sparkline-wrap">
     <div class="grade-sparkline-label">${dirIcon} <span>${points[0].pct}% → ${points[points.length - 1].pct}%</span></div>
     ${svg}
@@ -302,10 +302,10 @@ function renderGradeModalBody() {
       ${gradeDraft.components.map((c, ci) => componentBlockHtml(c, ci)).join('')}
     </div>
     <button type="button" class="btn btn-ghost btn-sm mt-3 w-100" onclick="addComponent()">
-      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Component
+      <i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Component
     </button>
     <div id="modalWeightWarn" class="grade-weight-total mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2))">
-      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`}
+      ${weightWarn ? `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : `<i class="${totalWeight === 100 ? 'icon-lucide-circle-check' : 'icon-lucide-info'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`}
     </div>
     <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--border)">
       <div class="text-faint" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Computed Final Grade</div>
@@ -316,12 +316,12 @@ function renderGradeModalBody() {
       ${finalPct !== null ? `
         <div class="mt-1" id="modalPassStatus">
           ${isPassing
-        ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
-        : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
+        ? `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing (≥${PASSING_PCT}%)</span>`
+        : `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
         </div>` : ''}
     </div>
     <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
-      <i class="bi bi-check2 me-1" aria-hidden="true"></i>Save Grading Breakdown
+      <i class="icon-lucide-check me-1" aria-hidden="true"></i>Save Grading Breakdown
     </button></div>`;
 }
 
@@ -339,10 +339,10 @@ function componentBlockHtml(c, ci) {
           value="${c.weight === 0 || c.weight === '' ? '' : c.weight}"
           oninput="onComponentWeightInput(${ci},this.value)"
           aria-label="Component weight percentage">
-        <span class="input-group-text" aria-hidden="true"><i class="bi bi-percent"></i></span>
+        <span class="input-group-text" aria-hidden="true"><i class="icon-lucide-percent"></i></span>
       </label>
       <button type="button" class="btn-icon btn-icon-sm" onclick="removeComponent(${ci})" title="Remove">
-        <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
+        <i class="icon-lucide-trash-2" style="color:#fb7185" aria-hidden="true"></i>
       </button>
     </div>
     <!-- Assessment column headers -->
@@ -360,7 +360,7 @@ function componentBlockHtml(c, ci) {
     <!-- Footer: add button + live avg/weighted -->
     <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-top:1px solid var(--border);margin-top:2px">
       <button type="button" class="btn btn-ghost btn-sm" onclick="addAssessment(${ci})" style="font-size:.74rem;padding:2px 9px">
-        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add
+        <i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add
       </button>
       <div class="text-end" style="font-size:.74rem" id="compSummary-${ci}">
         ${compSummaryHtml(avg, ws)}
@@ -391,7 +391,7 @@ function assessmentRowHtml(ci, ai, a) {
       ${pct === null ? '—' : pct.toFixed(1) + '%'}
     </div>
     <button type="button" class="btn-icon btn-icon-sm" onclick="removeAssessment(${ci},${ai})" aria-label="Remove assessment">
-      <i class="bi bi-x-lg" aria-hidden="true"></i>
+      <i class="icon-lucide-x" aria-hidden="true"></i>
     </button>
   </div>`;
 }
@@ -477,8 +477,8 @@ function refreshGradePreview() {
     if (weightWarnEl) {
         const warn = totalWeight !== 100 && totalWeight !== 0;
         weightWarnEl.innerHTML = warn
-            ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.`
-            : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`;
+            ? `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.`
+            : `<i class="${totalWeight === 100 ? 'icon-lucide-circle-check' : 'icon-lucide-info'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`;
     }
     const pctEl = document.getElementById('modalFinalPct');
     const gwaEl = document.getElementById('modalFinalGwa');
@@ -495,8 +495,8 @@ function refreshGradePreview() {
         }
         else {
             statusEl.innerHTML = isPassing
-                ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
-                : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
+                ? `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing (≥${PASSING_PCT}%)</span>`
+                : `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
         }
     }
 }
@@ -586,7 +586,7 @@ function gwaCalcRowHtml(r, i) {
       ${sel}
     </select>
     <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})" aria-label="Remove course from GWA calculator">
-      <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
+      <i class="icon-lucide-trash-2" style="color:#fb7185" aria-hidden="true"></i>
     </button>
   </div>`;
 }

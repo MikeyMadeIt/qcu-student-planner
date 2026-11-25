@@ -1,7 +1,7 @@
 .date-picker-field { position: relative; width: 100%; }
 .date-picker-field > input[type="date"] { position: absolute; width: 1px; height: 1px; min-height: 1px; padding: 0; margin: 0; opacity: 0; pointer-events: none; }
 .date-picker-trigger { display: flex; align-items: center; justify-content: space-between; gap: .75rem; text-align: left; cursor: pointer; font-weight: 400; }
-.date-picker-trigger .bi { color: var(--text-faint); }
+.date-picker-trigger .lucide-icon { color: var(--text-faint); }
 .date-picker-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .date-picker-panel { position: fixed; z-index: calc(var(--layer-modal) + 5); width: min(300px, calc(100vw - 24px)); max-height: calc(100vh - 16px); overflow-y: auto; overscroll-behavior: contain; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--elevated); color: var(--text); box-shadow: 0 16px 40px rgba(0,0,0,.32); }
 .date-picker-panel[hidden] { display: none; }

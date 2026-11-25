@@ -7,14 +7,14 @@
     var nav = document.getElementById('lpNav');
     if (!header || !btn || !nav) return;
 
-    var icon = btn.querySelector('i');
     var desktop = window.matchMedia('(min-width: 900px)');
 
     function setOpen(open) {
         header.classList.toggle('is-open', open);
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
         btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-        if (icon) icon.className = open ? 'bi bi-x-lg' : 'bi bi-list';
+        var icon = btn.querySelector('.lucide-icon, i[class*="icon-lucide-"]');
+        if (icon) window.setLucideIcon(icon, open ? 'x' : 'list');
     }
 
     btn.addEventListener('click', function () {

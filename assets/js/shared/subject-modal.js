@@ -86,8 +86,8 @@ function openSubjectModal(id, opts) {
     </div>
     <div id="subConflictWarning" class="sch-conflict-warning d-none" role="alert"></div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
-      ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
     </div>`;
     const codeInput = body.querySelector('#subCode');
     const codeError = body.querySelector('#subCodeError');
@@ -179,7 +179,7 @@ function saveSubject() {
     const warnEl = document.getElementById('subConflictWarning');
     if (conflicts.length) {
         const conflictNames = conflicts.map(c => `${c.code} (${fmtTime(c.start)}–${fmtTime(c.end)})`).join(', ');
-        warnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
+        warnEl.innerHTML = `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
         warnEl.classList.remove('d-none');
     }
     else {
@@ -212,7 +212,7 @@ function saveSubject() {
         });
     }
     if (DB.saveSubjects(subjects) === false) {
-        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'icon-lucide-triangle-alert');
         subSaving = false;
         return;
     }
