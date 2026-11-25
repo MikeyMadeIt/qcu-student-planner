@@ -9,7 +9,7 @@
 .desktop-floating-theme-panel[hidden] { display: none; }
 .desktop-floating-theme-panel .theme-option { display: flex; min-width: 0; min-height: 3.25rem; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .2rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-soft); font-size: .68rem; }
 .desktop-floating-theme-panel .theme-option[aria-checked="true"] { border-color: color-mix(in srgb, rgb(var(--accent)) 45%, var(--border)); background: color-mix(in srgb, rgb(var(--accent)) 12%, var(--surface-2)); color: rgb(var(--accent)); }
-.desktop-floating-theme-panel .theme-option i { font-size: .95rem; }
+.desktop-floating-theme-panel .theme-option .lucide-icon { font-size: .95rem; }
 @media (min-width: 992px) {
     .desktop-floating-tools { display: flex; }
     .pomodoro-desktop-trigger { display: inline-flex; }
@@ -28,7 +28,7 @@
 .pomodoro-widget[data-session="long"] { --pomodoro-color: rgb(var(--accent)); }
 .pomodoro-head { min-height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px 0 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); cursor: move; touch-action: none; }
 .pomodoro-heading { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 700; }
-.pomodoro-heading i { color: var(--pomodoro-color); }
+.pomodoro-heading .lucide-icon { color: var(--pomodoro-color); }
 .pomodoro-head-actions { display: flex; gap: 2px; }
 .pomodoro-head-actions button { width: 26px; height: 26px; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); color: var(--text-soft); background: transparent; font-size: .82rem; }
 .pomodoro-controls > button:not(.pomodoro-primary) { width: var(--pomo-control-button-size, 32px); height: var(--pomo-control-button-size, 32px); min-height: var(--pomo-control-button-size, 32px); display: grid; place-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-soft); background: var(--surface-2); font-size: .82rem; }

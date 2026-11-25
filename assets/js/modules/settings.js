@@ -153,17 +153,17 @@ function renderSemesterManager() {
             </div>
           </div>
           <div class="sem-item-actions">
-            ${isActive ? '<span class="chip sem-active-chip"><i class="bi bi-check2" aria-hidden="true"></i> Active</span>' :
-                `<button class="btn btn-ghost btn-sm sem-switch-btn" data-id="${escHtml(sem.id)}" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
-            <button class="btn btn-ghost btn-sm sem-edit-btn" data-id="${escHtml(sem.id)}" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger sem-delete-btn" data-id="${escHtml(sem.id)}" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
+            ${isActive ? '<span class="chip sem-active-chip"><i class="icon-lucide-check" aria-hidden="true"></i> Active</span>' :
+                `<button class="btn btn-ghost btn-sm sem-switch-btn" data-id="${escHtml(sem.id)}" aria-label="Switch to ${escHtml(sem.name)}"><i class="icon-lucide-toggle-left me-1" aria-hidden="true"></i>Switch</button>`}
+            <button class="btn btn-ghost btn-sm sem-edit-btn" data-id="${escHtml(sem.id)}" aria-label="Edit ${escHtml(sem.name)}"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
+            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger sem-delete-btn" data-id="${escHtml(sem.id)}" aria-label="Delete ${escHtml(sem.name)}"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
           </div>
         </div>`;
         }).join('')}
     </div>`;
     });
     html += `<div class="d-flex gap-2 mt-2">
-    <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
+    <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Semester</button>
   </div>`;
     wrap.innerHTML = html;
     if (!wrap._semBound) {
@@ -207,7 +207,7 @@ function openAddSemesterModal() {
       <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${ymdLocalFuture(100)}"></div>
       <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="15" min="1" max="52"></div>
     </div>
-    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Add Semester</button></div>`;
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>Add Semester</button></div>`;
     document.getElementById('semModalTitle').textContent = 'Add Semester';
     new bootstrap.Modal(document.getElementById('semModal')).show();
 }
@@ -235,7 +235,7 @@ function openEditSemesterModal(id) {
       <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${sem.finalsDate}"></div>
       <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="${sem.totalWeeks}" min="1" max="52"></div>
     </div>
-    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Update Semester</button></div>`;
+    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>Update Semester</button></div>`;
     document.getElementById('semModalTitle').textContent = 'Edit Semester';
     new bootstrap.Modal(document.getElementById('semModal')).show();
 }
@@ -250,7 +250,7 @@ function saveSemesterModal() {
     const finalsDate = document.getElementById('semFinalsInput').value;
     const totalWeeks = parseInt(document.getElementById('semWeeksInput').value) || 15;
     if (!schoolYear) {
-        Toast.show('School year is required', 'high', 'bi-exclamation-triangle');
+        Toast.show('School year is required', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     if (editId) {
@@ -260,7 +260,7 @@ function saveSemesterModal() {
     else {
         const result = DB.addSemester(schoolYear, semName, { startDate, endDate, finalsDate, totalWeeks });
         if (!result) {
-            Toast.show('That semester already exists', 'high', 'bi-exclamation-triangle');
+            Toast.show('That semester already exists', 'high', 'icon-lucide-triangle-alert');
         }
         else {
             Toast.show('Semester added');
@@ -302,10 +302,10 @@ function confirmDeleteSemester(id) {
     confirmAction({
         title: `Delete ${sem.schoolYear} ${sem.name}?`,
         message: `${dataMsg} This cannot be undone.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         onConfirm() {
             if (!DB.deleteSemester(id)) {
-                Toast.show('Cannot delete the only semester', 'high', 'bi-exclamation-triangle');
+                Toast.show('Cannot delete the only semester', 'high', 'icon-lucide-triangle-alert');
             }
             else {
                 Toast.show('Semester deleted');
@@ -433,7 +433,7 @@ function updateNotifSetting(key, val) {
 
 function requestNotifPermission() {
     if (!('Notification' in window)) {
-        Toast.show('Notifications not supported in this browser', 'high', 'bi-exclamation-triangle');
+        Toast.show('Notifications not supported in this browser', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     Notification.requestPermission().then(p => {
@@ -473,7 +473,7 @@ async function exportData() {
         const { data: sessionData } = await supabase.auth.getSession();
         const user = sessionData && sessionData.session && sessionData.session.user;
         if (!user) {
-            Toast.show('You need to be signed in to export your data.', 'high', 'bi-exclamation-triangle');
+            Toast.show('You need to be signed in to export your data.', 'high', 'icon-lucide-triangle-alert');
             return;
         }
         const userId = user.id;
@@ -549,7 +549,7 @@ async function exportData() {
         Toast.show('Data exported');
     } catch (err) {
         console.error('Export failed', err);
-        Toast.show('Export failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'bi-exclamation-triangle');
+        Toast.show('Export failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'icon-lucide-triangle-alert');
     } finally {
         if (window.Loading) Loading.setButtonLoading(btn, false);
     }
@@ -587,7 +587,7 @@ function confirmReset() {
                 setTimeout(() => location.reload(), 600);
             } catch (err) {
                 console.error('Reset failed', err);
-                Toast.show('Reset failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'bi-exclamation-triangle');
+                Toast.show('Reset failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'icon-lucide-triangle-alert');
                 if (window.Loading) Loading.setButtonLoading(btn, false);
             }
         }
@@ -600,13 +600,13 @@ function confirmSignOut() {
     confirmAction({
         title: 'Sign out?',
         message: 'You will need to sign in again to access your planner.',
-        confirmLabel: 'Sign out', danger: true, icon: 'bi-box-arrow-right',
+        confirmLabel: 'Sign out', danger: true, icon: 'icon-lucide-log-out',
         async onConfirm() {
             const btn = document.getElementById('settingsSignOutBtn');
             if (btn) btn.disabled = true;
             const result = await AuthService.signOut();
             if (!result.ok) {
-                Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'bi-exclamation-triangle');
+                Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
                 if (btn) btn.disabled = false;
                 return;
             }

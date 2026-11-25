@@ -12,7 +12,7 @@
     line-height: 1.55;
 }
 
-.inbox-backend-notice i {
+.inbox-backend-notice .lucide-icon {
     flex: 0 0 auto;
     color: var(--info);
 }
@@ -38,7 +38,7 @@
     margin-bottom: var(--space-3);
 }
 
-.inbox-search > i {
+.inbox-search > .lucide-icon {
     position: absolute;
     top: 50%;
     left: 13px;

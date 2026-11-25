@@ -34,8 +34,8 @@ function renderSemesterOverview() {
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
         wiEl.innerHTML = weekNum === 0
-            ? '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Not started yet'
-            : '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Week ' + weekNum + ' of ' + totalWeeks;
+            ? '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Not started yet'
+            : '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Week ' + weekNum + ' of ' + totalWeeks;
     var wlEl = document.getElementById('dashWeeksLeft');
     if (wlEl)
         wlEl.textContent = weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
@@ -178,13 +178,13 @@ function renderGradePerformance() {
     if (!wrap)
         return;
     if (!subjects.length) {
-        wrap.innerHTML = dashEmpty('bi-mortarboard', 'No subjects yet', 'Add subjects in Schedule.');
+        wrap.innerHTML = dashEmpty('icon-lucide-graduation-cap', 'No subjects yet', 'Add subjects in Schedule.');
         return;
     }
     var rows = computeDashSubjectGrades(semId, subjects);
     var withGrades = rows.filter(function (r) { return r.pct !== null; });
     if (!withGrades.length) {
-        wrap.innerHTML = dashEmpty('bi-bar-chart', 'No grades yet', 'Enter grades on the Grades page.');
+        wrap.innerHTML = dashEmpty('icon-lucide-chart-column', 'No grades yet', 'Enter grades on the Grades page.');
         return;
     }
     var display = withGrades.slice(0, 7);
@@ -302,10 +302,10 @@ function renderTodaySchedule() {
             var classesBegin = !isNaN(semesterStart.getTime())
                 ? 'Classes begin ' + semesterStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
                 : '';
-            wrap.innerHTML = dashEmpty('bi-calendar-x', "Semester hasn't started yet", classesBegin);
+            wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', "Semester hasn't started yet", classesBegin);
         }
         else {
-            wrap.innerHTML = dashEmpty('bi-calendar-x', 'Semester has ended', '');
+            wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', 'Semester has ended', '');
         }
         return;
     }
@@ -316,7 +316,7 @@ function renderTodaySchedule() {
         })
         .sort(function (a, b) { return a.start.localeCompare(b.start); });
     if (!list.length) {
-        wrap.innerHTML = dashEmpty('bi-calendar-x', 'No classes today', 'Enjoy the free day!');
+        wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', 'No classes today', 'Enjoy the free day!');
         return;
     }
     var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
@@ -367,18 +367,18 @@ function renderUpcomingTasks() {
         .sort(function (a, b) { return (a.dueDate + (a.dueTime || '')).localeCompare(b.dueDate + (b.dueTime || '')); })
         .slice(0, 3);
     if (!overdueTasks.length && !upcomingTasks.length) {
-        wrap.innerHTML = dashEmpty('bi-emoji-smile', 'No upcoming tasks', 'You\'re all caught up!');
+        wrap.innerHTML = dashEmpty('icon-lucide-smile', 'No upcoming tasks', 'You\'re all caught up!');
         return;
     }
     var html = '';
     if (overdueTasks.length) {
-        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle me-1"></i>Overdue</div>';
+        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="icon-lucide-triangle-alert me-1"></i>Overdue</div>';
         html += overdueTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash task-row-overdue">' +
-                '<div class="task-row-icon task-row-icon-overdue"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
+                '<div class="task-row-icon task-row-icon-overdue"><i class="' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -389,7 +389,7 @@ function renderUpcomingTasks() {
     }
     if (upcomingTasks.length) {
         if (overdueTasks.length)
-            html += '<div class="upcoming-section-label mt-2"><i class="bi bi-clock me-1" aria-hidden="true"></i>Upcoming</div>';
+            html += '<div class="upcoming-section-label mt-2"><i class="icon-lucide-clock me-1" aria-hidden="true"></i>Upcoming</div>';
         html += upcomingTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var daysLeft = Math.ceil((new Date(t.dueDate + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
@@ -398,7 +398,7 @@ function renderUpcomingTasks() {
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash">' +
-                '<div class="task-row-icon"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
+                '<div class="task-row-icon"><i class="' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -412,18 +412,18 @@ function renderUpcomingTasks() {
 
 function taskCatIcon(cat) {
     var map = {
-        Homework: 'bi-pencil-square', Project: 'bi-kanban', Quiz: 'bi-patch-question',
-        Exam: 'bi-journal-text', Personal: 'bi-person', Organization: 'bi-folder',
-        Academic: 'bi-book', Assignment: 'bi-pencil', Other: 'bi-check2-square'
+        Homework: 'icon-lucide-square-pen', Project: 'icon-lucide-kanban', Quiz: 'icon-lucide-badge-help',
+        Exam: 'icon-lucide-notebook-text', Personal: 'icon-lucide-user-round', Organization: 'icon-lucide-folder',
+        Academic: 'icon-lucide-book', Assignment: 'icon-lucide-pencil', Other: 'icon-lucide-list-check'
     };
-    return map[cat] || 'bi-check2-square';
+    return map[cat] || 'icon-lucide-list-check';
 }
 
 // HELPERS
 
 function dashEmpty(icon, title, sub) {
     return '<div class="dash-empty">' +
-        '<i class="bi ' + icon + '" aria-hidden="true"></i>' +
+        '<div class="empty-icon-circle" aria-hidden="true"><i class="' + icon + '"></i></div>' +
         '<div class="dash-empty-title">' + title + '</div>' +
         (sub ? '<div class="dash-empty-sub">' + sub + '</div>' : '') +
         '</div>';

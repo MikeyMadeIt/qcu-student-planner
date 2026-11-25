@@ -36,7 +36,7 @@ function initAiFlashcardMaker() {
             infoEl: afmEl('afmFileInfo'),
             removeEl: afmEl('afmFileRemove'),
             emptyEl: afmEl('afmFileEmpty'),
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
+            onError: msg => Toast.show(msg, 'danger', 'icon-lucide-triangle-alert'),
         });
     } catch (error) {
         console.error('AI Flashcard Maker: file attachment setup failed', error);
@@ -62,8 +62,8 @@ function afmSetBusy(busy) {
     const btn = afmEl('afmGenerateBtn');
     btn.disabled = busy;
     btn.innerHTML = busy
-        ? `<i class="bi bi-arrow-repeat ai-spin" aria-hidden="true"></i> Generating…`
-        : `<i class="bi bi-stars" aria-hidden="true"></i> Generate Flashcards`;
+        ? `<i class="icon-lucide-repeat ai-spin" aria-hidden="true"></i> Generating…`
+        : `<i class="icon-lucide-sparkles" aria-hidden="true"></i> Generate Flashcards`;
 }
 
 async function afmGenerate() {
@@ -74,7 +74,7 @@ async function afmGenerate() {
     const file = afmAttachment.getFile();
 
     if (!topic && !notes && !file) {
-        Toast.show('Add a topic, some notes, or attach a file to generate flashcards.', 'danger', 'bi-exclamation-triangle');
+        Toast.show('Add a topic, some notes, or attach a file to generate flashcards.', 'danger', 'icon-lucide-triangle-alert');
         return;
     }
 
@@ -139,7 +139,7 @@ function afmPersistDeck(set, meta) {
             afmLoadHistory();
         } catch (error) {
             console.warn('AI Flashcard Maker: could not save deck', error);
-            Toast.show("Flashcards generated, but they couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+            Toast.show("Flashcards generated, but they couldn't be saved: " + error.message, 'danger', 'icon-lucide-cloud-off');
         }
     })();
 }
@@ -161,15 +161,15 @@ async function afmLoadHistory() {
               </div>
             </div>
             <div class="aqm-history-card-actions">
-              <button type="button" class="btn-icon btn-sm" onclick="afmOpenSaved('${d.id}')" aria-label="Open ${escHtml(d.title)}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></button>
-              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="afmDeleteSaved('${d.id}')" aria-label="Delete ${escHtml(d.title)}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm" onclick="afmOpenSaved('${d.id}')" aria-label="Open ${escHtml(d.title)}"><i class="icon-lucide-external-link" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm aqm-danger" onclick="afmDeleteSaved('${d.id}')" aria-label="Delete ${escHtml(d.title)}"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>
             </div>
           </div>`).join('')
-          : afmHistoryEmptyMarkup('bi-journal-text', 'Generate a flashcard set and it will show up here.');
+          : afmHistoryEmptyMarkup('icon-lucide-notebook-text', 'Generate a flashcard set and it will show up here.');
     } catch (error) {
         console.warn('AI Flashcard Maker: could not load history', error);
         host.removeAttribute('aria-busy');
-        host.innerHTML = afmHistoryEmptyMarkup('bi-exclamation-triangle', "Couldn't load your saved decks", null, true);
+        host.innerHTML = afmHistoryEmptyMarkup('icon-lucide-triangle-alert', "Couldn't load your saved decks", null, true);
         const retryBtn = document.getElementById('afmHistoryRetryBtn');
         if (retryBtn) retryBtn.addEventListener('click', afmLoadHistory);
     }
@@ -178,7 +178,7 @@ async function afmLoadHistory() {
 // Mirrors aqmHistoryEmptyMarkup in ai-quiz-maker.js — same centered
 function afmHistoryEmptyMarkup(icon, title, subtext, withRetry) {
     return `<div class="aqm-history-empty">
-        <i class="bi ${icon}" aria-hidden="true"></i>
+        <div class="aqm-history-empty-icon empty-icon-circle" aria-hidden="true"><i class="${icon}"></i></div>
         <p>${escHtml(title)}</p>
         ${subtext ? `<span>${escHtml(subtext)}</span>` : ''}
         ${withRetry ? `<button type="button" class="btn btn-ghost btn-sm mt-2" id="afmHistoryRetryBtn">Retry</button>` : ''}
@@ -193,17 +193,17 @@ async function afmOpenSaved(id) {
         afmIndex = 0; afmFlipped = false;
         afmRenderCard(); afmShowView('cards');
     } catch (error) {
-        Toast.show("Couldn't open that deck: " + error.message, 'danger', 'bi-exclamation-triangle');
+        Toast.show("Couldn't open that deck: " + error.message, 'danger', 'icon-lucide-triangle-alert');
     }
 }
 
 function afmDeleteSaved(id) {
     confirmAction({
         title: 'Delete deck?', message: 'This flashcard deck will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         async onConfirm() {
             try { await (await afmStore()).deleteDeck(id); Toast.show('Deck deleted'); afmLoadHistory(); }
-            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle'); }
+            catch (error) { Toast.show("Couldn't delete: " + error.message, 'danger', 'icon-lucide-triangle-alert'); }
         }
     });
 }
@@ -268,7 +268,7 @@ function afmShuffle() {
     afmIndex = 0;
     afmFlipped = false;
     afmRenderCard();
-    Toast.show('Cards shuffled.', 'accent', 'bi-shuffle');
+    Toast.show('Cards shuffled.', 'accent', 'icon-lucide-shuffle');
 }
 
 function afmGoTo(index) {

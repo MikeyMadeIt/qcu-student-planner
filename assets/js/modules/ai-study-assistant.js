@@ -43,7 +43,7 @@ function initAiStudyAssistant() {
             infoEl: asaEl('asaFileInfo'),
             removeEl: asaEl('asaFileRemove'),
             emptyEl: null,
-            onError: msg => Toast.show(msg, 'danger', 'bi-exclamation-triangle'),
+            onError: msg => Toast.show(msg, 'danger', 'icon-lucide-triangle-alert'),
             onChange: file => asaUpdateAttachBar(file),
         });
     } catch (error) {
@@ -185,7 +185,7 @@ async function asaSend() {
         try {
             fileData = await aiUploadToBase64(file);
         } catch (error) {
-            Toast.show(error.message || 'That file could not be read.', 'danger', 'bi-exclamation-triangle');
+            Toast.show(error.message || 'That file could not be read.', 'danger', 'icon-lucide-triangle-alert');
             return;
         }
     }
@@ -257,7 +257,7 @@ function asaPersistTurn(userTurn, replyText) {
             asaLoadHistory();
         } catch (error) {
             console.warn('AI Study Assistant: could not save conversation', error);
-            Toast.show("Reply received, but the conversation couldn't be saved: " + error.message, 'danger', 'bi-cloud-slash');
+            Toast.show("Reply received, but the conversation couldn't be saved: " + error.message, 'danger', 'icon-lucide-cloud-off');
         }
     });
 }
@@ -275,7 +275,7 @@ async function asaLoadHistory() {
             h.removeAttribute('aria-busy');
             h.innerHTML = '<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">Couldn\'t load your conversations. '
                 + escHtml(error.message || '')
-                + '<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="asaHistoryRetryBtn">Try again</button></div>';
+                + '<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="asaHistoryRetryBtn"><i class="icon-lucide-rotate-cw" aria-hidden="true"></i> Try again</button></div>';
             const retryBtn = document.getElementById('asaHistoryRetryBtn');
             if (retryBtn) retryBtn.addEventListener('click', asaLoadHistory);
         }
@@ -312,7 +312,7 @@ function asaRenderHistoryLists() {
             <div class="asa-history-group-label">${g.label}</div>
             ${g.items.map(c => asaHistoryItemHtml(c)).join('')}
           `).join('')
-        : `<div class="text-faint" style="font-size:.85rem;padding:.5rem .25rem">${asaSearchTerm ? 'No conversations match your search.' : 'No saved conversations yet.'}</div>`;
+        : `<div class="asa-history-empty text-faint"><span class="asa-history-empty-icon empty-icon-circle" aria-hidden="true"><i class="icon-lucide-history"></i></span><span>${asaSearchTerm ? 'No conversations match your search.' : 'No saved conversations yet.'}</span></div>`;
 
     const host = asaEl('asaHistory');
     if (host) host.innerHTML = html;
@@ -328,11 +328,11 @@ function asaHistoryItemHtml(c) {
           <span class="asa-history-item-date">${escHtml(new Date(c.updated_at).toLocaleDateString())}</span>
         </button>
         <button type="button" class="asa-history-menu-btn" data-action="menu" aria-label="Conversation options" aria-haspopup="true">
-          <i class="bi bi-three-dots" aria-hidden="true"></i>
+          <i class="icon-lucide-ellipsis" aria-hidden="true"></i>
         </button>
         <div class="asa-history-menu" hidden>
-          <button type="button" data-action="rename"><i class="bi bi-pencil" aria-hidden="true"></i>Rename</button>
-          <button type="button" class="text-danger" data-action="delete"><i class="bi bi-trash3" aria-hidden="true"></i>Delete</button>
+          <button type="button" data-action="rename"><i class="icon-lucide-pencil" aria-hidden="true"></i>Rename</button>
+          <button type="button" class="text-danger" data-action="delete"><i class="icon-lucide-trash-2" aria-hidden="true"></i>Delete</button>
         </div>
       </div>`;
 }
@@ -380,7 +380,7 @@ async function asaOpenSaved(id) {
         asaRenderMessages();
         asaRenderHistoryLists();
     } catch (error) {
-        Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'bi-exclamation-triangle');
+        Toast.show("Couldn't open that conversation: " + error.message, 'danger', 'icon-lucide-triangle-alert');
     }
 }
 
@@ -400,7 +400,7 @@ function asaRenameSaved(id) {
                     if (conv) conv.title = title;
                     asaRenderHistoryLists();
                 } catch (error) {
-                    Toast.show("Couldn't rename: " + error.message, 'danger', 'bi-exclamation-triangle');
+                    Toast.show("Couldn't rename: " + error.message, 'danger', 'icon-lucide-triangle-alert');
                 }
             })();
         },
@@ -410,7 +410,7 @@ function asaRenameSaved(id) {
 function asaDeleteSaved(id) {
     confirmAction({
         title: 'Delete conversation?', message: 'This conversation will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         async onConfirm() {
             try {
                 await asaSaveChain;
@@ -419,7 +419,7 @@ function asaDeleteSaved(id) {
                 if (id === asaConvId) asaNewChat();
                 asaLoadHistory();
             } catch (error) {
-                Toast.show("Couldn't delete: " + error.message, 'danger', 'bi-exclamation-triangle');
+                Toast.show("Couldn't delete: " + error.message, 'danger', 'icon-lucide-triangle-alert');
             }
         }
     });
@@ -464,7 +464,7 @@ function asaRenderEmptyState() {
     const empty = document.createElement('div');
     empty.className = 'asa-welcome';
     empty.id = 'asaEmptyState';
-    empty.innerHTML = `<i class="bi bi-stars" aria-hidden="true"></i>
+    empty.innerHTML = `<span class="asa-welcome-icon empty-icon-circle" aria-hidden="true"><i class="icon-lucide-sparkles"></i></span>
         <h2>AI Study Assistant</h2>
         <p>Ask questions, understand difficult topics, or study your materials.</p>
         <div class="asa-suggestions">
@@ -499,7 +499,7 @@ function asaRenderMessages() {
             const attach = document.createElement('div');
             attach.className = 'ai-msg-attachment';
             const icon = document.createElement('i');
-            icon.className = 'bi bi-paperclip';
+            icon.className = 'icon-lucide-paperclip';
             icon.setAttribute('aria-hidden', 'true');
             attach.appendChild(icon);
             attach.appendChild(document.createTextNode(m.fileName));

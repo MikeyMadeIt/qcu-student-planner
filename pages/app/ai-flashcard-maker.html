@@ -10,9 +10,9 @@
 <link rel="manifest" href="../../manifest.json">
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/ai-tools.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -37,7 +37,7 @@
           <input type="file" id="afmFileInput" accept=".pdf,image/jpeg,image/png" class="d-none">
           <div class="aqm-dropzone" id="afmDropzone" tabindex="0" role="button" aria-labelledby="afmFileLabel" aria-describedby="afmDropzoneHint">
             <div class="aqm-dropzone-empty" id="afmFileEmpty">
-              <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+              <i class="icon-lucide-cloud-upload" aria-hidden="true"></i>
               <div class="aqm-dropzone-copy">
                 <span class="aqm-dropzone-title"><strong>Click to upload</strong> or drag and drop</span>
                 <span class="aqm-dropzone-hint" id="afmDropzoneHint">PDF, JPG, or PNG — up to 8 MB</span>
@@ -45,17 +45,17 @@
             </div>
             <div class="ai-file-info aqm-dropzone-file" id="afmFileInfo" hidden>
               <!-- filled in by initAiFileAttachment -->
-              <button type="button" class="btn-icon btn-sm aqm-file-remove" id="afmFileRemove" hidden aria-label="Remove attachment"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+              <button type="button" class="btn-icon btn-sm aqm-file-remove" id="afmFileRemove" hidden aria-label="Remove attachment"><i class="icon-lucide-x" aria-hidden="true"></i></button>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-accent w-100 aqm-generate-btn" id="afmGenerateBtn"><i class="bi bi-stars" aria-hidden="true"></i> Generate Flashcards</button>
+        <button type="submit" class="btn btn-accent w-100 aqm-generate-btn" id="afmGenerateBtn"><i class="icon-lucide-sparkles" aria-hidden="true"></i> Generate Flashcards</button>
       </form>
 
       <!-- SAVED DECKS -->
       <section class="glass card-pad aqm-history fade-in" id="afmHistorySection" aria-labelledby="afmHistoryHeading">
-        <h2 class="aqm-history-heading" id="afmHistoryHeading"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Your saved decks</span></h2>
+        <h2 class="aqm-history-heading" id="afmHistoryHeading"><i class="icon-lucide-history" aria-hidden="true"></i><span>Your saved decks</span></h2>
         <div class="aqm-history-list" id="afmHistory" aria-live="polite" aria-busy="true"></div>
       </section>
     </div>
@@ -73,16 +73,16 @@
 
     <!-- ERROR -->
     <div class="glass card-pad fade-in ai-state ai-state-error" id="afmErrorState" hidden>
-      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <i class="icon-lucide-triangle-alert" aria-hidden="true"></i>
       <p id="afmErrorMessage">Something went wrong.</p>
-      <button type="button" class="btn btn-ghost mt-2" id="afmRetryBtn"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Try again</button>
+      <button type="button" class="btn btn-ghost mt-2" id="afmRetryBtn"><i class="icon-lucide-repeat" aria-hidden="true"></i> Try again</button>
     </div>
 
     <!-- FLASHCARDS -->
     <div class="glass card-pad fade-in aqm-stage" id="afmCardsPanel" hidden>
       <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <h2 class="h5 mb-0" id="afmSetTitle"></h2>
-        <button type="button" class="btn-ghost" id="afmNewSetBtn"><i class="bi bi-plus-lg" aria-hidden="true"></i> New Set</button>
+        <button type="button" class="btn-ghost" id="afmNewSetBtn"><i class="icon-lucide-plus" aria-hidden="true"></i> New Set</button>
       </div>
       <div class="ai-quiz-progress"><span id="afmProgressLabel"></span></div>
       <div class="ai-progress-bar"><div class="ai-progress-bar-fill" id="afmProgressFill"></div></div>
@@ -94,13 +94,13 @@
             <div class="ai-flashcard-face ai-flashcard-face-back" id="afmCardBack"></div>
           </div>
         </div>
-        <p class="ai-flashcard-hint"><i class="bi bi-hand-index-thumb" aria-hidden="true"></i> Click or tap the card to flip it</p>
+        <p class="ai-flashcard-hint"><i class="icon-lucide-pointer" aria-hidden="true"></i> Click or tap the card to flip it</p>
 
         <div class="ai-flashcard-controls">
-          <button type="button" class="btn-ghost" id="afmPrevBtn"><i class="bi bi-arrow-left" aria-hidden="true"></i> Previous</button>
-          <button type="button" class="ai-icon-btn" id="afmShuffleBtn" aria-label="Shuffle cards" title="Shuffle"><i class="bi bi-shuffle" aria-hidden="true"></i></button>
-          <button type="button" class="ai-icon-btn" id="afmRestartBtn" aria-label="Restart" title="Restart"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button>
-          <button type="button" class="btn btn-accent" id="afmNextBtn">Next <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+          <button type="button" class="btn-ghost" id="afmPrevBtn"><i class="icon-lucide-arrow-left" aria-hidden="true"></i> Previous</button>
+          <button type="button" class="ai-icon-btn" id="afmShuffleBtn" aria-label="Shuffle cards" title="Shuffle"><i class="icon-lucide-shuffle" aria-hidden="true"></i></button>
+          <button type="button" class="ai-icon-btn" id="afmRestartBtn" aria-label="Restart" title="Restart"><i class="icon-lucide-rotate-ccw" aria-hidden="true"></i></button>
+          <button type="button" class="btn btn-accent" id="afmNextBtn">Next <i class="icon-lucide-arrow-right" aria-hidden="true"></i></button>
         </div>
       </div>
     </div>

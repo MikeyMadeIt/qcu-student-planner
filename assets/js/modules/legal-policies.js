@@ -40,7 +40,7 @@
     // Top card: the main sections, always visible.
     mainList.innerHTML = tree.map(function (s) {
         return '<li><a href="#' + s.id + '">' +
-            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>') +
+            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>') +
             '<span class="lg-toc-label">' + esc(s.title) + '</span></a></li>';
     }).join('');
 
@@ -61,7 +61,7 @@
     // Desktop rail: sections, with the subsections of the active one opened.
     railList.innerHTML = tree.map(function (s) {
         return '<div class="lg-rail-group" data-rail="' + s.id + '"><a class="lg-rail-link" href="#' + s.id + '">' +
-            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>') +
+            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>') +
             '<span class="lg-toc-label">' + esc(s.title) + '</span></a>' + subList(s) + '</div>';
     }).join('');
 

@@ -37,14 +37,14 @@ function makeWorker(fetchImpl, initialEntries = []) {
     };
     const caches = {
         async open(name) {
-            assert.equal(name, 'qcu-planner-v8');
+            assert.equal(name, 'qcu-planner-v10');
             return cache;
         },
         async match(request) {
             operations.push(['caches.match', getKey(request)]);
             return clone(entries.get(getKey(request)));
         },
-        async keys() { return ['qcu-planner-v8']; },
+        async keys() { return ['qcu-planner-v10']; },
         async delete() { return true; },
     };
     const self = {

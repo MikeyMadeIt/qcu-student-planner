@@ -68,17 +68,18 @@ html[data-motion="reduced"] .skel::after { animation: none; display: none; }
     font-size: .88rem;
 }
 .ld-state-icon {
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 3.25rem;
     height: 3.25rem;
     margin: 0 auto var(--space-3);
     border: 1px solid var(--border);
     border-radius: 50%;
     background: var(--surface-2);
-    font-size: 1.35rem;
     color: rgb(var(--accent));
 }
+.ld-state-icon > .lucide-icon { width: 1.15rem; height: 1.15rem; font-size: 1.15rem; }
 .ld-state-error .ld-state-icon { color: var(--danger); }
 .ld-state-title { font-size: .98rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; }
 .ld-state-msg { max-width: 30rem; margin: 0 auto; color: var(--text-soft); line-height: 1.55; }
@@ -148,6 +149,6 @@ html[data-motion="reduced"] .ld-progress-fill.indeterminate { animation-duration
 
 /* ---------- Saving / synced inline status (notes autosave, settings) ---------- */
 .ld-save-status { display: inline-flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--text-faint); white-space: nowrap; }
-.ld-save-status i { font-size: .9rem; }
-.ld-save-status.is-saved i { color: var(--success); }
-.ld-save-status.is-error i { color: var(--danger); }
+.ld-save-status .lucide-icon { font-size: .9rem; }
+.ld-save-status.is-saved .lucide-icon { color: var(--success); }
+.ld-save-status.is-error .lucide-icon { color: var(--danger); }

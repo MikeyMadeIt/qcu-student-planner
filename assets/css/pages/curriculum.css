@@ -362,7 +362,7 @@
     border-top: 1px dashed var(--border);
 }
 
-.cur-card-hours i {
+.cur-card-hours .lucide-icon {
     margin-right: 4px;
     font-size: .72rem;
     opacity: .7;
@@ -513,10 +513,7 @@
     padding: 40px 18px;
     border-radius: 5px;
 }
-.cur-empty i {
-    font-size: 2rem;
-    opacity: .6;
-}
+.cur-empty .empty-icon-circle { opacity: .6; }
 .cur-empty p {
     margin: 12px 0 0;
     opacity: .85;
@@ -540,7 +537,7 @@
     margin-bottom: 6px;
 }
 
-.cur-nav-label i {
+.cur-nav-label .lucide-icon {
     color: rgb(var(--accent));
     font-size: .78rem;
 }
@@ -836,7 +833,7 @@
     white-space: nowrap;
 }
 
-.cur-course-detail i {
+.cur-course-detail .lucide-icon {
     margin-right: 5px;
     font-size: .75rem;
     opacity: .75;
@@ -884,7 +881,7 @@
     font-size: .78rem;
     line-height: 1.35;
 }
-.cur-import-notice i { color: rgb(var(--accent)); flex: 0 0 auto; }
+.cur-import-notice .lucide-icon { color: rgb(var(--accent)); flex: 0 0 auto; }
 .cur-import-notice a { color: rgb(var(--accent)); font-weight: 700; }
 
 .cur-course-select { display: inline-flex; align-items: center; margin-right: 8px; }
@@ -945,7 +942,7 @@
     font-size: .78rem;
     line-height: 1.4;
 }
-.cur-program-reminder i { color: rgb(var(--accent)); flex: 0 0 auto; margin-top: 2px; }
+.cur-program-reminder .lucide-icon { color: rgb(var(--accent)); flex: 0 0 auto; margin-top: 2px; }
 .cur-program-reminder strong { color: var(--text-soft); }
 @media (max-width: 575.98px) {
   .sch-subject-empty-actions { flex-direction: column; align-items: stretch; }
@@ -964,7 +961,7 @@
         font-weight: 600;
         white-space: nowrap;
     }
-    .curv-btn i { font-size: .82rem; }
+    .curv-btn .lucide-icon { font-size: .82rem; }
 }
 
 /* CURRICULUM TRACKER */
@@ -977,7 +974,7 @@
 .cur-tracker-context-stats { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-faint); font-size: .76rem; }
 .cur-tracker-context-stats b { color: var(--text); font-family: var(--font-mono); font-size: .9rem; margin-right: 3px; }
 .cur-tracker-warning { flex-basis: 100%; display: flex; gap: 7px; align-items: flex-start; padding-top: 9px; border-top: 1px solid var(--border); color: var(--text-faint); font-size: .76rem; line-height: 1.4; }
-.cur-tracker-warning i { color: #b45309; flex: 0 0 auto; }
+.cur-tracker-warning .lucide-icon { color: #b45309; flex: 0 0 auto; }
 .cur-tracker-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .cur-tracker-section-heading h2 { margin: 3px 0 0; color: var(--text); font-family: var(--font-display); font-size: 1.02rem; }
 .cur-tracker-total, .cur-tracker-hint { color: var(--text-faint); font-family: var(--font-mono); font-size: .72rem; }
@@ -998,8 +995,8 @@
 .cur-tracker-year > summary, .cur-tracker-semester > summary, .cur-tracker-subject > summary { list-style: none; cursor: pointer; }
 .cur-tracker-year > summary::-webkit-details-marker, .cur-tracker-semester > summary::-webkit-details-marker, .cur-tracker-subject > summary::-webkit-details-marker { display: none; }
 .cur-tracker-year > summary { display: flex; align-items: center; gap: 10px; padding: 12px; color: var(--text); }
-.cur-tracker-year > summary::after, .cur-tracker-semester > summary::after { content: '\f282'; margin-left: auto; color: var(--text-faint); font-family: bootstrap-icons; font-size: .8rem; }
-.cur-tracker-year[open] > summary::after, .cur-tracker-semester[open] > summary::after { content: '\f286'; }
+.cur-tracker-year > summary::after, .cur-tracker-semester > summary::after { content: ''; width: .45rem; height: .45rem; margin-left: auto; border-right: 1.5px solid var(--text-faint); border-bottom: 1.5px solid var(--text-faint); transform: rotate(45deg); transition: transform .18s ease; }
+.cur-tracker-year[open] > summary::after, .cur-tracker-semester[open] > summary::after { transform: rotate(225deg); }
 .cur-tracker-year[open] > summary { background: rgba(var(--accent), .06); }
 .cur-tracker-year-number { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 25px; background: rgb(var(--accent)); color: var(--on-accent); font-family: var(--font-mono); font-size: .76rem; font-weight: 700; }
 .cur-tracker-year-title { font-weight: 700; font-size: .84rem; }
@@ -1026,7 +1023,7 @@
 .cur-tracker-prereqs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .cur-tracker-links { display: flex; flex-wrap: wrap; gap: 6px; }
 .cur-tracker-locked { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 24px; padding: 11px 13px; border: 1px solid var(--border); border-left: 3px solid rgb(var(--accent)); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-faint); font-size: .78rem; line-height: 1.4; }
-.cur-tracker-locked i { color: rgb(var(--accent)); }
+.cur-tracker-locked .lucide-icon { color: rgb(var(--accent)); }
 @media (max-width: 767.98px) {
     .cur-tracker-context, .cur-tracker-overview, .cur-tracker-breakdown { padding: 13px; }
     .cur-tracker-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2048,17 +2045,17 @@
 }
 .cur-tracker-panel .cur-tracker-year > summary::after,
 .cur-tracker-panel .cur-tracker-semester > summary::after {
-    content: '\f282';
+    content: '';
     position: absolute !important;
     top: 50% !important;
     right: 10px !important;
     left: auto !important;
     margin: 0 !important;
-    transform: translateY(-50%) !important;
+    transform: translateY(-50%) rotate(45deg) !important;
 }
 .cur-tracker-panel .cur-tracker-year[open] > summary::after,
 .cur-tracker-panel .cur-tracker-semester[open] > summary::after {
-    content: '\f286';
+    transform: translateY(-50%) rotate(225deg) !important;
 }
 .cur-tracker-panel .cur-tracker-year-title,
 .cur-tracker-panel .cur-tracker-semester > summary > span:first-child {
@@ -2372,7 +2369,7 @@
     gap: 5px;
     line-height: 1.25;
 }
-.cur-tracker-panel .cur-tracker-status i {
+.cur-tracker-panel .cur-tracker-status .lucide-icon {
     display: inline-block;
     flex: 0 0 auto;
     line-height: 1;
@@ -2427,7 +2424,7 @@
         line-height: 1.35;
         vertical-align: middle;
     }
-    .cur-tracker-panel .cur-tracker-status i {
+    .cur-tracker-panel .cur-tracker-status .lucide-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;

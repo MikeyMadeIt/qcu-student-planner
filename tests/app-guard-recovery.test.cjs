@@ -140,7 +140,7 @@ function createRuntime({ sessions, profiles, initialSupabase = true, onRetryScri
         caches: cacheStorage === 'unavailable' ? undefined : {
             async keys() {
                 if (cacheStorage === 'throw-keys') throw new Error('Cache Storage unavailable');
-                return ['qcu-planner-v8'];
+                return ['qcu-planner-v10'];
             },
             async open() {
                 if (cacheStorage === 'throw-open') throw new Error('Cache Storage unavailable');

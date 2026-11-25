@@ -52,7 +52,7 @@ function curCard(bodyHtml) {
 function curProgramSelectHtml(selected) {
     return `
         <div class="cur-nav-group cur-program-group">
-            <div class="cur-nav-label"><i class="bi bi-mortarboard" aria-hidden="true"></i> Select Program</div>
+            <div class="cur-nav-label"><i class="icon-lucide-graduation-cap" aria-hidden="true"></i> Select Program</div>
             <select id="curProgramSelect" class="form-select">
                 <option value="">Select a program</option>
                 ${Object.entries(CURRICULA).map(([code, d]) =>
@@ -78,7 +78,7 @@ function renderEmptyState() {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml('')}
         <div class="cur-empty">
-            <i class="bi bi-journal-bookmark" aria-hidden="true"></i>
+            <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-bookmark"></i></div>
             <p>Select a program above to view its curriculum.</p>
         </div>`);
     bindProgramSelect();
@@ -90,7 +90,7 @@ function renderUnavailable(code, c) {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
         <div class="cur-empty">
-            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+            <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-hourglass"></i></div>
             <p>The curriculum for <strong>${escHtml(c.title)}</strong> is not available yet.</p>
         </div>`);
     bindProgramSelect();
@@ -100,10 +100,10 @@ function curPdfActionsHtml(file) {
     return `
         <div class="curv-actions mt-3">
             <a class="curv-btn curv-btn-accent" href="${file}" download>
-                <i class="bi bi-download" aria-hidden="true"></i> Download PDF
+                <i class="icon-lucide-download" aria-hidden="true"></i> Download PDF
             </a>
             <a class="curv-btn" href="${file}" target="_blank" rel="noopener">
-                <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Open PDF
+                <i class="icon-lucide-external-link" aria-hidden="true"></i> Open PDF
             </a>
         </div>`;
 }
@@ -115,7 +115,7 @@ function renderPdfOnly(code, c) {
     curEl('curriculumContainer').innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
         <div class="cur-empty">
-            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+            <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-file-down"></i></div>
             <p>A structured view isn't available for <strong>${escHtml(c.title)}</strong> yet. Use the buttons below to view the official curriculum PDF.</p>
         </div>
         ${curPdfActionsHtml(c.file)}`);
@@ -201,7 +201,7 @@ async function renderStructuredCurriculum(code, meta) {
     const container = curEl('curriculumContainer');
     container.innerHTML = curCard(`
         ${curProgramSelectHtml(code)}
-        <div class="cur-empty"><i class="bi bi-hourglass-split" aria-hidden="true"></i><p>Loading curriculum…</p></div>`);
+        <div class="cur-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-hourglass"></i></div><p>Loading curriculum…</p></div>`);
     bindProgramSelect();
 
     let data;
@@ -211,7 +211,7 @@ async function renderStructuredCurriculum(code, meta) {
         container.innerHTML = curCard(`
             ${curProgramSelectHtml(code)}
             <div class="cur-empty">
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-triangle-alert"></i></div>
                 <p>Could not load the curriculum data. Please try again later.</p>
             </div>`);
         bindProgramSelect();
@@ -256,7 +256,7 @@ async function renderStructuredCurriculum(code, meta) {
                             <span class="cur-panel-note">Select subjects to add to your active semester</span>
                         </div>
                         <div class="cur-search-wrap cur-search-standalone cur-area-search">
-                            <i class="bi bi-search cur-search-icon" aria-hidden="true"></i>
+                            <i class="icon-lucide-search cur-search-icon" aria-hidden="true"></i>
                             <input type="text" class="form-control cur-search-input" id="curSearchInput"
                                 placeholder="Search subjects…" value="${escHtml(curViewState.query)}">
                         </div>
@@ -305,14 +305,14 @@ function renderCurNav(data) {
 
     wrap.innerHTML = `
         <div class="cur-nav-grid">
-            <div class="cur-nav-label cur-nav-year-label"><i class="bi bi-calendar-event" aria-hidden="true"></i> Select Year Level</div>
+            <div class="cur-nav-label cur-nav-year-label"><i class="icon-lucide-calendar-days" aria-hidden="true"></i> Select Year Level</div>
             <div class="cur-pill-row cur-pill-row-years">
                 ${data.years.map(y => `
                     <button type="button" class="cur-pill-btn${y.yearLevel === curViewState.activeYear ? ' active' : ''}"
                         data-year="${y.yearLevel}">${escHtml(y.yearLabel)}</button>
                 `).join('')}
             </div>
-            <div class="cur-nav-label cur-nav-sem-label"><i class="bi bi-calendar2-week" aria-hidden="true"></i> Select Semester</div>
+            <div class="cur-nav-label cur-nav-sem-label"><i class="icon-lucide-calendar-days" aria-hidden="true"></i> Select Semester</div>
             <div class="cur-pill-row cur-pill-row-sems">
                 ${activeYear.semesters.map((s, i) => `
                     <button type="button" class="cur-pill-btn cur-pill-btn-sem${(i + 1) === curViewState.activeSemester ? ' active' : ''}"
@@ -349,14 +349,14 @@ function curCanImport() {
 function curProgramReminderHtml() {
     if (!curRegisteredProgram || getSelectedProgram() === curRegisteredProgram) return '';
     const registeredTitle = CURRICULA[curRegisteredProgram] ? CURRICULA[curRegisteredProgram].title : curRegisteredProgram;
-    return `<div class="cur-program-reminder" role="status"><i class="bi bi-info-circle" aria-hidden="true"></i><span>This is a different program from your registered program. You can view it, but you cannot select or add its subjects. Your registered program is <strong>${escHtml(registeredTitle)}</strong>.</span></div>`;
+    return `<div class="cur-program-reminder" role="status"><i class="icon-lucide-info" aria-hidden="true"></i><span>This is a different program from your registered program. You can view it, but you cannot select or add its subjects. Your registered program is <strong>${escHtml(registeredTitle)}</strong>.</span></div>`;
 }
 
 // Each course rendered as its own accordion item (collapsed by default):
 // header = code + title + units, body = lec/lab hours + prerequisites.
 function curCourseAccordionHtml(courses, groupId) {
     if (!courses.length) {
-        return `<div class="cur-empty"><i class="bi bi-search" aria-hidden="true"></i><p>No subjects found.</p></div>`;
+        return `<div class="cur-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-search"></i></div><p>No subjects found.</p></div>`;
     }
 
     const items = courses.map((c, i) => {
@@ -369,7 +369,7 @@ function curCourseAccordionHtml(courses, groupId) {
                 data-bs-toggle="collapse" data-bs-target="#${id}"
                 aria-expanded="false" aria-controls="${id}">
                 <span class="cur-course-select" onclick="event.stopPropagation()">
-                    <span class="tk-bulk-check cur-select-course ${curSelectedCourses.has(c.code) ? 'selected' : ''}" role="checkbox" tabindex="0" data-course-code="${escHtml(c.code)}" data-course-units="${c.units}" aria-checked="${curSelectedCourses.has(c.code) ? 'true' : 'false'}" aria-label="Select ${escHtml(c.code)}" ${added || !curCanImport() ? 'aria-disabled="true"' : ''}>${curSelectedCourses.has(c.code) ? '<i class="bi bi-check-lg" aria-hidden="true"></i>' : ''}</span>
+                    <span class="tk-bulk-check cur-select-course ${curSelectedCourses.has(c.code) ? 'selected' : ''}" role="checkbox" tabindex="0" data-course-code="${escHtml(c.code)}" data-course-units="${c.units}" aria-checked="${curSelectedCourses.has(c.code) ? 'true' : 'false'}" aria-label="Select ${escHtml(c.code)}" ${added || !curCanImport() ? 'aria-disabled="true"' : ''}>${curSelectedCourses.has(c.code) ? '<i class="icon-lucide-check" aria-hidden="true"></i>' : ''}</span>
                 </span>
                 <span class="cur-course-btn-main">
                     <span class="cur-course-pills">
@@ -380,12 +380,12 @@ function curCourseAccordionHtml(courses, groupId) {
                     </span>
                     <span class="cur-course-btn-title">${escHtml(c.title)}</span>
                 </span>
-                <span class="cur-chevron-box"><i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                <span class="cur-chevron-box"><i class="icon-lucide-chevron-down" aria-hidden="true"></i></span>
             </button>
             <div class="collapse" id="${id}">
                 <div class="cur-course-body">
-                    ${c.lecHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-easel" aria-hidden="true"></i> ${c.lecHours} Lecture hrs</div>` : ''}
-                    ${c.labHours !== undefined ? `<div class="cur-course-detail"><i class="bi bi-pc-display" aria-hidden="true"></i> ${c.labHours} Lab hrs</div>` : ''}
+                    ${c.lecHours !== undefined ? `<div class="cur-course-detail"><i class="icon-lucide-presentation" aria-hidden="true"></i> ${c.lecHours} Lecture hrs</div>` : ''}
+                    ${c.labHours !== undefined ? `<div class="cur-course-detail"><i class="icon-lucide-monitor" aria-hidden="true"></i> ${c.labHours} Lab hrs</div>` : ''}
                     <div class="cur-course-detail-req"><span class="cur-req-label">Pre-requisite / Co-requisite</span><div class="cur-card-req-chips">${c.prerequisites.length ? c.prerequisites.map(p => `<span class="cur-badge">${escHtml(p)}</span>`).join('') : '<span class="cur-num">NONE</span>'}</div></div>
                 </div>
             </div>
@@ -399,7 +399,7 @@ function curCourseAccordionHtml(courses, groupId) {
 function curCourseTableHtml(courses, hasHours) {
     const rows = courses.map(c => `
         <tr>
-            <td><span class="tk-bulk-check cur-select-course ${curSelectedCourses.has(c.code) ? 'selected' : ''}" role="checkbox" tabindex="0" data-course-code="${escHtml(c.code)}" data-course-units="${c.units}" aria-checked="${curSelectedCourses.has(c.code) ? 'true' : 'false'}" aria-label="Select ${escHtml(c.code)}" ${curCourseAlreadyAdded(c) || !curCanImport() ? 'aria-disabled="true"' : ''}>${curSelectedCourses.has(c.code) ? '<i class="bi bi-check-lg" aria-hidden="true"></i>' : ''}</span></td>
+            <td><span class="tk-bulk-check cur-select-course ${curSelectedCourses.has(c.code) ? 'selected' : ''}" role="checkbox" tabindex="0" data-course-code="${escHtml(c.code)}" data-course-units="${c.units}" aria-checked="${curSelectedCourses.has(c.code) ? 'true' : 'false'}" aria-label="Select ${escHtml(c.code)}" ${curCourseAlreadyAdded(c) || !curCanImport() ? 'aria-disabled="true"' : ''}>${curSelectedCourses.has(c.code) ? '<i class="icon-lucide-check" aria-hidden="true"></i>' : ''}</span></td>
             <td><span class="cur-code">${escHtml(c.code)}</span>${curCourseAlreadyAdded(c) ? ' <span class="cur-badge">ADDED</span>' : ''}</td>
             <td class="cur-title">${escHtml(c.title)}${c.graduatingStudentOnly ? ' <span class="cur-badge cur-badge-grad" title="For graduating student only">GRAD</span>' : ''}</td>
             <td class="cur-num">${c.units}</td>
@@ -450,7 +450,7 @@ function curSelectionSummary(courses) {
 
 function curCourseListBlockHtml(courses, groupId, hasHours) {
     if (!courses.length) {
-        return `<div class="cur-empty"><i class="bi bi-search" aria-hidden="true"></i><p>No subjects found.</p></div>`;
+        return `<div class="cur-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-search"></i></div><p>No subjects found.</p></div>`;
     }
     return `
         <div class="d-none d-lg-block">${curCourseTableHtml(courses, hasHours)}</div>
@@ -475,7 +475,7 @@ function renderCurResults(data) {
         if (!groups.length) {
             el.innerHTML = `
                 <div class="cur-empty">
-                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-search"></i></div>
                     <p>No subjects match "<strong>${escHtml(q)}</strong>".</p>
                 </div>`;
             return;
@@ -512,7 +512,7 @@ function renderCurResults(data) {
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curSelectAll()" ${curCanImport() ? '' : 'disabled'}>Select All</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curDeselectAll()" ${curCanImport() ? '' : 'disabled'}>Deselect All</button>
                 <button type="button" class="btn btn-ghost btn-sm" onclick="curClearSelection()" ${curCanImport() ? '' : 'disabled'}>Clear Selection</button>
-                <button type="button" class="btn btn-accent btn-sm" onclick="curAddSelected()" ${summary.count ? '' : 'disabled'}><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Selected</button>
+                <button type="button" class="btn btn-accent btn-sm" onclick="curAddSelected()" ${summary.count ? '' : 'disabled'}><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Selected</button>
             </div>
         </div>
         ${curCourseListBlockHtml(sem.courses, groupId, hasHours)}`;
@@ -564,7 +564,7 @@ function curAddSelected() {
     }
     const sem = curActiveSemesterForImport();
     if (!sem) {
-        curImportMessage = '<i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>No active semester is available. <a href="settings.html#semesterManager">Set up an active semester in Semesters</a> before importing.</span>';
+        curImportMessage = '<i class="icon-lucide-triangle-alert" aria-hidden="true"></i><span>No active semester is available. <a href="settings.html#semesterManager">Set up an active semester in Semesters</a> before importing.</span>';
         const data = curStructuredCache[getSelectedProgram()]; if (data) renderCurResults(data);
         return;
     }
@@ -575,8 +575,8 @@ function curAddSelected() {
     const existingCodes = new Set(subjects.filter(s => s.semesterId === sem.id).map(s => String(s.code || '').toLowerCase()));
     const selected = semData.courses.filter(c => curSelectedCourses.has(c.code) && !existingCodes.has(String(c.code).toLowerCase()));
     selected.forEach(c => subjects.push({ id: DB.uid(), code: c.code, desc: c.title, type: c.labHours ? 'Laboratory' : 'Lecture', units: Number(c.units || 0), section: '', days: [], start: '', end: '', online: false, room: '', building: '', professor: '', email: '', color: DB.colors[subjects.length % DB.colors.length], notes: c.prerequisites && c.prerequisites.length ? `Prerequisites: ${c.prerequisites.join(', ')}` : '', semester: sem.name, schoolYear: sem.schoolYear, semesterId: sem.id, archived: false, source: 'curriculum', setupStatus: 'needs_setup', curriculumKey: `${getSelectedProgram()}:${curViewState.activeYear}:${curViewState.activeSemester}:${c.code}` }));
-    if (selected.length && DB.saveSubjects(subjects) === false) { curImportMessage = '<i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>Could not save the selected subjects on this device. Please try again.</span>'; }
-    else { const skipped = curSelectedCourses.size - selected.length; curImportMessage = selected.length ? `<i class="bi bi-check2-circle" aria-hidden="true"></i><span>${selected.length} subject${selected.length === 1 ? '' : 's'} added to ${escHtml(sem.name)}. Complete their details in Schedule.${skipped ? ` ${skipped} already existed and were skipped.` : ''}</span>` : `<i class="bi bi-info-circle" aria-hidden="true"></i><span>Those subjects are already in this semester.</span>`; curSelectedCourses.clear(); }
+    if (selected.length && DB.saveSubjects(subjects) === false) { curImportMessage = '<i class="icon-lucide-triangle-alert" aria-hidden="true"></i><span>Could not save the selected subjects on this device. Please try again.</span>'; }
+    else { const skipped = curSelectedCourses.size - selected.length; curImportMessage = selected.length ? `<i class="icon-lucide-circle-check" aria-hidden="true"></i><span>${selected.length} subject${selected.length === 1 ? '' : 's'} added to ${escHtml(sem.name)}. Complete their details in Schedule.${skipped ? ` ${skipped} already existed and were skipped.` : ''}</span>` : `<i class="icon-lucide-info" aria-hidden="true"></i><span>Those subjects are already in this semester.</span>`; curSelectedCourses.clear(); }
     renderCurResults(data);
 }
 
@@ -744,11 +744,11 @@ function trackerStatusClass(status) {
 }
 
 function trackerStatusIcon(status) {
-    return { completed: 'bi-check2-circle', ongoing: 'bi-arrow-repeat', 'not-taken': 'bi-dash-circle', 'needs-verification': 'bi-question-circle' }[status] || 'bi-dash-circle';
+    return { completed: 'icon-lucide-circle-check', ongoing: 'icon-lucide-repeat', 'not-taken': 'icon-lucide-circle-minus', 'needs-verification': 'icon-lucide-circle-help' }[status] || 'icon-lucide-circle-minus';
 }
 
 function trackerStatusBadge(item) {
-    return `<span class="cur-tracker-status ${trackerStatusClass(item.status)}"><i class="bi ${trackerStatusIcon(item.status)}" aria-hidden="true"></i>${item.label}</span>`;
+    return `<span class="cur-tracker-status ${trackerStatusClass(item.status)}"><i class="${trackerStatusIcon(item.status)}" aria-hidden="true"></i>${item.label}</span>`;
 }
 
 function trackerContextHtml(activeSemester, model, data) {
@@ -765,7 +765,7 @@ function trackerContextHtml(activeSemester, model, data) {
       <div class="cur-tracker-current-progress"><span class="cur-tracker-eyebrow">CURRICULUM PROGRESS</span><strong>${pct.toFixed(1)}%</strong><span>${completedUnits} of ${totalUnits} units completed</span></div>
       <div class="cur-tracker-current-bar"><div class="cur-tracker-progress-bar"><span style="width:${pct.toFixed(1)}%"></span></div></div>
       <div class="cur-tracker-context-stats"><span><b>${currentItems.length}</b> taking now</span><span><b>${currentUnits}</b> units enrolled</span></div>
-      ${mismatch ? `<div class="cur-tracker-warning" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i>Registered year level and active semester year level do not match. The tracker is using your registered year level as the reference.</div>` : ''}
+      ${mismatch ? `<div class="cur-tracker-warning" role="alert"><i class="icon-lucide-triangle-alert" aria-hidden="true"></i>Registered year level and active semester year level do not match. The tracker is using your registered year level as the reference.</div>` : ''}
     </div>`;
 }
 
@@ -787,7 +787,7 @@ function trackerSubjectRowHtml(item) {
     const grade = item.grade.pct !== null ? `${item.grade.pct.toFixed(1)}%` : 'No verified grade';
     const prereqs = (item.course.prerequisites || []).length ? item.course.prerequisites.map(p => `<span class="cur-badge">${escHtml(p)}</span>`).join('') : '<span class="cur-num">NONE</span>';
     const trackerKey = `subject-${item.year.yearLevel}-${item.semesterIndex}-${trackerNormalizeCode(item.course.code)}`;
-    return `<details class="cur-tracker-subject" data-tracker-key="${escHtml(trackerKey)}"><summary><span class="cur-tracker-subject-main"><span class="cur-tracker-subject-code">${escHtml(item.course.code)}</span><span class="cur-tracker-subject-name">${escHtml(item.course.title)}</span></span><span class="cur-tracker-subject-meta"><span class="cur-tracker-subject-units">${item.course.units} units</span>${trackerStatusBadge(item)}</span></summary><div class="cur-tracker-subject-detail"><div><span class="cur-tracker-detail-label">Curriculum</span>${escHtml(item.year.yearLabel)} · ${escHtml(item.semester.semesterLabel)}</div><div><span class="cur-tracker-detail-label">Grade</span>${grade}</div><div><span class="cur-tracker-detail-label">Prerequisites</span><span class="cur-tracker-prereqs">${prereqs}</span></div><p>${escHtml(item.detail)}</p>${trackerStatusEditorHtml(item)}<div class="cur-tracker-links"><a class="btn btn-ghost btn-sm" href="schedule.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-calendar2-week me-1" aria-hidden="true"></i>View Subject</a><a class="btn btn-ghost btn-sm" href="grades.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="bi bi-mortarboard me-1" aria-hidden="true"></i>View Grade</a></div></div></details>`;
+    return `<details class="cur-tracker-subject" data-tracker-key="${escHtml(trackerKey)}"><summary><span class="cur-tracker-subject-main"><span class="cur-tracker-subject-code">${escHtml(item.course.code)}</span><span class="cur-tracker-subject-name">${escHtml(item.course.title)}</span></span><span class="cur-tracker-subject-meta"><span class="cur-tracker-subject-units">${item.course.units} units</span>${trackerStatusBadge(item)}</span></summary><div class="cur-tracker-subject-detail"><div><span class="cur-tracker-detail-label">Curriculum</span>${escHtml(item.year.yearLabel)} · ${escHtml(item.semester.semesterLabel)}</div><div><span class="cur-tracker-detail-label">Grade</span>${grade}</div><div><span class="cur-tracker-detail-label">Prerequisites</span><span class="cur-tracker-prereqs">${prereqs}</span></div><p>${escHtml(item.detail)}</p>${trackerStatusEditorHtml(item)}<div class="cur-tracker-links"><a class="btn btn-ghost btn-sm" href="schedule.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>View Subject</a><a class="btn btn-ghost btn-sm" href="grades.html${subject ? `?subject=${encodeURIComponent(subject.id)}` : ''}"><i class="icon-lucide-graduation-cap me-1" aria-hidden="true"></i>View Grade</a></div></div></details>`;
 }
 
 function trackerBreakdownHtml(model, data, activeSemester) {
@@ -802,7 +802,7 @@ function renderCurriculumTracker(data, code) {
     if (!statsHost || !mainHost) return;
     if (curRegisteredProgram && code !== curRegisteredProgram) {
         statsHost.innerHTML = '';
-        mainHost.innerHTML = `<div class="cur-tracker-locked"><i class="bi bi-info-circle" aria-hidden="true"></i><span>The tracker follows your registered program. Switch back to <strong>${escHtml(CURRICULA[curRegisteredProgram] ? CURRICULA[curRegisteredProgram].title : curRegisteredProgram)}</strong> to view your progress.</span></div>`;
+        mainHost.innerHTML = `<div class="cur-tracker-locked"><i class="icon-lucide-info" aria-hidden="true"></i><span>The tracker follows your registered program. Switch back to <strong>${escHtml(CURRICULA[curRegisteredProgram] ? CURRICULA[curRegisteredProgram].title : curRegisteredProgram)}</strong> to view your progress.</span></div>`;
         return;
     }
     const activeSemester = trackerExplicitActiveSemester();

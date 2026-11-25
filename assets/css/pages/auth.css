@@ -183,7 +183,7 @@ body.auth-page {
     outline-offset: 2px;
 }
 
-.theme-toggle .bi {
+.theme-toggle .lucide-icon {
     line-height: 1;
 }
 
@@ -316,7 +316,7 @@ body.auth-page {
     text-decoration: underline;
 }
 
-.auth-link i {
+.auth-link .lucide-icon {
     margin-right: var(--space-2);
 }
 
@@ -550,7 +550,7 @@ html[data-motion="reduced"] .auth-spin {
     display: none;
 }
 
-.auth-alert i {
+.auth-alert .lucide-icon {
     flex: 0 0 auto;
     margin-top: 0.15rem;
     color: var(--auth-info);
@@ -849,7 +849,7 @@ body.auth-page {
     font-size: .78rem;
 }
 
-.auth-feature-list i {
+.auth-feature-list .lucide-icon {
     color: rgb(var(--accent));
     font-size: .9rem;
 }

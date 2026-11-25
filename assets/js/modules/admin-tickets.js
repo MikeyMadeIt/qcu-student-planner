@@ -58,16 +58,16 @@ async function loadRows() {
         <td data-label="Submitted" class="adm-col-hide-compact">${formatDateTime(r.created_at)}</td>
         <td data-label="Updated" class="adm-col-hide-compact">${formatDateTime(r.updated_at)}</td>
         <td class="text-end adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View ticket" aria-label="View ticket"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View ticket" aria-label="View ticket"><i class="icon-lucide-eye" aria-hidden="true"></i></button>
         </td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="icon-lucide-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="icon-lucide-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');
@@ -87,7 +87,7 @@ function notesMarkup(notes) {
 async function viewTicket(id) {
     currentTicketId = id;
     const bodyEl = document.getElementById('tkDetailBody');
-    bodyEl.innerHTML = `<div class="adm-loading"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Loading…</div>`;
+    bodyEl.innerHTML = `<div class="adm-loading"><i class="icon-lucide-hourglass" aria-hidden="true"></i> Loading…</div>`;
     const modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
     modal.show();
 
@@ -112,7 +112,7 @@ async function viewTicket(id) {
             <dt>Last updated</dt><dd>${formatDateTime(ticket.updated_at)}</dd>
             <dt>Last updated by</dt><dd>${escHtml(ticket.updater && ticket.updater.full_name ? ticket.updater.full_name : '—')}</dd>
         </div>
-        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-chat-left-text" aria-hidden="true"></i>${escHtml(ticket.subject)}</div>
+        <div class="section-title mb-2" style="font-size:.84rem"><i class="icon-lucide-message-square-text" aria-hidden="true"></i>${escHtml(ticket.subject)}</div>
         <div class="glass card-pad mb-3" style="white-space:pre-wrap;font-size:.88rem">${escHtml(ticket.description)}</div>
 
         <div class="row g-2 align-items-end mb-3">
@@ -121,16 +121,16 @@ async function viewTicket(id) {
             <select id="tkStatusSelect" class="form-select">${statusOptions}</select>
           </div>
           <div class="col-12 col-sm-6">
-            <button type="button" class="btn btn-accent w-100" id="tkStatusSaveBtn"><i class="bi bi-check2" aria-hidden="true"></i> Update status</button>
+            <button type="button" class="btn btn-accent w-100" id="tkStatusSaveBtn"><i class="icon-lucide-check" aria-hidden="true"></i> Update status</button>
           </div>
         </div>
         <p class="auth-error" id="tkStatusError" hidden></p>
 
-        <div class="section-title mb-2" style="font-size:.84rem"><i class="bi bi-journal-lock" aria-hidden="true"></i>Internal notes <span class="text-faint">(admin-only, never visible to the student)</span></div>
+        <div class="section-title mb-2" style="font-size:.84rem"><i class="icon-lucide-notebook-pen" aria-hidden="true"></i>Internal notes <span class="text-faint">(admin-only, never visible to the student)</span></div>
         <div id="tkNotesList" class="mb-2">${notesMarkup(notes)}</div>
         <div class="adm-compose-row">
           <input id="tkNoteInput" class="form-control" maxlength="2000" placeholder="Add an internal note…">
-          <button type="button" class="btn btn-ghost" id="tkNoteAddBtn"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add</button>
+          <button type="button" class="btn btn-ghost" id="tkNoteAddBtn"><i class="icon-lucide-plus" aria-hidden="true"></i> Add</button>
         </div>
         <p class="auth-error" id="tkNoteError" hidden></p>`;
 
@@ -145,12 +145,12 @@ async function onSaveStatus() {
     errorEl.hidden = true;
 
     btn.disabled = true;
-    btn.innerHTML = `<i class="bi bi-hourglass-split" aria-hidden="true"></i> Updating…`;
+    btn.innerHTML = `<i class="icon-lucide-hourglass" aria-hidden="true"></i> Updating…`;
 
     const result = await AdminService.setTicketStatus({ ticketId: currentTicketId, newStatus: select.value });
 
     btn.disabled = false;
-    btn.innerHTML = `<i class="bi bi-check2" aria-hidden="true"></i> Update status`;
+    btn.innerHTML = `<i class="icon-lucide-check" aria-hidden="true"></i> Update status`;
 
     if (!result.ok) {
         errorEl.textContent = result.message;
@@ -158,7 +158,7 @@ async function onSaveStatus() {
         return;
     }
 
-    Toast.show('Ticket status updated.', 'accent', 'bi-check-circle');
+    Toast.show('Ticket status updated.', 'accent', 'icon-lucide-circle-check');
     loadRows();
     viewTicket(currentTicketId);
 }

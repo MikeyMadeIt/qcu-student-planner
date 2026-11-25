@@ -123,11 +123,11 @@ label {
     border-color: rgba(var(--accent),.4);
 }
 
-.quick-action i {
+.quick-action .lucide-icon {
     transition: transform .2s;
 }
 
-.quick-action:hover i {
+.quick-action:hover .lucide-icon {
     transform: scale(1.12);
 }
 
@@ -385,19 +385,6 @@ td {
     text-align: center;
     padding: var(--space-6) var(--space-4);
     color: var(--text-soft);
-}
-
-.empty-state i {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
 }
 
 .empty-state p {
