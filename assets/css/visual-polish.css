@@ -1,0 +1,218 @@
+/* Shared visual finish for the existing application structure.
+   This file changes presentation only; component geometry and page flow stay
+   owned by the existing layout and feature stylesheets. */
+
+:root {
+    --shadow-popover: 0 10px 32px rgba(15, 23, 42, .12), 0 2px 8px rgba(15, 23, 42, .05);
+    --shadow-card-hover: 0 3px 10px rgba(15, 23, 42, .06);
+    --border-strong: color-mix(in srgb, var(--border) 72%, var(--text-faint));
+}
+
+[data-theme="dark"],
+[data-theme="amoled"] {
+    --shadow-popover: 0 12px 36px rgba(0, 0, 0, .42), 0 2px 8px rgba(0, 0, 0, .24);
+    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, .22);
+}
+
+body {
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.page-title,
+.section-title {
+    color: var(--text);
+}
+
+.page-title {
+    font-weight: 600;
+    letter-spacing: -.035em;
+}
+
+.page-sub,
+.text-muted,
+.text-secondary {
+    color: var(--text-soft) !important;
+}
+
+/* Shell panels retain their current positions and dimensions. */
+.sidebar,
+.main-content {
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+}
+
+.sidebar {
+    background: var(--nav-bg);
+}
+
+.main-content {
+    background: var(--surface);
+}
+
+/* One restrained surface treatment across cards and feature containers. */
+.glass,
+.card,
+.modal-content,
+.profile-panel,
+.header-panel,
+.dropdown-menu,
+.popover {
+    border-color: var(--border);
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+.glass,
+.card {
+    box-shadow: var(--shadow);
+}
+
+[data-theme] .glass,
+[data-theme] .card {
+    box-shadow: var(--shadow);
+}
+
+.glass:hover,
+.card:hover {
+    border-color: var(--border-strong);
+}
+
+.modal-content,
+.profile-panel,
+.header-panel,
+.dropdown-menu,
+.popover {
+    box-shadow: var(--shadow-popover);
+}
+
+.modal-header,
+.modal-footer,
+.dropdown-divider {
+    border-color: var(--border);
+}
+
+/* Buttons keep their existing dimensions, with clearer surface and state cues. */
+.btn-accent,
+.btn-primary {
+    font-weight: 600;
+    box-shadow: 0 1px 1px rgba(15, 23, 42, .12);
+}
+
+.btn-accent:hover,
+.btn-primary:hover {
+    filter: brightness(.97);
+}
+
+.btn-ghost,
+.btn-icon,
+.btn-secondary {
+    border-color: var(--border);
+    background-color: var(--surface-2);
+}
+
+.btn-ghost:hover,
+.btn-icon:hover,
+.btn-secondary:hover {
+    border-color: color-mix(in srgb, rgb(var(--accent)) 30%, var(--border));
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Inputs use a quiet neutral surface and a consistent accessible focus ring. */
+.form-control,
+.form-select,
+.date-picker-trigger {
+    border-color: var(--border) !important;
+}
+
+.form-control:hover:not(:disabled):not(:focus),
+.form-select:hover:not(:disabled):not(:focus),
+.date-picker-trigger:hover {
+    border-color: var(--border-strong) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgb(var(--accent)) !important;
+}
+
+/* Menus and table views use the same surface and row hover treatment. */
+.dropdown-item {
+    color: var(--text-soft);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active,
+.dropdown-item:active {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.table,
+.adm-table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    color: var(--text);
+}
+
+.table > :not(caption) > * > *,
+.adm-table th,
+.adm-table td {
+    border-color: var(--border);
+}
+
+.table-hover > tbody > tr:hover > *,
+.adm-table tbody tr:hover {
+    background-color: color-mix(in srgb, var(--surface-2) 72%, transparent);
+    color: var(--text);
+}
+
+/* Shared status, empty, and loading treatments remain compact and semantic. */
+.badge,
+.chip,
+.status-badge {
+    font-weight: 600;
+    letter-spacing: .005em;
+}
+
+.empty-state {
+    color: var(--text-soft);
+}
+
+.empty-state-title {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.empty-state-sub,
+.empty-state p {
+    color: var(--text-soft);
+}
+
+.empty-icon-circle {
+    border-color: var(--border);
+    background: var(--surface-2);
+}
+
+.skel,
+.skeleton,
+.skel-text,
+.skel-title,
+.skel-circle-sm {
+    background-color: var(--surface-2);
+}
