@@ -309,7 +309,6 @@
     position: relative;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-sm);
     padding: 12px 14px;
 }
@@ -890,7 +889,7 @@
     width: 20px;
     height: 20px;
     min-width: 20px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     background: transparent;
     display: flex;
@@ -935,7 +934,6 @@
     padding: 9px 11px;
     margin-bottom: 10px;
     border: 1px solid var(--border);
-    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-sm);
     background: var(--surface);
     color: var(--text-faint);
@@ -966,7 +964,7 @@
 
 /* CURRICULUM TRACKER */
 .cur-tracker-context, .cur-tracker-overview, .cur-tracker-breakdown { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-md); padding: var(--card-pad, 18px); min-width: 0; }
-.cur-tracker-context { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-left: 3px solid rgb(var(--accent)); }
+.cur-tracker-context { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
 .cur-tracker-context-main { display: grid; gap: 3px; min-width: 0; }
 .cur-tracker-eyebrow { color: var(--text-faint); font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .08em; }
 .cur-tracker-context-main strong { color: var(--text); font-size: 1.02rem; overflow-wrap: anywhere; }
@@ -1022,7 +1020,7 @@
 .cur-tracker-subject-detail p { margin: 0; color: var(--text-faint); }
 .cur-tracker-prereqs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .cur-tracker-links { display: flex; flex-wrap: wrap; gap: 6px; }
-.cur-tracker-locked { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 24px; padding: 11px 13px; border: 1px solid var(--border); border-left: 3px solid rgb(var(--accent)); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-faint); font-size: .78rem; line-height: 1.4; }
+.cur-tracker-locked { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0 24px; padding: 11px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-faint); font-size: .78rem; line-height: 1.4; }
 .cur-tracker-locked .lucide-icon { color: rgb(var(--accent)); }
 @media (max-width: 767.98px) {
     .cur-tracker-context, .cur-tracker-overview, .cur-tracker-breakdown { padding: 13px; }

@@ -227,8 +227,8 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     font-size: .82rem;
     color: var(--text-soft);
     background: var(--surface-2);
-    border-left: 3px solid rgb(var(--accent));
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: .6rem .85rem;
     margin-bottom: 1.25rem;
 }
@@ -568,7 +568,6 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     align-self: flex-start;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--text);
 }
 
 .ai-msg-attachment {
@@ -1246,7 +1245,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
 .asa-history-item:hover,
 .asa-history-item.is-menu-open { background: var(--surface-2); }
 
-.asa-history-item.is-active { background: rgba(var(--accent), .14); border-left: 2px solid rgb(var(--accent)); }
+.asa-history-item.is-active { background: rgba(var(--accent), .14); }
 
 .asa-history-item-btn {
     flex: 1 1 auto;

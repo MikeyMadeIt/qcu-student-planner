@@ -1,37 +1,15 @@
 // supabase/functions/admin-delete-account/index.ts
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { cors, corsPreflight, hasDisallowedOrigin } from '../_shared/cors.ts';
 
-// Restrict which origins may call this function from a browser. '*' would let
-// any site's JavaScript read the response to a credentialed request. Set the
-// ALLOWED_ORIGIN env var (Edge Functions -> Secrets) to your deployed app's
-// origin(s) (comma-separated for more than one, e.g. prod + preview URLs).
-// Note: this only stops browser JS running on other sites from reading the
-// response — it does not stop a direct curl/script call with a valid bearer
-// token, which is why the server-side admin/approval checks below are the
-// real access control, not this header.
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGIN') || '')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
-
-function corsHeaders(req) {
-    const origin = req.headers.get('Origin') || '';
-    const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : (ALLOWED_ORIGINS[0] || 'null');
-    return {
-        'Access-Control-Allow-Origin': allowOrigin,
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Vary': 'Origin',
-    };
-}
-
-// jsonResponse/handle take `req` so the CORS header reflects the actual
-// request's Origin rather than a single hardcoded '*'.
+// Browser origins are checked against the comma-separated ALLOWED_ORIGIN
+// allowlist. Requests without Origin remain usable by server-to-server callers;
+// those callers still must pass the authentication and authorization checks.
 function jsonResponse(req, status, body) {
     return new Response(JSON.stringify(body), {
         status,
-        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
+        headers: { ...cors(req), 'Content-Type': 'application/json' },
     });
 }
 
@@ -48,7 +26,11 @@ Deno.serve(async (req) => {
 
 async function handle(req) {
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders(req) });
+        return corsPreflight(req);
+    }
+
+    if (hasDisallowedOrigin(req)) {
+        return jsonResponse(req, 403, { error: 'This origin is not allowed.' });
     }
 
     if (req.method !== 'POST') {
@@ -56,18 +38,18 @@ async function handle(req) {
     }
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-    const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !ANON_KEY) {
         const missing = [
             !SUPABASE_URL && 'SUPABASE_URL',
-            !SERVICE_ROLE_KEY && 'SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)',
+            !SERVICE_ROLE_KEY && 'SUPABASE_SERVICE_ROLE_KEY',
             !ANON_KEY && 'SUPABASE_ANON_KEY',
         ].filter(Boolean).join(', ');
         return jsonResponse(req, 500, {
             error: `Server misconfiguration: missing required Edge Function secret(s): ${missing}. ` +
-                `SUPABASE_URL/SUPABASE_ANON_KEY are normally auto-provisioned; SERVICE_ROLE_KEY must be set ` +
+                `SUPABASE_URL/SUPABASE_ANON_KEY are normally auto-provisioned; SUPABASE_SERVICE_ROLE_KEY must be set ` +
                 `manually under Edge Functions -> Secrets, using a secret key (Project Settings -> API Keys) with ` +
                 `"Bypass Row Level Security" and Auth admin permissions enabled.`,
         });
@@ -141,13 +123,26 @@ async function handle(req) {
         return jsonResponse(req, 403, { error: 'This action is restricted to approved administrators.' });
     }
 
-    const { data: targetProfile } = await adminClient
+    const { data: targetProfile, error: targetProfileErr } = await adminClient
         .from('profiles')
         .select('account_status, email, full_name')
         .eq('id', targetUserId)
         .maybeSingle();
 
-    let dbCleanupNeeded = !!targetProfile;
+    if (targetProfileErr) {
+        console.error('admin-delete-account: target profile lookup failed', {
+            targetUserId,
+            message: targetProfileErr.message,
+            code: targetProfileErr.code,
+        });
+        return jsonResponse(req, 500, { error: 'Could not verify the target account before deletion.' });
+    }
+
+    if (!targetProfile) {
+        return jsonResponse(req, 404, { error: 'The target account was not found.' });
+    }
+
+    let dbCleanupNeeded = true;
 
     if (dbCleanupNeeded && targetProfile.account_status !== 'rejected') {
         return jsonResponse(req, 409, {
