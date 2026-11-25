@@ -1,15 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { cors, corsPreflight, hasDisallowedOrigin } from '../_shared/cors.ts';
 
 const QCU_API = 'https://qcu.edu.ph/wp-json/wp/v2';
 const CATEGORIES = [{ id: 26, category: 'news' }, { id: 16, category: 'announcement' }];
-const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGIN') || '').split(',').map((s) => s.trim()).filter(Boolean);
-
-function cors(req: Request) {
-  const origin = req.headers.get('Origin') || '';
-  return { 'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : (ALLOWED_ORIGINS[0] || 'null'),
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS', Vary: 'Origin' };
-}
 function json(req: Request, status: number, body: unknown) {
   return new Response(JSON.stringify(body), { status, headers: { ...cors(req), 'Content-Type': 'application/json' } });
 }
@@ -25,7 +18,8 @@ function validQcuUrl(value: unknown) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
+  if (req.method === 'OPTIONS') return corsPreflight(req);
+  if (hasDisallowedOrigin(req)) return json(req, 403, { error: 'This origin is not allowed.' });
   if (req.method !== 'POST') return json(req, 405, { error: 'Method not allowed.' });
   const url = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
