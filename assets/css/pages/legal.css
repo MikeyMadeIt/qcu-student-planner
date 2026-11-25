@@ -34,7 +34,6 @@ html:has(.legal-page) {
     margin-bottom: var(--grid-gap);
     padding: var(--space-4);
     border: 1px solid var(--border);
-    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-md);
     background: var(--surface);
 }

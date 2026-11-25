@@ -178,7 +178,6 @@ body {
     text-overflow: ellipsis;
     cursor: pointer;
     box-shadow: none;
-    border-left: 3px solid rgba(0,0,0,.22);
     transition: filter var(--transition-fast);
 }
 
@@ -2122,7 +2121,6 @@ body {
 }
 
 /* Curriculum imports awaiting completion */
-.sch-curriculum-setup { border-left: 3px solid rgb(var(--accent)); }
 .sch-curriculum-setup-sub { font-size: .78rem; }
 .sch-curriculum-setup-list { display: grid; gap: 8px; }
 .sch-curriculum-setup-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }

@@ -347,7 +347,7 @@
     width: 16px;
     height: 16px;
     min-width: 16px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     display: flex;
     align-items: center;
@@ -363,6 +363,15 @@
     background: rgb(var(--accent));
     border-color: rgb(var(--accent));
     color: #fff;
+}
+
+.md-cl-checked::after {
+    content: "";
+    width: 4px;
+    height: 7px;
+    border: solid currentColor;
+    border-width: 0 1.7px 1.7px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .md-cl-text {

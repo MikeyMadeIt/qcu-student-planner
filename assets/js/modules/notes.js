@@ -2208,7 +2208,7 @@ function exportNotePdf(id) {
         '.md-li,ol li{margin:0 0 3pt;break-inside:avoid}' +
         '.md-inline-code{background:#f0f0f8;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:.9em;overflow-wrap:anywhere}' +
         '.md-code-block{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow:hidden;background:#f5f5fa;border:1px solid #ddd;border-radius:4px;padding:10pt;margin:.75em 0;font-family:monospace;font-size:9pt;line-height:1.5}' +
-        '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
+        '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;border-radius:50%;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
         '.md-quote{margin:.6em 0 .8em;padding:6pt 12pt;border-left:3pt solid #2548a8;background:#f3f5fc;break-inside:avoid}' +
         '.md-ul .md-ul,.md-ul ol,ol .md-ul,ol ol{margin:2pt 0}.md-checklist-item{flex-wrap:wrap}.md-checklist-item>ul,.md-checklist-item>ol{flex:1 1 100%}' +
         'a{color:#2548a8;overflow-wrap:anywhere}' +
