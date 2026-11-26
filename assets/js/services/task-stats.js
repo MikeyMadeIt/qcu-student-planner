@@ -73,8 +73,6 @@ function computeTaskCounts(tasks) {
 // The absence limit falls back to the default if the stored value is invalid.
 // The semester progress bar no longer hits 100% before the last day ends.
 
-// I also added the total enrolled units to the Dashboard’s subjects card hint (e.g. “6 units · Syllabus 40%”), since the dashboard showed no units figure.
-
 // Not changed — needs your decision
 
 // Cloud sync stores unscored assessments as score: 0. An assessment with a name and total but no score, like an upcoming quiz, comes back from Supabase as 0%. Your migrations don’t define the grade_assessments columns, so I can’t tell whether they allow NULL. If they do, cloud-sync.js should push null instead of 0.

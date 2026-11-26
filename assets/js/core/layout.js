@@ -20,6 +20,7 @@ const NAV_ITEMS = [
     { href: 'report.html', icon: 'icon-lucide-flag', label: 'Report a Problem', key: 'report', base: 'app' },
     { href: 'legal-policies.html', icon: 'icon-lucide-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
     { href: 'dashboard.html', icon: 'icon-lucide-gauge', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
+    { href: 'academic-calendar.html', icon: 'icon-lucide-calendar-range', label: 'Academic Calendar', key: 'admin-academic-calendar', base: 'admin' },
     { href: 'university-events.html', icon: 'icon-lucide-landmark', label: 'University Events', key: 'admin-university-events', base: 'admin' },
     { href: 'users.html', icon: 'icon-lucide-users-round', label: 'All Users', key: 'admin-users', base: 'admin' },
     { href: 'verification.html', icon: 'icon-lucide-user-round-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
@@ -56,6 +57,7 @@ const PAGE_SECTIONS = {
     report: 'Safety & Support',
     'legal-policies': 'Safety & Support',
     'admin-dashboard': 'Overview',
+    'admin-academic-calendar': 'University',
     'admin-university-events': 'Events',
     'admin-users': 'User Management',
     'admin-verification': 'User Management',
@@ -75,7 +77,7 @@ const STUDENT_NAV_GROUPS = [
 ];
 const ADMIN_NAV_GROUPS = [
     { label: 'Overview', keys: ['admin-dashboard'] },
-    { label: 'Events', keys: ['admin-university-events'] },
+    { label: 'University', keys: ['admin-academic-calendar', 'admin-university-events'] },
     { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
     { label: 'Communications', keys: ['admin-inbox', 'admin-tickets'] },
     { label: 'System', keys: ['admin-activity'] },
@@ -91,8 +93,16 @@ async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
     try {
         const { AuthService } = await import('../services/auth-service.js');
-        await AuthService.signOut();
+        const result = await AuthService.signOut();
+        if (!result.ok) {
+            if (window.Toast) Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+            if (button) button.disabled = false;
+            return;
+        }
     } catch (error) {
+        if (window.Toast) Toast.show('Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+        if (button) button.disabled = false;
+        return;
     }
     location.href = '../auth/login.html';
 }
@@ -107,13 +117,20 @@ function formatSemesterCardDate(ymd) {
 }
 function renderShellSemesterCardHtml() {
     const sem = (typeof DB !== 'undefined') ? DB.getActiveSemester() : null;
-    if (!sem) return '';
+    if (!sem) return `
+        <div class="shell-semester-card shell-semester-card-empty" id="shellSemesterCard">
+            <div class="shell-semester-info">
+                <div class="shell-semester-name">No active academic period</div>
+                <div class="shell-semester-dates">The university administrator has not set one yet.</div>
+            </div>
+            <span class="shell-semester-status shell-semester-status-empty">Not set</span>
+        </div>`;
     const range = `${formatSemesterCardDate(sem.startDate)} &ndash; ${formatSemesterCardDate(sem.endDate)}`;
     return `
         <div class="shell-semester-card" id="shellSemesterCard">
             <div class="shell-semester-info">
-                <div class="shell-semester-name">${escHtml(sem.name)}</div>
-                <div class="shell-semester-dates">${range}</div>
+                <div class="shell-semester-name">${escHtml(sem.schoolYear)} · ${escHtml(sem.name)}</div>
+                <div class="shell-semester-dates">${range} · Managed by QCU</div>
             </div>
             <span class="shell-semester-status"><i class="icon-lucide-check" aria-hidden="true"></i>Active</span>
         </div>`;
@@ -531,6 +548,7 @@ function renderAdminShellBar(activeKey, admin) {
             </div>
         </div>`;
     main.insertBefore(bar, main.firstChild);
+    if (!document.body.classList.contains('admin-app')) ensureAcademicPeriodBanner(main);
     initHeaderPanel(bar, 'profileTrigger', 'profilePanel', 'profileMenu');
     initMobileThemeMenu();
 }
@@ -643,6 +661,10 @@ function renderShellBar(activeKey) {
         if (!document.hidden) refreshInboxPreview({ refreshList: false, throttle: true });
     });
     window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
+    window.addEventListener('planner:academic-calendar-changed', () => {
+        refreshShellSemesterCard();
+        refreshAcademicPeriodBanner();
+    });
     setupInboxBadgeRealtime();
     initMobileThemeMenu();
 }
@@ -650,6 +672,32 @@ function renderShellBar(activeKey) {
 function refreshShellSemesterCard() {
     const wrap = document.getElementById('shellSemesterCardWrap');
     if (wrap) wrap.innerHTML = renderShellSemesterCardHtml();
+}
+
+function academicPeriodBannerHtml() {
+    const sem = typeof DB !== 'undefined' ? DB.getActiveSemester() : null;
+    return sem
+        ? `<i class="icon-lucide-calendar-days" aria-hidden="true"></i><span><strong>${escHtml(sem.schoolYear)} · ${escHtml(sem.name)}</strong><span>University academic period · Managed by QCU</span></span>`
+        : `<i class="icon-lucide-calendar-x-2" aria-hidden="true"></i><span><strong>No active academic period</strong><span>The university administrator has not published the academic calendar yet.</span></span>`;
+}
+
+function ensureAcademicPeriodBanner(main) {
+    let banner = document.getElementById('academicPeriodBanner');
+    if (!banner) {
+        banner = document.createElement('aside');
+        banner.id = 'academicPeriodBanner';
+        banner.className = 'academic-period-banner';
+        banner.setAttribute('aria-live', 'polite');
+        const shellBar = main.querySelector('#shellBar');
+        if (shellBar && shellBar.nextSibling) main.insertBefore(banner, shellBar.nextSibling);
+        else main.insertBefore(banner, main.firstChild);
+    }
+    banner.innerHTML = academicPeriodBannerHtml();
+}
+
+function refreshAcademicPeriodBanner() {
+    const banner = document.getElementById('academicPeriodBanner');
+    if (banner) banner.innerHTML = academicPeriodBannerHtml();
 }
 
 function refreshNotificationPreview() {

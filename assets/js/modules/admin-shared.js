@@ -49,7 +49,12 @@ export function mountAdminTopbar(admin) {
         logoutBtn.dataset.adminLogoutWired = 'true';
         logoutBtn.addEventListener('click', async () => {
             document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = true);
-            await AuthService.signOut();
+            const result = await AuthService.signOut();
+            if (!result.ok) {
+                if (window.Toast) Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+                document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = false);
+                return;
+            }
             location.href = '../auth/login.html';
         });
     });

@@ -14,12 +14,6 @@ function ok(data) {
     return { ok: true, data };
 }
 
-function timeoutAfter(ms) {
-    return new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('__ai_timeout__')), ms);
-    });
-}
-
 // Calls the "ai-study" Edge Function.
 async function callAiBackend({ feature, prompt, questionCount, difficulty, file }) {
     let supabase;
@@ -56,10 +50,13 @@ async function callAiBackend({ feature, prompt, questionCount, difficulty, file 
     }
 
     let invokeResult;
+    let timeoutId;
     try {
         invokeResult = await Promise.race([
             supabase.functions.invoke(AI_EDGE_FUNCTION_NAME, { body }),
-            timeoutAfter(AI_REQUEST_TIMEOUT_MS),
+            new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('__ai_timeout__')), AI_REQUEST_TIMEOUT_MS);
+            }),
         ]);
     } catch (error) {
         if (error && error.message === '__ai_timeout__')
@@ -67,6 +64,8 @@ async function callAiBackend({ feature, prompt, questionCount, difficulty, file 
         if (typeof navigator !== 'undefined' && navigator.onLine === false)
             return fail('You appear to be offline. Check your connection and try again.');
         return fail('Could not reach the AI service. Check your connection and try again.');
+    } finally {
+        clearTimeout(timeoutId);
     }
 
     const { data, error } = invokeResult;

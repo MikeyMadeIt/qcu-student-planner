@@ -9,7 +9,11 @@ function json(req: Request, status: number, body: unknown) {
 function plain(value: string | undefined) {
   return (value || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&#8217;|&#8216;|&rsquo;|&lsquo;/g, '’')
     .replace(/&#8220;|&#8221;|&ldquo;|&rdquo;/g, '“').replace(/&amp;/g, '&').replace(/&quot;/g, '"')
-    .replace(/&#(d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&#x([\da-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&#(\d+);|&#x([\da-f]+);/gi, (_, decimal, hex) => {
+      const codePoint = decimal ? Number(decimal) : parseInt(hex, 16);
+      return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ? String.fromCodePoint(codePoint) : ' ';
+    })
     .replace(/\s+/g, ' ').trim();
 }
 function validQcuUrl(value: unknown) {

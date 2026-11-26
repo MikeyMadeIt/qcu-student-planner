@@ -1,0 +1,132 @@
+.ac-intro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: var(--space-3);
+}
+
+.ac-intro-actions,
+.ac-year-actions,
+.ac-semester-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.ac-active-panel { margin-bottom: var(--space-3); }
+
+#acActive {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--success) 28%, var(--border));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--success) 5%, var(--surface));
+}
+
+.ac-active-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--success) 12%, var(--surface));
+    color: var(--success);
+}
+
+.ac-active-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ac-active-copy strong { color: var(--text); font-size: .94rem; }
+.ac-active-copy > span:last-child { color: var(--text-faint); font-size: .76rem; }
+.ac-eyebrow { color: var(--text-faint); font-size: .63rem; font-weight: 700; letter-spacing: .07em; }
+
+.ac-year {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.ac-year + .ac-year { margin-top: 10px; }
+
+.ac-year-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 14px;
+    background: var(--surface-2);
+}
+
+.ac-year-head > div:first-child,
+.ac-semester-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ac-year-head strong, .ac-semester-main strong { color: var(--text); font-size: .86rem; }
+.ac-year-head > div:first-child span, .ac-semester-main span { color: var(--text-faint); font-size: .72rem; }
+
+.ac-semester-list { padding: 4px 14px; }
+
+.ac-semester {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-semester:last-child { border-bottom: 0; }
+.ac-semester.is-active .ac-semester-main strong { color: rgb(var(--accent)); }
+
+.ac-status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-faint);
+    background: var(--surface-2);
+    font-size: .67rem;
+    font-weight: 650;
+    text-transform: capitalize;
+}
+
+.ac-status-active { color: var(--success); border-color: color-mix(in srgb, var(--success) 35%, var(--border)); background: color-mix(in srgb, var(--success) 8%, var(--surface)); }
+.ac-status-archived, .ac-status-completed { color: var(--text-faint); }
+
+.ac-empty-period { display: flex; align-items: center; gap: 12px; color: var(--text-faint); }
+.ac-empty-period > .lucide-icon { flex: 0 0 auto; font-size: 1.3rem; color: rgb(var(--accent)); }
+.ac-empty-period > div { display: flex; flex-direction: column; gap: 3px; }
+.ac-empty-period strong { color: var(--text); font-size: .85rem; }
+.ac-empty-period span, .ac-empty { font-size: .78rem; line-height: 1.5; }
+.ac-empty, .ac-empty-year, .ac-loading { padding: 14px; color: var(--text-faint); font-size: .78rem; }
+.ac-empty-year { padding: 8px 14px 14px; }
+
+.ac-form { display: flex; flex-direction: column; gap: 8px; }
+.ac-form label { color: var(--text-soft); font-size: .78rem; font-weight: 600; }
+.ac-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ac-form-grid > div { min-width: 0; }
+.ac-form .modal-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+@media (max-width: 767.98px) {
+    .ac-intro { align-items: flex-start; flex-direction: column; }
+    .ac-intro-actions { width: 100%; }
+    .ac-intro-actions .btn { flex: 1 1 auto; }
+    .ac-year-head { align-items: flex-start; flex-direction: column; }
+    .ac-year-actions { width: 100%; }
+    .ac-year-actions .btn { flex: 1 1 auto; }
+    .ac-semester { grid-template-columns: minmax(0, 1fr) auto; }
+    .ac-semester-actions { grid-column: 1 / -1; justify-content: flex-start; }
+    .ac-form-grid { grid-template-columns: 1fr; }
+}

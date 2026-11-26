@@ -286,9 +286,9 @@ test('saving and reopening a note retains its rich-text Markdown representation'
     app.ntCurrentTags = [];
     app.saveNote();
 
-    assert.equal(app.__notes[0].content, 'Paragraph** bold**');
+    assert.equal(app.__notes[0].content, 'Paragraph **bold**');
     const reopened = app.renderMarkdown(app.__notes[0].content, null, true);
-    assert.match(reopened, /<strong> bold<\/strong>/);
+    assert.match(reopened, /Paragraph <strong>bold<\/strong>/);
 });
 
 test('PDF export keeps formatted paragraphs and lists in semantic HTML', () => {
@@ -331,7 +331,7 @@ test('lists that were toggled repeatedly (nested / mixed) never lose their marke
     ]);
     assert.equal(
         app.serializeNoteEditor(root),
-        '1. Remember to:\n2. Review notes\n- Chapter 1\n- Chapter 2\n3. Sleep early\n\n- Track attendance'
+        '1. Remember to:\n2. Review notes\n  - Chapter 1\n  - Chapter 2\n3. Sleep early\n\n- Track attendance'
     );
 });
 

@@ -64,7 +64,7 @@ function makeWorker(fetchImpl, initialEntries = []) {
                 request,
                 respondWith(value) { responsePromise = Promise.resolve(value); },
             });
-            assert.ok(responsePromise, `service worker did not intercept ${request.url}`);
+            if (!responsePromise) return undefined;
             return responsePromise;
         },
     };
@@ -83,6 +83,18 @@ function sdkResponse(body = 'window.supabase = { createClient() {} };', {
     });
     return response;
 }
+
+test('authenticated app pages bypass Cache Storage regardless of response headers', async () => {
+    let networkCalls = 0;
+    const worker = makeWorker(async () => {
+        networkCalls++;
+        return new Response('<main>private app shell</main>', { status: 200 });
+    });
+    const response = await worker.fetch(new Request('https://qcu-student-planner.vercel.app/pages/app/dashboard.html'));
+    assert.equal(response, undefined);
+    assert.equal(networkCalls, 0);
+    assert.deepEqual(worker.operations, []);
+});
 
 test('valid Supabase SDK network response is returned and cached', async () => {
     const fetched = [];
