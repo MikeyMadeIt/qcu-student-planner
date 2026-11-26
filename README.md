@@ -62,7 +62,7 @@ Everything listed under Students and Administrators is implemented. Pages that e
 - **Reports.** Submit a support ticket to the administrators and follow its status.
 - **Help center.** Searchable help topics.
 - **Wallpaper generator.** Creates schedule wallpapers from your classes in 8 themes.
-- **Settings and themes.** Edit your profile, choose Dark, Light or AMOLED, pick from 14 accent colors, toggle notifications (upcoming class, assignment due, exam reminders), manage semesters, and export or import a JSON backup of your data. Settings also shows the sync status and the install button.
+- **Settings and themes.** Choose Dark, Light or AMOLED, pick from 14 accent colors, toggle notifications (upcoming class, assignment due, exam reminders), view QCU's shared academic period, and export or import a JSON backup of your data. QCU administrators manage semesters centrally. Settings also shows the sync status and the install button.
 - **Progressive Web App.** Includes a web manifest, icons and a service worker. Pages, scripts and styles load from the network first and fall back to cached copies. Images, icons and CDN files are cached first. Auth and admin pages are never cached. Installation is offered from Settings. Planner data needs a connection to Supabase to sync.
 
 ### Administrators

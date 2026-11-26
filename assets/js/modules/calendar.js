@@ -92,7 +92,7 @@ function allEventsForDate(dateStr) {
     const events = [];
     const dayName = DAY_NAMES[new Date(dateStr + 'T00:00').getDay()];
     if (calFilters.classes && isDateInSemester(dateStr)) {
-        DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName)).forEach(s => {
+        DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName)).forEach(s => {
             events.push({
                 type: 'class', id: s.id, title: s.code,
                 color: getSubjectColor(s),
@@ -104,7 +104,7 @@ function allEventsForDate(dateStr) {
         });
     }
     if (calFilters.tasks) {
-        DB.getTasks().filter(t => t.semesterId === semId && t.dueDate === dateStr).forEach(t => {
+        DB.getTasks().filter(t => semId && t.semesterId === semId && t.dueDate === dateStr).forEach(t => {
             events.push({
                 type: 'task', id: t.id, title: t.title,
                 color: CATEGORY_COLORS[t.category] || '#8a90a6',
@@ -116,7 +116,7 @@ function allEventsForDate(dateStr) {
         });
     }
     if (calFilters.events) {
-        DB.getCalendarEvents().filter(e => e.semesterId === semId && e.date === dateStr).forEach(e => {
+        DB.getCalendarEvents().filter(e => semId && e.semesterId === semId && e.date === dateStr).forEach(e => {
             events.push({
                 type: 'event', id: e.id, title: e.title,
                 color: EVENT_CAT_COLORS[e.category] || '#34D399',
@@ -640,11 +640,11 @@ function openCalendarTaskModal(dateStr) {
     const dayModalElement = document.getElementById('dayModal');
     if (dayModalElement && dayModalElement.classList.contains('show')) {
         const dayModal = bootstrap.Modal.getOrCreateInstance(dayModalElement);
-        dayModalElement.addEventListener('hidden.bs.modal', () => openTaskModal(null, null, null, dateStr), { once: true });
+        dayModalElement.addEventListener('hidden.bs.modal', () => openTaskModal(null, null, dateStr), { once: true });
         dayModal.hide();
         return;
     }
-    openTaskModal(null, null, null, dateStr);
+    openTaskModal(null, null, dateStr);
 }
 
 // Legacy Day Modal (kept for mobile fallback)
@@ -1034,6 +1034,10 @@ function hexWithAlpha(hex, alpha) {
 function openScheduleModal(id, presetDay) {
     const s = id ? DB.getSubject(id) : null;
     const sem = DB.getSemester();
+    if (!s && !sem) {
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
     const days = s ? s.days : (presetDay ? [presetDay] : []);
     const color = s ? s.color : DB.colors[0];
     const body = document.getElementById('calSubjectModalBody');
@@ -1063,8 +1067,8 @@ function openScheduleModal(id, presetDay) {
       <div class="col-md-8"><label>Building</label><input class="form-control" id="csBuilding" value="${s ? escapeHtml(s.building) : ''}" placeholder="e.g. Engineering Building"></div>
       <div class="col-md-6"><label>Professor</label><input class="form-control" id="csProf" value="${s ? escapeHtml(s.professor) : ''}" placeholder="e.g. Juan Dela Cruz"></div>
       <div class="col-md-6"><label>Email</label><input type="email" class="form-control" id="csEmail" value="${s ? escapeHtml(s.email) : ''}" placeholder="e.g. juan.delacruz@qcu.edu.ph"></div>
-      <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}"></div>
-      <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}"></div>
+      <div class="col-md-6"><label>Semester</label><input class="form-control" id="csSemester" value="${s ? escapeHtml(s.semester) : sem.name}" readonly></div>
+      <div class="col-md-6"><label>School Year</label><input class="form-control" id="csYear" value="${s ? escapeHtml(s.schoolYear) : sem.schoolYear}" readonly></div>
       <div class="col-12"><label>Color Label</label>
         <div class="color-swatch-group" id="csColorPicker" role="radiogroup" aria-label="Select subject color">
           ${DB.colors.map(c => `<button type="button" onclick="selectScheduleColor('${c}')" data-cs-color="${c}" class="color-swatch-btn${color === c ? ' is-selected' : ''}" role="radio" aria-checked="${color === c}" aria-label="Color ${c}" style="background:${c}"></button>`).join('')}
@@ -1097,6 +1101,10 @@ function saveScheduleEntry() {
     // record before the modal's fade-out finishes.
     if (csSaving) return;
     const id = document.getElementById('csId').value;
+    if (!id && !DB.getActiveSemesterId()) {
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
     const code = document.getElementById('csCode').value.trim();
     if (!code) {
         Toast.show('Subject code is required', 'high', 'icon-lucide-triangle-alert');
@@ -1147,6 +1155,10 @@ function deleteScheduleEntry(id) {
 let calEventModalColor = EVENT_CAT_COLORS['Event'];
 
 function openCalEventModal(id, presetDate) {
+    if (!id && !DB.getActiveSemesterId()) {
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
     eventEditingId = id || null;
     const existing = id ? DB.getCalendarEvents().find(e => e.id === id) : null;
     calEventModalColor = existing ? (existing.color || EVENT_CAT_COLORS['Event']) : EVENT_CAT_COLORS['Event'];
@@ -1206,7 +1218,7 @@ function saveCalEvent() {
     if (eventEditingId) {
         const idx = events.findIndex(e => e.id === eventEditingId);
         if (idx > -1)
-            events[idx] = { ...events[idx], ...data };
+            events[idx] = { ...events[idx], ...data, semesterId: events[idx].semesterId };
     }
     else {
         events.push({ id: DB.uid(), createdAt: Date.now(), ...data });
@@ -1284,3 +1296,7 @@ function openUnivEventModal(id) {
 // Shared subject/task modals announce changes so calendar views stay current.
 document.addEventListener('subjects:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });
 document.addEventListener('tasks:changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });
+if (!window._calendarAcademicCalendarBound) {
+    window._calendarAcademicCalendarBound = true;
+    window.addEventListener('planner:academic-calendar-changed', () => { renderCalendar(); if (calSelectedDate) renderAgenda(calSelectedDate); });
+}

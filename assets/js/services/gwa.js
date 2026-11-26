@@ -45,6 +45,22 @@ function gwaLabel(point) {
     return row ? row.label : '—';
 }
 
+// Manual calculator input is separate from official subject grades. Invalid
+// or incomplete rows are ignored until they have positive units and a valid
+// 1.00–5.00 grade.
+function isValidManualGwaRow(row) {
+    const units = Number(row && row.units);
+    const grade = Number(row && row.grade);
+    return Number.isFinite(units) && units > 0 && Number.isFinite(grade) && grade >= 1 && grade <= 5;
+}
+
+function computeManualGwa(rows) {
+    const valid = (rows || []).filter(isValidManualGwaRow);
+    const totalUnits = valid.reduce((sum, row) => sum + Number(row.units), 0);
+    if (!totalUnits) return null;
+    return valid.reduce((sum, row) => sum + Number(row.grade) * Number(row.units), 0) / totalUnits;
+}
+
 // Grade math
 
 function assessmentPct(a) {
@@ -124,7 +140,9 @@ function normalizeGradeRecord(g) {
 //   { rows: [{ subject, pct, point }], scoredRows, gwa }   (gwa is null when it cannot be computed)
 function computeSemesterGWA(subjects, grades) {
     const rows = (subjects || []).map(s => {
-        const g = (grades || []).find(x => x.subjectId === s.id);
+        // Subject id is the primary link, while semester id is a second guard
+        // against a stale or malformed grade leaking into another period.
+        const g = (grades || []).find(x => x.subjectId === s.id && x.semesterId === s.semesterId);
         const pct = g ? computeSubjectFinalPct(normalizeGradeRecord(g).components) : null;
         return { subject: s, pct, point: pct !== null ? percentToGWA(pct) : null };
     });

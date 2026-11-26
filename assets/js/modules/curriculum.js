@@ -163,6 +163,10 @@ async function initCurriculum() {
     const code = CURRICULA[registered] ? registered : (CURRICULA[saved] ? saved : '');
     if (code) setSelectedProgram(code);
     renderProgram(code);
+    if (!window._curriculumAcademicCalendarBound) {
+        window._curriculumAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => renderProgram(code));
+    }
 }
 
 
@@ -431,12 +435,12 @@ function curCourseTableHtml(courses, hasHours) {
 
 // Mobile: accordion. Desktop (md+): table. Same data, two presentations.
 function curCourseAlreadyAdded(course) {
-    const activeId = DB.get('activeSemesterId', null);
-    return !!activeId && DB.getSubjects().some(s => s.semesterId === activeId && String(s.code || '').toLowerCase() === String(course.code || '').toLowerCase());
+    const activeId = DB.getActiveSemesterId();
+    return !!activeId && DB.getSubjects().some(s => activeId && s.semesterId === activeId && String(s.code || '').toLowerCase() === String(course.code || '').toLowerCase());
 }
 
 function curActiveSemesterForImport() {
-    const activeId = DB.get('activeSemesterId', null);
+    const activeId = DB.getActiveSemesterId();
     const sem = activeId ? DB.getSemesters().find(s => s.id === activeId) : null;
     if (!sem) return null;
     if (sem.endDate && sem.endDate < ymdLocal(new Date())) return null;
@@ -564,7 +568,7 @@ function curAddSelected() {
     }
     const sem = curActiveSemesterForImport();
     if (!sem) {
-        curImportMessage = '<i class="icon-lucide-triangle-alert" aria-hidden="true"></i><span>No active semester is available. <a href="settings.html#semesterManager">Set up an active semester in Semesters</a> before importing.</span>';
+        curImportMessage = '<i class="icon-lucide-triangle-alert" aria-hidden="true"></i><span>No active university academic period is available yet. Contact your QCU administrator before importing subjects.</span>';
         const data = curStructuredCache[getSelectedProgram()]; if (data) renderCurResults(data);
         return;
     }
@@ -608,7 +612,7 @@ function trackerSemesterNumber(value) {
 }
 
 function trackerExplicitActiveSemester() {
-    const id = DB.get('activeSemesterId', null);
+    const id = DB.getActiveSemesterId();
     if (!id) return null;
     return DB.getSemesters().find(s => s.id === id) || null;
 }
@@ -681,7 +685,7 @@ function trackerClassify(course, activeSemester) {
     const rows = trackerSubjectRows(course.code);
     const grade = trackerGradeForSubjects(rows);
     const activeId = activeSemester ? activeSemester.id : null;
-    const activeRows = rows.filter(s => s.semesterId === activeId);
+    const activeRows = rows.filter(s => activeId && s.semesterId === activeId);
     const confirmedActive = activeRows.some(s => s.setupStatus !== 'needs_setup');
     const override = trackerGetOverride(course.code);
     let status = 'not-taken';
@@ -761,7 +765,7 @@ function trackerContextHtml(activeSemester, model, data) {
     const totalUnits = Number(data.totalUnits || model.uniqueItems.reduce((sum, i) => sum + Number(i.course.units || 0), 0));
     const pct = totalUnits > 0 ? Math.min(100, (completedUnits / totalUnits) * 100) : 0;
     return `<div class="cur-tracker-context cur-tracker-current-card">
-      <div class="cur-tracker-context-main"><span class="cur-tracker-eyebrow">CURRENT YEAR & TERM</span><strong>${escHtml(curRegisteredYearLevel || 'Year level not available')}</strong><span class="cur-tracker-context-term">${activeSemester ? `${escHtml(activeSemester.schoolYear || 'Academic year unavailable')} · ${escHtml(activeSemester.name || 'Semester unavailable')}` : 'No active semester selected'}</span></div>
+      <div class="cur-tracker-context-main"><span class="cur-tracker-eyebrow">CURRENT YEAR & TERM</span><strong>${escHtml(curRegisteredYearLevel || 'Year level not available')}</strong><span class="cur-tracker-context-term">${activeSemester ? `${escHtml(activeSemester.schoolYear || 'Academic year unavailable')} · ${escHtml(activeSemester.name || 'Semester unavailable')}` : 'No active university academic period'}</span></div>
       <div class="cur-tracker-current-progress"><span class="cur-tracker-eyebrow">CURRICULUM PROGRESS</span><strong>${pct.toFixed(1)}%</strong><span>${completedUnits} of ${totalUnits} units completed</span></div>
       <div class="cur-tracker-current-bar"><div class="cur-tracker-progress-bar"><span style="width:${pct.toFixed(1)}%"></span></div></div>
       <div class="cur-tracker-context-stats"><span><b>${currentItems.length}</b> taking now</span><span><b>${currentUnits}</b> units enrolled</span></div>

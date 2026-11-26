@@ -34,7 +34,7 @@ The repository contains migrations 0001–0030, but these are **incremental chan
 |---|---|---|
 | Profiles and admin | `profiles` (base schema), `admin_audit_log` | Profile creation/status flow; audit rows written by privileged admin functions. |
 | Student planner | `subjects`, `tasks`, `task_checklist_items`, `notes`, `calendar_events`, `attendance`, `grades`, `grade_components`, `grade_assessments`, `gwa_calculator`, `semesters` (mostly base schema) | Local-storage-backed planner state is mirrored to and hydrated from Supabase in `assets/js/data/cloud-sync.js`. |
-| Syllabus | `syllabus_courses`, `syllabus_weeks`, `syllabus_topics` (base schema) | Migration 0015 adds `syllabus_courses.data jsonb`; the existing migration report says the nested syllabus is stored in that JSON rather than the child tables. Current cloud sync does not include syllabus in its main hydration list, so actual persistence/use should be confirmed. |
+| Legacy syllabus schema | Historical `syllabus_courses`, `syllabus_weeks`, and `syllabus_topics` references remain in old migrations only. QCU Student Planner has no syllabus page or active syllabus feature; the app does not hydrate or save these records. |
 | AI tools | AI chat, quiz, flashcard tables (base schema, policies in later migrations) | Stores call `save_ai_chat_turn`, `save_ai_quiz`, and `save_ai_flashcard_deck`. Definitions are not in the committed migration set. |
 | Communication/support | `admin_messages`, `admin_message_recipients`, `support_tickets`, `support_ticket_notes` | Created in 0008; app writes through SECURITY DEFINER RPCs rather than direct client mutations. |
 | Shared institutional content | `university_events`, `qcu_news_articles`, `qcu_news_sync_state` | Migrations 0028 and 0030 create these; QCU news sync is handled by a server-side function. |
@@ -71,7 +71,7 @@ The migration history and `DATABASE_MIGRATION_REPORT.md` do not provide a canoni
 
 **Actual measured storage: unavailable.** No Supabase/Postgres connection or database inspection tool was available. No `pg_database_size`, table counts, relation sizes, TOAST sizes, or index usage measurements were obtained. This report does not claim a measured database size or row count.
 
-**Schema-based risk assessment:** likely database growth sources are AI message text, generated quiz/flashcard content and explanations, quiz attempts/answers (including JSONB), notes, syllabus JSONB if synced, and append-only audit/support records. There are no observed database columns storing uploaded PDF/image bytes. AI uploads are converted to base64 only for the request path in the client and are not seen being stored in Supabase Storage.
+**Schema-based risk assessment:** likely database growth sources are AI message text, generated quiz/flashcard content and explanations, quiz attempts/answers (including JSONB), notes, and append-only audit/support records. Legacy syllabus JSONB is outside active application functionality. There are no observed database columns storing uploaded PDF/image bytes. AI uploads are converted to base64 only for the request path in the client and are not seen being stored in Supabase Storage.
 
 **Separate file storage:** the local config declares a 50 MiB Storage upload cap, but the AI upload client cap is 8 MiB and no Storage uploads were found. Supabase Storage file quotas are separate from PostgreSQL database size; do not add object bytes to the database forecast. No bucket configuration/policies can be verified from the repo.
 
@@ -81,7 +81,7 @@ The migration history and `DATABASE_MIGRATION_REPORT.md` do not provide a canoni
 |---|---|---|
 | AI history and generated records | Highest likely per-user growth because user and model text, quiz question/explanation text, cards, and attempts can be retained indefinitely. | Unknown; AI schema/RPC implementation missing. |
 | Planner records | Notes and tasks accumulate; attendance/events can add repeated rows each term. | Unknown; base schema absent. |
-| Syllabus payload | `syllabus_courses.data jsonb` is a potentially large nested payload by design, but current sync coverage is unclear. | Unknown. |
+| Legacy syllabus payload | `syllabus_courses.data` may remain in historical database schemas, but is not used by the current application. | Not applicable to current app sync. |
 | Admin audit/support | Append-only or retained operational records. | Unknown; likely lower volume than student content. |
 | Indexes | Migrations explicitly add user/FK indexes and admin audit indexes; catalog may contain more indexes from base schema. | Unknown; no live index sizes or usage. |
 | TOAST | Large text/JSONB values can be compressed/out-of-line by PostgreSQL. | Unknown; no catalog access. |
@@ -135,7 +135,7 @@ For a live index review, collect these stats after meaningful usage and interpre
 ### Indexes present in migrations
 
 - 0014 adds indexes on `subjects(user_id)`, `tasks(user_id)`, `calendar_events(user_id)`, and `task_checklist_items(task_id)`.
-- 0015 adds indexes on `notes(user_id)`, `attendance(user_id)`, `grades(user_id)`, `gwa_calculator(user_id)`, `syllabus_courses(user_id)`, `grade_components(grade_id)`, and `grade_assessments(component_id)`.
+- 0015 adds indexes on `notes(user_id)`, `attendance(user_id)`, `grades(user_id)`, `gwa_calculator(user_id)`, legacy syllabus tables, `grade_components(grade_id)`, and `grade_assessments(component_id)`.
 - 0018 adds `admin_audit_log(created_at)`, `actor_id`, and `target_user_id` to support the paginated ordered admin log and FK embeds.
 - 0008 adds indexes for message recipient/time, message ID, support ticket student/time, status, ticket-note ticket ID, and message time. 0020–0022 establish a unique semester owner/client ID pair. 0028 and 0030 add event/news indexes and uniqueness constraints.
 
@@ -167,7 +167,7 @@ No duplicate index is proven. The `event_date` and `(is_published,event_date)` i
 - Later migrations establish ownership checks on several FK-bearing tables, which is a positive control against a user attaching a row to another student's subject/grade/semester.
 - Core foreign-key definitions, nullability, check constraints, and `ON DELETE` behavior are not reconstructible because the original DDL is missing. Therefore this report cannot certify all user-owned rows have valid, cascading parent relationships.
 - Semester membership for synced planner records is partly represented in a browser-local map rather than a clear server-side FK relationship in the hydration logic. This creates cross-device and recovery risk: server rows alone may not preserve the intended local semester association.
-- `syllabus_courses.data` JSONB is reasonable for a nested imported syllabus snapshot if the client treats it as a document. It should not duplicate authoritative queryable entities unnecessarily; current app sync use was not confirmed.
+- Legacy syllabus tables are retained only for migration compatibility and are not part of the current product or sync flows.
 - `reset_my_planner_data()` in 0027 provides user-controlled cleanup for major planner and AI records. Admin rejected-account cleanup in 0006 predates later AI/preferences/cancelled-occurrence additions and uses an explicit table list; verify that rejected-account cleanup leaves no per-user rows if those tables can contain data before approval.
 
 ### RLS and privileged access

@@ -26,6 +26,7 @@ class FakeElement {
         this.listeners.set(type, listeners);
     }
     setAttribute(name, value) { this.attributes[name] = String(value); }
+    removeAttribute(name) { delete this.attributes[name]; }
     querySelectorAll(selector) {
         if (selector === '.day-check:checked') return this.days.filter(day => day.checked);
         if (selector === '.day-check') return this.days;
@@ -33,6 +34,7 @@ class FakeElement {
     }
     querySelector(selector) {
         if (selector === '.day-check') return this.days[0] || null;
+        if (selector === '[onclick="saveSubject()"]') return this.saveButton || null;
         return null;
     }
     focus() {}
@@ -82,6 +84,7 @@ class FakeBody extends FakeElement {
 function createHarness(initialSubjects = []) {
     const elements = new Map();
     const modal = new FakeElement('subjectModal');
+    modal.saveButton = new FakeElement('saveSubjectButton');
     elements.set('subjectModal', modal);
     const body = new FakeBody(elements);
     elements.set(body.id, body);
@@ -103,7 +106,7 @@ function createHarness(initialSubjects = []) {
             getActiveSemester: () => ({ id: 'semester-1', name: 'First Semester', schoolYear: '2026-2027' }),
             getActiveSemesterId: () => 'semester-1',
             uid: () => `new-${nextId++}`,
-            saveSubjects: subjects => { saved.subjects = subjects; return true; },
+            async saveSubjectsAndSync(subjects) { saved.subjects = subjects; return { ok: true }; },
         },
         TimeField: {
             html: ({ id, value }) => `<input id="${id}" value="${value || ''}">`,
@@ -141,11 +144,11 @@ function createHarness(initialSubjects = []) {
     return { saved, elements, body, events, open, save: () => api.saveSubject() };
 }
 
-test('new subjects omit removed controls and keep the established section and online defaults', () => {
+test('new subjects omit removed controls and keep the established section and online defaults', async () => {
     const harness = createHarness();
     harness.open();
     assert.doesNotMatch(harness.body.innerHTML, /subOnline|subSection|Online Class|Section/);
-    harness.save();
+    await harness.save();
 
     assert.equal(harness.saved.subjects.length, 1);
     assert.equal(harness.saved.subjects[0].online, false);
@@ -155,7 +158,7 @@ test('new subjects omit removed controls and keep the established section and on
     assert.deepEqual(harness.events, ['subjects:changed']);
 });
 
-test('editing preserves online, section, room, building, and unrelated subject properties', () => {
+test('editing preserves online, section, room, building, and unrelated subject properties', async () => {
     const original = {
         id: 'subject-1', code: 'CS101', desc: 'Intro', type: 'Lecture', units: 3,
         days: ['Mon'], start: '09:00', end: '10:00', room: '302', building: 'Engineering',
@@ -169,7 +172,7 @@ test('editing preserves online, section, room, building, and unrelated subject p
     assert.equal(harness.elements.get('subRoom').value, '302');
     assert.equal(harness.elements.get('subBuilding').value, 'Engineering');
     harness.elements.get('subCode').value = 'CS102';
-    harness.save();
+    await harness.save();
 
     const updated = harness.saved.subjects[0];
     assert.equal(updated.code, 'CS102');

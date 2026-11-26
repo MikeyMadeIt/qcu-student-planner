@@ -188,6 +188,11 @@
     background: #fb7185;
 }
 
+.sync-status-row.is-pending .sync-status-dot {
+    background: rgb(var(--accent));
+    box-shadow: 0 0 0 .2rem rgba(var(--accent), .14);
+}
+
 .sync-status-row.is-error .pref-help {
     color: #fb7185;
 }
@@ -319,4 +324,17 @@
         gap: 6px;
         max-width: 100%;
     }
+}
+.settings-academic-period {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .82rem;
+    line-height: 1.5;
+}
+
+.settings-academic-period.is-unconfigured {
+    color: var(--text-faint);
 }

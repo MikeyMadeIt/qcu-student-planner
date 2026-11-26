@@ -140,17 +140,6 @@ textarea:focus-visible {
     color: var(--text-faint);
 }
 
-/* Syllabus card dropdown — lift open card above siblings so menu isn't clipped */
-
-.syl-list-card:has(.dropdown-menu.show) {
-    z-index: 100;
-    position: relative;
-}
-
-.syl-list-card .dropdown-menu {
-    z-index: 200;
-}
-
 /* app.js dynamic elements */
 
 .confirm-icon-wrap {

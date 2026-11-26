@@ -13,6 +13,10 @@ let tkView = 'list';
 
 function initTasks() {
     renderTasks();
+    if (!window._tasksAcademicCalendarBound) {
+        window._tasksAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', renderTasks);
+    }
     const searchEl = document.getElementById('tkSearch');
     if (searchEl) searchEl.addEventListener('input', debounce(renderTasks, 180));
     var drawerBtn = document.getElementById('filterSortBtn');
@@ -29,7 +33,7 @@ function initTasks() {
         boardViewBtn.addEventListener('click', function () { setView('board'); });
     var params = new URLSearchParams(location.search);
     if (params.get('new') === '1')
-        openTaskModal(null, params.get('syllabusWeekId'), params.get('title'));
+        openTaskModal(null, params.get('title'));
     window.quickAddHandlers = window.quickAddHandlers || {};
     window.quickAddHandlers['task'] = function () { openTaskModal(); };
 }
@@ -171,8 +175,8 @@ function openFilterDrawer() {
         return;
     }
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var cats = [];
     tasks.forEach(function (t) { if (t.category && !cats.includes(t.category))
         cats.push(t.category); });
@@ -397,7 +401,6 @@ function generateNextOccurrence(completedTask) {
         progress: 0,
         score: null,
         remarks: '',
-        syllabusWeekId: completedTask.syllabusWeekId || null,
         timeEstimate: completedTask.timeEstimate || null,
         updatedAt: Date.now(),
     };
@@ -906,7 +909,7 @@ function bulkDelete() {
 
 function openBulkMove() {
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
     var existing = document.getElementById('tkMoveModal');
     if (existing)
         existing.remove();
@@ -978,7 +981,7 @@ function executeBulkMove() {
 function renderTasks() {
     var semId = DB.getActiveSemesterId();
     var storedTasks = DB.getTasks();
-    var allTasks = storedTasks.filter(function (t) { return t.semesterId === semId; });
+    var allTasks = storedTasks.filter(function (t) { return semId && t.semesterId === semId; });
     var changed = false;
     allTasks.forEach(function (t) {
         if (t.status === 'not-started')
@@ -1116,7 +1119,7 @@ function renderBoardView(tasks) {
 function renderSubjectGroups(tasks) {
     var subs = DB.getSubjects();
     var semId = DB.getActiveSemesterId();
-    var semSubs = subs.filter(function (s) { return s.semesterId === semId; });
+    var semSubs = subs.filter(function (s) { return semId && s.semesterId === semId; });
     var groups = {};
     var noSubject = [];
     tasks.forEach(function (t) {

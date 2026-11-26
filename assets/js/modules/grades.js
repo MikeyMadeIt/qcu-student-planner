@@ -24,20 +24,26 @@ function gradeEquivBadgeHtml(point) {
 
 function syncGradesWithSubjects() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subjects = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     let allGrades = DB.getGrades().map(normalizeGradeRecord);
+    let changed = false;
+    const subjectsById = new Map(DB.getSubjects().map(subject => [subject.id, subject]));
     subjects.forEach(s => {
         if (!allGrades.find(g => g.subjectId === s.id)) {
             allGrades.push({ subjectId: s.id, semesterId: semId, components: [] });
+            changed = true;
         }
     });
     allGrades.forEach(g => {
-        if (!g.semesterId) {
-            const sub = DB.getSubject(g.subjectId);
-            g.semesterId = sub ? sub.semesterId : semId;
+        const sub = subjectsById.get(g.subjectId);
+        if (sub && sub.semesterId && g.semesterId !== sub.semesterId) {
+            // The subject is the semester source of truth for its grade.
+            // The database guard rejects stale grade semester associations.
+            g.semesterId = sub.semesterId;
+            changed = true;
         }
     });
-    DB.saveGrades(allGrades);
+    if (changed) DB.saveGrades(allGrades);
     return allGrades.filter(g => subjects.some(s => s.id === g.subjectId));
 }
 
@@ -85,6 +91,15 @@ function initGrades() {
     renderGradeCards();
     renderGradeReferenceTable();
     renderGwaCalculator();
+    if (!window._gradesAcademicCalendarBound) {
+        window._gradesAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            syncGradesWithSubjects(); renderGradesOverview(); renderGradeCards(); renderGwaCalculator();
+        });
+        window.addEventListener('planner:semester-context-changed', () => {
+            syncGradesWithSubjects(); renderGradesOverview(); renderGradeCards(); renderGwaCalculator();
+        });
+    }
     const linkedSubjectId = new URLSearchParams(location.search).get('subject');
     if (linkedSubjectId && DB.getSubject(linkedSubjectId))
         setTimeout(() => openGradeModal(linkedSubjectId), 0);
@@ -94,7 +109,7 @@ function initGrades() {
 
 function renderGradesOverview() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subjects = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const grades = syncGradesWithSubjects();
     const { rows, scoredRows, gwa } = computeSemesterGWA(subjects, grades);
     const totalSubjects = subjects.length;
@@ -153,7 +168,7 @@ function renderGradeCards() {
     if (wrap) wrap.removeAttribute('aria-busy');
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const grades = DB.getGrades().map(normalizeGradeRecord);
     if (!subs.length) {
         const msg = sem ? `Add subjects in Schedule to start tracking grades for ${sem.schoolYear} · ${sem.name}.` : 'Add subjects in Schedule to start tracking grades.';
@@ -161,7 +176,7 @@ function renderGradeCards() {
         return;
     }
     const gradeCards = subs.map(s => {
-        const g = grades.find(x => x.subjectId === s.id) || { components: [] };
+        const g = grades.find(x => x.subjectId === s.id && x.semesterId === s.semesterId) || { components: [] };
         const pct = computeSubjectFinalPct(g.components);
         const point = pct !== null ? percentToGWA(pct) : null;
         const totalWeight = sumWeights(g.components);
@@ -270,14 +285,22 @@ function renderSparklineHtml(points) {
   </div>`;
 }
 
-let gradeDraft = null, gradeDraftSubjectId = null;
+let gradeDraft = null, gradeDraftSubjectId = null, gradeDraftSemesterId = null;
 const ASSESS_GRID = 'minmax(0, 1fr) 56px 56px 52px 28px';
 
 function openGradeModal(subjectId) {
     const s = DB.getSubject(subjectId);
+    const selectedSemesterId = DB.getActiveSemesterId();
+    if (!s || !selectedSemesterId || s.semesterId !== selectedSemesterId) {
+        Toast.show('This subject is not in the selected semester. Refresh the page and try again.', 'high');
+        return;
+    }
     const grades = DB.getGrades().map(normalizeGradeRecord);
-    const g = grades.find(x => x.subjectId === subjectId) || { subjectId, components: [] };
+    const g = grades.find(x => x.subjectId === subjectId && x.semesterId === s.semesterId)
+        || grades.find(x => x.subjectId === subjectId)
+        || { subjectId, semesterId: s.semesterId, components: [] };
     gradeDraftSubjectId = subjectId;
+    gradeDraftSemesterId = s.semesterId;
     gradeDraft = { components: JSON.parse(JSON.stringify(g.components || [])) };
     if (!gradeDraft.components.length)
         gradeDraft.components.push({ id: DB.uid(), name: '', weight: '', assessments: [] });
@@ -502,46 +525,79 @@ function refreshGradePreview() {
 }
 
 let gcSaving = false;
-function saveGradeComponents() {
+async function saveGradeComponents() {
     // Re-entrancy guard against a rapid double-click: the modal hide()
     // below is a non-blocking fade, so a second click could otherwise
     // push a duplicate grade record before the first one commits.
-    if (gcSaving) return;
+    if (gcSaving || !gradeDraft) return;
     gcSaving = true;
-    syncComponentWeightsFromInputs();
-    const cleaned = gradeDraft.components
-        .map((c, i) => ({
-        id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
-        assessments: (c.assessments || [])
-            .filter(a => a.name || (a.score !== null && a.totalItems !== null))
-            .map(a => ({ id: a.id || DB.uid(), name: (a.name || '').trim(), score: a.score, totalItems: a.totalItems }))
-    })).filter(c => c.name.trim() || c.weight || c.assessments.length);
-    const semId = DB.getActiveSemesterId();
-    const grades = DB.getGrades().map(normalizeGradeRecord);
-    const idx = grades.findIndex(g => g.subjectId === gradeDraftSubjectId);
-    if (idx > -1) {
-        grades[idx].components = cleaned;
-        grades[idx].semesterId = grades[idx].semesterId || semId;
+    const saveButton = document.querySelector('#gradeModalBody .modal-actions .btn-accent');
+    const modalControls = Array.from(document.querySelectorAll('#gradeModalBody input, #gradeModalBody button'));
+    const priorDisabledState = modalControls.map(control => control.disabled);
+    modalControls.forEach(control => { control.disabled = true; });
+    if (saveButton) {
+        saveButton.setAttribute('aria-busy', 'true');
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Saving…';
     }
-    else
-        grades.push({ subjectId: gradeDraftSubjectId, semesterId: semId, components: cleaned });
-    DB.saveGrades(grades);
-    const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
-    if (inst)
-        inst.hide();
-    if (typeof Toast !== 'undefined') {
+    try {
+        syncComponentWeightsFromInputs();
+        const subject = DB.getSubject(gradeDraftSubjectId);
+        const semId = DB.getActiveSemesterId();
+        if (!subject || !gradeDraftSemesterId || subject.semesterId !== gradeDraftSemesterId || semId !== gradeDraftSemesterId) {
+            throw new Error('The subject or selected semester changed. Refresh the page before saving this breakdown.');
+        }
+
+        const cleaned = gradeDraft.components
+            .map((c, i) => ({
+                id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
+                assessments: (c.assessments || [])
+                    .filter(a => a.name || (a.score !== null && a.totalItems !== null))
+                    .map(a => ({ id: a.id || DB.uid(), name: (a.name || '').trim(), score: a.score, totalItems: a.totalItems }))
+            })).filter(c => c.name.trim() || c.weight || c.assessments.length);
+        const grades = DB.getGrades().map(normalizeGradeRecord);
+        const idx = grades.findIndex(g => g.subjectId === gradeDraftSubjectId);
+        if (idx > -1) {
+            grades[idx].components = cleaned;
+            grades[idx].semesterId = subject.semesterId;
+        } else {
+            grades.push({ subjectId: gradeDraftSubjectId, semesterId: subject.semesterId, components: cleaned });
+        }
+
+        if (typeof DB.saveGradesAndSync !== 'function')
+            throw new Error('Grade synchronization is unavailable. Your changes are still in this form.');
+        const result = await DB.saveGradesAndSync(grades);
+        if (!result || !result.ok)
+            throw result && result.error || new Error('The server did not confirm the save. Please retry.');
+
+        const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
+        if (inst) inst.hide();
         const savedWeight = sumWeights(cleaned);
         if (cleaned.length && savedWeight !== 100) {
-            Toast.show(`Saved \u2014 note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
+            Toast.show(`Saved — note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
         } else {
             Toast.show('Grading breakdown saved');
         }
+        gradeDraft = null;
+        gradeDraftSubjectId = null;
+        gradeDraftSemesterId = null;
+        renderGradesOverview();
+        renderGradeCards();
+    } catch (error) {
+        if (saveButton) saveButton.dataset.saveFailed = 'true';
+        Toast.show(`Couldn't save the grading breakdown: ${error && error.message || 'Please check your connection and retry.'}`, 'high');
+    } finally {
+        if (saveButton && saveButton.isConnected) {
+            saveButton.removeAttribute('aria-busy');
+            saveButton.innerHTML = saveButton.dataset.saveFailed
+                ? '<i class="icon-lucide-rotate-cw me-1" aria-hidden="true"></i>Retry Save'
+                : '<i class="icon-lucide-check me-1" aria-hidden="true"></i>Save Grading Breakdown';
+            delete saveButton.dataset.saveFailed;
+        }
+        modalControls.forEach((control, index) => {
+            if (control.isConnected) control.disabled = priorDisabledState[index];
+        });
+        gcSaving = false;
     }
-    gradeDraft = null;
-    gradeDraftSubjectId = null;
-    renderGradesOverview();
-    renderGradeCards();
-    gcSaving = false;
 }
 
 // Grade reference table
@@ -564,10 +620,24 @@ function renderGwaCalculator() {
     const wrap = document.getElementById('gwaCalcRows');
     if (!wrap)
         return;
-    let rows = DB.getGwaCalcRows();
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) {
+        wrap.innerHTML = '<div class="text-soft py-2">Select an academic period to use the GWA calculator.</div>';
+        refreshGwaTotals([]);
+        return;
+    }
+    let allRows = DB.getGwaCalcRows();
+    // Before semester support, manual calculator rows were stored globally.
+    // Preserve those existing entries by assigning them once to the student's
+    // current workspace when they first load under the semester-aware model.
+    if (allRows.some(row => !row.semesterId)) {
+        allRows = allRows.map(row => row.semesterId ? row : { ...row, semesterId });
+        DB.saveGwaCalcRows(allRows);
+    }
+    let rows = allRows.filter(r => r.semesterId === semesterId);
     if (!rows.length) {
-        rows = [{ id: DB.uid(), label: '', units: '', grade: '' }];
-        DB.saveGwaCalcRows(rows);
+        rows = [{ id: DB.uid(), label: '', units: '', grade: '', semesterId }];
+        DB.saveGwaCalcRows([...allRows, ...rows]);
     }
     wrap.innerHTML = rows.map((r, i) => gwaCalcRowHtml(r, i)).join('');
     if (window.enhanceSelects) window.enhanceSelects(wrap);
@@ -579,47 +649,42 @@ function gwaCalcRowHtml(r, i) {
     const sel = gradeOptions.map(v => `<option value="${v}" ${r.grade == v && v !== '' ? 'selected' : ''}>${v === '' ? 'Select grade' : v}</option>`).join('');
     return `<div class="gwa-input-row">
     <input class="form-control form-control-sm gwa-col-code" placeholder="e.g., HUM 1"
-      value="${escapeHtml(r.label || '')}" oninput="updateGwaCalcRow(${i},'label',this.value)">
-    <input type="number" min="0" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Units"
-      value="${r.units === '' ? '' : r.units}" oninput="updateGwaCalcRow(${i},'units',this.value)">
-    <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow(${i},'grade',this.value)">
+      value="${escapeHtml(r.label || '')}" oninput="updateGwaCalcRow('${r.id}','label',this.value)">
+    <input type="number" min="0.5" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Units"
+      value="${r.units === '' ? '' : r.units}" oninput="updateGwaCalcRow('${r.id}','units',this.value)">
+    <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow('${r.id}','grade',this.value)">
       ${sel}
     </select>
-    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})" aria-label="Remove course from GWA calculator">
+    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow('${r.id}')" aria-label="Remove course from GWA calculator">
       <i class="icon-lucide-trash-2" style="color:#fb7185" aria-hidden="true"></i>
     </button>
   </div>`;
 }
 
-function updateGwaCalcRow(i, field, value) {
+function updateGwaCalcRow(rowId, field, value) {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    if (!rows[i])
+    const row = rows.find(r => r.id === rowId && r.semesterId === semesterId);
+    if (!row)
         return;
-    rows[i][field] = (field === 'units' || field === 'grade') ? (value === '' ? '' : +value) : value;
+    row[field] = (field === 'units' || field === 'grade') ? (value === '' ? '' : +value) : value;
     DB.saveGwaCalcRows(rows);
     if (field === 'grade') {
         renderGwaCalculator();
     }
     else {
-        refreshGwaTotals(rows);
+        refreshGwaTotals(rows.filter(r => r.semesterId === semesterId));
     }
 }
 
 function refreshGwaTotals(rows) {
     if (!rows)
         rows = DB.getGwaCalcRows();
-    let totalUnits = 0, weightedSum = 0, courseCount = 0;
-    rows.forEach(r => {
-        // A row counts only when it has real units and a real grade. Cloud sync stores blank
-        // cells as 0, so a blank row must not be counted as a course after a round-trip.
-        const u = +r.units || 0, gr = +r.grade || 0;
-        if (u > 0 && gr > 0) {
-            totalUnits += u;
-            weightedSum += u * gr;
-            courseCount++;
-        }
-    });
-    const result = courseCount > 0 && totalUnits > 0 ? weightedSum / totalUnits : null;
+    const valid = rows.filter(isValidManualGwaRow);
+    const totalUnits = valid.reduce((sum, row) => sum + Number(row.units), 0);
+    const courseCount = valid.length;
+    const result = computeManualGwa(rows);
     const passed = result !== null ? result <= 3.00 : null;
     document.getElementById('gwaCalcResult').textContent = result === null ? '--' : result.toFixed(2);
     const meaningEl = document.getElementById('gwaCalcResultMeaning');
@@ -641,21 +706,32 @@ function refreshGwaTotals(rows) {
 }
 
 function addGwaCalcRow() {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    rows.push({ id: DB.uid(), label: '', units: '', grade: '' });
+    rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
     DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
-function removeGwaCalcRow(i) {
+function removeGwaCalcRow(rowId) {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    rows.splice(i, 1);
-    DB.saveGwaCalcRows(rows.length ? rows : [{ id: DB.uid(), label: '', units: '', grade: '' }]);
+    const index = rows.findIndex(r => r.id === rowId && r.semesterId === semesterId);
+    if (index < 0) return;
+    rows.splice(index, 1);
+    if (!rows.some(r => r.semesterId === semesterId)) rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
+    DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
 function clearAllGwaRows() {
-    DB.saveGwaCalcRows([{ id: DB.uid(), label: '', units: '', grade: '' }]);
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
+    const rows = DB.getGwaCalcRows().filter(r => r.semesterId !== semesterId);
+    rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
+    DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
@@ -665,7 +741,7 @@ function copyGwaCardAsImage() {
     const settings = DB.getSettings();
     const name = (settings && settings.name) ? settings.name : 'Student';
     const sem = DB.getActiveSemester();
-    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'Current Semester';
+    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'No active university academic period';
     const gwaEl = document.getElementById('gGwa');
     const gwaSubEl = document.getElementById('gGwaSub');
     const gwa = gwaEl ? gwaEl.textContent : '--';
