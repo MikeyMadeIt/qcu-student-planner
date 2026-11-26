@@ -31,6 +31,10 @@ const NOTE_TEMPLATES = {
 
 function initNotes() {
     renderNotes();
+    if (!window._notesAcademicCalendarBound) {
+        window._notesAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', renderNotes);
+    }
     var searchEl = document.getElementById('noteSearch');
     if (searchEl)
         searchEl.addEventListener('input', debounce(renderNotes, 200));
@@ -105,8 +109,8 @@ function ntSyncDropdown(id) {
 
 function populateNoteLinkFilters() {
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var subSel = document.getElementById('noteSubFilterSel');
     var taskSel = document.getElementById('noteTaskFilterSel');
     if (!subSel || !taskSel)
@@ -290,9 +294,9 @@ function getFilteredNotes() {
     q = q.toLowerCase().trim();
     var cat = (document.getElementById('noteCatFilter') || {}).value || '';
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
-    var list = DB.getNotes().filter(function (n) { return n.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
+    var list = DB.getNotes().filter(function (n) { return semId && n.semesterId === semId; });
     if (q) {
         list = list.filter(function (n) {
             var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
@@ -379,7 +383,7 @@ function renderNotes() {
     var list = getFilteredNotes();
     if (!list.length) {
         var semId = DB.getActiveSemesterId();
-        var hasSemesterNotes = DB.getNotes().some(function (note) { return note.semesterId === semId; });
+        var hasSemesterNotes = DB.getNotes().some(function (note) { return semId && note.semesterId === semId; });
         var emptyMessage = hasSemesterNotes
             ? '<p>No notes match your current filters.</p><button type="button" class="btn btn-ghost btn-sm" onclick="clearNoteFilters()">Clear filters</button>'
             : '<strong>No notes yet</strong><p>Create a note to keep useful details close at hand.</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()"><i class="icon-lucide-plus" aria-hidden="true"></i>Create note</button>';
@@ -387,8 +391,8 @@ function renderNotes() {
         return;
     }
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     wrap.innerHTML = list.map(function (n) {
         var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
         var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
@@ -476,8 +480,8 @@ function openNotePreview(id) {
     if (!n)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
     var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
     var tags = n.tags || [];
@@ -1966,8 +1970,8 @@ function toggleTemplateDropdown() {
 function openNoteModal(id) {
     var n = id ? DB.getNotes().find(function (x) { return x.id === id; }) : null;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var curSubId = n ? (n.subjectId || '') : '';
     var curTaskId = n ? (n.taskId || '') : '';
     document.getElementById('noteModalTitle').textContent = n ? 'Edit Note' : 'New Note';
@@ -2119,6 +2123,11 @@ function saveNote() {
     var subjectId = document.getElementById('nSubject').value || null;
     var taskId = document.getElementById('nTask').value || null;
     var id = document.getElementById('nId').value;
+    if (!id && !DB.getActiveSemesterId()) {
+        ntSaving = false;
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
     var tags = ntCurrentTags.slice();
     var notes = DB.getNotes();
     if (id) {
@@ -2168,8 +2177,8 @@ function exportNotePdf(id) {
     if (!n)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
     var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
     var tags = n.tags || [];

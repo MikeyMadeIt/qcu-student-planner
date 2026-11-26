@@ -216,7 +216,7 @@ function setupAttendanceResponsiveAbsenceLimits() {
 function initAttendance() {
     setupAttendanceResponsiveAbsenceLimits();
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const attDate = document.getElementById('attDate');
     if (attDate) {
         updateAttendanceDateBounds();
@@ -275,7 +275,7 @@ function chooseHeatmapSubject(id) {
         return;
     sel.value = id;
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     renderHeatmapFilterMenu(subs);
     renderHeatmap();
 }
@@ -380,7 +380,7 @@ function getAttendanceSubjectsForDate(date) {
     const dow = DAY_NAMES[dateObj.getDay()].slice(0, 3).toLowerCase();
     const semId = DB.getActiveSemesterId();
     return DB.getSubjects()
-        .filter(s => s.semesterId === semId && !s.archived && Array.isArray(s.days) &&
+        .filter(s => semId && s.semesterId === semId && !s.archived && Array.isArray(s.days) &&
             s.days.some(day => String(day).slice(0, 3).toLowerCase() === dow))
         .sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
 }
@@ -418,6 +418,11 @@ function setupAttendanceSemesterRefresh() {
     window.addEventListener('planner:cloud-synced', () => {
         updateAttendanceDateBounds();
         renderAttendanceSubjectList();
+    });
+    window.addEventListener('planner:academic-calendar-changed', () => {
+        updateAttendanceDateBounds();
+        renderAttendanceSubjectList();
+        renderAttendanceAll();
     });
 }
 
@@ -689,8 +694,8 @@ function renderConsecutiveAbsenceAlerts() {
     if (!wrap)
         return;
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const warnings = [];
     for (const s of subs) {
         const streak = getCurrentConsecutiveAbsences(s.id, records);
@@ -735,7 +740,7 @@ function renderHeatmap() {
             _hmResizeFrame = requestAnimationFrame(renderHeatmap);
         }, { passive: true });
     }
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const filterSubId = document.getElementById('heatmapSubjectFilter')?.value || '';
     const filteredRecords = filterSubId ? records.filter(r => r.subjectId === filterSubId) : records;
     if (!filteredRecords.length) {
@@ -1030,8 +1035,8 @@ if (!window._hmTooltipGlobalBound) {
 
 function renderAbsenceWarnings() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const wrap = document.getElementById('absenceWarnings');
     if (!wrap)
         return;
@@ -1064,8 +1069,8 @@ function renderAbsenceWarnings() {
 
 function openAbsenceLimitModal() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const body = document.getElementById('absenceLimitModalBody');
     if (!subs.length) {
         body.innerHTML = `<div class="att-card-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div><strong>No subjects yet</strong><span>Add subjects for this semester in Schedule first.</span></div>`;
@@ -1141,8 +1146,8 @@ function saveAbsenceLimitFromInput(btn, subjectId, subjectCode) {
 
 function renderSubjectBreakdown() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const wrap = document.getElementById('subjectBreakdown');
     if (!wrap)
         return;
@@ -1218,7 +1223,7 @@ function renderLog(showAll) {
     showAll = _attLogShowAll;
     const semId = DB.getActiveSemesterId();
     const subs = DB.getSubjects();
-    const records = [...DB.getAttendance().filter(r => r.semesterId === semId)]
+    const records = [...DB.getAttendance().filter(r => semId && r.semesterId === semId)]
         .sort((a, b) => b.date.localeCompare(a.date));
     const wrap = document.getElementById('attendanceLog');
     if (!records.length) {
@@ -1355,7 +1360,7 @@ function openAttendanceEdit(id, draft) {
 
     // Active-semester subjects, plus the record's current subject even if archived
     const subjects = DB.getSubjects().filter(s =>
-        (s.semesterId === semId && !s.archived) || s.id === rec.subjectId);
+        (semId && s.semesterId === semId && !s.archived) || s.id === rec.subjectId);
     const subjectSel = document.getElementById('attEditSubject');
     subjectSel.innerHTML = subjects.map(s =>
         `<option value="${escapeAttHtml(s.id)}">${escapeAttHtml(s.code)}${s.archived ? ' (archived)' : ''}</option>`).join('');
@@ -1488,7 +1493,7 @@ function applyAttendanceEdit(id, next) {
 function exportAttendanceCSV() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId)
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId)
         .sort((a, b) => a.date.localeCompare(b.date));
     const subs = DB.getSubjects();
     if (!records.length) {
@@ -1524,9 +1529,9 @@ function exportAttendanceCSV() {
 function exportAttendancePDF() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId)
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId)
         .sort((a, b) => a.date.localeCompare(b.date));
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     if (!records.length) {
         Toast.show('No attendance records to export.', 'high', 'icon-lucide-circle-alert');
         return;
@@ -1535,7 +1540,7 @@ function exportAttendancePDF() {
     // Same counting as the Attendance page (shared helper) so the printed report matches the screen.
     const overall = summarizeAttendance(getLiveSemesterAttendance(semId));
     const overallRate = overall.rate === null ? '—' : overall.rate + '%';
-    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'Current Semester';
+    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'No active university academic period';
     const settings = DB.getSettings();
     const studentName = settings.name || '';
     // Build per-subject summary

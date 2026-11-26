@@ -1,6 +1,6 @@
 /* SHARED TASK MODAL
  * One Add/Edit Task modal for every page (Tasks, Calendar, ...).
- * Usage: openTaskModal(id?, syllabusWeekId?, title?, presetDueDate?)
+ * Usage: openTaskModal(id?, title?, presetDueDate?)
  * After a save it fires a `tasks:changed` event on document; each page
  * listens for it and re-renders itself.
  * Needs core/time-field.js, core/ui.js (fireConfetti), DB, Toast, bootstrap.
@@ -192,13 +192,21 @@ function tkInitTaskTimeFields(t) {
 
 // Add/Edit Modal
 
-function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
+function openTaskModal(id, prefillTitle, presetDate) {
     ensureTaskModal();
-    var t = id ? DB.getTasks().find(function (x) { return x.id === id; }) : null;
-    var isEdit = !!t;
-    document.getElementById('taskModalTitle').textContent = t ? 'Edit Task' : 'Add Task';
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
+    var t = id ? DB.getTasks().find(function (x) { return x.id === id && x.semesterId === semId; }) : null;
+    if (id && !t) {
+        Toast.show('That task is not in the selected semester.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
+    var isEdit = !!t;
+    if (!isEdit && !semId) {
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
+    document.getElementById('taskModalTitle').textContent = t ? 'Edit Task' : 'Add Task';
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
     var checklist = t && t.checklist ? t.checklist : [];
     var CATEGORIES = ['Academic', 'Assignment', 'Project', 'Exam', 'Quiz', 'Homework', 'Personal', 'Organization', 'Other'];
     var PRIORITIES = ['low', 'medium', 'high'];
@@ -226,7 +234,6 @@ function openTaskModal(id, prefillSyllabusWeekId, prefillTitle, presetDate) {
     document.getElementById('taskModalBody').innerHTML =
         '<div class="row g-2">' +
             '<input type="hidden" id="tId" value="' + (t ? t.id : '') + '">' +
-            '<input type="hidden" id="tSyllabusWeekId" value="' + (t ? (t.syllabusWeekId || '') : (prefillSyllabusWeekId || '')) + '">' +
             '<div class="col-12"><label class="form-label">Task Title *</label>' +
             '<input class="form-control" id="tTitle" value="' + (t ? escHtml(t.title) : (prefillTitle ? escHtml(prefillTitle) : '')) + '" placeholder="What needs to be done?" autocomplete="off"></div>' +
             '<div class="col-12"><label class="form-label">Description</label>' +
@@ -285,7 +292,7 @@ function modalAddClItem() {
 }
 
 let tkSaving = false;
-function saveTask() {
+async function saveTask() {
     // Re-entrancy guard: the Save button is a plain onclick, and
     // bootstrap's modal hide() is a non-blocking fade, so a rapid
     // double-click can invoke this function twice before the modal is
@@ -303,13 +310,15 @@ function saveTask() {
         return;
     }
     tkSaving = true;
+    var saveButton = document.querySelector('#taskModalBody .modal-actions button');
+    if (saveButton) { saveButton.disabled = true; saveButton.setAttribute('aria-busy', 'true'); }
     var timeEstimate = estField ? (estField._tkValue || null) : null;
     var checklist = Array.from(document.querySelectorAll('.tk-modal-cl-row')).map(function (row) {
         return { done: row.querySelector('input[type=checkbox]').checked, text: row.querySelector('input[type=text]').value.trim() };
     }).filter(function (c) { return c.text; });
-    var id = document.getElementById('tId').value;
+    var idInput = document.getElementById('tId');
+    var id = idInput.value;
     var tasks = DB.getTasks();
-    var syllabusWeekIdEl = document.getElementById('tSyllabusWeekId');
     var repeatEl = document.getElementById('tRepeat');
     var scoreEl = document.getElementById('tScore');
     var remarksEl = document.getElementById('tRemarks');
@@ -323,7 +332,6 @@ function saveTask() {
         dueTime: TimeField.get('tDueTime') || '23:59',
         checklist: checklist,
         repeat: repeatEl ? repeatEl.value : 'none',
-        syllabusWeekId: syllabusWeekIdEl ? (syllabusWeekIdEl.value || null) : null,
         timeEstimate: timeEstimate,
         updatedAt: Date.now(),
         score: scoreEl && scoreEl.value !== '' ? parseFloat(scoreEl.value) : (id ? (tasks.find(function (x) { return x.id === id; }) || {}).score || null : null),
@@ -336,24 +344,44 @@ function saveTask() {
         data.status = 'in-progress';
     else
         data.status = 'not-started';
+    if (!id) {
+        id = DB.uid();
+        idInput.value = id;
+    }
     if (id) {
         var idx = tasks.findIndex(function (t) { return t.id === id; });
-        var prev = tasks[idx];
+        var prev = idx >= 0 ? tasks[idx] : null;
+        if (!prev) {
+            var semId = DB.getActiveSemesterId();
+            if (!semId) {
+                tkSaving = false;
+                if (saveButton) { saveButton.disabled = false; saveButton.removeAttribute('aria-busy'); }
+                Toast.show('Select an available semester before saving this task.', 'high', 'icon-lucide-calendar-x-2');
+                return;
+            }
+            prev = { id: id, createdAt: Date.now(), semesterId: semId, status: 'not-started', progress: 0 };
+            tasks.push(prev);
+        }
         var wasCompleted = prev.status === 'completed';
-        tasks[idx] = Object.assign({}, prev, data);
+        var nextTask = Object.assign({}, prev, data);
         if (!wasCompleted && data.status === 'completed') {
-            tasks[idx].completedAt = Date.now();
+            nextTask.completedAt = Date.now();
             fireConfetti();
         }
         if (wasCompleted && data.status !== 'completed') {
-            delete tasks[idx].completedAt;
+            delete nextTask.completedAt;
         }
+        tasks[tasks.findIndex(function (t) { return t.id === id; })] = nextTask;
     }
-    else {
-        var semId = DB.getActiveSemesterId();
-        tasks.push(Object.assign({ id: DB.uid(), createdAt: Date.now(), semesterId: semId }, data));
+    const saveResult = typeof DB.saveTasksAndSync === 'function'
+        ? await DB.saveTasksAndSync(tasks)
+        : { ok: false, error: new Error('Task synchronization is unavailable. Please retry when the connection is restored.') };
+    if (!saveResult.ok) {
+        tkSaving = false;
+        if (saveButton) { saveButton.disabled = false; saveButton.removeAttribute('aria-busy'); }
+        Toast.show('Task was not saved: ' + ((saveResult.error && saveResult.error.message) || 'server synchronization failed. Your entries are still in this form; retry to save.'), 'high', 'icon-lucide-cloud-off');
+        return;
     }
-    DB.saveTasks(tasks);
     bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
     Toast.show(id ? 'Task updated' : 'Task added');
     document.dispatchEvent(new CustomEvent('tasks:changed'));

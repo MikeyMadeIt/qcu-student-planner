@@ -7,47 +7,58 @@ function initDashboard() {
     renderAttendanceDonut();
     renderTodaySchedule();
     renderUpcomingTasks();
-    setInterval(renderTodaySchedule, 60000);
+    setInterval(() => { renderTodaySchedule(); renderSemesterOverview(); }, 60000);
+    if (!window._dashboardAcademicCalendarBound) {
+        window._dashboardAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            renderSemesterOverview(); renderStatCards(); renderGradePerformance();
+            renderAttendanceDonut(); renderTodaySchedule(); renderUpcomingTasks();
+        });
+    }
 }
 
 // 1. SEMESTER OVERVIEW
 
 function renderSemesterOverview() {
     const sem = DB.getActiveSemester();
-    if (!sem)
+    if (!sem) {
+        const labelEl = document.getElementById('dashSemLabel');
+        if (labelEl) labelEl.textContent = 'No active academic period';
+        ['dashWeekInfo', 'dashWeeksLeft', 'dashSemPct', 'dashSemDates'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '—';
+        });
+        const bar = document.getElementById('dashSemBar');
+        if (bar) bar.style.width = '0%';
         return;
+    }
     const labelEl = document.getElementById('dashSemLabel');
     if (labelEl)
-        labelEl.textContent = sem.schoolYear + ' \u00B7 ' + sem.name;
-    const start = new Date(sem.startDate + 'T00:00:00');
-    // The end date is the last day of the semester, so it runs until the end of that day.
-    const end = new Date(sem.endDate + 'T23:59:59');
-    const now = new Date();
-    if (isNaN(start.getTime()) || isNaN(end.getTime()))
+        labelEl.textContent = 'AY ' + sem.schoolYear + '\n' + sem.name;
+    const timeline = calculateSemesterTimeline(sem.startDate, sem.endDate);
+    if (!timeline)
         return;
-    const totalMs = end - start;
-    const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
-    const pct = totalMs > 0 ? Math.round(elapsedMs / totalMs * 100) : 0;
-    const totalWeeks = sem.totalWeeks || 15;
-    const weekNum = now < start ? 0 : Math.min(totalWeeks, Math.ceil((now - start) / 604800000));
-    const weeksLeft = Math.max(0, totalWeeks - weekNum);
+    const pct = timeline.progress;
+    const totalWeeks = timeline.totalWeeks;
+    const weeksLeft = timeline.status === 'completed' ? 0 : Math.max(0, totalWeeks - (timeline.currentWeek || 0));
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
-        wiEl.innerHTML = weekNum === 0
-            ? '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Not started yet'
-            : '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Week ' + weekNum + ' of ' + totalWeeks;
+        wiEl.innerHTML = timeline.status === 'upcoming'
+            ? '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Upcoming'
+            : timeline.status === 'completed'
+                ? '<i class="icon-lucide-circle-check me-1" aria-hidden="true"></i>Completed · ' + totalWeeks + ' weeks'
+                : '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Week ' + timeline.currentWeek + ' of ' + totalWeeks;
     var wlEl = document.getElementById('dashWeeksLeft');
     if (wlEl)
-        wlEl.textContent = weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
+        wlEl.textContent = timeline.status === 'upcoming' ? 'Upcoming' : timeline.status === 'completed' ? 'Completed' : weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
     var spEl = document.getElementById('dashSemPct');
     if (spEl)
         spEl.textContent = pct + '%';
-    const daysLeft = Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
-    const startStr = start.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    const endStr = end.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    const startStr = new Date(sem.startDate + 'T00:00:00+08:00').toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'Asia/Manila' });
+    const endStr = new Date(sem.endDate + 'T00:00:00+08:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' });
     var sdEl = document.getElementById('dashSemDates');
     if (sdEl)
-        sdEl.textContent = startStr + ' \u2013 ' + endStr + ' \u00B7 ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' to end';
+        sdEl.textContent = startStr + ' \u2013 ' + endStr;
     setTimeout(function () {
         var bar = document.getElementById('dashSemBar');
         if (bar)
@@ -57,46 +68,17 @@ function renderSemesterOverview() {
 
 // 2. STAT CARDS
 
-function computeSyllabusCoverage(semId) {
-    var courses = DB.getSyllabusCourses().filter(function (c) { return c.semesterId === semId; });
-    if (!courses.length)
-        return null;
-    var sem = DB.getActiveSemester();
-    var totalWks = sem ? (sem.totalWeeks || 15) : 15;
-    var totalTopics = 0;
-    var coveredTopics = 0;
-    var hasTopicData = false;
-    courses.forEach(function (c) {
-        if (Array.isArray(c.topics) && c.topics.length) {
-            hasTopicData = true;
-            c.topics.forEach(function (t) {
-                totalTopics++;
-                if (t.completed)
-                    coveredTopics++;
-            });
-        }
-    });
-    if (hasTopicData && totalTopics > 0)
-        return Math.round(coveredTopics / totalTopics * 100);
-    var covered = courses.reduce(function (sum, course) { return sum + ((course.weeks || []).length); }, 0);
-    var expected = courses.length * totalWks;
-    return expected > 0 ? Math.min(100, Math.round(covered / expected * 100)) : 0;
-}
-
 function renderStatCards() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
-    const tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    const subjects = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId && !s.archived; });
+    const tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     const taskCounts = computeTaskCounts(tasks);
     const done = taskCounts.completed;
-    const syllabusCoverage = computeSyllabusCoverage(semId);
     const totalUnits = subjects.reduce(function (sum, s) { return sum + (+s.units || 0); }, 0);
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
     var subjectsHint = document.getElementById('statSubjectsHint');
     if (subjectsHint)
-        subjectsHint.textContent = !subjects.length ? 'Add a subject'
-            : syllabusCoverage !== null ? totalUnits + ' units \u00B7 Syllabus ' + syllabusCoverage + '%'
-                : totalUnits + ' units this semester';
+        subjectsHint.textContent = !subjects.length ? 'Add a subject' : totalUnits + ' units this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
@@ -173,7 +155,7 @@ function computeDashGWA(semId, subjects) {
 
 function renderGradePerformance() {
     var semId = DB.getActiveSemesterId();
-    var subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
+    var subjects = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId && !s.archived; });
     var wrap = document.getElementById('dashGradeChart');
     if (!wrap)
         return;
@@ -311,7 +293,7 @@ function renderTodaySchedule() {
     }
     var list = DB.getSubjects()
         .filter(function (s) {
-            if (!(s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;
+            if (!(semId && s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;
             return !DB.getCancelledOccurrences().some(function (c) { return c.subjectId === s.id && c.date === todayStr; });
         })
         .sort(function (a, b) { return a.start.localeCompare(b.start); });
@@ -354,10 +336,10 @@ function renderUpcomingTasks() {
     if (!wrap)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
     var today = todayKey();
     // Same status rules as the Tasks page: a task is overdue once its due date AND time have passed.
-    var semTasks = DB.getTasks().filter(function (t) { return t.semesterId === semId && t.dueDate; });
+    var semTasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId && t.dueDate; });
     var overdueTasks = semTasks
         .filter(function (t) { return computeStatus(t) === 'overdue'; })
         .sort(function (a, b) { return b.dueDate.localeCompare(a.dueDate); })

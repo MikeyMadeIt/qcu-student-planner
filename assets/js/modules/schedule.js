@@ -70,13 +70,13 @@ function restoreOccurrence(subjectId, dateStr) {
 
 function getAttendanceRecord(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    return DB.getAttendance().find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId) || null;
+    return DB.getAttendance().find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId) || null;
 }
 
 function logQuickAttendance(subjectId, dateStr, status) {
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
-    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId);
+    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId);
     if (existing) {
         existing.status = status;
     }
@@ -98,7 +98,7 @@ function getSubjectGradeAvg(subjectId) {
 
 function getSubjectAttendanceRate(subjectId) {
     const semId = DB.getActiveSemesterId();
-    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId)).rate;
+    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && semId && r.semesterId === semId)).rate;
 }
 
 // Init
@@ -115,6 +115,13 @@ function initSchedule() {
     renderAllViews();
     startTick();
     setupPinchZoom();
+    if (!window._scheduleAcademicCalendarBound) {
+        window._scheduleAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            setSchedView('day');
+            renderNav(); renderAllViews(); renderNextCard(); renderDaySummary();
+        });
+    }
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             renderNextCard();
@@ -237,7 +244,7 @@ function getSubjectsForDay(date) {
         return [];
     const dayName = DAY_SHORT[date.getDay()];
     return DB.getSubjects()
-        .filter(s => s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))
+        .filter(s => semId && s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))
         .sort((a, b) => toMins(a.start) - toMins(b.start));
 }
 
@@ -265,13 +272,13 @@ function getSemesterEmptyState(date) {
 function getTasksDueToday(subjectId) {
     const today = isoDate(new Date());
     const semId = DB.getActiveSemesterId();
-    return DB.getTasks().filter(t => t.semesterId === semId && t.subjectId === subjectId && t.dueDate === today);
+    return DB.getTasks().filter(t => semId && t.semesterId === semId && t.subjectId === subjectId && t.dueDate === today);
 }
 
 function getAllTasksDueToday() {
     const today = isoDate(new Date());
     const semId = DB.getActiveSemesterId();
-    return DB.getTasks().filter(t => t.semesterId === semId && t.dueDate === today);
+    return DB.getTasks().filter(t => semId && t.semesterId === semId && t.dueDate === today);
 }
 
 // Next/current class logic (skips cancelled)
@@ -318,7 +325,7 @@ function detectConflicts(classes) {
 
 function detectAllWeekConflicts() {
     const semId = DB.getActiveSemesterId();
-    const allSubs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const allSubs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const conflictSubjectIds = new Set();
     DAY_SHORT.forEach(dayName => {
         const daySubs = allSubs.filter(s => s.days && s.days.includes(dayName));
@@ -583,7 +590,7 @@ function saveQuickAtt() {
 
 function clearQuickAtt(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId));
+    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId));
     DB.saveAttendance(records);
     const modal = bootstrap.Modal.getInstance(document.getElementById('quickAttModal'));
     if (modal)
@@ -670,7 +677,7 @@ function doCancel() {
     const reason = (document.getElementById('cancelReason')?.value || '').trim();
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
-    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId);
+    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId);
     if (existing) {
         existing.status = 'No Classes';
     }
@@ -687,7 +694,7 @@ function doCancel() {
 
 function doRestoreOccurrence(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId && r.status === 'No Classes'));
+    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId && r.status === 'No Classes'));
     DB.saveAttendance(records);
     restoreOccurrence(subjectId, dateStr);
     const modal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
@@ -875,7 +882,7 @@ function renderTimetable() {
     updateZoomUI();
     const wrap = document.getElementById('ttGrid');
     const semId = DB.getActiveSemesterId();
-    const allSubs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const allSubs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const startHour = 6, endHour = 21;
     const today = new Date();
     const nm = nowMins();
@@ -1040,7 +1047,7 @@ function computeOverlaps(classes) {
 // Show imported subjects that still need schedule details in both schedule views.
 function getCurriculumSetupHtml() {
     const semId = DB.getActiveSemesterId();
-    const pending = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.source === 'curriculum' && s.setupStatus === 'needs_setup');
+    const pending = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived && s.source === 'curriculum' && s.setupStatus === 'needs_setup');
     if (!pending.length) return '';
     return `<div class="glass card-pad sch-curriculum-setup mb-3" aria-live="polite">
       <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-3">

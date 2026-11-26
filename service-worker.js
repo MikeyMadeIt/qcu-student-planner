@@ -12,7 +12,9 @@ const PRECACHE = [
     'assets/icons/icon-512.png',
     'assets/icons/lucide-sprite.svg',
 ];
-const NEVER_CACHE = ['/pages/auth/', '/pages/admin/'];
+// Keep every personalized application shell out of Cache Storage. Vercel sets
+// no-store too, but the service worker must enforce this across deployments.
+const NEVER_CACHE = ['/pages/auth/', '/pages/admin/', '/pages/app/'];
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).catch(() => { }));
     self.skipWaiting();

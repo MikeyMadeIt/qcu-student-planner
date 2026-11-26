@@ -85,7 +85,7 @@
         try { cancelled = DB.getCancelledOccurrences(); } catch (e) { /* ignore */ }
 
         DB.getSubjects()
-            .filter(s => s.semesterId === semId && !s.archived && Array.isArray(s.days) && s.days.includes(dayName) && s.start)
+            .filter(s => semId && s.semesterId === semId && !s.archived && Array.isArray(s.days) && s.days.includes(dayName) && s.start)
             .forEach(s => {
                 if (cancelled.some(c => c.subjectId === s.id && c.date === todayStr)) return;
                 const parts = String(s.start).split(':').map(Number);
@@ -158,7 +158,7 @@
         const records = DB.getAttendanceForSemester(semId);
 
         DB.getSubjects()
-            .filter(s => s.semesterId === semId && !s.archived)
+            .filter(s => semId && s.semesterId === semId && !s.archived)
             .forEach(s => {
                 const raw = limitsMap[s.id];
                 const limit = (raw != null && raw !== '' && isFinite(+raw) && +raw >= 0) ? +raw : defaultLimit;
