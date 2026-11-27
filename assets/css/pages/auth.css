@@ -980,8 +980,7 @@ body.auth-page {
         max-width: none;
         margin: 0;
         gap: 0;
-        /* .auth-main already supplies the mobile safe-area horizontal inset. */
-        padding-inline: 0;
+        padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
         align-items: stretch;
         justify-content: flex-start;
     }
@@ -1087,7 +1086,7 @@ body.auth-page {
     }
 
     .auth-login-card .auth-hint {
-        margin: 1.15rem 0 0;
+        margin: auto 0 0;
         padding: 0;
         border: 0;
         border-radius: 0;
@@ -1115,8 +1114,7 @@ body.auth-page {
 
     .auth-approval-note {
         display: block;
-        margin: auto auto 0;
-        padding-top: .65rem;
+        margin: .65rem auto 0;
         color: var(--auth-text-soft);
         font-size: .76rem;
         line-height: 1.5;

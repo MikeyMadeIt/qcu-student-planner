@@ -21,8 +21,9 @@ test('mobile login retains QCU sign-in, email, legal links, and independent-proj
   assert.match(authCss, /min-height: 100dvh/);
   assert.match(authCss, /env\(safe-area-inset-top/);
   assert.match(authCss, /\.auth-login-main\s*\{[^}]*justify-content:\s*flex-start;/s);
-  assert.match(authCss, /\.auth-login-main\s*\{[^}]*padding-inline:\s*0;/s);
-  assert.match(authCss, /\.auth-approval-note\s*\{[^}]*margin:\s*auto auto 0;/s);
+  assert.match(authCss, /\.auth-login-main\s*\{[^}]*padding-inline:\s*max\(1\.25rem, env\(\s*safe-area-inset-left/s);
+  assert.match(authCss, /\.auth-login-card \.auth-hint\s*\{[^}]*margin:\s*auto 0 0;/s);
+  assert.match(authCss, /\.auth-approval-note\s*\{[^}]*margin:\s*\.65rem auto 0;/s);
   assert.match(authCss, /\.auth-login-intro\s*\{\s*display:\s*none;/);
   assert.match(authCss, /\.auth-login-main > \.auth-login-card\s*\{\s*display:\s*contents;/);
   assert.match(authCss, /\.auth-login-card > \.auth-hint\s*\{\s*order:\s*4;/);
