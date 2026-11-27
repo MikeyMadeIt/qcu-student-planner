@@ -1506,9 +1506,9 @@ body.auth-page {
 
     .auth-status-card .auth-actions a[href="login.html"] {
         position: fixed;
-        z-index: 12;
+        z-index: 13;
         left: 50%;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 1.1rem);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 2.8rem);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1516,6 +1516,21 @@ body.auth-page {
         min-height: 3.15rem;
         margin: 0;
         transform: translateX(-50%);
+    }
+
+    .auth-status-main > .auth-note {
+        position: fixed;
+        z-index: 12;
+        right: max(1.25rem, env(safe-area-inset-right, 0px));
+        bottom: calc(env(safe-area-inset-bottom, 0px) + .55rem);
+        left: max(1.25rem, env(safe-area-inset-left, 0px));
+        width: auto;
+        max-width: 30rem;
+        margin: 0 auto;
+        padding: 0;
+        text-align: center;
+        font-size: .72rem;
+        line-height: 1.35;
     }
 }
 
