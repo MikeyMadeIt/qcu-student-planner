@@ -54,12 +54,16 @@
 <!-- Message detail modal -->
 <div class="modal fade" id="messageDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="msgDetailTitle">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content card-pad">
-      <div class="d-flex justify-content-between align-items-start mb-2">
-        <h5 id="msgDetailTitle" class="mb-0">Message details</h5>
+    <div class="modal-content">
+      <div class="msg-modal-head">
+        <span class="msg-modal-icon" aria-hidden="true"><i class="icon-lucide-mail-open"></i></span>
+        <div class="msg-modal-titles">
+          <span class="msg-modal-eyebrow">Inbox message</span>
+          <h5 id="msgDetailTitle">Message details</h5>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div id="msgDetailBody"></div>
+      <div id="msgDetailBody" class="msg-modal-body"></div>
     </div>
   </div>
 </div>

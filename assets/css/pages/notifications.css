@@ -273,4 +273,38 @@
         width: 100%;
         margin-left: 0;
     }
+
+    /* Smaller text in the notification details card on phones.
+       Only font sizes and spacing change; the buttons keep their height.
+       Delete this group to go back to the bigger text. */
+    .notification-detail-content {
+        padding: var(--space-4);
+    }
+
+    .notification-category {
+        font-size: 0.68rem;
+    }
+
+    .notification-detail-content h2 {
+        margin: var(--space-2) 0;
+        font-size: 0.98rem;
+    }
+
+    .notification-detail-date,
+    .notification-description {
+        font-size: 0.74rem;
+        line-height: 1.5;
+    }
+
+    .notification-detail-actions {
+        margin-top: var(--space-4);
+    }
+
+    .notification-detail-actions .btn {
+        font-size: 0.76rem;
+    }
+
+    .notification-read-label {
+        font-size: 0.74rem;
+    }
 }
