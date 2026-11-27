@@ -1478,6 +1478,47 @@ body.auth-page {
     }
 }
 
+@media (max-width: 575.98px) {
+    .auth-status-main {
+        align-items: stretch;
+        justify-content: flex-start;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6.25rem);
+    }
+
+    .auth-status-main > .auth-status-card {
+        display: flex;
+        flex: 1 0 auto;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        max-width: 30rem;
+        margin: 0 auto;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .auth-status-card > .auth-center:not([hidden]) {
+        margin-block: auto;
+    }
+
+    .auth-status-card .auth-actions a[href="login.html"] {
+        position: fixed;
+        z-index: 12;
+        left: 50%;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 1.1rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: min(30rem, calc(100vw - 2.5rem));
+        min-height: 3.15rem;
+        margin: 0;
+        transform: translateX(-50%);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .auth-spinner,
     .auth-page .status-icon .auth-spin,
