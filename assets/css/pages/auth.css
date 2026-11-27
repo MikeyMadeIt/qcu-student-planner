@@ -92,6 +92,10 @@ body.auth-page {
     max-height: 2rem;
 }
 
+.auth-profile-mobile-brand {
+    display: none;
+}
+
 .auth-title {
     margin: 0 0 var(--space-2);
     font-size: 1.6rem;
@@ -753,6 +757,23 @@ html[data-motion="reduced"] .auth-spin {
 }
 
 @media (max-width: 575.98px) {
+    .auth-profile-mobile-brand {
+        display: flex;
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 1.05rem);
+        left: max(1.25rem, env(safe-area-inset-left, 0px));
+        z-index: 12;
+        width: max-content;
+        max-width: calc(100vw - 6rem);
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .auth-profile-card > .auth-brand {
+        display: none;
+    }
+
     .auth-profile-page::before {
         position: fixed;
         inset: 0 0 auto;
@@ -1297,11 +1318,12 @@ body.auth-page {
         background: var(--auth-elevated);
     }
 
-    .auth-profile-card {
+    .auth-profile-page .auth-profile-card {
         max-width: 38rem;
         margin: 0 auto;
         padding: 0;
         border: 0;
+        border-radius: 0;
         background: transparent;
         box-shadow: none;
     }
