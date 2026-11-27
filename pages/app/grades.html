@@ -47,9 +47,6 @@
             <button class="btn-icon btn-icon-sm gwa-action-btn" onclick="openGradeInterpModal()" title="Grade Interpretation Reference">
               <i class="icon-lucide-info" aria-hidden="true"></i>
             </button>
-            <button class="btn-icon btn-icon-sm gwa-action-btn gwa-share-btn" id="gwaShareBtn" onclick="copyGwaCardAsImage()" title="Share as image">
-              <i class="icon-lucide-share" aria-hidden="true"></i>
-            </button>
           </div>
         </div>
         <div class="empty-state gwa-overview-empty d-none" id="gwaOverviewEmpty">
@@ -171,9 +168,6 @@
     </div>
   </div>
 </div>
-
-<!-- Toast for clipboard copy -->
-<div id="gwaToast" class="gwa-toast" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>

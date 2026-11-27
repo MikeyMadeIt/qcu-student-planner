@@ -83,17 +83,9 @@ body.auth-page {
     text-decoration: none;
 }
 
-.auth-brand .dot {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--radius-sm);
-    background: rgb(var(--accent));
-    color: var(--on-accent);
-    font-size: 1.2rem;
+.auth-brand .app-brand-logo {
+    width: 7.25rem;
+    max-height: 2rem;
 }
 
 .auth-title {
@@ -741,13 +733,6 @@ body.auth-page {
     gap: 12px;
     font-size: .95rem;
     letter-spacing: -.01em;
-}
-
-.auth-brand .dot {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 12px;
-    box-shadow: none;
 }
 
 .auth-login-main {
