@@ -748,11 +748,11 @@ function renderDaySummary() {
     let timelineHtml = '';
     if (!classes.length) {
         const semesterState = getSemesterEmptyState(_selectedDate);
-        timelineHtml = `<div class="glass card-pad sch-empty-day fade-in">
+        timelineHtml = `<div class="glass empty-state sch-empty-day fade-in">
       <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-x-2"></i></div>
-      <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
-      ${semesterState ? (semesterState.detail ? `<div class="sch-empty-copy">${semesterState.detail}</div>` : '') : `<div class="sch-empty-copy">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
-      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
+      <strong class="empty-state-title">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</strong>
+      ${semesterState ? (semesterState.detail ? `<span class="empty-state-sub">${semesterState.detail}</span>` : '') : `<span class="empty-state-sub">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</span>`}
+      <span class="empty-state-sub sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</span>
       <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="icon-lucide-book-open me-1" aria-hidden="true"></i>Use Curriculum</a></div>
     </div>`;
     }
@@ -891,10 +891,10 @@ function renderTimetable() {
     const conflictIds = detectAllWeekConflicts();
     const selectedDayName = DAY_SHORT[_selectedDate.getDay()];
     if (!allSubs.length) {
-        wrap.innerHTML = `<div class="sch-empty-day" style="min-height:200px">
+        wrap.innerHTML = `<div class="empty-state sch-empty-day">
       <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-days"></i></div>
-      <div class="mt-2 fw-bold" style="color:var(--text)">No Classes Scheduled</div>
-      <div class="text-faint" style="font-size:.85rem">Add subjects to see your weekly timetable.</div>
+      <strong class="empty-state-title">No Classes Scheduled</strong>
+      <span class="empty-state-sub">Add subjects to see your weekly timetable.</span>
     </div>`;
         return;
     }
@@ -1087,10 +1087,10 @@ function renderListView() {
             s.professor.toLowerCase().includes(q) || s.room.toLowerCase().includes(q));
     const sem = DB.getActiveSemester();
     if (!list.length) {
-        wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-4 sch-empty-day">
+        wrap.innerHTML = `<div class="col-12"><div class="glass empty-state sch-empty-day sch-empty-subject">
       <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div>
-      <strong>${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</strong>
-      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
+      <strong class="empty-state-title">${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</strong>
+      <span class="empty-state-sub sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</span>
       ${!showArchived ? `<div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="icon-lucide-book-open me-1" aria-hidden="true"></i>Use Curriculum</a></div>` : ''}
     </div></div>`;
         return;
@@ -1234,7 +1234,7 @@ function deleteSubject(id) {
             if (subjectModal)
                 bootstrap.Modal.getOrCreateInstance(subjectModal).hide();
             Toast.show('Subject deleted');
-            renderAllViews();
+            document.dispatchEvent(new CustomEvent('subjects:changed'));
         }
     });
 }
@@ -1250,7 +1250,7 @@ function duplicateSubject(id) {
         return;
     }
     Toast.show('Subject duplicated');
-    renderAllViews();
+    document.dispatchEvent(new CustomEvent('subjects:changed'));
 }
 
 function archiveSubject(id) {
@@ -1264,7 +1264,7 @@ function archiveSubject(id) {
         return;
     }
     Toast.show(s.archived ? 'Subject archived' : 'Subject restored');
-    renderAllViews();
+    document.dispatchEvent(new CustomEvent('subjects:changed'));
 }
 
 // Pinch-to-zoom for timetable
@@ -1294,4 +1294,7 @@ function setupPinchZoom() {
 }
 
 function escapeHtml(s) { return escHtml(s); }
-document.addEventListener('subjects:changed', function () { renderAllViews(); });
+document.addEventListener('subjects:changed', function () {
+    renderNav();
+    renderAllViews();
+});

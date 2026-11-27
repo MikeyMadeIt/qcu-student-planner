@@ -772,6 +772,40 @@
     white-space: nowrap;
 }
 
+.grade-component-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: var(--space-2);
+}
+
+.grade-component-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: .75rem;
+    line-height: 1.35;
+}
+
+.grade-component-name {
+    min-width: 0;
+    color: var(--text-soft);
+    overflow-wrap: anywhere;
+}
+
+.grade-component-values {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    white-space: nowrap;
+}
+
+.grade-component-values .mono {
+    min-width: 36px;
+    text-align: right;
+}
+
 /* Target Grade section header */
 
 .tg-section-header {
@@ -1416,6 +1450,7 @@
 @media (max-width: 575.98px) {
     /* Height of every input and button in the Grading Breakdown modal on phones.
        Change this one value to make them taller or slimmer. */
+    .grade-card-top { padding: 5px 9px; }
     #gradeModal { --grade-input-h: 2.25rem; }
 
     .component-header { flex-wrap: nowrap; }
@@ -1464,18 +1499,6 @@
     .assessment-grid-head { font-size: .52rem !important; }
     .assessment-grid-row input { font-size: .68rem; }
 }
-.grade-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    text-align: center;
-    color: var(--text-soft);
-}
-
-.grade-empty > strong { color: var(--text); font-size: .96rem; }
-.grade-empty > span { max-width: 30rem; font-size: .82rem; line-height: 1.5; }
-
 /* DESKTOP FIX 1 (screens 576px and wider): wider number columns.
    Score / Out of were too narrow, so "100" showed as "10" in the Grading Breakdown
    and the Units placeholder was cut off in the Manual GWA calculator.

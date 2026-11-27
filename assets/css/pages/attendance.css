@@ -3633,3 +3633,32 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
   border: 1px solid rgba(251, 113, 133, .35);
 }
 .att-edit-btn:hover { color: rgb(var(--accent, 36, 87, 214)); }
+
+/* Keep the flattened mobile attendance stack on one spacing rhythm and clear
+   Bootstrap card margins so they do not accumulate with the grid gap. */
+@media (max-width: 991.98px) {
+    .student-app .main-content:has(.attendance-columns) > .topbar {
+        margin-bottom: 0;
+    }
+
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card,
+    .student-app .main-content:has(.attendance-columns) .att-log-form,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats),
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap),
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown),
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog),
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard {
+        margin-block: 0 !important;
+    }
+
+    .student-app .main-content:has(.attendance-columns) .att-consec-alerts {
+        margin-block: 0 !important;
+    }
+
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot:empty,
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts:empty {
+        display: none;
+    }
+}

@@ -34,7 +34,7 @@ function renderSemesterOverview() {
     }
     const labelEl = document.getElementById('dashSemLabel');
     if (labelEl)
-        labelEl.textContent = 'AY ' + sem.schoolYear + '\n' + sem.name;
+        labelEl.textContent = 'AY ' + (sem.schoolYear || sem.academicYear || '') + ' • ' + sem.name;
     const timeline = calculateSemesterTimeline(sem.startDate, sem.endDate);
     if (!timeline)
         return;
@@ -54,11 +54,9 @@ function renderSemesterOverview() {
     var spEl = document.getElementById('dashSemPct');
     if (spEl)
         spEl.textContent = pct + '%';
-    const startStr = new Date(sem.startDate + 'T00:00:00+08:00').toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'Asia/Manila' });
-    const endStr = new Date(sem.endDate + 'T00:00:00+08:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Manila' });
     var sdEl = document.getElementById('dashSemDates');
     if (sdEl)
-        sdEl.textContent = startStr + ' \u2013 ' + endStr;
+        sdEl.textContent = window.formatSemesterDateRange(sem.startDate, sem.endDate);
     setTimeout(function () {
         var bar = document.getElementById('dashSemBar');
         if (bar)

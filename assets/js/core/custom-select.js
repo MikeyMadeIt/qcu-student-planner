@@ -16,9 +16,10 @@ function convertSelect(select) {
     const wrap = document.createElement('div');
     wrap.className = 'custom-select dropdown';
 
+    const isWorkspaceSemester = select.classList.contains('settings-workspace-select');
     const trigger = document.createElement('button');
     trigger.type = 'button';
-    trigger.className = 'form-select cs-trigger dropdown-toggle' + (select.disabled ? ' disabled' : '');
+    trigger.className = 'form-select cs-trigger' + (isWorkspaceSemester ? '' : ' dropdown-toggle') + (select.disabled ? ' disabled' : '');
     trigger.setAttribute('data-bs-toggle', 'dropdown');
     trigger.setAttribute('data-bs-auto-close', 'true');
     trigger.setAttribute('aria-haspopup', 'listbox');
@@ -29,6 +30,19 @@ function convertSelect(select) {
         trigger.setAttribute('aria-label', select.getAttribute('aria-label'));
     if (select.id)
         trigger.setAttribute('aria-labelledby', 'label-for-' + select.id);
+    const triggerLabel = isWorkspaceSemester ? document.createElement('span') : null;
+    const triggerStatus = isWorkspaceSemester ? document.createElement('span') : null;
+    const triggerChevron = isWorkspaceSemester ? document.createElement('span') : null;
+    if (triggerLabel) {
+        triggerLabel.className = 'cs-trigger-label';
+        trigger.appendChild(triggerLabel);
+        triggerStatus.className = 'cs-trigger-status';
+        trigger.appendChild(triggerStatus);
+        triggerChevron.className = 'cs-trigger-chevron';
+        triggerChevron.setAttribute('aria-hidden', 'true');
+        triggerChevron.innerHTML = '<i class="icon-lucide-chevron-down"></i>';
+        trigger.appendChild(triggerChevron);
+    }
 
     const menu = document.createElement('ul');
     menu.className = 'dropdown-menu cs-menu';
@@ -61,12 +75,24 @@ function convertSelect(select) {
 
     function syncTrigger() {
         const sel = select.options[select.selectedIndex];
-        trigger.textContent = sel ? sel.textContent : '';
+        const label = sel ? sel.textContent : '';
+        if (triggerLabel) {
+            const statusMatch = /^(.*) • (Active|Upcoming|Previous(?: · Archived)?)$/.exec(label);
+            triggerLabel.textContent = statusMatch ? statusMatch[1] : label;
+            triggerStatus.textContent = statusMatch ? statusMatch[2] : '';
+            triggerStatus.hidden = !statusMatch;
+            triggerStatus.classList.toggle('is-active', !!statusMatch && statusMatch[2] === 'Active');
+        } else trigger.textContent = label;
         menu.querySelectorAll('.cs-option').forEach(o => {
             const isSel = o.dataset.value === select.value;
             o.classList.toggle('active', isSel);
             o.setAttribute('aria-selected', isSel ? 'true' : 'false');
         });
+    }
+
+    function syncDisabledState() {
+        trigger.disabled = select.disabled;
+        trigger.classList.toggle('disabled', select.disabled);
     }
 
     renderOptions();
@@ -79,6 +105,16 @@ function convertSelect(select) {
     }
 
     wrap.addEventListener('show.bs.dropdown', syncMenuWidth);
+    if (isWorkspaceSemester) {
+        wrap.addEventListener('shown.bs.dropdown', () => {
+            const icon = triggerChevron.querySelector('.lucide-icon');
+            if (icon && window.setLucideIcon) window.setLucideIcon(icon, 'chevron-up');
+        });
+        wrap.addEventListener('hidden.bs.dropdown', () => {
+            const icon = triggerChevron.querySelector('.lucide-icon');
+            if (icon && window.setLucideIcon) window.setLucideIcon(icon, 'chevron-down');
+        });
+    }
     window.addEventListener('resize', () => {
         if (!menu.classList.contains('show'))
             return;
@@ -103,7 +139,7 @@ function convertSelect(select) {
             label.addEventListener('click', (e) => { e.preventDefault(); trigger.focus(); trigger.click(); });
     }
 
-    const observer = new MutationObserver(() => { renderOptions(); syncTrigger(); });
+    const observer = new MutationObserver(() => { renderOptions(); syncTrigger(); syncDisabledState(); });
     observer.observe(select, { childList: true, attributes: true, attributeFilter: ['disabled'] });
     select.addEventListener('cs-refresh', () => { renderOptions(); syncTrigger(); });
 

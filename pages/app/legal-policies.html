@@ -45,10 +45,12 @@
     <nav class="glass card-pad lg-toc-card" id="lgToc" aria-labelledby="lgTocTitle">
       <h2 class="lg-toc-title" id="lgTocTitle"><i class="icon-lucide-list" aria-hidden="true"></i>Table of contents</h2>
       <ol class="lg-toc-main" id="lgTocMain"></ol>
-      <details class="lg-toc-details" id="lgTocDetails">
-        <summary><i class="icon-lucide-chevron-down" aria-hidden="true"></i>All subsections</summary>
-        <div class="lg-toc-full" id="lgTocFull"></div>
-      </details>
+      <div class="lg-toc-details" id="lgTocDetails">
+        <button class="lg-toc-toggle" id="lgTocToggle" type="button" aria-expanded="false" aria-controls="lgTocFull">
+          <i class="icon-lucide-chevron-down" aria-hidden="true"></i>All subsections
+        </button>
+        <div class="lg-toc-full" id="lgTocFull" hidden></div>
+      </div>
     </nav>
 
     <div class="lg-layout">

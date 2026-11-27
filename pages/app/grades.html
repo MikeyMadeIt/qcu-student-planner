@@ -52,7 +52,12 @@
             </button>
           </div>
         </div>
-        <div class="gwa-compact-grid">
+        <div class="empty-state gwa-overview-empty d-none" id="gwaOverviewEmpty">
+          <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-column"></i></div>
+          <strong class="empty-state-title">No grades to summarize yet</strong>
+          <span class="empty-state-sub">Add assessment scores to see your GWA and subject highlights.</span>
+        </div>
+        <div class="gwa-compact-grid" id="gwaOverviewStats">
           <!-- Left: Current GWA -->
           <div class="gwa-compact-main">
             <div class="gwa-compact-label"><i class="icon-lucide-award" aria-hidden="true"></i>Current GWA</div>

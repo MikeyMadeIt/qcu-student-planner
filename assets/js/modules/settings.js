@@ -26,9 +26,39 @@ function renderAcademicPeriod() {
     const select = document.getElementById('settingsSemesterSelect');
     const hint = document.getElementById('settingsSemesterHint');
     if (active) {
-        host.textContent = `${active.schoolYear} · ${active.name} · ${active.startDate} – ${active.endDate} · Managed by QCU`;
+        host.replaceChildren();
         host.classList.remove('is-unconfigured');
+        const card = document.createElement('div');
+        card.className = 'settings-academic-card';
+        const content = document.createElement('div');
+        content.className = 'settings-academic-copy';
+        const title = document.createElement('div');
+        title.className = 'settings-academic-name';
+        title.textContent = `AY ${active.schoolYear || active.academicYear || ''}`;
+        const details = document.createElement('div');
+        details.className = 'settings-academic-details';
+        const dateIcon = document.createElement('i');
+        dateIcon.className = 'icon-lucide-calendar-days';
+        dateIcon.setAttribute('aria-hidden', 'true');
+        const dates = document.createElement('div');
+        dates.className = 'settings-academic-dates';
+        dates.textContent = `${active.name || 'Semester'} · ${window.formatSemesterDateRange(active.startDate, active.endDate)}`;
+        details.append(dateIcon, dates);
+        content.append(title, details);
+        const side = document.createElement('div');
+        side.className = 'settings-academic-side';
+        const progress = document.createElement('div');
+        progress.className = 'settings-academic-progress';
+        const timeline = calculateSemesterTimeline(active.startDate, active.endDate);
+        progress.textContent = timeline ? `${timeline.progress}%` : '—';
+        const status = document.createElement('div');
+        status.className = 'settings-academic-status';
+        status.textContent = 'Active';
+        side.append(progress, status);
+        card.append(content, side);
+        host.appendChild(card);
     } else {
+        host.replaceChildren();
         host.textContent = 'No active academic period has been set by the university administrator yet.';
         host.classList.add('is-unconfigured');
     }
@@ -49,12 +79,13 @@ function renderAcademicPeriod() {
     }
     const selectedId = sem ? sem.id : (active && active.id);
     [...years.entries()].forEach(([year, rows]) => {
-        const group = document.createElement('optgroup'); group.label = year;
+        const group = document.createElement('optgroup'); group.label = /^AY\b/i.test(year) ? year : `AY ${year}`;
         rows.forEach(period => {
             const isActive = active && active.id === period.id;
             const isUpcoming = !isSemesterSelectable(period, active && active.id) && !isActive;
             const status = isActive ? 'Active' : isUpcoming ? 'Upcoming' : period.status === 'completed' ? 'Previous' : period.status === 'archived' ? 'Previous · Archived' : 'Previous';
-            const option = new Option(`${period.name} · ${period.startDate} – ${period.endDate} · ${status}`, period.id);
+            const academicYear = period.academicYear || period.schoolYear || year;
+            const option = new Option(`AY ${academicYear} • ${[period.name, status].filter(Boolean).join(' • ')}`, period.id);
             option.disabled = isUpcoming;
             option.selected = period.id === selectedId;
             group.appendChild(option);
@@ -62,7 +93,7 @@ function renderAcademicPeriod() {
         select.appendChild(group);
     });
     select.disabled = !active;
-    if (hint) hint.textContent = sem && active && sem.id !== active.id ? `Viewing ${sem.name}. The university-wide active semester remains ${active.name}.` : active ? 'Your workspace follows the university-wide active semester.' : 'Semester-based planner actions are unavailable until QCU sets an active semester.';
+    if (hint) hint.textContent = sem && active && sem.id !== active.id ? `Viewing ${sem.name}. The university-wide active semester remains ${active.name}.` : active ? 'Your workspace follows the university-wide active semester.' : 'Semester-based planner actions are unavailable until the administrator sets an active semester.';
     select.onchange = () => {
         if (DB.selectSemester(select.value)) location.reload();
     };
@@ -508,3 +539,7 @@ window.exportData = exportData;
 window.confirmReset = confirmReset;
 window.confirmSignOut = confirmSignOut;
 window.retryCloudSync = retryCloudSync;
+
+// Start only after this module has executed. A page-level inline callback can
+// run before the module exports initSettings during a fast refresh.
+DB.whenCloudReady(initSettings);
