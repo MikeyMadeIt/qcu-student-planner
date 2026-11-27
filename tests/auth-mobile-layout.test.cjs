@@ -8,13 +8,13 @@ const callback = fs.readFileSync('pages/auth/callback.html', 'utf8');
 const finishProfile = fs.readFileSync('pages/auth/finish-profile.html', 'utf8');
 const authCss = fs.readFileSync('assets/css/pages/auth.css', 'utf8');
 
-test('mobile login retains QCU sign-in, email, legal links, and independent-project notice', () => {
+test('mobile login retains QCU sign-in and legal links without the independent-project disclaimer', () => {
   assert.match(login, /images\/logo\/kyusiyu-student-planner\.png/);
   assert.match(login, /data-theme-toggle/);
   assert.match(login, /data-google-signin/);
   assert.match(login, /Sign in to continue/);
   assert.match(login, /lastname\.firstname\.middlename@gmail\.com/);
-  assert.match(login, /independent student-developed project[\s\S]*?Quezon City University/);
+  assert.doesNotMatch(login, /independent student-developed project/i);
   assert.match(login, /legal-policies\.html#terms-of-service/);
   assert.match(login, /legal-policies\.html#privacy-policy/);
   assert.match(authCss, /@media \(max-width: 575\.98px\)/);
@@ -29,8 +29,9 @@ test('mobile login retains QCU sign-in, email, legal links, and independent-proj
   assert.match(authCss, /\.auth-login-card > \.auth-hint\s*\{\s*order:\s*4;/);
   assert.match(authCss, /\.auth-login-card > \[data-google-signin\]\s*\{\s*order:\s*5;/);
   assert.match(authCss, /\.auth-login-card > \.auth-approval-note\s*\{\s*order:\s*6;/);
-  assert.match(authCss, /\.auth-login-card > \.auth-independent-note\s*\{\s*order:\s*7;/);
-  assert.match(authCss, /\.auth-login-card > \.auth-consent-mobile\s*\{\s*order:\s*8;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-consent-mobile\s*\{\s*order:\s*7;/);
+  assert.match(authCss, /\.auth-mobile-symbol\s*\{[^}]*margin:\s*auto auto 1\.1rem;/s);
+  assert.match(authCss, /\.auth-login-card \.btn-google\s*\{[^}]*border-radius:\s*var\(--radius-pill\);/s);
 });
 
 test('finish profile keeps its required fields and uses a mobile-only readiness state', () => {
