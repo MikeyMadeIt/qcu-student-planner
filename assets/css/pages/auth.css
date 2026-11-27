@@ -1130,6 +1130,56 @@ body.auth-page {
     margin-inline: auto;
 }
 
+.auth-callback-error .auth-callback-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.auth-callback-error .auth-callback-error-icon {
+    display: inline-flex;
+    margin-bottom: 1.25rem;
+}
+
+.auth-callback-error .auth-callback-error-icon .lucide-icon {
+    width: 1.65rem;
+    height: 1.65rem;
+}
+
+.auth-callback-error .auth-callback-content .auth-title,
+.auth-callback-error .auth-callback-content .auth-alert {
+    width: 100%;
+    text-align: center;
+}
+
+.auth-callback-error .auth-callback-content [data-callback-actions] {
+    position: fixed;
+    z-index: 12;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 3.65rem);
+    left: 50%;
+    width: min(28rem, calc(100vw - 2.5rem));
+    margin: 0;
+    transform: translateX(-50%);
+}
+
+.auth-callback-error .auth-callback-content [data-callback-actions] .btn {
+    width: 100%;
+    min-height: 3.15rem;
+}
+
+.auth-callback-error .auth-callback-main > .auth-note {
+    position: fixed;
+    z-index: 11;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + .65rem);
+    left: 50%;
+    width: min(28rem, calc(100vw - 2.5rem));
+    margin: 0;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
 /* The callback page gets the same theme control on mobile. */
 .auth-mobile-theme-toggle {
     display: none;
@@ -1158,6 +1208,10 @@ body.auth-page {
 }
 
 @media (max-width: 575.98px) {
+    .auth-callback-error .auth-callback-main {
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 7.25rem);
+    }
+
     body.auth-page {
         min-height: 100vh;
         min-height: 100svh;
