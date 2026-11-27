@@ -248,25 +248,47 @@ body.auth-page {
 }
 
 .auth-profile-content .cs-trigger {
-    padding-right: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    gap: .65rem;
+    padding-right: .9rem;
     background-image: none;
+}
+
+.auth-profile-content .cs-trigger-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .auth-profile-content .cs-trigger-lucide-chevron::after {
     display: none;
+    content: none;
 }
 
 .auth-profile-content .cs-trigger-chevron {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
+    justify-content: center;
     margin-left: auto;
     color: var(--auth-text-soft);
 }
 
 .auth-profile-content .cs-trigger-chevron .lucide-icon {
+    display: block;
     width: 1rem;
     height: 1rem;
+}
+
+.auth-profile-content .cs-option.active::after {
+    display: none;
+    content: none;
 }
 
 .auth-page .form-select option,
