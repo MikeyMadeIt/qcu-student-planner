@@ -167,15 +167,18 @@ body.auth-page {
     line-height: 1;
 }
 
-.theme-icon-moon {
+.auth-page .theme-icon-sun,
+.auth-page .theme-icon-moon,
+.auth-page .theme-icon-amoled {
     display: none;
 }
 
-[data-theme="light"] .theme-icon-sun {
-    display: none;
+[data-theme="dark"] .auth-page .theme-icon-moon {
+    display: inline-block;
 }
 
-[data-theme="light"] .theme-icon-moon {
+[data-theme="light"] .auth-page .theme-icon-sun,
+[data-theme="amoled"] .auth-page .theme-icon-amoled {
     display: inline-block;
 }
 
@@ -868,6 +871,16 @@ body.auth-page {
     background:
         radial-gradient(ellipse at 14% 20%, rgba(var(--accent), .16), transparent 30rem),
         var(--auth-bg);
+}
+
+[data-theme="amoled"] body.auth-page {
+    background: var(--auth-bg);
+}
+
+[data-theme="amoled"] body.auth-page .grid-bg {
+    --grid-fade: #000;
+    --grid-line: rgba(255, 255, 255, .025);
+    --grid-line-major: rgba(var(--accent), .06);
 }
 
 .auth-card {
