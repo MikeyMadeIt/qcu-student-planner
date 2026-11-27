@@ -975,7 +975,9 @@
     justify-content: space-between;
     gap: 8px;
     padding-bottom: 6px;
-}.gwa-calc-desc {
+}
+
+.gwa-calc-desc {
     font-size: .76rem;
     color: var(--text-faint);
     line-height: 1.5;
@@ -1551,5 +1553,24 @@
         align-items: center;
         justify-content: flex-start;
         gap: 2px 10px;
+    }
+}
+
+/* MOBILE FIX: subject card spacing (phones only, up to 575px).
+   Only adds space between cards. Does not change card size, padding or layout.
+   Change the 8px to make the gap bigger or smaller.
+   Delete this block to remove it. */
+@media (max-width: 575.98px) {
+    #gradesWrap .grade-subject-item {
+        margin-bottom: 8px;
+    }
+
+    #gradesWrap .grades-subject-column:last-child .grade-subject-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Space between the "SUBJECTS" heading row and the first card. */
+    #gradesWrap .grades-subject-column:first-child .grade-subject-item:first-child {
+        margin-top: 8px;
     }
 }
