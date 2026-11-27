@@ -9,7 +9,7 @@
     --toast-color: var(--success);
     display: flex;
     align-items: flex-start;
-    gap: var(--space-3);
+    gap: var(--space-2);
     min-width: 15rem;
     max-width: min(24rem, calc(100vw - 2rem));
     margin-bottom: var(--space-2);
@@ -36,15 +36,15 @@
 
 .app-toast .toast-item-icon {
     display: grid;
-    flex: 0 0 2rem;
+    flex: 0 0 1.25rem;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
-    margin-top: 1px;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0;
     border-radius: 50%;
     background: color-mix(in srgb, var(--toast-color) 14%, var(--elevated));
     color: var(--toast-color);
-    font-size: .95rem;
+    font-size: .72rem;
 }
 
 .app-toast .toast-item-msg {
@@ -52,7 +52,7 @@
     min-width: 0;
     font-size: .86rem;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.45;
     color: var(--text);
     overflow-wrap: anywhere;
 }

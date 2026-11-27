@@ -50,7 +50,11 @@ async function initCalendar() {
             const dropdown = document.getElementById('jumpDateDropdown');
             const button = document.getElementById('jumpDateBtn');
             if (!dropdown || !button || button.getAttribute('aria-expanded') !== 'true') return;
-            if (dropdown.contains(event.target) || event.target.closest('.date-picker-panel')) return;
+            // The date picker replaces its contents when changing months. That
+            // detaches the clicked chevron before this document listener runs,
+            // so checking only event.target.closest() incorrectly treats it as
+            // an outside click. composedPath() retains the original panel.
+            if (isJumpDatePickerInteraction(event, dropdown)) return;
             hideJumpDateDropdown();
         });
         document.addEventListener('keydown', event => {
@@ -75,6 +79,12 @@ async function initCalendar() {
             }
         });
     }
+}
+
+function isJumpDatePickerInteraction(event, dropdown) {
+    const pickerPanel = document.getElementById('jumpDateInputPickerPanel');
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    return dropdown.contains(event.target) || !!(pickerPanel && (path.includes(pickerPanel) || pickerPanel.contains(event.target)));
 }
 
 // Subject Colors (stable)
@@ -965,21 +975,17 @@ function applyDrop(type, id, fromDate, toDate) {
 
 // EXPORT: .ICS
 
-function exportICS() {
+function exportICS(destination) {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
     const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Student Planner//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
-    const calEvents = DB.getCalendarEventsForSemester(semId);
+    const calEvents = DB.getCalendarEventsForSemester(semId).filter(ev => ev.date);
     calEvents.forEach(ev => {
-        if (!ev.date)
-            return;
-        const dtstart = icsDate(ev.date, ev.startTime);
-        const dtend = icsDate(ev.date, ev.endTime || ev.startTime);
         lines.push('BEGIN:VEVENT');
         lines.push('UID:' + ev.id + '@studentplanner');
         lines.push('DTSTAMP:' + icsNow());
-        lines.push('DTSTART:' + dtstart);
-        lines.push('DTEND:' + dtend);
+        lines.push(...icsDateProperty('DTSTART', ev.date, ev.startTime));
+        lines.push(...icsDateProperty('DTEND', ev.startTime ? ev.date : addCalendarDays(ev.date, 1), ev.startTime ? (ev.endTime || ev.startTime) : ''));
         lines.push('SUMMARY:' + icsEscape(ev.title));
         if (ev.description)
             lines.push('DESCRIPTION:' + icsEscape(ev.description));
@@ -987,15 +993,33 @@ function exportICS() {
     });
     const tasks = DB.getTasksForSemester(semId).filter(t => t.dueDate);
     tasks.forEach(t => {
-        const dtstart = icsDate(t.dueDate, t.dueTime || '00:00');
         lines.push('BEGIN:VEVENT');
         lines.push('UID:task-' + t.id + '@studentplanner');
         lines.push('DTSTAMP:' + icsNow());
-        lines.push('DTSTART:' + dtstart);
-        lines.push('DTEND:' + dtstart);
+        lines.push(...icsDateProperty('DTSTART', t.dueDate, t.dueTime));
+        lines.push(...icsDateProperty('DTEND', t.dueTime ? t.dueDate : addCalendarDays(t.dueDate, 1), t.dueTime || ''));
         lines.push('SUMMARY:[Task] ' + icsEscape(t.title));
         if (t.description)
             lines.push('DESCRIPTION:' + icsEscape(t.description));
+        lines.push('END:VEVENT');
+    });
+    const subjects = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived && Array.isArray(s.days) && s.days.length && s.start && s.end);
+    subjects.forEach(subject => {
+        const weekdays = normalizeClassWeekdays(subject.days);
+        if (!weekdays.length || !sem || !sem.startDate || !sem.endDate) return;
+        const startDate = firstWeekdayOnOrAfter(sem.startDate, weekdays);
+        if (!startDate || startDate > sem.endDate) return;
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:class-' + subject.id + '@studentplanner');
+        lines.push('DTSTAMP:' + icsNow());
+        lines.push('DTSTART:' + icsDate(startDate, subject.start));
+        lines.push('DTEND:' + icsDate(startDate, subject.end));
+        lines.push('RRULE:FREQ=WEEKLY;BYDAY=' + weekdays.join(',') + ';UNTIL=' + sem.endDate.replace(/-/g, '') + 'T235959');
+        lines.push('SUMMARY:' + icsEscape(subject.code || subject.name || 'Class'));
+        const description = [subject.name, subject.desc].filter(Boolean).join(' — ');
+        if (description) lines.push('DESCRIPTION:' + icsEscape(description));
+        const location = [subject.room, subject.building].filter(Boolean).join(', ');
+        if (location) lines.push('LOCATION:' + icsEscape(location));
         lines.push('END:VEVENT');
     });
     const univEvents = getUnivEvents();
@@ -1010,8 +1034,8 @@ function exportICS() {
             lines.push('DTEND:' + icsDate(u.event_date, u.end_time || u.start_time));
         }
         else {
-            lines.push('DTSTART;VALUE=DATE:' + u.event_date.replace(/-/g, ''));
-            lines.push('DTEND;VALUE=DATE:' + u.event_date.replace(/-/g, ''));
+            lines.push(...icsDateProperty('DTSTART', u.event_date, ''));
+            lines.push(...icsDateProperty('DTEND', addCalendarDays(u.event_date, 1), ''));
         }
         lines.push('SUMMARY:' + icsEscape(u.title));
         const descParts = [u.description, u.location].filter(Boolean);
@@ -1022,7 +1046,7 @@ function exportICS() {
         lines.push('END:VEVENT');
     });
     lines.push('END:VCALENDAR');
-    const total = calEvents.length + tasks.length + univEvents.length;
+    const total = calEvents.length + tasks.length + subjects.length + univEvents.length;
     if (total === 0) {
         Toast.show('No events to export', 'high', 'icon-lucide-triangle-alert');
         return;
@@ -1032,10 +1056,10 @@ function exportICS() {
     const a = document.createElement('a');
     a.href = url;
     const semName = sem ? `${sem.schoolYear}-${sem.name.replace(/\s+/g, '-')}` : 'Calendar';
-    a.download = `Student-Planner-${semName}.ics`;
+    a.download = `${destination === 'google' ? 'Google-Calendar' : 'Student-Planner'}-${semName}.ics`;
     a.click();
     URL.revokeObjectURL(url);
-    Toast.show('Calendar exported as .ics');
+    Toast.show(destination === 'google' ? 'Calendar exported for Google Calendar' : 'Calendar exported as .ics');
 }
 
 function icsDate(dateStr, timeStr) {
@@ -1048,59 +1072,47 @@ function icsDate(dateStr, timeStr) {
     return d + 'T' + t;
 }
 
+function icsDateProperty(property, dateStr, timeStr) {
+    if (!timeStr) return [`${property};VALUE=DATE:${dateStr.replace(/-/g, '')}`];
+    return [`${property}:${icsDate(dateStr, timeStr)}`];
+}
+
+function addCalendarDays(dateStr, count) {
+    const date = new Date(dateStr + 'T00:00:00');
+    date.setDate(date.getDate() + count);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function normalizeClassWeekdays(days) {
+    const dayCodes = { Sun: 'SU', Sunday: 'SU', Mon: 'MO', Monday: 'MO', Tue: 'TU', Tuesday: 'TU', Wed: 'WE', Wednesday: 'WE', Thu: 'TH', Thursday: 'TH', Fri: 'FR', Friday: 'FR', Sat: 'SA', Saturday: 'SA' };
+    return [...new Set(days.map(day => dayCodes[String(day).trim()]).filter(Boolean))];
+}
+
+function firstWeekdayOnOrAfter(startDate, weekdayCodes) {
+    const date = new Date(startDate + 'T00:00:00');
+    if (Number.isNaN(date.getTime())) return '';
+    const codes = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+    for (let i = 0; i < 7; i++) {
+        if (weekdayCodes.includes(codes[date.getDay()])) return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        date.setDate(date.getDate() + 1);
+    }
+    return '';
+}
+
 function icsNow() {
     return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 }
 
 function icsEscape(s) {
-    return String(s || '').replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
+    return String(s || '').replace(/\\/g, '\\\\').replace(/\r\n|\r|\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
 }
 
 // EXPORT: GOOGLE CALENDAR
 
 function exportGoogleCalendar() {
-    const semId = DB.getActiveSemesterId();
-    const calEvents = DB.getCalendarEventsForSemester(semId);
-    if (!calEvents.length) {
-        Toast.show('No exportable events. Use .ics for tasks & university events.', 'medium', 'icon-lucide-info');
-        return;
-    }
-    const first = calEvents[0];
-    const start = googleCalDate(first.date, first.startTime);
-    const end = googleCalDate(first.date, first.endTime || first.startTime);
-    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(first.title)}&dates=${start}/${end}&details=${encodeURIComponent(first.description || '')}`;
-    if (calEvents.length === 1) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    }
-    else {
-        chooseAction({
-            title: 'Multiple events found',
-            message: `You have ${calEvents.length} events. Open the first event in Google Calendar, or download the .ics file for bulk import.`,
-            icon: 'icon-lucide-calendar-days',
-            options: [
-                { label: 'Open first event in Google Calendar', value: 'google', primary: true },
-                { label: 'Download .ics file', value: 'ics' },
-            ],
-            onChoose: (value) => {
-                if (value === 'google') {
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                }
-                else {
-                    exportICS();
-                }
-            },
-        });
-    }
-}
-
-function googleCalDate(dateStr, timeStr) {
-    if (!dateStr)
-        return '';
-    const d = dateStr.replace(/-/g, '');
-    if (!timeStr)
-        return d;
-    const localDateTime = new Date(`${dateStr}T${timeStr}:00`);
-    return isNaN(localDateTime.getTime()) ? '' : localDateTime.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    // Google Calendar's template URL supports a single event only. An ICS
+    // calendar is the complete, standards-based export for bulk import.
+    exportICS('google');
 }
 
 // HELPER
