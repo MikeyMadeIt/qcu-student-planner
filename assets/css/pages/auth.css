@@ -979,9 +979,11 @@ body.auth-page {
         width: 100%;
         max-width: none;
         margin: 0;
-        padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
+        gap: 0;
+        /* .auth-main already supplies the mobile safe-area horizontal inset. */
+        padding-inline: 0;
         align-items: stretch;
-        justify-content: center;
+        justify-content: flex-start;
     }
 
     .auth-login-intro {
@@ -1113,7 +1115,8 @@ body.auth-page {
 
     .auth-approval-note {
         display: block;
-        margin: .65rem auto 0;
+        margin: auto auto 0;
+        padding-top: .65rem;
         color: var(--auth-text-soft);
         font-size: .76rem;
         line-height: 1.5;
@@ -1280,7 +1283,7 @@ html[data-motion="reduced"] .auth-page .status-icon .auth-spin {
     color: var(--auth-danger);
 }
 
-@media (max-width: 900px) {
+@media (min-width: 576px) and (max-width: 900px) {
     .auth-login-main {
         display: flex;
         width: 100%;
@@ -1299,10 +1302,6 @@ html[data-motion="reduced"] .auth-page .status-icon .auth-spin {
 }
 
 @media (max-width: 575.98px) {
-    .auth-login-main {
-        padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
-    }
-
     .auth-profile-main {
         padding-top: calc(env(safe-area-inset-top, 0px) + 5rem);
     }
