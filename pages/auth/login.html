@@ -21,6 +21,7 @@
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to light theme">
         <i class="icon-lucide-sun theme-icon-sun" aria-hidden="true"></i>
         <i class="icon-lucide-moon-star theme-icon-moon" aria-hidden="true"></i>
+        <i class="icon-lucide-circle theme-icon-amoled" aria-hidden="true"></i>
     </button>
 
     <main class="auth-main auth-login-main" id="main">
@@ -40,8 +41,9 @@
                 <img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner">
             </a>
 
-            <h2 class="auth-title">Welcome back</h2>
-            <p class="auth-sub">Access your planner with your QCU student Google account.</p>
+            <div class="auth-mobile-symbol" aria-hidden="true"><i class="icon-lucide-user-round-check"></i></div>
+            <h2 class="auth-title"><span class="auth-title-desktop">Welcome back</span><span class="auth-title-mobile">Sign in to continue</span></h2>
+            <p class="auth-sub"><span class="auth-sub-desktop">Access your planner with your QCU student Google account.</span><span class="auth-sub-mobile">Use the Google account registered with your QCU student email format to access your planner.</span></p>
             <div class="auth-alert error" data-alert role="alert" hidden></div>
 
             <button type="button" class="btn btn-google auth-submit" data-google-signin>
@@ -54,7 +56,7 @@
                 Continue with Google
             </button>
 
-            <p class="auth-consent-note">
+            <p class="auth-consent-note auth-consent-desktop">
                 By continuing with Google, you agree to our
                 <a href="../../pages/app/legal-policies.html#terms-of-service">Terms of Service</a>
                 and acknowledge our
@@ -62,8 +64,18 @@
             </p>
 
             <p class="auth-hint">
-                <span class="auth-hint-label">Account access</span>
-                Use your registered QCU student Google account, usually <code class="auth-inline-code">lastname.firstname.middlename@gmail.com</code>. New accounts require administrator approval.
+                <span class="auth-hint-label"><span class="auth-desktop-only">Account access</span><span class="auth-mobile-only">QCU student Gmail format</span></span>
+                <span class="auth-desktop-only">Use your registered QCU student Google account, usually <code class="auth-inline-code">lastname.firstname.middlename@gmail.com</code>. New accounts require administrator approval.</span>
+                <span class="auth-mobile-only"><code class="auth-inline-code">lastname.firstname.middlename@gmail.com</code></span>
+            </p>
+
+            <p class="auth-approval-note">New accounts need administrator approval before planner access.</p>
+
+            <p class="auth-consent-note auth-consent-mobile">
+                By continuing, you agree to our
+                <a href="../../pages/app/legal-policies.html#terms-of-service">Terms of Service</a>
+                and acknowledge our
+                <a href="../../pages/app/legal-policies.html#privacy-policy">Privacy Policy</a>.
             </p>
         </div>
     </main>

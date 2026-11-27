@@ -58,6 +58,40 @@ async function populateOptions(form) {
     }
 }
 
+async function loadLegalContent() {
+    const policyUrl = new URL('../app/legal-policies.html', window.location.href);
+    const response = await fetch(policyUrl, { credentials: 'same-origin' });
+    if (!response.ok) throw new Error('Could not load the legal page.');
+
+    const policyDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+    const sections = [
+        { source: 'terms-of-service', target: 'terms' },
+        { source: 'privacy-policy', target: 'privacy' },
+    ];
+
+    sections.forEach(({ source, target }) => {
+        const sourceSection = policyDocument.getElementById(source);
+        const targetContent = document.querySelector(`[data-legal-content="${target}"]`);
+        const articles = sourceSection
+            ? Array.from(sourceSection.children).filter(child => child.matches('article.lg-sub'))
+            : [];
+
+        if (!targetContent || articles.length === 0) throw new Error(`The ${source} section is missing.`);
+
+        const content = articles.map(article => {
+            const copy = article.cloneNode(true);
+            copy.querySelectorAll('a[href^="#"]').forEach(link => {
+                link.href = new URL(link.getAttribute('href'), policyUrl).href;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+            });
+            return copy;
+        });
+
+        targetContent.replaceChildren(...content);
+    });
+}
+
 function validateField(form, name) {
     const input = form.elements[name];
     const message = FIELD_RULES[name](readValue(input), form);
@@ -115,6 +149,8 @@ async function submitDetails(form, submitButton) {
 }
 
 async function guardAndPrefill(form) {
+    const loadingMessage = $('[data-finish-profile-loading-message]');
+    if (loadingMessage) loadingMessage.textContent = 'Verifying your account status and access…';
     const profileResult = await AuthService.getCurrentProfile();
 
     if (!profileResult.ok) {
@@ -138,9 +174,18 @@ async function guardAndPrefill(form) {
         return;
     }
 
+    try {
+        await loadLegalContent();
+    } catch (error) {
+        if (loadingMessage) loadingMessage.textContent = 'The current Terms of Service and Privacy Policy could not be loaded. Check your connection and reload this page.';
+        return;
+    }
+
     if (profile.full_name) form.elements.fullName.value = profile.full_name;
 
+    if (loadingMessage) loadingMessage.textContent = 'Preparing your profile form…';
     form.hidden = false;
+    $('[data-finish-profile-content]')?.closest('.auth-profile-main')?.classList.add('is-profile-ready');
     $('[data-finish-profile-loading]')?.setAttribute('hidden', '');
 }
 

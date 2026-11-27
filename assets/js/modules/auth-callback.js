@@ -9,14 +9,28 @@ function showFailure(text) {
     const message = $('[data-callback-message]');
     const actions = $('[data-callback-actions]');
     const spinner = $('[data-callback-spinner]');
+    const errorIcon = $('[data-callback-error-icon]');
 
     if (spinner) spinner.hidden = true;
+    if (errorIcon) errorIcon.hidden = false;
+    document.body.classList.add('auth-callback-error');
     if (title) title.textContent = 'Sign-in unavailable';
+    $('[data-callback-subtitle]')?.setAttribute('hidden', '');
     if (message) {
         message.hidden = false;
         message.textContent = text;
     }
     if (actions) actions.hidden = false;
+}
+
+function setCallbackProgress(titleText, descriptionText) {
+    const title = $('[data-callback-title]');
+    const description = $('[data-callback-subtitle]');
+    if (title) title.textContent = titleText;
+    if (description) {
+        description.textContent = descriptionText;
+        description.hidden = false;
+    }
 }
 
 function readOAuthError() {
@@ -48,6 +62,7 @@ async function handleCallback() {
         return;
     }
 
+    setCallbackProgress('Verifying your sign-in', 'Confirming your Google session…');
     const session = await AuthService.waitForOAuthSession();
 
     if (!session) {
@@ -55,6 +70,7 @@ async function handleCallback() {
         return;
     }
 
+    setCallbackProgress('Loading your profile', 'Retrieving your QCU account details…');
     const profileResult = await loadProfileWithRetry();
 
     if (!profileResult.ok) {
@@ -62,6 +78,7 @@ async function handleCallback() {
         return;
     }
 
+    setCallbackProgress('Checking account access', 'Verifying your account status and administrator approval…');
     const profile = profileResult.data;
     const destination = resolveLandingRoute({
         role: profile.role,
