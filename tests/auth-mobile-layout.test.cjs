@@ -23,9 +23,10 @@ test('mobile login retains QCU sign-in, email, legal links, and independent-proj
   assert.match(authCss, /\.auth-login-intro\s*\{\s*display:\s*none;/);
   assert.match(authCss, /\.auth-login-main > \.auth-login-card\s*\{\s*display:\s*contents;/);
   assert.match(authCss, /\.auth-login-card > \.auth-hint\s*\{\s*order:\s*4;/);
-  assert.match(authCss, /\.auth-login-card > \.auth-independent-note\s*\{\s*order:\s*5;/);
-  assert.match(authCss, /\.auth-login-card > \[data-google-signin\]\s*\{\s*order:\s*6;/);
-  assert.match(authCss, /\.auth-login-card > \.auth-consent-mobile\s*\{\s*order:\s*7;/);
+  assert.match(authCss, /\.auth-login-card > \[data-google-signin\]\s*\{\s*order:\s*5;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-approval-note\s*\{\s*order:\s*6;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-independent-note\s*\{\s*order:\s*7;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-consent-mobile\s*\{\s*order:\s*8;/);
 });
 
 test('finish profile keeps its required fields and uses a mobile-only readiness state', () => {
