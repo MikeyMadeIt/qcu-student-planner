@@ -52,33 +52,24 @@
                 </div>
 
                 <div class="auth-field">
-                    <label for="program">Program <span class="auth-required" aria-hidden="true">*</span></label>
-                    <div class="auth-select-control">
-                        <select class="form-select" id="program" name="program" aria-describedby="program-err" aria-invalid="false" aria-required="true">
-                            <option value="" selected disabled>Select your program</option>
-                        </select>
-                        <i class="icon-lucide-chevron-down auth-select-chevron" aria-hidden="true"></i>
-                    </div>
+                    <label id="label-for-program" for="program">Program <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="program" name="program" aria-describedby="program-err" aria-invalid="false" aria-required="true">
+                        <option value="" selected disabled>Select your program</option>
+                    </select>
                     <p class="auth-error" id="program-err" hidden></p>
                 </div>
                 <div class="auth-field">
-                    <label for="campus">Campus <span class="auth-required" aria-hidden="true">*</span></label>
-                    <div class="auth-select-control">
-                        <select class="form-select" id="campus" name="campus" aria-describedby="campus-err" aria-invalid="false" aria-required="true">
-                            <option value="" selected disabled>Select your campus</option>
-                        </select>
-                        <i class="icon-lucide-chevron-down auth-select-chevron" aria-hidden="true"></i>
-                    </div>
+                    <label id="label-for-campus" for="campus">Campus <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="campus" name="campus" aria-describedby="campus-err" aria-invalid="false" aria-required="true">
+                        <option value="" selected disabled>Select your campus</option>
+                    </select>
                     <p class="auth-error" id="campus-err" hidden></p>
                 </div>
                 <div class="auth-field">
-                    <label for="yearLevel">Year Level <span class="auth-required" aria-hidden="true">*</span></label>
-                    <div class="auth-select-control">
-                        <select class="form-select" id="yearLevel" name="yearLevel" aria-describedby="yearLevel-err" aria-invalid="false" aria-required="true">
-                            <option value="" selected disabled>Select your year level</option>
-                        </select>
-                        <i class="icon-lucide-chevron-down auth-select-chevron" aria-hidden="true"></i>
-                    </div>
+                    <label id="label-for-yearLevel" for="yearLevel">Year Level <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="yearLevel" name="yearLevel" aria-describedby="yearLevel-err" aria-invalid="false" aria-required="true">
+                        <option value="" selected disabled>Select your year level</option>
+                    </select>
                     <p class="auth-error" id="yearLevel-err" hidden></p>
                 </div>
 
@@ -98,7 +89,7 @@
                     </div>
                 </section>
 
-                <div class="auth-field">
+                <div class="auth-field auth-consent-field">
                     <label class="auth-check" for="acceptTerms">
                         <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false" aria-required="true">
                         <span>I have read and agree to the <a class="auth-link" href="#terms-box">Terms of Service</a> and <a class="auth-link" href="#privacy-box">Privacy Policy</a>.</span>
@@ -115,6 +106,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script src="../../assets/js/core/theme-toggle.js"></script>
+    <script src="../../assets/js/core/custom-select.js"></script>
     <script type="module" src="../../assets/js/modules/auth.js"></script>
 </body>
 </html>

@@ -210,26 +210,6 @@ body.auth-page {
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.auth-profile-content .auth-select-control {
-    position: relative;
-}
-
-.auth-profile-content .auth-select-control .form-select {
-    padding-right: 2.9rem;
-    background-image: none;
-}
-
-.auth-profile-content .auth-select-chevron {
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    z-index: 1;
-    transform: translateY(-50%);
-    color: var(--auth-text-soft);
-    font-size: 1rem;
-    pointer-events: none;
-}
-
 .auth-page .form-control::placeholder {
     color: var(--auth-text-faint);
     opacity: 1;
@@ -265,6 +245,11 @@ body.auth-page {
         calc(100% - 0.95rem) 50%;
     background-size: 0.35rem 0.35rem;
     background-repeat: no-repeat;
+}
+
+.auth-profile-content .cs-trigger {
+    padding-right: 2.75rem;
+    background-image: none;
 }
 
 .auth-page .form-select option,
@@ -712,6 +697,15 @@ html[data-motion="reduced"] .auth-spin {
     margin: .15rem 0 0;
 }
 
+.auth-consent-field > .auth-error {
+    align-items: center;
+}
+
+.auth-consent-field > .auth-error::before {
+    align-self: center;
+    margin-top: 0;
+}
+
 /* Status screens */
 
 .auth-center {
@@ -780,7 +774,7 @@ html[data-motion="reduced"] .auth-spin {
         z-index: 9;
         height: calc(env(safe-area-inset-top, 0px) + 3.75rem);
         border-bottom: 1px solid var(--auth-border);
-        background: var(--auth-bg);
+        background: var(--nav-bg);
         content: "";
     }
 
@@ -1389,14 +1383,14 @@ body.auth-page {
     }
 
     .auth-profile-content .auth-check {
-        align-items: flex-start;
+        align-items: center;
         gap: .65rem;
         line-height: 1.5;
     }
 
     .auth-profile-content .auth-check input[type="checkbox"] {
         flex: 0 0 1.1rem;
-        margin-top: .15rem;
+        margin-top: 0;
     }
 
     .auth-profile-content .auth-submit {
