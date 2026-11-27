@@ -72,6 +72,27 @@ function academicDateKey() {
     return `${p.year}-${p.month}-${p.day}`;
 }
 
+// Keep academic-period date ranges consistent across the dashboard and
+// settings, using date-only values in the university's Asia/Manila timezone.
+function formatSemesterDateRange(startValue, endValue) {
+    const format = (value, includeYear) => {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ''));
+        if (!match) return '';
+        const date = new Date(Date.UTC(+match[1], +match[2] - 1, +match[3]));
+        if (date.getUTCFullYear() !== +match[1] || date.getUTCMonth() !== +match[2] - 1 || date.getUTCDate() !== +match[3]) return '';
+        return date.toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', ...(includeYear ? { year: 'numeric' } : {}), timeZone: 'UTC'
+        });
+    };
+    const startYear = String(startValue || '').slice(0, 4);
+    const endYear = String(endValue || '').slice(0, 4);
+    const start = format(startValue, !!(startYear && endYear && startYear !== endYear));
+    const end = format(endValue, true);
+    if (start && end) return `${start} - ${end}`;
+    return start || end;
+}
+window.formatSemesterDateRange = formatSemesterDateRange;
+
 // Format "14:30" -> "2:30 PM"
 
 function fmtTime(t) {

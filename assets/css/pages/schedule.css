@@ -278,6 +278,12 @@ body {
 }
 
 .sch-day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    box-sizing: border-box;
     font-size: .95rem;
     font-weight: 800;
     font-family: var(--font-mono);
@@ -729,24 +735,7 @@ body {
 
 .sch-empty-day {
     text-align: center;
-    padding: var(--space-6) var(--card-pad);
     margin-bottom: var(--grid-gap);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.sch-empty-day > .empty-icon-circle {
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-}
-
-.sch-empty-day > .fw-bold {
-    margin-top: 0 !important;
-    color: var(--text) !important;
-    font-size: .96rem;
 }
 
 .sch-empty-copy {
@@ -895,6 +884,18 @@ body {
     }
     .sch-next-subject {
         font-size: .88rem;
+    }
+    .sch-day-summary {
+        padding: 10px 12px;
+    }
+    .sch-summary-label {
+        margin-bottom: 7px;
+    }
+    .sch-summary-stats {
+        gap: 10px;
+    }
+    .sch-empty-day {
+        margin-bottom: 0;
     }
     .sch-next-card {
         padding: 12px 13px;
@@ -1374,12 +1375,6 @@ body {
     border: 1px solid rgba(180,83,9,.2);
 }
 
-/* Empty state button */
-
-.sch-empty-day .btn {
-    margin-top: 8px;
-}
-
 /* min-w-0 utility */
 
 .min-w-0 {
@@ -1648,17 +1643,18 @@ body {
 .sch-day-btn.today:not(.selected) .sch-day-num::before {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: 0;
     border-radius: 50%;
     border: 1.5px solid rgba(var(--accent), .45);
     pointer-events: none;
 }
 
-/* Selected: solid accent pill */
+/* Keep the selected day marker circular instead of filling the full date
+   selector button. */
 
 .sch-day-btn.selected {
-    background: rgba(var(--accent), .18) !important;
-    border-color: rgba(var(--accent), .45) !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 
 .sch-day-btn.selected .sch-day-name {
@@ -1666,14 +1662,23 @@ body {
 }
 
 .sch-day-btn.selected .sch-day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    box-sizing: border-box;
+    border: 1px solid rgba(var(--accent), .5);
+    border-radius: 50%;
+    background: rgba(var(--accent), .18);
     color: rgb(var(--accent)) !important;
 }
 
 /* Combined: today + selected */
 
 .sch-day-btn.today.selected {
-    background: rgba(var(--accent), .22) !important;
-    border-color: rgba(var(--accent), .6) !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 
 .sch-day-btn.today.selected .sch-day-num {
@@ -2135,5 +2140,5 @@ body {
   .sch-curriculum-setup { padding: 12px !important; }
 }
 
-.sch-subject-empty-copy { max-width: 420px; margin: 7px auto 0; color: var(--text-faint); font-size: .82rem; line-height: 1.45; }
-.sch-subject-empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.sch-subject-empty-copy { max-width: 420px; margin: 0; color: var(--text-faint); font-size: .82rem; line-height: 1.45; }
+.sch-subject-empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 0; }
