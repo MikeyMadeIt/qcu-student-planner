@@ -9,11 +9,11 @@ export const MESSAGE_CATEGORY_LABELS = {
 };
 
 export const MESSAGE_CATEGORY_ICONS = {
-    announcement: 'bi-megaphone',
-    update: 'bi-arrow-repeat',
-    reminder: 'bi-alarm',
-    maintenance: 'bi-tools',
-    general: 'bi-chat-square-text',
+    announcement: 'icon-lucide-megaphone',
+    update: 'icon-lucide-repeat',
+    reminder: 'icon-lucide-alarm-clock',
+    maintenance: 'icon-lucide-wrench',
+    general: 'icon-lucide-message-square-text',
 };
 
 export const REPORT_CATEGORY_LABELS = {

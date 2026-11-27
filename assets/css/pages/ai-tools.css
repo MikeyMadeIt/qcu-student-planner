@@ -52,7 +52,7 @@
     min-width: 0;
 }
 
-.ai-file-info i {
+.ai-file-info .lucide-icon {
     color: rgb(var(--accent));
     font-size: 1.1rem;
 }
@@ -82,14 +82,14 @@
     color: var(--text-soft);
 }
 
-.ai-state i {
+.ai-state .lucide-icon {
     font-size: 2rem;
     display: block;
     margin-bottom: .75rem;
     color: rgb(var(--accent));
 }
 
-.ai-state.ai-state-error i {
+.ai-state.ai-state-error .lucide-icon {
     color: #fb7185;
 }
 
@@ -220,15 +220,15 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     font-size: 1rem;
 }
 
-.ai-choice-icon.bi-check-circle { color: #34D399; }
-.ai-choice-icon.bi-x-circle { color: #fb7185; }
+.ai-choice-icon.icon-lucide-circle-check { color: #34D399; }
+.ai-choice-icon.icon-lucide-circle-x { color: #fb7185; }
 
 .ai-explanation {
     font-size: .82rem;
     color: var(--text-soft);
     background: var(--surface-2);
-    border-left: 3px solid rgb(var(--accent));
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: .6rem .85rem;
     margin-bottom: 1.25rem;
 }
@@ -568,7 +568,6 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     align-self: flex-start;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--text);
 }
 
 .ai-msg-attachment {
@@ -722,7 +721,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     display: none;
 }
 
-.aqm-dropzone-empty > i {
+.aqm-dropzone-empty > .lucide-icon {
     flex-shrink: 0;
     font-size: 1.6rem;
     color: rgb(var(--accent));
@@ -913,7 +912,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     color: var(--text-soft);
 }
 
-.aqm-history-heading i {
+.aqm-history-heading .lucide-icon {
     flex-shrink: 0;
     font-size: .95rem;
     color: rgb(var(--accent));
@@ -940,18 +939,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     color: var(--text-soft);
 }
 
-.aqm-history-empty i {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin-bottom: .25rem;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.1rem;
-}
+.aqm-history-empty-icon { margin-bottom: .25rem; }
 
 .aqm-history-empty p {
     margin: 0;
@@ -960,7 +948,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     color: var(--text);
 }
 
-.aqm-history-empty span {
+.aqm-history-empty > span {
     font-size: .78rem;
     color: var(--text-soft);
     max-width: 20rem;
@@ -1070,7 +1058,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     color: rgb(var(--accent));
 }
 
-.asa-mode-label i { font-size: .85rem; }
+.asa-mode-label .lucide-icon { font-size: .85rem; }
 
 .asa-header-actions {
     display: flex;
@@ -1177,7 +1165,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     flex-shrink: 0;
 }
 
-.asa-search i {
+.asa-search .lucide-icon {
     position: absolute;
     left: .65rem;
     top: 50%;
@@ -1212,6 +1200,26 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     gap: .15rem;
 }
 
+.asa-history-empty {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem .25rem;
+    font-size: .85rem;
+}
+
+.asa-history-empty .lucide-icon {
+    flex: 0 0 auto;
+    font-size: 1.15rem;
+}
+
+.asa-history-empty .asa-history-empty-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-basis: 2.5rem;
+    margin: 0;
+}
+
 .asa-history-group-label {
     font-size: .66rem;
     font-weight: 700;
@@ -1237,7 +1245,7 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
 .asa-history-item:hover,
 .asa-history-item.is-menu-open { background: var(--surface-2); }
 
-.asa-history-item.is-active { background: rgba(var(--accent), .14); border-left: 2px solid rgb(var(--accent)); }
+.asa-history-item.is-active { background: rgba(var(--accent), .14); }
 
 .asa-history-item-btn {
     flex: 1 1 auto;
@@ -1358,9 +1366,9 @@ html[data-motion="reduced"] .ai-typing-dots span { animation-duration: 2s; }
     padding: 1rem;
 }
 
-.asa-welcome i.bi-stars {
-    font-size: 1.9rem;
-    color: rgb(var(--accent));
+.asa-welcome .asa-welcome-icon {
+    width: 3rem;
+    height: 3rem;
     margin-bottom: .3rem;
 }
 

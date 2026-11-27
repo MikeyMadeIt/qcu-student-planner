@@ -7,47 +7,56 @@ function initDashboard() {
     renderAttendanceDonut();
     renderTodaySchedule();
     renderUpcomingTasks();
-    setInterval(renderTodaySchedule, 60000);
+    setInterval(() => { renderTodaySchedule(); renderSemesterOverview(); }, 60000);
+    if (!window._dashboardAcademicCalendarBound) {
+        window._dashboardAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            renderSemesterOverview(); renderStatCards(); renderGradePerformance();
+            renderAttendanceDonut(); renderTodaySchedule(); renderUpcomingTasks();
+        });
+    }
 }
 
 // 1. SEMESTER OVERVIEW
 
 function renderSemesterOverview() {
     const sem = DB.getActiveSemester();
-    if (!sem)
+    if (!sem) {
+        const labelEl = document.getElementById('dashSemLabel');
+        if (labelEl) labelEl.textContent = 'No active academic period';
+        ['dashWeekInfo', 'dashWeeksLeft', 'dashSemPct', 'dashSemDates'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '—';
+        });
+        const bar = document.getElementById('dashSemBar');
+        if (bar) bar.style.width = '0%';
         return;
+    }
     const labelEl = document.getElementById('dashSemLabel');
     if (labelEl)
-        labelEl.textContent = sem.schoolYear + ' \u00B7 ' + sem.name;
-    const start = new Date(sem.startDate + 'T00:00:00');
-    // The end date is the last day of the semester, so it runs until the end of that day.
-    const end = new Date(sem.endDate + 'T23:59:59');
-    const now = new Date();
-    if (isNaN(start.getTime()) || isNaN(end.getTime()))
+        labelEl.textContent = 'AY ' + (sem.schoolYear || sem.academicYear || '') + ' • ' + sem.name;
+    const timeline = calculateSemesterTimeline(sem.startDate, sem.endDate);
+    if (!timeline)
         return;
-    const totalMs = end - start;
-    const elapsedMs = Math.min(Math.max(now - start, 0), totalMs);
-    const pct = totalMs > 0 ? Math.round(elapsedMs / totalMs * 100) : 0;
-    const totalWeeks = sem.totalWeeks || 15;
-    const weekNum = now < start ? 0 : Math.min(totalWeeks, Math.ceil((now - start) / 604800000));
-    const weeksLeft = Math.max(0, totalWeeks - weekNum);
+    const pct = timeline.progress;
+    const totalWeeks = timeline.totalWeeks;
+    const weeksLeft = timeline.status === 'completed' ? 0 : Math.max(0, totalWeeks - (timeline.currentWeek || 0));
     var wiEl = document.getElementById('dashWeekInfo');
     if (wiEl)
-        wiEl.innerHTML = weekNum === 0
-            ? '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Not started yet'
-            : '<i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>Week ' + weekNum + ' of ' + totalWeeks;
+        wiEl.innerHTML = timeline.status === 'upcoming'
+            ? '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Upcoming'
+            : timeline.status === 'completed'
+                ? '<i class="icon-lucide-circle-check me-1" aria-hidden="true"></i>Completed · ' + totalWeeks + ' weeks'
+                : '<i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>Week ' + timeline.currentWeek + ' of ' + totalWeeks;
     var wlEl = document.getElementById('dashWeeksLeft');
     if (wlEl)
-        wlEl.textContent = weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
+        wlEl.textContent = timeline.status === 'upcoming' ? 'Upcoming' : timeline.status === 'completed' ? 'Completed' : weeksLeft + ' week' + (weeksLeft !== 1 ? 's' : '') + ' remaining';
     var spEl = document.getElementById('dashSemPct');
     if (spEl)
         spEl.textContent = pct + '%';
-    const daysLeft = Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
-    const startStr = start.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    const endStr = end.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
     var sdEl = document.getElementById('dashSemDates');
     if (sdEl)
-        sdEl.textContent = startStr + ' \u2013 ' + endStr + ' \u00B7 ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' to end';
+        sdEl.textContent = window.formatSemesterDateRange(sem.startDate, sem.endDate);
     setTimeout(function () {
         var bar = document.getElementById('dashSemBar');
         if (bar)
@@ -57,46 +66,17 @@ function renderSemesterOverview() {
 
 // 2. STAT CARDS
 
-function computeSyllabusCoverage(semId) {
-    var courses = DB.getSyllabusCourses().filter(function (c) { return c.semesterId === semId; });
-    if (!courses.length)
-        return null;
-    var sem = DB.getActiveSemester();
-    var totalWks = sem ? (sem.totalWeeks || 15) : 15;
-    var totalTopics = 0;
-    var coveredTopics = 0;
-    var hasTopicData = false;
-    courses.forEach(function (c) {
-        if (Array.isArray(c.topics) && c.topics.length) {
-            hasTopicData = true;
-            c.topics.forEach(function (t) {
-                totalTopics++;
-                if (t.completed)
-                    coveredTopics++;
-            });
-        }
-    });
-    if (hasTopicData && totalTopics > 0)
-        return Math.round(coveredTopics / totalTopics * 100);
-    var covered = courses.reduce(function (sum, course) { return sum + ((course.weeks || []).length); }, 0);
-    var expected = courses.length * totalWks;
-    return expected > 0 ? Math.min(100, Math.round(covered / expected * 100)) : 0;
-}
-
 function renderStatCards() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
-    const tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    const subjects = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId && !s.archived; });
+    const tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     const taskCounts = computeTaskCounts(tasks);
     const done = taskCounts.completed;
-    const syllabusCoverage = computeSyllabusCoverage(semId);
     const totalUnits = subjects.reduce(function (sum, s) { return sum + (+s.units || 0); }, 0);
     animateCountUp('statSubjects', 0, subjects.length, 700, function (v) { return String(Math.round(v)); });
     var subjectsHint = document.getElementById('statSubjectsHint');
     if (subjectsHint)
-        subjectsHint.textContent = !subjects.length ? 'Add a subject'
-            : syllabusCoverage !== null ? totalUnits + ' units \u00B7 Syllabus ' + syllabusCoverage + '%'
-                : totalUnits + ' units this semester';
+        subjectsHint.textContent = !subjects.length ? 'Add a subject' : totalUnits + ' units this semester';
     const gwa = computeDashGWA(semId, subjects);
     if (gwa !== null) {
         animateCountUp('statGwa', 0, gwa, 900, function (v) { return v.toFixed(2); });
@@ -173,18 +153,18 @@ function computeDashGWA(semId, subjects) {
 
 function renderGradePerformance() {
     var semId = DB.getActiveSemesterId();
-    var subjects = DB.getSubjects().filter(function (s) { return s.semesterId === semId && !s.archived; });
+    var subjects = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId && !s.archived; });
     var wrap = document.getElementById('dashGradeChart');
     if (!wrap)
         return;
     if (!subjects.length) {
-        wrap.innerHTML = dashEmpty('bi-mortarboard', 'No subjects yet', 'Add subjects in Schedule.');
+        wrap.innerHTML = dashEmpty('icon-lucide-graduation-cap', 'No subjects yet', 'Add subjects in Schedule.');
         return;
     }
     var rows = computeDashSubjectGrades(semId, subjects);
     var withGrades = rows.filter(function (r) { return r.pct !== null; });
     if (!withGrades.length) {
-        wrap.innerHTML = dashEmpty('bi-bar-chart', 'No grades yet', 'Enter grades on the Grades page.');
+        wrap.innerHTML = dashEmpty('icon-lucide-chart-column', 'No grades yet', 'Enter grades on the Grades page.');
         return;
     }
     var display = withGrades.slice(0, 7);
@@ -302,21 +282,21 @@ function renderTodaySchedule() {
             var classesBegin = !isNaN(semesterStart.getTime())
                 ? 'Classes begin ' + semesterStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
                 : '';
-            wrap.innerHTML = dashEmpty('bi-calendar-x', "Semester hasn't started yet", classesBegin);
+            wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', "Semester hasn't started yet", classesBegin);
         }
         else {
-            wrap.innerHTML = dashEmpty('bi-calendar-x', 'Semester has ended', '');
+            wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', 'Semester has ended', '');
         }
         return;
     }
     var list = DB.getSubjects()
         .filter(function (s) {
-            if (!(s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;
+            if (!(semId && s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))) return false;
             return !DB.getCancelledOccurrences().some(function (c) { return c.subjectId === s.id && c.date === todayStr; });
         })
         .sort(function (a, b) { return a.start.localeCompare(b.start); });
     if (!list.length) {
-        wrap.innerHTML = dashEmpty('bi-calendar-x', 'No classes today', 'Enjoy the free day!');
+        wrap.innerHTML = dashEmpty('icon-lucide-calendar-x-2', 'No classes today', 'Enjoy the free day!');
         return;
     }
     var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
@@ -354,10 +334,10 @@ function renderUpcomingTasks() {
     if (!wrap)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
     var today = todayKey();
     // Same status rules as the Tasks page: a task is overdue once its due date AND time have passed.
-    var semTasks = DB.getTasks().filter(function (t) { return t.semesterId === semId && t.dueDate; });
+    var semTasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId && t.dueDate; });
     var overdueTasks = semTasks
         .filter(function (t) { return computeStatus(t) === 'overdue'; })
         .sort(function (a, b) { return b.dueDate.localeCompare(a.dueDate); })
@@ -367,18 +347,18 @@ function renderUpcomingTasks() {
         .sort(function (a, b) { return (a.dueDate + (a.dueTime || '')).localeCompare(b.dueDate + (b.dueTime || '')); })
         .slice(0, 3);
     if (!overdueTasks.length && !upcomingTasks.length) {
-        wrap.innerHTML = dashEmpty('bi-emoji-smile', 'No upcoming tasks', 'You\'re all caught up!');
+        wrap.innerHTML = dashEmpty('icon-lucide-smile', 'No upcoming tasks', 'You\'re all caught up!');
         return;
     }
     var html = '';
     if (overdueTasks.length) {
-        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="bi bi-exclamation-triangle me-1"></i>Overdue</div>';
+        html += '<div class="upcoming-section-label upcoming-overdue-label"><i class="icon-lucide-triangle-alert me-1"></i>Overdue</div>';
         html += overdueTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash task-row-overdue">' +
-                '<div class="task-row-icon task-row-icon-overdue"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
+                '<div class="task-row-icon task-row-icon-overdue"><i class="' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -389,7 +369,7 @@ function renderUpcomingTasks() {
     }
     if (upcomingTasks.length) {
         if (overdueTasks.length)
-            html += '<div class="upcoming-section-label mt-2"><i class="bi bi-clock me-1" aria-hidden="true"></i>Upcoming</div>';
+            html += '<div class="upcoming-section-label mt-2"><i class="icon-lucide-clock me-1" aria-hidden="true"></i>Upcoming</div>';
         html += upcomingTasks.map(function (t) {
             var sub = subs.find(function (s) { return s.id === t.subjectId; });
             var daysLeft = Math.ceil((new Date(t.dueDate + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
@@ -398,7 +378,7 @@ function renderUpcomingTasks() {
             var dateStr = new Date(t.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
             var catIcon = taskCatIcon(t.category);
             return '<div class="task-row-dash">' +
-                '<div class="task-row-icon"><i class="bi ' + catIcon + '" aria-hidden="true"></i></div>' +
+                '<div class="task-row-icon"><i class="' + catIcon + '" aria-hidden="true"></i></div>' +
                 '<div class="flex-grow-1">' +
                 '<div class="task-title-dash">' + escHtml(t.title) + '</div>' +
                 '<div class="task-meta-dash">' + (sub ? escHtml(sub.code) + ' \u00B7 ' : '') + dateStr + '</div>' +
@@ -412,18 +392,18 @@ function renderUpcomingTasks() {
 
 function taskCatIcon(cat) {
     var map = {
-        Homework: 'bi-pencil-square', Project: 'bi-kanban', Quiz: 'bi-patch-question',
-        Exam: 'bi-journal-text', Personal: 'bi-person', Organization: 'bi-folder',
-        Academic: 'bi-book', Assignment: 'bi-pencil', Other: 'bi-check2-square'
+        Homework: 'icon-lucide-square-pen', Project: 'icon-lucide-kanban', Quiz: 'icon-lucide-badge-help',
+        Exam: 'icon-lucide-notebook-text', Personal: 'icon-lucide-user-round', Organization: 'icon-lucide-folder',
+        Academic: 'icon-lucide-book', Assignment: 'icon-lucide-pencil', Other: 'icon-lucide-list-check'
     };
-    return map[cat] || 'bi-check2-square';
+    return map[cat] || 'icon-lucide-list-check';
 }
 
 // HELPERS
 
 function dashEmpty(icon, title, sub) {
     return '<div class="dash-empty">' +
-        '<i class="bi ' + icon + '" aria-hidden="true"></i>' +
+        '<div class="empty-icon-circle" aria-hidden="true"><i class="' + icon + '"></i></div>' +
         '<div class="dash-empty-title">' + title + '</div>' +
         (sub ? '<div class="dash-empty-sub">' + sub + '</div>' : '') +
         '</div>';

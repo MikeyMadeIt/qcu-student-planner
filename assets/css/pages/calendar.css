@@ -219,7 +219,7 @@
     gap: 5px;
 }
 
-.day-modal-section-title i {
+.day-modal-section-title .lucide-icon {
     color: rgb(var(--accent));
 }
 
@@ -228,7 +228,7 @@
 .cal-layout {
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: 16px;
+    gap: var(--grid-gap);
     align-items: start;
 }
 
@@ -617,17 +617,10 @@
     gap: var(--space-2);
 }
 
-.cal-empty-state i {
-    display: grid;
-    place-items: center;
+.cal-empty-state .empty-icon-circle {
     width: 3rem;
     height: 3rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
 }
 
 .cal-empty-state > strong {
@@ -647,10 +640,9 @@
     padding: var(--space-5) var(--space-4);
 }
 
-.cal-empty-small i {
+.cal-empty-small .empty-icon-circle {
     width: 2.5rem;
     height: 2.5rem;
-    font-size: 1.1rem;
 }
 
 /* Drag and Drop */
@@ -707,7 +699,7 @@
     border-bottom: 1px solid var(--border);
 }
 
-.cal-agenda-header i {
+.cal-agenda-header .lucide-icon {
     font-size: .9rem;
 }
 

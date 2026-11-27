@@ -33,8 +33,9 @@
 .task-check {
     width: 22px;
     height: 22px;
-    border-radius: 4px;
-    border: 2px solid var(--border);
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
     flex-shrink: 0;
     cursor: pointer;
     display: flex;
@@ -46,7 +47,7 @@
 
 .task-check.checked {
     background: rgb(var(--accent));
-    border-color: transparent;
+    border-color: rgb(var(--accent));
     color: #fff;
 }
 
@@ -337,7 +338,7 @@
     padding: 0 2px;
 }
 
-.tk-group-heading i {
+.tk-group-heading .lucide-icon {
     font-size: .8rem;
 }
 
@@ -435,7 +436,7 @@
 .tk-checkbox {
     width: 20px;
     height: 20px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     background: transparent;
     flex-shrink: 0;
@@ -456,7 +457,7 @@
 
 .tk-checkbox.done {
     background: rgb(var(--accent));
-    border-color: transparent;
+    border-color: rgb(var(--accent));
 }
 
 .tk-card-title-wrap {
@@ -531,7 +532,7 @@
     border: 1px solid rgba(52, 211, 153, .25);
 }
 
-.tk-status-badge i {
+.tk-status-badge .lucide-icon {
     font-size: .65rem;
 }
 
@@ -780,7 +781,7 @@
 .tk-cl-check {
     width: 18px;
     height: 18px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     background: transparent;
     flex-shrink: 0;
@@ -799,7 +800,7 @@
 
 .tk-cl-check.done {
     background: rgb(var(--accent));
-    border-color: transparent;
+    border-color: rgb(var(--accent));
 }
 
 .tk-cl-text {
@@ -947,17 +948,10 @@
     margin-top: var(--space-2);
 }
 
-.tk-empty-state i {
-    display: grid;
-    place-items: center;
+.tk-empty-state .empty-icon-circle {
     width: 3.25rem;
     height: 3.25rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.35rem;
 }
 
 .tk-empty-title {
@@ -1081,7 +1075,7 @@
     transition: color .15s, border-color .15s, background .15s;
 }
 
-.tk-select-all-btn i {
+.tk-select-all-btn .lucide-icon {
     font-size: .88rem;
 }
 
@@ -1123,7 +1117,7 @@
     letter-spacing: .01em;
 }
 
-.tk-complete-btn i {
+.tk-complete-btn .lucide-icon {
     font-size: .78rem;
     flex-shrink: 0;
 }
@@ -1152,13 +1146,15 @@
 /* Task selected state — distinct from completed */
 
 .tk-card.tk-selected {
-    border-color: rgba(var(--accent), .55) !important;
-    box-shadow: 0 0 0 2px rgba(var(--accent), .18), inset 0 0 0 1px rgba(var(--accent), .08) !important;
-    background: rgba(var(--accent), .04) !important;
+    border-top-color: rgba(var(--accent), .55) !important;
+    border-right-color: rgba(var(--accent), .55) !important;
+    border-bottom-color: rgba(var(--accent), .55) !important;
+    box-shadow: none !important;
+    background: var(--surface) !important;
 }
 
 .tk-card.tk-selected .tk-card-header {
-    background: rgba(var(--accent), .04);
+    background: transparent;
 }
 
 /* Bulk check — larger touch target, visually distinct from complete */
@@ -1167,7 +1163,7 @@
     width: 20px;
     height: 20px;
     min-width: 20px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     background: transparent;
     display: flex;
@@ -1191,6 +1187,13 @@
     background: rgb(var(--accent));
     border-color: rgb(var(--accent));
     color: #fff;
+    box-shadow: none;
+}
+
+.tk-bulk-check:focus-visible,
+.tk-cl-check:focus-visible {
+    outline: 2px solid rgba(var(--accent), .6);
+    outline-offset: 2px;
 }
 
 /* Remove the old plain checkbox from task header */
@@ -1292,7 +1295,7 @@
     line-height: 1;
 }
 
-.tk-bulk-btn i {
+.tk-bulk-btn .lucide-icon {
     font-size: .78rem;
     flex-shrink: 0;
 }
@@ -1373,7 +1376,7 @@
         font-size: .7rem;
         gap: 3px;
     }
-    .tk-bulk-btn i {
+    .tk-bulk-btn .lucide-icon {
         font-size: .72rem;
     }
     .tk-bulk-count {
@@ -1674,7 +1677,7 @@
     flex-shrink: 0;
 }
 
-.tk-estimate-badge i {
+.tk-estimate-badge .lucide-icon {
     font-size: .62rem;
 }
 
@@ -1709,14 +1712,14 @@
 .sch-time-opt:hover, .sch-time-opt.is-active { background: rgba(var(--accent, 36, 87, 214), .16); }
 .sch-time-opt[aria-selected="true"] { font-weight: 400; color: rgb(var(--accent, 36, 87, 214)); }
 .sch-time-hint { margin: .4rem 0 0; font-size: .75rem; color: var(--text-faint); }
-.sch-time-hint .bi { margin-right: .15rem; }
+.sch-time-hint .lucide-icon { margin-right: .15rem; }
 @media (max-width: 575.98px) {
   .sch-time-opt { padding: .7rem .7rem; }
 }
 
 /* Due label icon */
 
-.tk-due-label i {
+.tk-due-label .lucide-icon {
     font-size: .68rem;
     margin-right: 3px;
     opacity: .7;
@@ -2016,16 +2019,18 @@
 .tk-card.tk-selected,
 .tk-card.overdue.tk-selected,
 .tk-card.completed.tk-selected {
-    border-color: rgb(var(--accent)) !important;
-    box-shadow: 0 0 0 2px rgba(var(--accent),.28) !important;
-    background: rgba(var(--accent), .07) !important;
+    border-top-color: rgba(var(--accent), .55) !important;
+    border-right-color: rgba(var(--accent), .55) !important;
+    border-bottom-color: rgba(var(--accent), .55) !important;
+    box-shadow: none !important;
+    background: var(--surface) !important;
     opacity: 1 !important;
 }
 
 .tk-card.tk-selected .tk-card-header,
 .tk-card.overdue.tk-selected .tk-card-header,
 .tk-card.completed.tk-selected .tk-card-header {
-    background: rgba(var(--accent), .06) !important;
+    background: transparent !important;
 }
 
 /* The bulk checkbox shows accent fill when selected, stays visible on any card */
@@ -2034,7 +2039,7 @@
     background: rgb(var(--accent)) !important;
     border-color: rgb(var(--accent)) !important;
     color: #fff !important;
-    box-shadow: 0 0 0 2px rgba(var(--accent), .3) !important;
+    box-shadow: none !important;
 }
 
 @media (max-width: 767px) {
@@ -2161,7 +2166,7 @@
     white-space: nowrap;
 }
 
-.tk-bc-te i {
+.tk-bc-te .lucide-icon {
     font-size: .55rem;
 }
 
@@ -2226,7 +2231,7 @@
     justify-content: center;
 }
 
-.tk-bc-btn i {
+.tk-bc-btn .lucide-icon {
     font-size: .72rem;
 }
 

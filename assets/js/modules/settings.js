@@ -1,5 +1,5 @@
 // SETTINGS.JS — profile summary, appearance, notifications, academic
-// semester management, data/storage and sign-out. ES module (for
+// period display, data/storage and sign-out. ES module (for
 // AuthService); every handler referenced from inline HTML attributes is
 // re-exposed on window at the bottom of the file.
 
@@ -11,11 +11,95 @@ function initSettings() {
     highlightTheme(s.theme);
     renderAccentPicker(s.accent);
     renderNotifToggles(s.notifications);
-    renderSemesterManager();
+    renderAcademicPeriod();
     initDisplayPrefs(s);
     renderSyncStatus();
     loadProfileSummary();
 }
+
+function renderAcademicPeriod() {
+    const host = document.getElementById('settingsAcademicPeriod');
+    if (!host) return;
+    const calendar = DB.getUniversityCalendar();
+    const active = calendar && calendar.activeSemester;
+    const sem = DB.getActiveSemester();
+    const select = document.getElementById('settingsSemesterSelect');
+    const hint = document.getElementById('settingsSemesterHint');
+    if (active) {
+        host.replaceChildren();
+        host.classList.remove('is-unconfigured');
+        const card = document.createElement('div');
+        card.className = 'settings-academic-card';
+        const content = document.createElement('div');
+        content.className = 'settings-academic-copy';
+        const title = document.createElement('div');
+        title.className = 'settings-academic-name';
+        title.textContent = `AY ${active.schoolYear || active.academicYear || ''}`;
+        const details = document.createElement('div');
+        details.className = 'settings-academic-details';
+        const dateIcon = document.createElement('i');
+        dateIcon.className = 'icon-lucide-calendar-days';
+        dateIcon.setAttribute('aria-hidden', 'true');
+        const dates = document.createElement('div');
+        dates.className = 'settings-academic-dates';
+        dates.textContent = `${active.name || 'Semester'} · ${window.formatSemesterDateRange(active.startDate, active.endDate)}`;
+        details.append(dateIcon, dates);
+        content.append(title, details);
+        const side = document.createElement('div');
+        side.className = 'settings-academic-side';
+        const progress = document.createElement('div');
+        progress.className = 'settings-academic-progress';
+        const timeline = calculateSemesterTimeline(active.startDate, active.endDate);
+        progress.textContent = timeline ? `${timeline.progress}%` : '—';
+        const status = document.createElement('div');
+        status.className = 'settings-academic-status';
+        status.textContent = 'Active';
+        side.append(progress, status);
+        card.append(content, side);
+        host.appendChild(card);
+    } else {
+        host.replaceChildren();
+        host.textContent = 'No active academic period has been set by the university administrator yet.';
+        host.classList.add('is-unconfigured');
+    }
+    if (!select) return;
+    const periods = calendar && Array.isArray(calendar.semesters) ? calendar.semesters : [];
+    const years = new Map();
+    periods.forEach(period => {
+        const label = period.academicYear || period.schoolYear || 'Academic year';
+        if (!years.has(label)) years.set(label, []);
+        years.get(label).push(period);
+    });
+    select.replaceChildren();
+    if (!periods.length) {
+        select.add(new Option(active ? 'No semesters available' : 'No active semester configured', ''));
+        select.disabled = true;
+        if (hint) hint.textContent = '';
+        return;
+    }
+    const selectedId = sem ? sem.id : (active && active.id);
+    [...years.entries()].forEach(([year, rows]) => {
+        const group = document.createElement('optgroup'); group.label = /^AY\b/i.test(year) ? year : `AY ${year}`;
+        rows.forEach(period => {
+            const isActive = active && active.id === period.id;
+            const isUpcoming = !isSemesterSelectable(period, active && active.id) && !isActive;
+            const status = isActive ? 'Active' : isUpcoming ? 'Upcoming' : period.status === 'completed' ? 'Previous' : period.status === 'archived' ? 'Previous · Archived' : 'Previous';
+            const academicYear = period.academicYear || period.schoolYear || year;
+            const option = new Option(`AY ${academicYear} • ${[period.name, status].filter(Boolean).join(' • ')}`, period.id);
+            option.disabled = isUpcoming;
+            option.selected = period.id === selectedId;
+            group.appendChild(option);
+        });
+        select.appendChild(group);
+    });
+    select.disabled = !active;
+    if (hint) hint.textContent = sem && active && sem.id !== active.id ? `Viewing ${sem.name}. The university-wide active semester remains ${active.name}.` : active ? 'Your workspace follows the university-wide active semester.' : 'Semester-based planner actions are unavailable until the administrator sets an active semester.';
+    select.onchange = () => {
+        if (DB.selectSemester(select.value)) location.reload();
+    };
+}
+
+window.addEventListener('planner:academic-calendar-changed', renderAcademicPeriod);
 
 // PROFILE SUMMARY (read-only) — the authenticated Supabase user plus the
 // matching `profiles` row. No editing here; profile details are set once
@@ -92,20 +176,46 @@ function renderSyncStatus() {
     const msgEl = document.getElementById('syncStatusMsg');
     const retryBtn = document.getElementById('syncStatusRetryBtn');
     if (!row || !msgEl) return;
-    const err = (window.CloudSync && typeof window.CloudSync.getLastSyncError === 'function')
-        ? window.CloudSync.getLastSyncError() : null;
-    if (!err) {
+    const status = window.CloudSync && typeof window.CloudSync.getSyncStatus === 'function'
+        ? window.CloudSync.getSyncStatus() : { pending: false, error: null, lastSuccessfulAt: null };
+    if (status.pending) {
+        row.classList.remove('is-error', 'is-ok');
+        row.classList.add('is-pending');
+        msgEl.textContent = 'Synchronizing changes with Supabase…';
+        if (retryBtn) retryBtn.hidden = true;
+        return;
+    }
+    row.classList.remove('is-pending');
+    if (!status.error) {
         row.classList.remove('is-error');
         row.classList.add('is-ok');
-        msgEl.textContent = 'All data is synced.';
+        msgEl.textContent = status.lastSuccessfulAt
+            ? 'All data synced. Last successful sync: ' + new Date(status.lastSuccessfulAt).toLocaleString()
+            : 'Waiting for the first successful sync.';
         if (retryBtn) retryBtn.hidden = true;
         return;
     }
     row.classList.remove('is-ok');
     row.classList.add('is-error');
+    const err = status.error;
     const when = err.at ? new Date(err.at).toLocaleString() : '';
     msgEl.textContent = when ? `${err.message} (${when})` : err.message;
     if (retryBtn) retryBtn.hidden = false;
+}
+
+async function retryCloudSync() {
+    const btn = document.getElementById('syncStatusRetryBtn');
+    if (btn) btn.disabled = true;
+    try {
+        if (!window.CloudSync || typeof CloudSync.retryFailedSync !== 'function') throw new Error('Sync retry is unavailable.');
+        const result = await CloudSync.retryFailedSync();
+        if (!result.ok) Toast.show(result.error.message || 'Some records could not be synchronized.', 'high', 'icon-lucide-cloud-off');
+    } catch (error) {
+        Toast.show(error.message || 'Sync retry failed.', 'high', 'icon-lucide-cloud-off');
+    } finally {
+        if (btn) btn.disabled = false;
+        renderSyncStatus();
+    }
 }
 
 window.addEventListener('planner:sync-status-changed', renderSyncStatus);
@@ -121,205 +231,7 @@ function initDisplayPrefs(s) {
     motion.addEventListener('change', () => { const st = DB.getSettings(); st.reduceMotion = motion.checked; DB.saveSettings(st); applyTheme(); });
 }
 
-// SEMESTER MANAGEMENT (Academic Preferences)
-
-function renderSemesterManager() {
-    const wrap = document.getElementById('semesterManager');
-    if (!wrap)
-        return;
-    wrap.removeAttribute('aria-busy');
-    const semesters = DB.getSemesters();
-    const activeId = DB.getActiveSemesterId();
-    const byYear = {};
-    semesters.forEach(sem => {
-        if (!byYear[sem.schoolYear])
-            byYear[sem.schoolYear] = [];
-        byYear[sem.schoolYear].push(sem);
-    });
-    const sortedYears = Object.keys(byYear).sort();
-    let html = '';
-    sortedYears.forEach(year => {
-        const yearSems = byYear[year].sort((a, b) => a.name.localeCompare(b.name));
-        html += `<div class="sem-year-group mb-3">
-      <div class="sem-year-label">${year}</div>
-      ${yearSems.map(sem => {
-            const isActive = sem.id === activeId;
-            return `<div class="sem-item ${isActive ? 'sem-item-active' : ''}">
-          <div class="sem-item-left">
-            <span class="sem-dot ${isActive ? 'active' : ''}"></span>
-            <div>
-              <div class="sem-item-name">${escHtml(sem.name)}</div>
-              <div class="sem-item-dates">${sem.startDate} – ${sem.endDate}</div>
-            </div>
-          </div>
-          <div class="sem-item-actions">
-            ${isActive ? '<span class="chip sem-active-chip"><i class="bi bi-check2" aria-hidden="true"></i> Active</span>' :
-                `<button class="btn btn-ghost btn-sm sem-switch-btn" data-id="${escHtml(sem.id)}" aria-label="Switch to ${escHtml(sem.name)}"><i class="bi bi-toggle-off me-1" aria-hidden="true"></i>Switch</button>`}
-            <button class="btn btn-ghost btn-sm sem-edit-btn" data-id="${escHtml(sem.id)}" aria-label="Edit ${escHtml(sem.name)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            ${semesters.length > 1 ? `<button class="btn btn-ghost btn-sm text-danger sem-delete-btn" data-id="${escHtml(sem.id)}" aria-label="Delete ${escHtml(sem.name)}"><i class="bi bi-trash" aria-hidden="true"></i></button>` : ''}
-          </div>
-        </div>`;
-        }).join('')}
-    </div>`;
-    });
-    html += `<div class="d-flex gap-2 mt-2">
-    <button class="btn btn-accent btn-sm flex-grow-1" onclick="openAddSemesterModal()"><i class="bi bi-plus me-1" aria-hidden="true"></i>Add Semester</button>
-  </div>`;
-    wrap.innerHTML = html;
-    if (!wrap._semBound) {
-        wrap._semBound = true;
-        wrap.addEventListener('click', function (e) {
-            const switchBtn = e.target.closest('.sem-switch-btn');
-            if (switchBtn) { switchActiveSemester(switchBtn.dataset.id); return; }
-            const editBtn = e.target.closest('.sem-edit-btn');
-            if (editBtn) { openEditSemesterModal(editBtn.dataset.id); return; }
-            const deleteBtn = e.target.closest('.sem-delete-btn');
-            if (deleteBtn) { confirmDeleteSemester(deleteBtn.dataset.id); return; }
-        });
-    }
-}
-
-function switchActiveSemester(id) {
-    DB.setActiveSemester(id);
-    renderSemesterManager();
-    const sem = DB.getActiveSemester();
-    Toast.show(`Switched to ${sem.schoolYear} • ${sem.name}`);
-}
-
-function openAddSemesterModal() {
-    const body = document.getElementById('semModalBody');
-    body.innerHTML = `
-    <input type="hidden" id="editSemId" value="">
-    <div class="row g-2">
-      <div class="col-md-6">
-        <label for="semYearInput">School Year</label>
-        <input class="form-control" id="semYearInput" placeholder="e.g. 2026-2027" value="${new Date().getFullYear()}-${new Date().getFullYear() + 1}" autocomplete="off">
-      </div>
-      <div class="col-md-6">
-        <label for="semNameInput">Semester</label>
-        <select class="form-select" id="semNameInput">
-          <option value="1st Semester">1st Semester</option>
-          <option value="2nd Semester">2nd Semester</option>
-        </select>
-      </div>
-      <div class="col-md-6"><label for="semStartInput">Start Date</label><input type="date" class="form-control" id="semStartInput" value="${ymdLocalNow()}"></div>
-      <div class="col-md-6"><label for="semEndInput">End Date</label><input type="date" class="form-control" id="semEndInput" value="${ymdLocalFuture(105)}"></div>
-      <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${ymdLocalFuture(100)}"></div>
-      <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="15" min="1" max="52"></div>
-    </div>
-    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Add Semester</button></div>`;
-    document.getElementById('semModalTitle').textContent = 'Add Semester';
-    new bootstrap.Modal(document.getElementById('semModal')).show();
-}
-
-function openEditSemesterModal(id) {
-    const sem = DB.getSemesters().find(s => s.id === id);
-    if (!sem)
-        return;
-    const body = document.getElementById('semModalBody');
-    body.innerHTML = `
-    <input type="hidden" id="editSemId" value="${sem.id}">
-    <div class="row g-2">
-      <div class="col-md-6">
-        <label>School Year</label>
-        <input class="form-control sem-readonly-field" id="semYearInput" value="${escHtml(sem.schoolYear)}" readonly>
-        <div class="text-faint mt-1 sem-readonly-hint">School year cannot be changed</div>
-      </div>
-      <div class="col-md-6">
-        <label>Semester</label>
-        <input class="form-control sem-readonly-field" id="semNameInput" value="${escHtml(sem.name)}" readonly>
-        <div class="text-faint mt-1 sem-readonly-hint">Name cannot be changed</div>
-      </div>
-      <div class="col-md-6"><label for="semStartInput">Start Date</label><input type="date" class="form-control" id="semStartInput" value="${sem.startDate}"></div>
-      <div class="col-md-6"><label for="semEndInput">End Date</label><input type="date" class="form-control" id="semEndInput" value="${sem.endDate}"></div>
-      <div class="col-md-6"><label for="semFinalsInput">Finals Date</label><input type="date" class="form-control" id="semFinalsInput" value="${sem.finalsDate}"></div>
-      <div class="col-md-6"><label for="semWeeksInput">Total Weeks</label><input type="number" class="form-control" id="semWeeksInput" value="${sem.totalWeeks}" min="1" max="52"></div>
-    </div>
-    <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveSemesterModal()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Update Semester</button></div>`;
-    document.getElementById('semModalTitle').textContent = 'Edit Semester';
-    new bootstrap.Modal(document.getElementById('semModal')).show();
-}
-
-function saveSemesterModal() {
-    const editId = document.getElementById('editSemId').value;
-    const schoolYear = (document.getElementById('semYearInput').value || '').trim();
-    const semNameEl = document.getElementById('semNameInput');
-    const semName = semNameEl ? semNameEl.value.trim() : '1st Semester';
-    const startDate = document.getElementById('semStartInput').value;
-    const endDate = document.getElementById('semEndInput').value;
-    const finalsDate = document.getElementById('semFinalsInput').value;
-    const totalWeeks = parseInt(document.getElementById('semWeeksInput').value) || 15;
-    if (!schoolYear) {
-        Toast.show('School year is required', 'high', 'bi-exclamation-triangle');
-        return;
-    }
-    if (editId) {
-        DB.updateSemester(editId, { startDate, endDate, finalsDate, totalWeeks });
-        Toast.show('Semester updated');
-    }
-    else {
-        const result = DB.addSemester(schoolYear, semName, { startDate, endDate, finalsDate, totalWeeks });
-        if (!result) {
-            Toast.show('That semester already exists', 'high', 'bi-exclamation-triangle');
-        }
-        else {
-            Toast.show('Semester added');
-        }
-    }
-    const modalEl = document.getElementById('semModal');
-    const inst = bootstrap.Modal.getInstance(modalEl);
-    if (inst)
-        inst.hide();
-    renderSemesterManager();
-}
-
-function confirmDeleteSemester(id) {
-    const sem = DB.getSemesters().find(s => s.id === id);
-    if (!sem)
-        return;
-    const subCount = DB.getSubjectsForSemester(id).length;
-    const taskCount = DB.getTasksForSemester(id).length;
-    const noteCount = DB.getNotesForSemester(id).length;
-    const attCount = DB.getAttendanceForSemester(id).length;
-    const gradeCount = DB.getGradesForSemester(id).length;
-    const syllabusCount = DB.getSyllabusCoursesForSemester(id).length;
-    const parts = [];
-    if (subCount)
-        parts.push(`${subCount} subject${subCount !== 1 ? 's' : ''}`);
-    if (taskCount)
-        parts.push(`${taskCount} task${taskCount !== 1 ? 's' : ''}`);
-    if (attCount)
-        parts.push(`${attCount} attendance record${attCount !== 1 ? 's' : ''}`);
-    if (gradeCount)
-        parts.push(`${gradeCount} grade record${gradeCount !== 1 ? 's' : ''}`);
-    if (noteCount)
-        parts.push(`${noteCount} note${noteCount !== 1 ? 's' : ''}`);
-    if (syllabusCount)
-        parts.push(`${syllabusCount} syllabus course${syllabusCount !== 1 ? 's' : ''}`);
-    const dataMsg = parts.length
-        ? `This will also permanently remove ${parts.join(', ')}.`
-        : 'No linked data will be affected.';
-    confirmAction({
-        title: `Delete ${sem.schoolYear} ${sem.name}?`,
-        message: `${dataMsg} This cannot be undone.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
-        onConfirm() {
-            if (!DB.deleteSemester(id)) {
-                Toast.show('Cannot delete the only semester', 'high', 'bi-exclamation-triangle');
-            }
-            else {
-                Toast.show('Semester deleted');
-                renderSemesterManager();
-            }
-        }
-    });
-}
-
-function ymdLocalNow() { return ymdLocal(new Date()); }
-
-function ymdLocalFuture(days) { return ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * days)); }
-// ymdLocal defined in storage.js
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+// Academic period display is read-only; configuration lives in Admin > Academic Calendar.
 
 // THEME / ACCENT / NOTIF
 
@@ -433,7 +345,7 @@ function updateNotifSetting(key, val) {
 
 function requestNotifPermission() {
     if (!('Notification' in window)) {
-        Toast.show('Notifications not supported in this browser', 'high', 'bi-exclamation-triangle');
+        Toast.show('Notifications not supported in this browser', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     Notification.requestPermission().then(p => {
@@ -473,7 +385,7 @@ async function exportData() {
         const { data: sessionData } = await supabase.auth.getSession();
         const user = sessionData && sessionData.session && sessionData.session.user;
         if (!user) {
-            Toast.show('You need to be signed in to export your data.', 'high', 'bi-exclamation-triangle');
+            Toast.show('You need to be signed in to export your data.', 'high', 'icon-lucide-triangle-alert');
             return;
         }
         const userId = user.id;
@@ -549,7 +461,7 @@ async function exportData() {
         Toast.show('Data exported');
     } catch (err) {
         console.error('Export failed', err);
-        Toast.show('Export failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'bi-exclamation-triangle');
+        Toast.show('Export failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'icon-lucide-triangle-alert');
     } finally {
         if (window.Loading) Loading.setButtonLoading(btn, false);
     }
@@ -587,7 +499,7 @@ function confirmReset() {
                 setTimeout(() => location.reload(), 600);
             } catch (err) {
                 console.error('Reset failed', err);
-                Toast.show('Reset failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'bi-exclamation-triangle');
+                Toast.show('Reset failed: ' + (err && err.message ? err.message : 'Unknown error'), 'high', 'icon-lucide-triangle-alert');
                 if (window.Loading) Loading.setButtonLoading(btn, false);
             }
         }
@@ -600,13 +512,13 @@ function confirmSignOut() {
     confirmAction({
         title: 'Sign out?',
         message: 'You will need to sign in again to access your planner.',
-        confirmLabel: 'Sign out', danger: true, icon: 'bi-box-arrow-right',
+        confirmLabel: 'Sign out', danger: true, icon: 'icon-lucide-log-out',
         async onConfirm() {
             const btn = document.getElementById('settingsSignOutBtn');
             if (btn) btn.disabled = true;
             const result = await AuthService.signOut();
             if (!result.ok) {
-                Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'bi-exclamation-triangle');
+                Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
                 if (btn) btn.disabled = false;
                 return;
             }
@@ -619,8 +531,6 @@ function confirmSignOut() {
 // resolve against window, not this module's scope — expose everything
 // they call.
 window.initSettings = initSettings;
-window.openAddSemesterModal = openAddSemesterModal;
-window.saveSemesterModal = saveSemesterModal;
 window.chooseTheme = chooseTheme;
 window.chooseAccent = chooseAccent;
 window.updateNotifSetting = updateNotifSetting;
@@ -628,3 +538,8 @@ window.requestNotifPermission = requestNotifPermission;
 window.exportData = exportData;
 window.confirmReset = confirmReset;
 window.confirmSignOut = confirmSignOut;
+window.retryCloudSync = retryCloudSync;
+
+// Start only after this module has executed. A page-level inline callback can
+// run before the module exports initSettings during a fast refresh.
+DB.whenCloudReady(initSettings);

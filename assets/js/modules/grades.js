@@ -24,20 +24,26 @@ function gradeEquivBadgeHtml(point) {
 
 function syncGradesWithSubjects() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subjects = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     let allGrades = DB.getGrades().map(normalizeGradeRecord);
+    let changed = false;
+    const subjectsById = new Map(DB.getSubjects().map(subject => [subject.id, subject]));
     subjects.forEach(s => {
         if (!allGrades.find(g => g.subjectId === s.id)) {
             allGrades.push({ subjectId: s.id, semesterId: semId, components: [] });
+            changed = true;
         }
     });
     allGrades.forEach(g => {
-        if (!g.semesterId) {
-            const sub = DB.getSubject(g.subjectId);
-            g.semesterId = sub ? sub.semesterId : semId;
+        const sub = subjectsById.get(g.subjectId);
+        if (sub && sub.semesterId && g.semesterId !== sub.semesterId) {
+            // The subject is the semester source of truth for its grade.
+            // The database guard rejects stale grade semester associations.
+            g.semesterId = sub.semesterId;
+            changed = true;
         }
     });
-    DB.saveGrades(allGrades);
+    if (changed) DB.saveGrades(allGrades);
     return allGrades.filter(g => subjects.some(s => s.id === g.subjectId));
 }
 
@@ -85,6 +91,15 @@ function initGrades() {
     renderGradeCards();
     renderGradeReferenceTable();
     renderGwaCalculator();
+    if (!window._gradesAcademicCalendarBound) {
+        window._gradesAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            syncGradesWithSubjects(); renderGradesOverview(); renderGradeCards(); renderGwaCalculator();
+        });
+        window.addEventListener('planner:semester-context-changed', () => {
+            syncGradesWithSubjects(); renderGradesOverview(); renderGradeCards(); renderGwaCalculator();
+        });
+    }
     const linkedSubjectId = new URLSearchParams(location.search).get('subject');
     if (linkedSubjectId && DB.getSubject(linkedSubjectId))
         setTimeout(() => openGradeModal(linkedSubjectId), 0);
@@ -94,11 +109,23 @@ function initGrades() {
 
 function renderGradesOverview() {
     const semId = DB.getActiveSemesterId();
-    const subjects = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subjects = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const grades = syncGradesWithSubjects();
     const { rows, scoredRows, gwa } = computeSemesterGWA(subjects, grades);
     const totalSubjects = subjects.length;
     const scoredSubjects = scoredRows.length;
+    const overviewStats = document.getElementById('gwaOverviewStats');
+    const overviewEmpty = document.getElementById('gwaOverviewEmpty');
+    if (overviewStats) overviewStats.classList.toggle('d-none', scoredSubjects === 0);
+    if (overviewEmpty) {
+        overviewEmpty.classList.toggle('d-none', scoredSubjects !== 0);
+        const emptyMessage = overviewEmpty.querySelector('.empty-state-sub');
+        if (emptyMessage) {
+            emptyMessage.textContent = totalSubjects
+                ? 'Add assessment scores to see your GWA and subject highlights.'
+                : 'Add subjects in Schedule to start tracking your GWA.';
+        }
+    }
     let highestRow = null, lowestRow = null;
     if (scoredRows.length) {
         highestRow = scoredRows.reduce((best, r) => r.point < best.point ? r : best, scoredRows[0]);
@@ -124,11 +151,11 @@ function renderGradesOverview() {
             gwaStatusSubEl.textContent = 'Add assessments to compute GWA';
         }
         else if (scoredSubjects < totalSubjects) {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Incomplete</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge incomplete"><i class="icon-lucide-hourglass me-1" aria-hidden="true"></i>Incomplete</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} of ${totalSubjects} subject${totalSubjects !== 1 ? 's' : ''}`;
         }
         else {
-            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>All Subjects</span>`;
+            gwaStatusEl.innerHTML = `<span class="grade-status-badge complete"><i class="icon-lucide-circle-check me-1" aria-hidden="true"></i>All Subjects</span>`;
             gwaStatusSubEl.textContent = `Based on ${scoredSubjects} subject${scoredSubjects !== 1 ? 's' : ''}`;
         }
     }
@@ -153,15 +180,15 @@ function renderGradeCards() {
     if (wrap) wrap.removeAttribute('aria-busy');
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const grades = DB.getGrades().map(normalizeGradeRecord);
     if (!subs.length) {
         const msg = sem ? `Add subjects in Schedule to start tracking grades for ${sem.schoolYear} · ${sem.name}.` : 'Add subjects in Schedule to start tracking grades.';
-        wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
+        wrap.innerHTML = `<div class="col-12"><div class="glass empty-state"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-column"></i></div><strong class="empty-state-title">No grades to show yet</strong><span class="empty-state-sub">${msg}</span></div></div>`;
         return;
     }
     const gradeCards = subs.map(s => {
-        const g = grades.find(x => x.subjectId === s.id) || { components: [] };
+        const g = grades.find(x => x.subjectId === s.id && x.semesterId === s.semesterId) || { components: [] };
         const pct = computeSubjectFinalPct(g.components);
         const point = pct !== null ? percentToGWA(pct) : null;
         const totalWeight = sumWeights(g.components);
@@ -172,18 +199,15 @@ function renderGradeCards() {
         const hasAnyScores = hasComponents && g.components.some(c => c.assessments && c.assessments.some(a => assessmentPct(a) !== null));
         if (pct !== null) {
             if (isPassingPct(pct)) {
-                statusBadge = `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing</span>`;
+                statusBadge = `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing</span>`;
             }
             else {
-                statusBadge = `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk</span>`;
+                statusBadge = `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk</span>`;
             }
         }
         else if (hasComponents && !hasAnyScores) {
-            statusBadge = `<span class="grade-pass-badge no-data"><i class="bi bi-dash-circle" aria-hidden="true"></i> No data</span>`;
+            statusBadge = `<span class="grade-pass-badge no-data"><i class="icon-lucide-circle-minus" aria-hidden="true"></i> No data</span>`;
         }
-        const equivBadge = gradeEquivBadgeHtml(point);
-        const sparkPoints = getSparklineDatapoints(g.components);
-        const hasSparkline = sparkPoints.length >= 2;
         return `<div class="grade-subject-item">
       <div class="grade-card hover-lift" style="border-left:3px solid ${s.color}">
         <!-- Card top: compact three-column layout -->
@@ -194,38 +218,35 @@ function renderGradeCards() {
           </div>
           <div class="grade-card-center">
             <div class="grade-card-pct">${pct === null ? '--' : pct.toFixed(1) + '%'}</div>
-            <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}${equivBadge}</div>
-            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="bi bi-exclamation-triangle me-1"></i>${totalWeight}%</div>` : ''}
+            <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}</div>
           </div>
           <div class="grade-card-actions">
-            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
+            <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="icon-lucide-chevron-down" aria-hidden="true"></i></button>
           </div>
         </div>
-        ${hasSparkline ? renderSparklineHtml(sparkPoints) : ''}
-        <div class="progress grade-card-bar"><div class="progress-bar" style="width:${Math.min(pct || 0, 100)}%;background:${pct !== null && !isPassingPct(pct) ? '#fb7185' : ''}"></div></div>
         <!-- Expanded detail -->
         <div class="collapse" id="${collapseId}">
           <div class="grade-card-detail">
             ${s.desc ? `<div class="text-faint mb-2" style="font-size:.76rem">${escapeHtml(s.desc)}</div>` : ''}
             ${g.components.length ? `
-              <div class="d-flex flex-column gap-1 mb-2">
+              <div class="grade-component-list">
                 ${g.components.map(c => {
             const ws = componentWeightedScore(c);
             const avg = componentAvgPct(c);
             const cPassing = avg !== null ? isPassingPct(avg) : null;
-            return `<div class="d-flex justify-content-between align-items-center" style="font-size:.75rem">
-                    <span class="text-soft">${escapeHtml(c.name)} <span class="text-faint">(${c.weight}%)</span></span>
-                    <div class="d-flex gap-2 align-items-center">
+            return `<div class="grade-component-row">
+                    <span class="grade-component-name">${escapeHtml(c.name)} <span class="text-faint">(${c.weight}%)</span></span>
+                    <div class="grade-component-values">
                       <span style="color:${cPassing === null ? 'var(--text-faint)' : cPassing ? '#34d399' : '#fb7185'}">${avg === null ? '—' : avg.toFixed(1) + '%'}</span>
-                      <span class="mono fw-bold" style="min-width:36px;text-align:right">${ws === null ? '—' : ws.toFixed(2)}</span>
+                      <span class="mono fw-bold">${ws === null ? '—' : ws.toFixed(2)}</span>
                     </div>
                   </div>`;
         }).join('')}
               </div>
-              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
-              ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="bi bi-exclamation-triangle me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
-            ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="bi bi-pencil"></i> to add.</div>`}
+              ${pct !== null && !isPassingPct(pct) ? `<div class="grade-warning-box mb-2"><i class="icon-lucide-triangle-alert me-1"></i>Below passing threshold (${PASSING_PCT}%). Current: ${pct.toFixed(1)}%</div>` : ''}
+              ${weightWarn ? `<div class="text-faint mb-2" style="font-size:.68rem;color:rgb(var(--accent-2))"><i class="icon-lucide-triangle-alert me-1"></i>Weights total ${totalWeight}%, not 100%</div>` : ''}
+            ` : `<div class="text-faint" style="font-size:.76rem">No components yet — tap <i class="icon-lucide-pencil"></i> to add.</div>`}
           </div>
         </div>
       </div>
@@ -263,21 +284,29 @@ function renderSparklineHtml(points) {
         svg += `</circle>`;
     });
     svg += `</svg>`;
-    const dirIcon = dir === 'up' ? '<i class="bi bi-graph-up-arrow" style="color:#34d399" aria-hidden="true"></i>' : dir === 'down' ? '<i class="bi bi-graph-down-arrow" style="color:#fb7185" aria-hidden="true"></i>' : '<i class="bi bi-dash-lg" style="color:#94a3b8" aria-hidden="true"></i>';
+    const dirIcon = dir === 'up' ? '<i class="icon-lucide-chart-no-axes-combined" style="color:#34d399" aria-hidden="true"></i>' : dir === 'down' ? '<i class="icon-lucide-chart-no-axes-column-decreasing" style="color:#fb7185" aria-hidden="true"></i>' : '<i class="icon-lucide-minus" style="color:#94a3b8" aria-hidden="true"></i>';
     return `<div class="grade-sparkline-wrap">
     <div class="grade-sparkline-label">${dirIcon} <span>${points[0].pct}% → ${points[points.length - 1].pct}%</span></div>
     ${svg}
   </div>`;
 }
 
-let gradeDraft = null, gradeDraftSubjectId = null;
+let gradeDraft = null, gradeDraftSubjectId = null, gradeDraftSemesterId = null;
 const ASSESS_GRID = 'minmax(0, 1fr) 56px 56px 52px 28px';
 
 function openGradeModal(subjectId) {
     const s = DB.getSubject(subjectId);
+    const selectedSemesterId = DB.getActiveSemesterId();
+    if (!s || !selectedSemesterId || s.semesterId !== selectedSemesterId) {
+        Toast.show('This subject is not in the selected semester. Refresh the page and try again.', 'high');
+        return;
+    }
     const grades = DB.getGrades().map(normalizeGradeRecord);
-    const g = grades.find(x => x.subjectId === subjectId) || { subjectId, components: [] };
+    const g = grades.find(x => x.subjectId === subjectId && x.semesterId === s.semesterId)
+        || grades.find(x => x.subjectId === subjectId)
+        || { subjectId, semesterId: s.semesterId, components: [] };
     gradeDraftSubjectId = subjectId;
+    gradeDraftSemesterId = s.semesterId;
     gradeDraft = { components: JSON.parse(JSON.stringify(g.components || [])) };
     if (!gradeDraft.components.length)
         gradeDraft.components.push({ id: DB.uid(), name: '', weight: '', assessments: [] });
@@ -302,10 +331,10 @@ function renderGradeModalBody() {
       ${gradeDraft.components.map((c, ci) => componentBlockHtml(c, ci)).join('')}
     </div>
     <button type="button" class="btn btn-ghost btn-sm mt-3 w-100" onclick="addComponent()">
-      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Component
+      <i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Component
     </button>
     <div id="modalWeightWarn" class="grade-weight-total mt-2 p-2 rounded" style="background:rgba(var(--accent-2),.1);font-size:.76rem;color:rgb(var(--accent-2))">
-      ${weightWarn ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`}
+      ${weightWarn ? `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.` : `<i class="${totalWeight === 100 ? 'icon-lucide-circle-check' : 'icon-lucide-info'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`}
     </div>
     <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--border)">
       <div class="text-faint" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em">Computed Final Grade</div>
@@ -316,12 +345,12 @@ function renderGradeModalBody() {
       ${finalPct !== null ? `
         <div class="mt-1" id="modalPassStatus">
           ${isPassing
-        ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
-        : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
+        ? `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing (≥${PASSING_PCT}%)</span>`
+        : `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`}
         </div>` : ''}
     </div>
     <div class="modal-actions"><button class="btn btn-accent w-100" onclick="saveGradeComponents()">
-      <i class="bi bi-check2 me-1" aria-hidden="true"></i>Save Grading Breakdown
+      <i class="icon-lucide-check me-1" aria-hidden="true"></i>Save Grading Breakdown
     </button></div>`;
 }
 
@@ -339,10 +368,10 @@ function componentBlockHtml(c, ci) {
           value="${c.weight === 0 || c.weight === '' ? '' : c.weight}"
           oninput="onComponentWeightInput(${ci},this.value)"
           aria-label="Component weight percentage">
-        <span class="input-group-text" aria-hidden="true"><i class="bi bi-percent"></i></span>
+        <span class="input-group-text" aria-hidden="true"><i class="icon-lucide-percent"></i></span>
       </label>
       <button type="button" class="btn-icon btn-icon-sm" onclick="removeComponent(${ci})" title="Remove">
-        <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
+        <i class="icon-lucide-trash-2" style="color:#fb7185" aria-hidden="true"></i>
       </button>
     </div>
     <!-- Assessment column headers -->
@@ -360,7 +389,7 @@ function componentBlockHtml(c, ci) {
     <!-- Footer: add button + live avg/weighted -->
     <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-top:1px solid var(--border);margin-top:2px">
       <button type="button" class="btn btn-ghost btn-sm" onclick="addAssessment(${ci})" style="font-size:.74rem;padding:2px 9px">
-        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add
+        <i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add
       </button>
       <div class="text-end" style="font-size:.74rem" id="compSummary-${ci}">
         ${compSummaryHtml(avg, ws)}
@@ -391,7 +420,7 @@ function assessmentRowHtml(ci, ai, a) {
       ${pct === null ? '—' : pct.toFixed(1) + '%'}
     </div>
     <button type="button" class="btn-icon btn-icon-sm" onclick="removeAssessment(${ci},${ai})" aria-label="Remove assessment">
-      <i class="bi bi-x-lg" aria-hidden="true"></i>
+      <i class="icon-lucide-x" aria-hidden="true"></i>
     </button>
   </div>`;
 }
@@ -477,8 +506,8 @@ function refreshGradePreview() {
     if (weightWarnEl) {
         const warn = totalWeight !== 100 && totalWeight !== 0;
         weightWarnEl.innerHTML = warn
-            ? `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.`
-            : `<i class="bi bi-${totalWeight === 100 ? 'check-circle' : 'info-circle'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`;
+            ? `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong> — should add up to 100%.`
+            : `<i class="${totalWeight === 100 ? 'icon-lucide-circle-check' : 'icon-lucide-info'} me-1" aria-hidden="true"></i>Weights total <strong>${totalWeight}%</strong>${totalWeight === 100 ? ' — balanced.' : ' — adjust to 100%.'}`;
     }
     const pctEl = document.getElementById('modalFinalPct');
     const gwaEl = document.getElementById('modalFinalGwa');
@@ -495,53 +524,94 @@ function refreshGradePreview() {
         }
         else {
             statusEl.innerHTML = isPassing
-                ? `<span class="grade-pass-badge passing"><i class="bi bi-check-circle"></i> Passing (≥${PASSING_PCT}%)</span>`
-                : `<span class="grade-pass-badge failing"><i class="bi bi-exclamation-triangle"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
+                ? `<span class="grade-pass-badge passing"><i class="icon-lucide-circle-check"></i> Passing (≥${PASSING_PCT}%)</span>`
+                : `<span class="grade-pass-badge failing"><i class="icon-lucide-triangle-alert"></i> At Risk — ${(PASSING_PCT - finalPct).toFixed(1)}% below passing</span>`;
         }
     }
 }
 
 let gcSaving = false;
-function saveGradeComponents() {
+async function saveGradeComponents() {
     // Re-entrancy guard against a rapid double-click: the modal hide()
     // below is a non-blocking fade, so a second click could otherwise
     // push a duplicate grade record before the first one commits.
-    if (gcSaving) return;
+    if (gcSaving || !gradeDraft) return;
     gcSaving = true;
-    syncComponentWeightsFromInputs();
-    const cleaned = gradeDraft.components
-        .map((c, i) => ({
-        id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
-        assessments: (c.assessments || [])
-            .filter(a => a.name || (a.score !== null && a.totalItems !== null))
-            .map(a => ({ id: a.id || DB.uid(), name: (a.name || '').trim(), score: a.score, totalItems: a.totalItems }))
-    })).filter(c => c.name.trim() || c.weight || c.assessments.length);
-    const semId = DB.getActiveSemesterId();
-    const grades = DB.getGrades().map(normalizeGradeRecord);
-    const idx = grades.findIndex(g => g.subjectId === gradeDraftSubjectId);
-    if (idx > -1) {
-        grades[idx].components = cleaned;
-        grades[idx].semesterId = grades[idx].semesterId || semId;
+    const saveButton = document.querySelector('#gradeModalBody .modal-actions .btn-accent');
+    const modalControls = Array.from(document.querySelectorAll('#gradeModalBody input, #gradeModalBody button'));
+    const priorDisabledState = modalControls.map(control => control.disabled);
+    modalControls.forEach(control => { control.disabled = true; });
+    if (saveButton) {
+        saveButton.setAttribute('aria-busy', 'true');
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Saving…';
     }
-    else
-        grades.push({ subjectId: gradeDraftSubjectId, semesterId: semId, components: cleaned });
-    DB.saveGrades(grades);
-    const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
-    if (inst)
-        inst.hide();
-    if (typeof Toast !== 'undefined') {
+    try {
+        syncComponentWeightsFromInputs();
+        const subject = DB.getSubject(gradeDraftSubjectId);
+        const semId = DB.getActiveSemesterId();
+        if (!subject || !gradeDraftSemesterId || subject.semesterId !== gradeDraftSemesterId || semId !== gradeDraftSemesterId) {
+            throw new Error('The subject or selected semester changed. Refresh the page before saving this breakdown.');
+        }
+
+        const cleaned = gradeDraft.components
+            .map((c, i) => ({
+                id: c.id || DB.uid(), name: (c.name || '').trim() || `Component ${i + 1}`, weight: +c.weight || 0,
+                assessments: (c.assessments || [])
+                    .filter(a => a.name || (a.score !== null && a.totalItems !== null))
+                    .map(a => ({ id: a.id || DB.uid(), name: (a.name || '').trim(), score: a.score, totalItems: a.totalItems }))
+            })).filter(c => c.name.trim() || c.weight || c.assessments.length);
+        const grades = DB.getGrades().map(normalizeGradeRecord);
+        const idx = grades.findIndex(g => g.subjectId === gradeDraftSubjectId);
+        if (idx > -1) {
+            grades[idx].components = cleaned;
+            grades[idx].semesterId = subject.semesterId;
+        } else {
+            grades.push({ subjectId: gradeDraftSubjectId, semesterId: subject.semesterId, components: cleaned });
+        }
+
+        if (typeof DB.saveGrades === 'function') {
+            // Persist locally and let cloud-sync push in the background so the
+            // grade cards can refresh without waiting for a network round trip.
+            if (DB.saveGrades(grades) === false)
+                throw new Error("Couldn't save the grading breakdown on this device. Check available storage and retry.");
+        } else if (typeof DB.saveGradesAndSync === 'function') {
+            // Compatibility with adapters that only expose the server-sync API.
+            const result = await DB.saveGradesAndSync(grades);
+            if (!result || !result.ok)
+                throw result && result.error || new Error('The server did not confirm the save. Please retry.');
+        } else {
+            throw new Error('Grade storage is unavailable. Your changes are still in this form.');
+        }
+
+        const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
+        if (inst) inst.hide();
         const savedWeight = sumWeights(cleaned);
         if (cleaned.length && savedWeight !== 100) {
-            Toast.show(`Saved \u2014 note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
+            Toast.show(`Saved — note: weights total ${savedWeight}%, not 100%. Grade is normalised automatically.`, 'warn');
         } else {
             Toast.show('Grading breakdown saved');
         }
+        gradeDraft = null;
+        gradeDraftSubjectId = null;
+        gradeDraftSemesterId = null;
+        renderGradesOverview();
+        renderGradeCards();
+    } catch (error) {
+        if (saveButton) saveButton.dataset.saveFailed = 'true';
+        Toast.show(`Couldn't save the grading breakdown: ${error && error.message || 'Please check your connection and retry.'}`, 'high');
+    } finally {
+        if (saveButton && saveButton.isConnected) {
+            saveButton.removeAttribute('aria-busy');
+            saveButton.innerHTML = saveButton.dataset.saveFailed
+                ? '<i class="icon-lucide-rotate-cw me-1" aria-hidden="true"></i>Retry Save'
+                : '<i class="icon-lucide-check me-1" aria-hidden="true"></i>Save Grading Breakdown';
+            delete saveButton.dataset.saveFailed;
+        }
+        modalControls.forEach((control, index) => {
+            if (control.isConnected) control.disabled = priorDisabledState[index];
+        });
+        gcSaving = false;
     }
-    gradeDraft = null;
-    gradeDraftSubjectId = null;
-    renderGradesOverview();
-    renderGradeCards();
-    gcSaving = false;
 }
 
 // Grade reference table
@@ -564,10 +634,24 @@ function renderGwaCalculator() {
     const wrap = document.getElementById('gwaCalcRows');
     if (!wrap)
         return;
-    let rows = DB.getGwaCalcRows();
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) {
+        wrap.innerHTML = '<div class="text-soft py-2">Select an academic period to use the GWA calculator.</div>';
+        refreshGwaTotals([]);
+        return;
+    }
+    let allRows = DB.getGwaCalcRows();
+    // Before semester support, manual calculator rows were stored globally.
+    // Preserve those existing entries by assigning them once to the student's
+    // current workspace when they first load under the semester-aware model.
+    if (allRows.some(row => !row.semesterId)) {
+        allRows = allRows.map(row => row.semesterId ? row : { ...row, semesterId });
+        DB.saveGwaCalcRows(allRows);
+    }
+    let rows = allRows.filter(r => r.semesterId === semesterId);
     if (!rows.length) {
-        rows = [{ id: DB.uid(), label: '', units: '', grade: '' }];
-        DB.saveGwaCalcRows(rows);
+        rows = [{ id: DB.uid(), label: '', units: '', grade: '', semesterId }];
+        DB.saveGwaCalcRows([...allRows, ...rows]);
     }
     wrap.innerHTML = rows.map((r, i) => gwaCalcRowHtml(r, i)).join('');
     if (window.enhanceSelects) window.enhanceSelects(wrap);
@@ -579,47 +663,42 @@ function gwaCalcRowHtml(r, i) {
     const sel = gradeOptions.map(v => `<option value="${v}" ${r.grade == v && v !== '' ? 'selected' : ''}>${v === '' ? 'Select grade' : v}</option>`).join('');
     return `<div class="gwa-input-row">
     <input class="form-control form-control-sm gwa-col-code" placeholder="e.g., HUM 1"
-      value="${escapeHtml(r.label || '')}" oninput="updateGwaCalcRow(${i},'label',this.value)">
-    <input type="number" min="0" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Units"
-      value="${r.units === '' ? '' : r.units}" oninput="updateGwaCalcRow(${i},'units',this.value)">
-    <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow(${i},'grade',this.value)">
+      value="${escapeHtml(r.label || '')}" oninput="updateGwaCalcRow('${r.id}','label',this.value)">
+    <input type="number" min="0.5" step="0.5" class="form-control form-control-sm text-center gwa-col-units" placeholder="Units"
+      value="${r.units === '' ? '' : r.units}" oninput="updateGwaCalcRow('${r.id}','units',this.value)">
+    <select class="form-select form-select-sm gwa-col-grade" aria-label="Select grade for ${escapeHtml(r.label || 'course')}" onchange="updateGwaCalcRow('${r.id}','grade',this.value)">
       ${sel}
     </select>
-    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow(${i})" aria-label="Remove course from GWA calculator">
-      <i class="bi bi-trash3" style="color:#fb7185" aria-hidden="true"></i>
+    <button type="button" class="btn-icon btn-icon-sm" onclick="removeGwaCalcRow('${r.id}')" aria-label="Remove course from GWA calculator">
+      <i class="icon-lucide-trash-2" style="color:#fb7185" aria-hidden="true"></i>
     </button>
   </div>`;
 }
 
-function updateGwaCalcRow(i, field, value) {
+function updateGwaCalcRow(rowId, field, value) {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    if (!rows[i])
+    const row = rows.find(r => r.id === rowId && r.semesterId === semesterId);
+    if (!row)
         return;
-    rows[i][field] = (field === 'units' || field === 'grade') ? (value === '' ? '' : +value) : value;
+    row[field] = (field === 'units' || field === 'grade') ? (value === '' ? '' : +value) : value;
     DB.saveGwaCalcRows(rows);
     if (field === 'grade') {
         renderGwaCalculator();
     }
     else {
-        refreshGwaTotals(rows);
+        refreshGwaTotals(rows.filter(r => r.semesterId === semesterId));
     }
 }
 
 function refreshGwaTotals(rows) {
     if (!rows)
         rows = DB.getGwaCalcRows();
-    let totalUnits = 0, weightedSum = 0, courseCount = 0;
-    rows.forEach(r => {
-        // A row counts only when it has real units and a real grade. Cloud sync stores blank
-        // cells as 0, so a blank row must not be counted as a course after a round-trip.
-        const u = +r.units || 0, gr = +r.grade || 0;
-        if (u > 0 && gr > 0) {
-            totalUnits += u;
-            weightedSum += u * gr;
-            courseCount++;
-        }
-    });
-    const result = courseCount > 0 && totalUnits > 0 ? weightedSum / totalUnits : null;
+    const valid = rows.filter(isValidManualGwaRow);
+    const totalUnits = valid.reduce((sum, row) => sum + Number(row.units), 0);
+    const courseCount = valid.length;
+    const result = computeManualGwa(rows);
     const passed = result !== null ? result <= 3.00 : null;
     document.getElementById('gwaCalcResult').textContent = result === null ? '--' : result.toFixed(2);
     const meaningEl = document.getElementById('gwaCalcResultMeaning');
@@ -641,21 +720,32 @@ function refreshGwaTotals(rows) {
 }
 
 function addGwaCalcRow() {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    rows.push({ id: DB.uid(), label: '', units: '', grade: '' });
+    rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
     DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
-function removeGwaCalcRow(i) {
+function removeGwaCalcRow(rowId) {
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
     const rows = DB.getGwaCalcRows();
-    rows.splice(i, 1);
-    DB.saveGwaCalcRows(rows.length ? rows : [{ id: DB.uid(), label: '', units: '', grade: '' }]);
+    const index = rows.findIndex(r => r.id === rowId && r.semesterId === semesterId);
+    if (index < 0) return;
+    rows.splice(index, 1);
+    if (!rows.some(r => r.semesterId === semesterId)) rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
+    DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
 function clearAllGwaRows() {
-    DB.saveGwaCalcRows([{ id: DB.uid(), label: '', units: '', grade: '' }]);
+    const semesterId = DB.getActiveSemesterId();
+    if (!semesterId) return;
+    const rows = DB.getGwaCalcRows().filter(r => r.semesterId !== semesterId);
+    rows.push({ id: DB.uid(), label: '', units: '', grade: '', semesterId });
+    DB.saveGwaCalcRows(rows);
     renderGwaCalculator();
 }
 
@@ -665,7 +755,7 @@ function copyGwaCardAsImage() {
     const settings = DB.getSettings();
     const name = (settings && settings.name) ? settings.name : 'Student';
     const sem = DB.getActiveSemester();
-    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'Current Semester';
+    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'No active university academic period';
     const gwaEl = document.getElementById('gGwa');
     const gwaSubEl = document.getElementById('gGwaSub');
     const gwa = gwaEl ? gwaEl.textContent : '--';

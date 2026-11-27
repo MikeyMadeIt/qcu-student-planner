@@ -11,7 +11,7 @@
     var mainList = document.getElementById('lgTocMain');
     var fullList = document.getElementById('lgTocFull');
     var railList = document.getElementById('lgRailList');
-    var details = document.getElementById('lgTocDetails');
+    var tocToggle = document.getElementById('lgTocToggle');
     if (!sections.length || !mainList || !fullList || !railList) return;
 
     function esc(s) {
@@ -40,7 +40,7 @@
     // Top card: the main sections, always visible.
     mainList.innerHTML = tree.map(function (s) {
         return '<li><a href="#' + s.id + '">' +
-            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>') +
+            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>') +
             '<span class="lg-toc-label">' + esc(s.title) + '</span></a></li>';
     }).join('');
 
@@ -58,21 +58,22 @@
             (s.num ? s.num + '. ' : '') + esc(s.title) + '</a>' + subList(s) + '</div>';
     }).join('');
 
-    // Desktop rail: sections, with the subsections of the active one opened.
-    railList.innerHTML = tree.map(function (s) {
-        return '<div class="lg-rail-group" data-rail="' + s.id + '"><a class="lg-rail-link" href="#' + s.id + '">' +
-            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>') +
-            '<span class="lg-toc-label">' + esc(s.title) + '</span></a>' + subList(s) + '</div>';
-    }).join('');
-
-    // Close the expanded list after choosing a link on small screens, so the content is in view.
-    if (details) {
-        details.addEventListener('click', function (e) {
-            if (e.target.closest('a') && window.matchMedia('(max-width: 1099.98px)').matches) {
-                details.open = false;
-            }
+    // Keep disclosure state independent from anchor navigation. Only this
+    // button can collapse the subsection list; selecting a link never hides it.
+    if (tocToggle) {
+        tocToggle.addEventListener('click', function () {
+            var expanded = tocToggle.getAttribute('aria-expanded') !== 'true';
+            tocToggle.setAttribute('aria-expanded', String(expanded));
+            fullList.hidden = !expanded;
         });
     }
+
+    // Desktop rail: keep subsection links available while highlighting the active section.
+    railList.innerHTML = tree.map(function (s) {
+        return '<div class="lg-rail-group" data-rail="' + s.id + '"><a class="lg-rail-link" href="#' + s.id + '">' +
+            (s.num ? '<span class="lg-toc-num">' + s.num + '</span>' : '<span class="lg-toc-num"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>') +
+            '<span class="lg-toc-label">' + esc(s.title) + '</span></a>' + subList(s) + '</div>';
+    }).join('');
 
     // Highlight the section currently being read.
     function setActive(id) {

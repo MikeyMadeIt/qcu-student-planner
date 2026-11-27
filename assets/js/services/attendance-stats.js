@@ -39,8 +39,8 @@ function summarizeAttendance(records) {
 function getLiveSemesterAttendance(semId) {
     var ids = {};
     DB.getSubjects().forEach(function (s) {
-        if (s.semesterId === semId && !s.archived)
+        if (semId && s.semesterId === semId && !s.archived)
             ids[s.id] = true;
     });
-    return DB.getAttendance().filter(function (r) { return r.semesterId === semId && ids[r.subjectId]; });
+    return DB.getAttendance().filter(function (r) { return !!semId && r.semesterId === semId && ids[r.subjectId]; });
 }

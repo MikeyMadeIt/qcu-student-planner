@@ -11,7 +11,6 @@ const DB_KEYS = {
     semester: 'sp_semester',
     pomodoro: 'sp_pomodoro_stats',
     calendarEvents: 'sp_calendar_events',
-    syllabusCourses: 'sp_syllabus_courses',
     semesters: 'sp_semesters',
     activeSemesterId: 'sp_active_semester_id',
 };
@@ -102,23 +101,19 @@ function migrateLegacyData() {
         return;
     const legacySem = readKey(DB_KEYS.semester, null);
     let semesters = readKey(DB_KEYS.semesters, []);
-    if (!semesters.length) {
-        const schoolYear = (legacySem && legacySem.schoolYear) ? legacySem.schoolYear : '2026-2027';
-        const semName = (legacySem && legacySem.name) ? legacySem.name : '1st Semester';
+    if (!semesters.length && legacySem && legacySem.schoolYear && legacySem.name) {
+        const schoolYear = legacySem.schoolYear;
+        const semName = legacySem.name;
         const sem = makeSemesterObject(schoolYear, semName, legacySem);
         semesters = [sem];
         writeKey(DB_KEYS.semesters, semesters);
-    }
-    const activeSemId = semesters[0].id;
-    if (!localStorage.getItem(DB_KEYS.activeSemesterId)) {
-        writeKey(DB_KEYS.activeSemesterId, activeSemId);
     }
     const subjects = readKey(DB_KEYS.subjects, []);
     let subjectsChanged = false;
     subjects.forEach(s => {
         if (!s.semesterId) {
             const match = semesters.find(sem => sem.name === s.semester && sem.schoolYear === s.schoolYear);
-            s.semesterId = match ? match.id : activeSemId;
+            if (match) s.semesterId = match.id;
             subjectsChanged = true;
         }
     });
@@ -129,7 +124,7 @@ function migrateLegacyData() {
     attendance.forEach(r => {
         if (!r.semesterId) {
             const sub = subjects.find(s => s.id === r.subjectId);
-            r.semesterId = sub ? sub.semesterId : activeSemId;
+            if (sub && sub.semesterId) r.semesterId = sub.semesterId;
             attChanged = true;
         }
     });
@@ -140,7 +135,7 @@ function migrateLegacyData() {
     grades.forEach(g => {
         if (!g.semesterId) {
             const sub = subjects.find(s => s.id === g.subjectId);
-            g.semesterId = sub ? sub.semesterId : activeSemId;
+            if (sub && sub.semesterId) g.semesterId = sub.semesterId;
             gradesChanged = true;
         }
     });
@@ -151,7 +146,7 @@ function migrateLegacyData() {
     tasks.forEach(t => {
         if (!t.semesterId) {
             const sub = t.subjectId ? subjects.find(s => s.id === t.subjectId) : null;
-            t.semesterId = sub ? sub.semesterId : activeSemId;
+            if (sub && sub.semesterId) t.semesterId = sub.semesterId;
             tasksChanged = true;
         }
     });
@@ -161,23 +156,16 @@ function migrateLegacyData() {
     let notesChanged = false;
     notes.forEach(n => {
         if (!n.semesterId) {
-            n.semesterId = activeSemId;
+            const subject = n.subjectId ? subjects.find(s => s.id === n.subjectId) : null;
+            const task = n.taskId ? tasks.find(t => t.id === n.taskId) : null;
+            if (subject && task && subject.semesterId === task.semesterId && subject.semesterId) n.semesterId = subject.semesterId;
+            else if (subject && !task && subject.semesterId) n.semesterId = subject.semesterId;
+            else if (task && !subject && task.semesterId) n.semesterId = task.semesterId;
             notesChanged = true;
         }
     });
     if (notesChanged)
         writeKey(DB_KEYS.notes, notes);
-    const courses = readKey(DB_KEYS.syllabusCourses, []);
-    let coursesChanged = false;
-    courses.forEach(c => {
-        if (!c.semesterId) {
-            const match = semesters.find(sem => sem.name === c.semester && sem.schoolYear === c.academicYear);
-            c.semesterId = match ? match.id : activeSemId;
-            coursesChanged = true;
-        }
-    });
-    if (coursesChanged)
-        writeKey(DB_KEYS.syllabusCourses, courses);
     localStorage.setItem('sp_semester_migrated', '1');
 }
 
@@ -186,14 +174,8 @@ function migrateLegacyData() {
 function initIfEmpty() {
     if (localStorage.getItem('sp_initialized'))
         return;
-    const defaultSem = makeSemesterObject('2026-2027', '1st Semester', {
-        startDate: ymdLocal(new Date()),
-        endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)),
-        finalsDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 100)),
-        totalWeeks: 15,
-    });
-    writeKey(DB_KEYS.semesters, [defaultSem]);
-    writeKey(DB_KEYS.activeSemesterId, defaultSem.id);
+    writeKey(DB_KEYS.semesters, []);
+    writeKey(DB_KEYS.activeSemesterId, null);
     writeKey(DB_KEYS.subjects, []);
     writeKey(DB_KEYS.tasks, []);
     writeKey(DB_KEYS.notes, []);
@@ -201,14 +183,9 @@ function initIfEmpty() {
     writeKey(DB_KEYS.grades, []);
     writeKey(DB_KEYS.gwaCalc, []);
     writeKey(DB_KEYS.calendarEvents, []);
-    writeKey(DB_KEYS.syllabusCourses, []);
     writeKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] });
     writeKey(DB_KEYS.settings, DEFAULT_SETTINGS);
-    writeKey(DB_KEYS.semester, { name: '1st Semester', schoolYear: '2026-2027',
-        startDate: ymdLocal(new Date()),
-        endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)),
-        finalsDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 100)),
-        totalWeeks: 15 });
+    writeKey(DB_KEYS.semester, null);
     localStorage.setItem('sp_initialized', '1');
     localStorage.setItem('sp_semester_migrated', '1');
 }
@@ -236,70 +213,101 @@ const DB = {
     colors: SUBJECT_COLORS,
     get(key, fallback) { return readKey(DB_KEYS[key], fallback); },
     set(key, value) { return writeKey(DB_KEYS[key], value); },
-    getSemesters() { return readKey(DB_KEYS.semesters, []); },
+    getSemesters() {
+        const stored = readKey(DB_KEYS.semesters, []);
+        const calendar = this.getUniversityCalendar();
+        const shared = calendar && Array.isArray(calendar.semesters) ? calendar.semesters : [];
+        const merged = new Map(stored.map(s => [s.id, s]));
+        shared.forEach(s => merged.set(s.id, s));
+        return [...merged.values()];
+    },
     saveSemesters(list) { return writeKey(DB_KEYS.semesters, list); },
     getActiveSemesterId() {
-        const id = readKey(DB_KEYS.activeSemesterId, null);
-        if (id)
-            return id;
-        const sems = this.getSemesters();
-        return sems.length ? sems[0].id : null;
+        return this.getSelectedSemesterId();
     },
-    setActiveSemester(id) {
-        writeKey(DB_KEYS.activeSemesterId, id);
+    getUniversityActiveSemesterId() {
+        const calendar = this.getUniversityCalendar();
+        return calendar && calendar.activeSemester ? calendar.activeSemester.id : null;
+    },
+    _semesterContextUserId: null,
+    setSemesterContextUser(userId) { this._semesterContextUserId = userId || null; },
+    _semesterSelectionKey() { return 'sp_selected_semester:' + (this._semesterContextUserId || 'anonymous'); },
+    _canSelectSemester(semester, activeId) {
+        if (typeof isSemesterSelectable === 'function') return isSemesterSelectable(semester, activeId, academicDateKey());
+        return !!(semester && semester.id && semester.startDate && (semester.id === activeId || semester.startDate <= new Date().toISOString().slice(0, 10)));
+    },
+    getSelectedSemesterId() {
+        const active = this.getUniversityActiveSemesterId();
+        if (!active) return null;
+        const key = this._semesterSelectionKey();
+        const previousActive = localStorage.getItem(key + ':active');
+        if (previousActive !== active) {
+            localStorage.setItem(key + ':active', active);
+            localStorage.setItem(key, active);
+            return active;
+        }
+        const selected = localStorage.getItem(key);
+        const calendar = this.getUniversityCalendar();
+        const semester = calendar && (calendar.semesters || []).find(s => s.id === selected);
+        if (!this._canSelectSemester(semester, active)) {
+            localStorage.setItem(key, active);
+            return active;
+        }
+        return selected;
+    },
+    selectSemester(id) {
+        const active = this.getUniversityActiveSemesterId();
+        const calendar = this.getUniversityCalendar();
+        const candidate = calendar && (calendar.semesters || []).find(s => s.id === id);
+        if (!active || !this._canSelectSemester(candidate, active)) return false;
+        const key = this._semesterSelectionKey();
+        localStorage.setItem(key + ':active', active);
+        localStorage.setItem(key, id);
+        window.dispatchEvent(new CustomEvent('planner:semester-context-changed', { detail: { semesterId: id } }));
+        return true;
+    },
+    getUniversityCalendar() {
+        try { return JSON.parse(localStorage.getItem('sp_university_academic_calendar') || 'null'); }
+        catch (e) { return null; }
+    },
+    setUniversityCalendar(calendar) {
+        const next = calendar || null;
+        const oldCalendar = this.getUniversityCalendar();
+        const oldActive = oldCalendar && oldCalendar.activeSemester ? oldCalendar.activeSemester.id : null;
+        let changed = true;
+        try {
+            const key = 'sp_university_academic_calendar';
+            const previous = localStorage.getItem(key);
+            const serialized = JSON.stringify(next);
+            changed = previous !== serialized;
+            localStorage.setItem(key, serialized);
+        } catch (e) { /* ignore */ }
+        if (changed) {
+            window.dispatchEvent(new CustomEvent('planner:academic-calendar-changed', { detail: next }));
+            const newActive = next && next.activeSemester ? next.activeSemester.id : null;
+            if (oldActive !== newActive) {
+                const key = this._semesterSelectionKey();
+                if (newActive) { localStorage.setItem(key + ':active', newActive); localStorage.setItem(key, newActive); }
+                else { localStorage.removeItem(key + ':active'); localStorage.removeItem(key); }
+                window.dispatchEvent(new CustomEvent('planner:semester-context-changed', { detail: { semesterId: newActive, activeChanged: true } }));
+            }
+        }
     },
     getActiveSemester() {
-        const id = this.getActiveSemesterId();
-        const sems = this.getSemesters();
-        return sems.find(s => s.id === id) || sems[0] || null;
+        const id = this.getSelectedSemesterId();
+        return id ? this.getSemesters().find(s => s.id === id) || null : null;
     },
-    addSemester(schoolYear, semName, extra) {
-        const sems = this.getSemesters();
-        const newSem = makeSemesterObject(schoolYear, semName, extra);
-        if (sems.find(s => s.id === newSem.id))
-            return null;
-        sems.push(newSem);
-        this.saveSemesters(sems);
-        return newSem;
-    },
-    updateSemester(id, data) {
-        const sems = this.getSemesters();
-        const idx = sems.findIndex(s => s.id === id);
-        if (idx === -1)
-            return false;
-        sems[idx] = { ...sems[idx], ...data };
-        this.saveSemesters(sems);
-        return true;
-    },
-    deleteSemester(id) {
-        const sems = this.getSemesters();
-        if (sems.length <= 1)
-            return false;
-        const filtered = sems.filter(s => s.id !== id);
-        this.saveSemesters(filtered);
-        ['subjects', 'tasks', 'notes', 'attendance', 'grades', 'syllabusCourses', 'calendarEvents'].forEach(key => {
-            const all = readKey(DB_KEYS[key], []);
-            const remaining = all.filter(r => r.semesterId !== id);
-            writeKey(DB_KEYS[key], remaining);
-        });
-        if (this.getActiveSemesterId() === id) {
-            this.setActiveSemester(filtered[0].id);
-        }
-        return true;
-    },
-    getSubjectsForSemester(semId) { return this.getSubjects().filter(s => s.semesterId === semId); },
-    getAttendanceForSemester(semId) { return this.getAttendance().filter(r => r.semesterId === semId); },
-    getGradesForSemester(semId) { return this.getGrades().filter(g => g.semesterId === semId); },
-    getTasksForSemester(semId) { return this.getTasks().filter(t => t.semesterId === semId); },
-    getNotesForSemester(semId) { return this.getNotes().filter(n => n.semesterId === semId); },
-    getSyllabusCoursesForSemester(semId) { return this.getSyllabusCourses().filter(c => c.semesterId === semId); },
-    getCalendarEventsForSemester(semId) { return this.getCalendarEvents().filter(e => e.semesterId === semId); },
-    getActiveSubjects() { return this.getSubjectsForSemester(this.getActiveSemesterId()); },
-    getActiveAttendance() { return this.getAttendanceForSemester(this.getActiveSemesterId()); },
-    getActiveGrades() { return this.getGradesForSemester(this.getActiveSemesterId()); },
-    getActiveTasks() { return this.getTasksForSemester(this.getActiveSemesterId()); },
-    getActiveNotes() { return this.getNotesForSemester(this.getActiveSemesterId()); },
-    getActiveSyllabusCourses() { return this.getSyllabusCoursesForSemester(this.getActiveSemesterId()); },
+    getSubjectsForSemester(semId) { return semId ? this.getSubjects().filter(s => s.semesterId === semId) : []; },
+    getAttendanceForSemester(semId) { return semId ? this.getAttendance().filter(r => r.semesterId === semId) : []; },
+    getGradesForSemester(semId) { return semId ? this.getGrades().filter(g => g.semesterId === semId) : []; },
+    getTasksForSemester(semId) { return semId ? this.getTasks().filter(t => t.semesterId === semId) : []; },
+    getNotesForSemester(semId) { return semId ? this.getNotes().filter(n => n.semesterId === semId) : []; },
+    getCalendarEventsForSemester(semId) { return semId ? this.getCalendarEvents().filter(e => e.semesterId === semId) : []; },
+    getActiveSubjects() { const id = this.getActiveSemesterId(); return id ? this.getSubjectsForSemester(id) : []; },
+    getActiveAttendance() { const id = this.getActiveSemesterId(); return id ? this.getAttendanceForSemester(id) : []; },
+    getActiveGrades() { const id = this.getActiveSemesterId(); return id ? this.getGradesForSemester(id) : []; },
+    getActiveTasks() { const id = this.getActiveSemesterId(); return id ? this.getTasksForSemester(id) : []; },
+    getActiveNotes() { const id = this.getActiveSemesterId(); return id ? this.getNotesForSemester(id) : []; },
     getSubjects() { return readKey(DB_KEYS.subjects, []); },
     saveSubjects(list) { return writeKey(DB_KEYS.subjects, list); },
     getSubject(id) { return this.getSubjects().find(s => s.id === id); },
@@ -322,9 +330,6 @@ const DB = {
     },
     getCalendarEvents() { return readKey(DB_KEYS.calendarEvents, []); },
     saveCalendarEvents(list) { return writeKey(DB_KEYS.calendarEvents, list); },
-    getSyllabusCourses() { return readKey(DB_KEYS.syllabusCourses, []); },
-    saveSyllabusCourses(list) { return writeKey(DB_KEYS.syllabusCourses, list); },
-    getSyllabusCourse(id) { return this.getSyllabusCourses().find(c => c.id === id); },
     // Only ever returns the known schema (DEFAULT_SETTINGS' keys) even if
     // `stored` (local cache, or whatever was last pulled from Supabase's
     // user_preferences row) still has old fields like name/studentNumber/
@@ -351,7 +356,7 @@ const DB = {
         if (s && s.notifications) clean.notifications = { ...DEFAULT_SETTINGS.notifications, ...s.notifications };
         return writeKey(DB_KEYS.settings, clean);
     },
-    getSemester() { return this.getActiveSemester() || readKey(DB_KEYS.semester, { name: '1st Semester', schoolYear: '2026-2027', startDate: ymdLocal(new Date()), endDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 105)), finalsDate: ymdLocal(new Date(Date.now() + 1000 * 60 * 60 * 24 * 100)), totalWeeks: 15 }); },
+    getSemester() { return this.getActiveSemester(); },
     saveSemester(s) { return writeKey(DB_KEYS.semester, s); },
     getPomo() { return readKey(DB_KEYS.pomodoro, { sessionsToday: 0, totalFocusMinutes: 0, lastDate: new Date().toDateString(), history: [] }); },
     savePomo(p) { return writeKey(DB_KEYS.pomodoro, p); },
@@ -360,9 +365,9 @@ const DB = {
             if (k === 'settings') return;
             localStorage.removeItem(DB_KEYS[k]);
         });
-        ['sp_program_code', 'sp_cloud_last_user_id', 'sp_cloud_task_syllabus_week_map',
+        ['sp_program_code', 'sp_cloud_last_user_id',
          'sp_cancelled_occurrences', 'sp_cloud_dirty_subjects', 'sp_cloud_dirty_attendance',
-         'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters']
+         'sp_cloud_dirty_grades', 'sp_cloud_dirty_semesters', 'sp_cloud_dirty_tasks', 'sp_cloud_dirty_collections']
             .forEach(k => localStorage.removeItem(k));
     },
     resetAll() {
@@ -375,7 +380,18 @@ const DB = {
     }
 };
 
+function academicDateKey() {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
 DB.init();
+
+window.addEventListener('planner:semester-context-changed', function (event) {
+    if (event.detail && event.detail.activeChanged && !window._semesterContextReloading) {
+        window._semesterContextReloading = true;
+        window.location.reload();
+    }
+});
 
 const PROGRAM_KEY = 'sp_program_code';
 

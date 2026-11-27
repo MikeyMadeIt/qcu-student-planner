@@ -34,12 +34,11 @@ html:has(.legal-page) {
     margin-bottom: var(--grid-gap);
     padding: var(--space-4);
     border: 1px solid var(--border);
-    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-md);
     background: var(--surface);
 }
 
-.lg-notice > i {
+.lg-notice > .lucide-icon {
     flex: 0 0 auto;
     margin-top: 2px;
     color: rgb(var(--accent));
@@ -73,7 +72,7 @@ html:has(.legal-page) {
     color: var(--text);
 }
 
-.lg-toc-title i {
+.lg-toc-title .lucide-icon {
     color: rgb(var(--accent));
 }
 
@@ -146,40 +145,35 @@ html:has(.legal-page) {
     margin-top: var(--space-3);
 }
 
-.lg-toc-details summary {
+.lg-toc-toggle {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     min-height: 2.75rem;
     padding: 0 var(--space-2);
+    border: 0;
+    background: transparent;
     color: var(--text-soft);
+    font: inherit;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     border-radius: var(--radius-sm);
 }
 
-.lg-toc-details summary {
-    list-style: none;
-}
-
-.lg-toc-details summary::-webkit-details-marker {
-    display: none;
-}
-
-.lg-toc-details summary i {
+.lg-toc-toggle .lucide-icon {
     transition: transform var(--transition-fast);
 }
 
-.lg-toc-details[open] summary i {
+.lg-toc-toggle[aria-expanded="true"] .lucide-icon {
     transform: rotate(180deg);
 }
 
-.lg-toc-details summary:hover {
+.lg-toc-toggle:hover {
     color: var(--text);
 }
 
-.lg-toc-details summary:focus-visible,
+.lg-toc-toggle:focus-visible,
 .lg-toc-card a:focus-visible,
 .lg-rail a:focus-visible,
 .lg-top:focus-visible,
@@ -195,6 +189,10 @@ html:has(.legal-page) {
     margin-top: var(--space-3);
     padding-top: var(--space-4);
     border-top: 1px solid var(--border);
+}
+
+.lg-toc-full[hidden] {
+    display: none;
 }
 
 @media (min-width: 720px) {
@@ -312,14 +310,9 @@ html:has(.legal-page) {
 }
 
 .lg-rail .lg-toc-sub {
-    display: none;
     margin: var(--space-1) 0 var(--space-2);
     padding-left: var(--space-3);
     border-left: 1px solid var(--border);
-}
-
-.lg-rail-group.is-active .lg-toc-sub {
-    display: block;
 }
 
 .lg-rail .lg-toc-sub a {

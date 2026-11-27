@@ -7,7 +7,9 @@
     function trackPush(p) {
         const entry = p.catch(() => {});
         _pending.push(entry);
+        notifySyncStatusChanged();
         entry.finally(() => { _pending = _pending.filter(x => x !== entry); });
+        entry.finally(notifySyncStatusChanged);
         return p;
     }
     function waitForPendingPushes(timeoutMs) {
@@ -23,6 +25,48 @@
         return waitForPendingPushes(timeoutMs != null ? timeoutMs : 8000);
     };
     window.CloudSync.getLastSyncError = function () { return getLastSyncError(); };
+    window.CloudSync.getSyncStatus = function () {
+        let lastSuccessfulAt = null;
+        try { lastSuccessfulAt = Number(localStorage.getItem('sp_cloud_last_success')) || null; } catch (e) { /* ignore */ }
+        return { pending: _pending.length > 0, error: getLastSyncError(), lastSuccessfulAt };
+    };
+    window.CloudSync.retryFailedSync = async function () {
+        const retryTasks = new Map(DB.getTasks().map(t => [t.id, t]));
+        Object.entries(getDirtyTasks()).forEach(([id, task]) => task ? retryTasks.set(id, task) : retryTasks.delete(id));
+        const taskRows = [...retryTasks.values()];
+        const dirtyCollections = getDirtyCollections();
+        const retrySubjects = mergeDirtyCollection('subjects', DB.getSubjects());
+        const retryEvents = mergeDirtyCollection('calendarEvents', DB.getCalendarEvents());
+        const retryNotes = mergeDirtyCollection('notes', DB.getNotes());
+        const jobs = [
+            pushSubjects(retrySubjects), pushTasks(taskRows),
+            pushCalendarEvents(retryEvents), pushNotes(retryNotes),
+            pushAttendance(DB.getAttendance().slice()), pushGrades(DB.getGrades().slice()),
+            queueGwaCalcSync(DB.getGwaCalcRows().slice()),
+        ];
+        await Promise.all(jobs.map(job => trackPush(Promise.resolve(job))));
+        if (!getLastSyncError() && taskRows.length) _saveTasks(taskRows);
+        if (!getLastSyncError()) {
+            if (dirtyCollections.subjects) _saveSubjects(retrySubjects);
+            if (dirtyCollections.calendarEvents) _saveCalendarEvents(retryEvents);
+            if (dirtyCollections.notes) _saveNotes(retryNotes);
+        }
+        return { ok: !getLastSyncError(), error: getLastSyncError() };
+    };
+    let _calendarRefreshPromise = null;
+    window.CloudSync.refreshAcademicCalendar = function () {
+        if (_calendarRefreshPromise) return _calendarRefreshPromise;
+        _calendarRefreshPromise = import('../services/academic-calendar-service.js')
+            .then(module => module.AcademicCalendarService.getCalendar())
+            .then(result => {
+                if (result && result.ok) DB.setUniversityCalendar(result.data);
+                else if (result && result.message) console.warn('University academic calendar could not be refreshed.', result.message);
+                return result;
+            })
+            .catch(error => { console.warn('University academic calendar could not be refreshed.', error); return { ok: false }; })
+            .finally(() => { _calendarRefreshPromise = null; });
+        return _calendarRefreshPromise;
+    };
 
     function loadMap() {
         const empty = { subjects: {}, tasks: {}, calendarEvents: {}, notes: {}, attendance: {}, grades: {} };
@@ -34,7 +78,22 @@
     }
     function semFor(bucket, id) {
         const m = loadMap();
-        return (m[bucket] && m[bucket][id]) || DB.getActiveSemesterId();
+        return (m[bucket] && m[bucket][id]) || null;
+    }
+    let semesterServerToLocal = new Map();
+    let semesterLocalToServer = new Map();
+    function semForRow(bucket, row) {
+        if (row.semester_id && semesterServerToLocal.has(row.semester_id)) return semesterServerToLocal.get(row.semester_id);
+        return semFor(bucket, row.id) || row.semester_id || null;
+    }
+    function serverSemesterId(localId) {
+        if (!localId) return null;
+        return semesterLocalToServer.get(localId) || (isUuid(localId) ? localId : null);
+    }
+    function requireServerSemesterId(localId, area) {
+        const serverId = serverSemesterId(localId);
+        if (!serverId) throw new Error('Select a valid semester before saving ' + area + '.');
+        return serverId;
     }
     function setSemFor(bucket, id, semId) {
         const m = loadMap();
@@ -65,6 +124,7 @@
                 if (cur && cur.area !== area) return;
             }
             localStorage.removeItem(LAST_ERROR_KEY);
+            localStorage.setItem('sp_cloud_last_success', String(Date.now()));
         } catch (e) { /* ignore */ }
         notifySyncStatusChanged();
     }
@@ -75,7 +135,7 @@
     function toast(msg, kind, area) {
         if (kind === 'high' || kind === 'danger') recordSyncError(area || 'sync', msg);
         if (window.Toast && typeof window.Toast.show === 'function') {
-            window.Toast.show(msg, kind || 'high', 'bi-cloud-slash');
+            window.Toast.show(msg, kind || 'high', 'icon-lucide-cloud-off');
         }
     }
 
@@ -109,13 +169,65 @@
         try { localStorage.setItem(DIRTY_GRADES_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
     }
 
-    const DIRTY_SEM_KEY = 'sp_cloud_dirty_semesters';
-    function getDirtySem() {
-        try { return new Set(JSON.parse(localStorage.getItem(DIRTY_SEM_KEY)) || []); }
-        catch (e) { return new Set(); }
+    const DIRTY_TASKS_KEY = 'sp_cloud_dirty_tasks';
+    function getDirtyTasks() {
+        try { return JSON.parse(localStorage.getItem(DIRTY_TASKS_KEY)) || {}; } catch (e) { return {}; }
     }
-    function setDirtySem(set) {
-        try { localStorage.setItem(DIRTY_SEM_KEY, JSON.stringify([...set])); } catch (e) { /* ignore */ }
+    function setDirtyTasks(value) {
+        try {
+            if (Object.keys(value).length) localStorage.setItem(DIRTY_TASKS_KEY, JSON.stringify(value));
+            else localStorage.removeItem(DIRTY_TASKS_KEY);
+        } catch (e) { /* keep local records available even if metadata storage fails */ }
+    }
+    function markTasksDirty(list) {
+        const dirty = {};
+        const ids = new Set((list || []).map(t => t.id));
+        last.tasks.forEach((_, id) => { if (!ids.has(id)) dirty[id] = null; });
+        (list || []).forEach(t => { dirty[t.id] = t; });
+        setDirtyTasks(dirty);
+    }
+    const DIRTY_COLLECTIONS_KEY = 'sp_cloud_dirty_collections';
+    function getDirtyCollections() {
+        try { return JSON.parse(localStorage.getItem(DIRTY_COLLECTIONS_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function setDirtyCollection(bucket, value) {
+        const all = getDirtyCollections();
+        if (Object.keys(value).length) all[bucket] = value;
+        else delete all[bucket];
+        try {
+            if (Object.keys(all).length) localStorage.setItem(DIRTY_COLLECTIONS_KEY, JSON.stringify(all));
+            else localStorage.removeItem(DIRTY_COLLECTIONS_KEY);
+        } catch (e) { /* preserve local rows */ }
+    }
+    function markCollectionDirty(bucket, rows) {
+        const dirty = {};
+        const ids = new Set((rows || []).map(r => r.id));
+        (last[bucket] || new Map()).forEach((_, id) => { if (!ids.has(id)) dirty[id] = null; });
+        (rows || []).forEach(r => { dirty[r.id] = r; });
+        setDirtyCollection(bucket, dirty);
+    }
+    function markChangedCollectionDirty(bucket, previousRows, nextRows) {
+        const pending = Object.assign({}, getDirtyCollections()[bucket] || {});
+        const previous = new Map((previousRows || []).map(row => [row.id, row]));
+        const next = new Map((nextRows || []).map(row => [row.id, row]));
+        previous.forEach((row, id) => {
+            if (!next.has(id)) pending[id] = null;
+            else if (JSON.stringify(row) !== JSON.stringify(next.get(id))) pending[id] = next.get(id);
+        });
+        next.forEach((row, id) => {
+            if (!previous.has(id)) pending[id] = row;
+            else if (JSON.stringify(previous.get(id)) === JSON.stringify(row) && !serverSemesterId(row.semesterId)) delete pending[id];
+        });
+        (last[bucket] || new Map()).forEach((_, id) => {
+            if (!next.has(id)) pending[id] = null;
+        });
+        setDirtyCollection(bucket, pending);
+    }
+    function mergeDirtyCollection(bucket, serverRows) {
+        const rows = new Map((serverRows || []).map(r => [r.id, r]));
+        const pending = getDirtyCollections()[bucket] || {};
+        Object.entries(pending).forEach(([id, row]) => row ? rows.set(id, row) : rows.delete(id));
+        return [...rows.values()];
     }
 
     let overlayCount = 0;
@@ -127,7 +239,7 @@
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
         el.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg,#111318);opacity:.97;';
-        el.innerHTML = '<i class="bi bi-mortarboard" aria-hidden="true" style="font-size:1.9rem;color:rgb(var(--accent,36,87,214))"></i>' +
+        el.innerHTML = '<i class="icon-lucide-graduation-cap" aria-hidden="true" style="font-size:1.9rem;color:rgb(var(--accent,36,87,214))"></i>' +
             '<div class="ld-typing" aria-hidden="true"><span></span><span></span><span></span></div>' +
             '<div style="color:var(--text-soft,#A1A8B5);font-size:.9rem">Loading your data…</div>';
         document.body.appendChild(el);
@@ -182,7 +294,7 @@
             source: row.source || 'manual',
             setupStatus: row.setup_status || 'completed',
             curriculumKey: row.curriculum_key || '',
-            semesterId: semFor('subjects', row.id),
+            semesterId: semForRow('subjects', row),
         };
     }
     function subjectLocalToRow(s, userId) {
@@ -200,6 +312,7 @@
             source: s.source || 'manual',
             setup_status: s.setupStatus || 'completed',
             curriculum_key: s.curriculumKey || null,
+            semester_id: requireServerSemesterId(s.semesterId, 'this subject'),
         };
     }
 
@@ -225,7 +338,7 @@
             createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
             updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
             checklist: (checklist || []).map(c => ({ id: c.id, text: c.text, done: !!c.done })),
-            semesterId: semFor('tasks', row.id),
+            semesterId: semForRow('tasks', row),
         };
     }
     function taskLocalToRow(t, userId) {
@@ -242,6 +355,7 @@
             remarks: t.remarks || '',
             completed_at: t.completedAt ? new Date(t.completedAt).toISOString() : null,
             updated_at: new Date().toISOString(),
+            semester_id: requireServerSemesterId(t.semesterId, 'this task'),
         };
     }
 
@@ -252,7 +366,7 @@
             category: row.category || '', color: row.color || '',
             description: row.note || '',
             createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
-            semesterId: semFor('calendarEvents', row.id),
+            semesterId: semForRow('calendarEvents', row),
         };
     }
     function eventLocalToRow(e, userId) {
@@ -260,6 +374,7 @@
             id: e.id, user_id: userId, title: e.title || '', date: e.date,
             start_time: e.startTime || null, end_time: e.endTime || null,
             category: e.category || null, color: e.color || null, note: e.description || '',
+            semester_id: serverSemesterId(e.semesterId),
         };
     }
 
@@ -272,7 +387,7 @@
             checklist: [],
             createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
             updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : Date.now(),
-            semesterId: semFor('notes', row.id),
+            semesterId: semForRow('notes', row),
         };
     }
     function notesLocalToRow(n, userId) {
@@ -281,7 +396,7 @@
             category: n.category || null, pinned: !!n.pinned, favorite: !!n.favorite,
             subject_id: n.subjectId || null, task_id: n.taskId || null,
             tags: Array.isArray(n.tags) ? n.tags : [],
-            updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(), semester_id: serverSemesterId(n.semesterId),
         };
     }
 
@@ -289,26 +404,26 @@
         return {
             id: row.id, subjectId: row.subject_id, date: row.date, status: row.status || '',
             online: !!row.online, notes: row.notes || '',
-            semesterId: semFor('attendance', row.id),
+            semesterId: semForRow('attendance', row),
         };
     }
     function attendanceLocalToRow(r, userId) {
         return {
             id: r.id, user_id: userId, subject_id: r.subjectId, date: r.date,
             status: r.status || '', online: !!r.online, notes: r.notes || '',
-            updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(), semester_id: serverSemesterId(r.semesterId),
         };
     }
 
     function gwaRowToLocal(row) {
-        return { id: row.id, label: row.label || '', units: row.units != null ? row.units : '', grade: row.grade != null ? row.grade : '' };
+        return { id: row.id, label: row.label || '', units: row.units != null ? row.units : '', grade: row.grade != null ? row.grade : '', semesterId: semForRow('gwaCalc', row) };
     }
     function gwaLocalToRow(r, userId) {
         return {
             id: r.id, user_id: userId, label: r.label || '',
             units: r.units === '' || r.units == null ? 0 : (+r.units || 0),
             grade: r.grade === '' || r.grade == null ? 0 : (+r.grade || 0),
-            updated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(), semester_id: requireServerSemesterId(r.semesterId, 'the GWA calculator entry'),
         };
     }
 
@@ -316,7 +431,7 @@
         return {
             id: row.id,
             subjectId: row.subject_id,
-            semesterId: semFor('grades', row.id),
+            semesterId: semForRow('grades', row),
             components: (components || []).map(c => ({
                 id: c.id, name: c.name || '', weight: c.weight != null ? Number(c.weight) : 0,
                 assessments: (assessmentsByComponent[c.id] || []).map(a => ({
@@ -326,43 +441,6 @@
                 })),
             })),
         };
-    }
-
-    const SERVER_SEM_KEY = 'sp_cloud_server_semester_id';
-    async function getServerSemesterId(userId) {
-        let id = null;
-        try { id = localStorage.getItem(SERVER_SEM_KEY); } catch (e) { /* ignore */ }
-        if (id) return id;
-        const supabase = await getClient();
-        const { data: existing, error: selErr } = await supabase
-            .from('semesters')
-            .select('id')
-            .eq('user_id', userId)
-            .is('client_id', null)
-            .limit(1)
-            .maybeSingle();
-        if (!selErr && existing && existing.id) {
-            try { localStorage.setItem(SERVER_SEM_KEY, existing.id); } catch (e) { /* ignore */ }
-            return existing.id;
-        }
-        const { data, error } = await supabase
-            .from('semesters')
-            .insert({ user_id: userId, name: 'My Planner Data', school_year: String(new Date().getFullYear()), total_weeks: 15, is_active: false })
-            .select('id')
-            .single();
-        if (error) {
-            if (error.code === '23505') {
-                const { data: retry } = await supabase.from('semesters').select('id').eq('user_id', userId).is('client_id', null).limit(1).maybeSingle();
-                if (retry && retry.id) {
-                    try { localStorage.setItem(SERVER_SEM_KEY, retry.id); } catch (e) { /* ignore */ }
-                    return retry.id;
-                }
-            }
-            throw error;
-        }
-        if (!data) throw new Error('Could not create placeholder semester');
-        try { localStorage.setItem(SERVER_SEM_KEY, data.id); } catch (e) { /* ignore */ }
-        return data.id;
     }
 
     // `semesters.client_id` holds the local deterministic id (e.g. "2026-2027-1")
@@ -375,23 +453,46 @@
             endDate: row.end_date || '',
             finalsDate: row.finals_date || '',
             totalWeeks: row.total_weeks != null ? Number(row.total_weeks) : 15,
-        };
-    }
-    function semesterLocalToRow(s, userId, activeId) {
-        return {
-            user_id: userId, client_id: s.id,
-            name: s.name || '', school_year: s.schoolYear || '',
-            start_date: s.startDate || null, end_date: s.endDate || null,
-            finals_date: s.finalsDate || null, total_weeks: s.totalWeeks || 15,
-            is_active: s.id === activeId,
+            status: row.status || 'archived',
         };
     }
 
     const last = {
         subjects: new Map(), tasks: new Map(), calendarEvents: new Map(),
         notes: new Map(), attendance: new Map(), grades: new Map(),
-        gwaCalc: new Map(), semesters: new Map(),
+        gwaCalc: new Map(),
     };
+    let gwaSyncQueue = null;
+    let gwaSyncQueuedRows = null;
+    let gwaSyncTimer = null;
+    let gwaSyncWaiters = [];
+    function queueGwaCalcSync(rows) {
+        gwaSyncQueuedRows = Array.isArray(rows) ? rows.map(row => ({ ...row })) : [];
+        if (gwaSyncTimer) clearTimeout(gwaSyncTimer);
+        const completion = new Promise(resolve => gwaSyncWaiters.push(resolve));
+        gwaSyncTimer = setTimeout(runGwaCalcSyncQueue, 180);
+        return completion;
+    }
+    function runGwaCalcSyncQueue() {
+        if (gwaSyncTimer) clearTimeout(gwaSyncTimer);
+        gwaSyncTimer = null;
+        if (gwaSyncQueue) return gwaSyncQueue;
+        gwaSyncQueue = (async () => {
+            while (gwaSyncQueuedRows) {
+                const rows = gwaSyncQueuedRows;
+                gwaSyncQueuedRows = null;
+                await pushGwaCalc(rows);
+            }
+        })().finally(() => {
+            gwaSyncQueue = null;
+            if (gwaSyncQueuedRows) {
+                gwaSyncTimer = setTimeout(runGwaCalcSyncQueue, 0);
+            } else {
+                gwaSyncWaiters.splice(0).forEach(resolve => resolve());
+            }
+        });
+        return gwaSyncQueue;
+    }
     let _lastCancelledJson = '[]';
 
     const LAST_USER_KEY = 'sp_cloud_last_user_id';
@@ -427,6 +528,7 @@
 
     async function hydrate() {
         const userId = await getUserId();
+        DB.setSemesterContextUser(userId);
         if (!userId) return;
         _sessionUserId = userId;
         await _subjQueue;
@@ -438,7 +540,6 @@
             DB.clearPrivateCacheOnSignOut();
             try {
                 localStorage.removeItem(MAP_KEY);
-                localStorage.removeItem(SERVER_SEM_KEY);
             } catch (e) { /* ignore */ }
         }
         try { localStorage.setItem(LAST_USER_KEY, userId); } catch (e) { /* ignore */ }
@@ -446,7 +547,10 @@
         try {
             const supabase = await getClient();
 
-            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes, prefRes] = await Promise.all([
+            const calendarPromise = import('../services/academic-calendar-service.js')
+                .then(module => module.AcademicCalendarService.getCalendar())
+                .catch(error => ({ ok: false, message: error.message }));
+            const [subjRes, taskRes, clRes, evRes, noteRes, attRes, gradeRes, gcRes, gaRes, gwaRes, coRes, semRes, prefRes, calendarResult] = await Promise.all([
                 supabase.from('subjects').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
                 supabase.from('task_checklist_items').select('*').order('position', { ascending: true }),
@@ -460,6 +564,7 @@
                 supabase.from('cancelled_occurrences').select('occurrences').eq('user_id', userId).maybeSingle(),
                 supabase.from('semesters').select('*').eq('user_id', userId).not('client_id', 'is', null).order('created_at', { ascending: true }),
                 supabase.from('user_preferences').select('prefs').eq('user_id', userId).maybeSingle(),
+                calendarPromise,
             ]);
 
             // user_preferences is new (migration 0026): on a project where it
@@ -478,6 +583,31 @@
                 .map(r => r.error).find(Boolean);
             if (firstError) throw firstError;
 
+            const serverSemesters = (semRes.data || []).map(semesterRowToLocal);
+            const serverSemIds = new Set(serverSemesters.map(s => s.id));
+            const localOnlySemesters = readKey(DB_KEYS.semesters, []).filter(s => !serverSemIds.has(s.id));
+            const semesters = [...serverSemesters, ...localOnlySemesters];
+            semesterServerToLocal = new Map();
+            semesterLocalToServer = new Map();
+            (semRes.data || []).forEach(row => {
+                if (row.client_id) {
+                    semesterServerToLocal.set(row.id, row.client_id);
+                    semesterLocalToServer.set(row.client_id, row.id);
+                }
+            });
+            if (calendarResult && calendarResult.ok && calendarResult.data.available) {
+                const calendar = calendarResult.data;
+                calendar.semesters.forEach(semester => {
+                    semesterServerToLocal.set(semester.id, semester.id);
+                    semesterLocalToServer.set(semester.id, semester.id);
+                });
+                DB.setUniversityCalendar(calendar);
+            } else if (calendarResult && !calendarResult.ok) {
+                console.warn('University academic calendar could not be refreshed; keeping the cached calendar.', calendarResult.message);
+            } else {
+                DB.setUniversityCalendar({ available: false, academicYears: [], semesters: [], activeSemester: null, updatedAt: null });
+            }
+
             const checklistByTask = {};
             (clRes.data || []).forEach(c => {
                 (checklistByTask[c.task_id] = checklistByTask[c.task_id] || []).push(c);
@@ -492,44 +622,42 @@
             });
 
             const serverSubjects = (subjRes.data || []).map(subjectRowToLocal);
+            const persistedSubjects = mergeDirtyCollection('subjects', serverSubjects);
             const dirtyIds = getDirty();
-            const localDirty = DB.getSubjects().filter(s => dirtyIds.has(s.id));
+            const localDirty = persistedSubjects.filter(s => dirtyIds.has(s.id));
             const localDirtyMap = new Map(localDirty.map(s => [s.id, s]));
-            const subjects = serverSubjects.map(s => localDirtyMap.get(s.id) || s);
-            localDirty.forEach(s => { if (!serverSubjects.some(x => x.id === s.id)) subjects.push(s); });
+            const subjects = persistedSubjects.map(s => localDirtyMap.get(s.id) || s);
+            localDirty.forEach(s => { if (!persistedSubjects.some(x => x.id === s.id)) subjects.push(s); });
             setDirty(new Set(localDirty.map(s => s.id)));
-            const tasks = (taskRes.data || []).map(r => taskRowToLocal(r, checklistByTask[r.id]));
-            const events = (evRes.data || []).map(eventRowToLocal);
-            const notes = (noteRes.data || []).map(notesRowToLocal);
+            const serverTasks = (taskRes.data || []).map(r => taskRowToLocal(r, checklistByTask[r.id]));
+            const pendingTasks = getDirtyTasks();
+            const tasksById = new Map(serverTasks.map(t => [t.id, t]));
+            Object.entries(pendingTasks).forEach(([id, task]) => {
+                if (task) tasksById.set(id, task);
+                else tasksById.delete(id);
+            });
+            const tasks = [...tasksById.values()];
+            const events = mergeDirtyCollection('calendarEvents', (evRes.data || []).map(eventRowToLocal));
+            const notes = mergeDirtyCollection('notes', (noteRes.data || []).map(notesRowToLocal));
             const serverAtt = (attRes.data || []).map(attendanceRowToLocal);
+            const persistedAttendance = mergeDirtyCollection('attendance', serverAtt);
             const dirtyAttIds = getDirtyAtt();
-            const localDirtyAtt = DB.getAttendance().filter(r => dirtyAttIds.has(r.id));
+            const localDirtyAtt = persistedAttendance.filter(r => dirtyAttIds.has(r.id));
             const dirtyAttMap = new Map(localDirtyAtt.map(r => [r.id, r]));
-            const attendance = serverAtt.map(r => dirtyAttMap.get(r.id) || r);
-            localDirtyAtt.forEach(r => { if (!serverAtt.some(x => x.id === r.id)) attendance.push(r); });
+            const attendance = persistedAttendance.map(r => dirtyAttMap.get(r.id) || r);
+            localDirtyAtt.forEach(r => { if (!persistedAttendance.some(x => x.id === r.id)) attendance.push(r); });
             setDirtyAtt(new Set(localDirtyAtt.map(r => r.id)));
             const serverGrades = (gradeRes.data || []).map(r => gradeRowToLocal(r, componentsByGrade[r.id], assessmentsByComponent));
+            const persistedGrades = mergeDirtyCollection('grades', serverGrades);
             const dirtyGradeIds = getDirtyGrades();
-            const localDirtyGrades = DB.getGrades().filter(g => g.id && dirtyGradeIds.has(g.id));
+            const localDirtyGrades = persistedGrades.filter(g => g.id && dirtyGradeIds.has(g.id));
             const localDirtyGradesMap = new Map(localDirtyGrades.map(g => [g.id, g]));
-            const grades = serverGrades.map(g => localDirtyGradesMap.get(g.id) || g);
-            localDirtyGrades.forEach(g => { if (!serverGrades.some(x => x.id === g.id)) grades.push(g); });
+            const grades = persistedGrades.map(g => localDirtyGradesMap.get(g.id) || g);
+            localDirtyGrades.forEach(g => { if (!persistedGrades.some(x => x.id === g.id)) grades.push(g); });
             setDirtyGrades(new Set(localDirtyGrades.map(g => g.id)));
 
-            const gwaRows = (gwaRes.data || []).map(gwaRowToLocal);
-
-            const serverSemesters = (semRes.data || []).map(semesterRowToLocal);
-            const serverSemIds = new Set(serverSemesters.map(s => s.id));
-            const localOnlySemesters = DB.getSemesters().filter(s => !serverSemIds.has(s.id));
-            const semesters = [...serverSemesters, ...localOnlySemesters];
-            setDirtySem(new Set(localOnlySemesters.map(s => s.id)));
-
-            if (!DB.get('activeSemesterId', null)) {
-                const serverActiveRow = (semRes.data || []).find(r => r.is_active && r.client_id);
-                if (serverActiveRow && semesters.some(s => s.id === serverActiveRow.client_id)) {
-                    DB.set('activeSemesterId', serverActiveRow.client_id);
-                }
-            }
+            const serverGwaRows = (gwaRes.data || []).map(gwaRowToLocal);
+            const gwaRows = mergeDirtyCollection('gwaCalc', serverGwaRows);
 
             DB.set('subjects', subjects);
             DB.set('tasks', tasks);
@@ -538,7 +666,7 @@
             DB.set('attendance', attendance);
             DB.set('grades', grades);
             DB.set('gwaCalc', gwaRows);
-            if (semesters.length) DB.set('semesters', semesters);
+            DB.set('semesters', semesters);
 
             if (coRes && coRes.data && Array.isArray(coRes.data.occurrences)) {
                 DB.saveCancelledOccurrences(coRes.data.occurrences);
@@ -605,20 +733,36 @@
             }
 
             last.subjects = new Map(serverSubjects.map(s => [s.id, true]));
-            last.tasks = new Map(tasks.map(t => [t.id, true]));
-            last.calendarEvents = new Map(events.map(e => [e.id, true]));
-            last.notes = new Map(notes.map(n => [n.id, true]));
+            last.tasks = new Map(serverTasks.map(t => [t.id, true]));
+            last.calendarEvents = new Map((evRes.data || []).map(r => [r.id, true]));
+            last.notes = new Map((noteRes.data || []).map(r => [r.id, true]));
             last.attendance = new Map(serverAtt.map(a => [a.id, true]));
             last.grades = new Map(serverGrades.map(g => [g.id, true]));
-            last.gwaCalc = new Map(gwaRows.map(r => [r.id, true]));
-            last.semesters = new Map(serverSemesters.map(s => [s.id, true]));
+            // Legacy rows without a semester remain locally preserved, but
+            // are not managed by semester-scoped synchronization.
+            last.gwaCalc = new Map(serverGwaRows.filter(r => r.semesterId && isSyncableGwaRow(r)).map(r => [r.id, true]));
 
             clearSyncError('load');
 
-            if (localDirty.length) pushSubjects(subjects.slice());
-            if (localDirtyAtt.length) pushAttendance(attendance.slice());
-            if (localDirtyGrades.length) pushGrades(grades.slice());
-            if (localOnlySemesters.length) pushSemesters(semesters.slice());
+            const pendingCollections = getDirtyCollections();
+            if (localDirty.length || (pendingCollections.subjects && Object.keys(pendingCollections.subjects).length)) pushSubjects(subjects.slice());
+            const hasMappableSemester = (rows, bucket) => (rows || []).some(row => {
+                const localId = semForRow(bucket, row);
+                const serverId = serverSemesterId(localId);
+                return !!serverId && row.semester_id !== serverId;
+            });
+            // Persist only associations that can be reconstructed from the
+            // old per-record local map or an existing database relation.
+            // Unmapped/ambiguous records stay unassigned for later review.
+            if (hasMappableSemester(subjRes.data, 'subjects')) pushSubjects(subjects.slice());
+            if (hasMappableSemester(taskRes.data, 'tasks')) pushTasks(tasks.slice());
+            if (Object.keys(pendingTasks).length) pushTasks(tasks.slice());
+            if ((getDirtyCollections().calendarEvents && Object.keys(getDirtyCollections().calendarEvents).length) || hasMappableSemester(evRes.data, 'calendarEvents')) pushCalendarEvents(events.slice());
+            if ((getDirtyCollections().notes && Object.keys(getDirtyCollections().notes).length) || hasMappableSemester(noteRes.data, 'notes')) pushNotes(notes.slice());
+            if (hasMappableSemester(attRes.data, 'attendance')) pushAttendance(attendance.slice());
+            if (hasMappableSemester(gradeRes.data, 'grades')) pushGrades(grades.slice());
+            if (localDirtyAtt.length || (pendingCollections.attendance && Object.keys(pendingCollections.attendance).length)) pushAttendance(attendance.slice());
+            if (localDirtyGrades.length || (pendingCollections.grades && Object.keys(pendingCollections.grades).length)) pushGrades(grades.slice());
             // Re-validate the GWA calculator on every load. A push only ever
             // runs when a row is edited, so a past failure (e.g. a blank row
             // that used to violate gwa_calculator_grade_check) stayed stuck
@@ -628,7 +772,7 @@
             // already-valid, already-synced rows here is a harmless no-op
             // when nothing is actually wrong, but it means a resolved error
             // clears itself instead of waiting on the user.
-            pushGwaCalc(gwaRows.slice());
+            queueGwaCalcSync(gwaRows.slice());
             window.dispatchEvent(new CustomEvent('planner:cloud-synced'));
         } catch (err) {
             console.warn('Cloud sync hydrate failed', err);
@@ -637,14 +781,14 @@
     }
 
     let _subjQueue = Promise.resolve();
-    function pushSubjects(newList) {
-        _subjQueue = _subjQueue.then(() => doPushSubjects(newList)).catch(() => {});
+    function pushSubjects(newList, silentFailure) {
+        _subjQueue = _subjQueue.then(() => doPushSubjects(newList, silentFailure)).catch(error => ({ ok: false, error }));
         return _subjQueue;
     }
 
-    async function doPushSubjects(newList) {
+    async function doPushSubjects(newList, silentFailure) {
         const userId = await getUserId();
-        if (!userId) return;
+        if (!userId) return { ok: false, error: new Error('Sign in before syncing subjects.') };
         const supabase = await getClient();
         const newIds = new Set(newList.map(s => s.id));
         const toDelete = [...last.subjects.keys()].filter(id => !newIds.has(id));
@@ -661,6 +805,15 @@
                     failure = failure || new Error('Subject "' + (s.code || '?') + '" has an invalid id');
                     continue;
                 }
+                const mappedSemesterId = serverSemesterId(s.semesterId);
+                if (!mappedSemesterId) {
+                    // Leave an unchanged legacy row alone; a changed row must
+                    // never be written without its selected semester.
+                    if (dirty.has(s.id)) {
+                        failure = failure || new Error('Select a valid semester before saving subject ' + (s.code || '') + '.');
+                    }
+                    continue;
+                }
                 const { error } = await supabase.from('subjects').upsert(subjectLocalToRow(s, userId), { onConflict: 'id' });
                 if (error) { failure = failure || error; continue; }
                 setSemFor('subjects', s.id, s.semesterId);
@@ -673,22 +826,29 @@
         setDirty(dirty);
         if (failure) {
             console.warn('Cloud sync (subjects) failed', failure);
-            toast("Couldn't save a subject to the server: " + (failure.message || 'unknown error'), 'high', 'subjects');
+            const message = "Couldn't save a subject to the server: " + (failure.message || 'unknown error');
+            recordSyncError('subjects', message);
+            if (!silentFailure) toast(message, 'high', 'subjects');
+            return { ok: false, error: failure };
         } else {
+            setDirtyCollection('subjects', {});
             clearSyncError('subjects');
+            return { ok: true };
         }
     }
 
-    async function pushTasks(newList, changedId) {
+    async function pushTasks(newList, changedId, silentFailure) {
         const userId = await getUserId();
-        if (!userId) return;
+        if (!userId) return { ok: false, error: new Error('Sign in before syncing tasks.') };
         const supabase = await getClient();
         const newIds = new Set(newList.map(t => t.id));
         const toDelete = [...last.tasks.keys()].filter(id => !newIds.has(id));
         try {
             if (toDelete.length) {
-                await supabase.from('task_checklist_items').delete().in('task_id', toDelete);
-                await supabase.from('tasks').delete().in('id', toDelete);
+                const { error: checklistDeleteError } = await supabase.from('task_checklist_items').delete().in('task_id', toDelete);
+                if (checklistDeleteError) throw checklistDeleteError;
+                const { error: taskDeleteError } = await supabase.from('tasks').delete().in('id', toDelete);
+                if (taskDeleteError) throw taskDeleteError;
                 toDelete.forEach(id => dropSemFor('tasks', id));
             }
             for (const t of newList) {
@@ -696,10 +856,12 @@
                 const isNew = !last.tasks.has(t.id);
                 const row = taskLocalToRow(t, userId);
                 if (isNew) row.created_at = new Date(t.createdAt || Date.now()).toISOString();
-                const { error } = await supabase.from('tasks').upsert(row, { onConflict: 'id' });
+        if (!row.semester_id) throw new Error('Select a valid semester before saving this task.');
+        const { error } = await supabase.from('tasks').upsert(row, { onConflict: 'id' });
                 if (error) throw error;
                 setSemFor('tasks', t.id, t.semesterId);
-                await supabase.from('task_checklist_items').delete().eq('task_id', t.id);
+                const { error: checklistDeleteError } = await supabase.from('task_checklist_items').delete().eq('task_id', t.id);
+                if (checklistDeleteError) throw checklistDeleteError;
                 const items = (t.checklist || []).map((c, i) => ({
                     id: (c.id && isUuid(c.id)) ? c.id : (window.crypto && crypto.randomUUID ? crypto.randomUUID() : undefined),
                     task_id: t.id, text: c.text, done: !!c.done, position: i,
@@ -710,10 +872,15 @@
                 }
             }
             last.tasks = new Map(newList.map(t => [t.id, true]));
+            setDirtyTasks({});
             clearSyncError('tasks');
+            return { ok: true };
         } catch (err) {
             console.warn('Cloud sync (tasks) failed', err);
-            toast("Couldn't save that task to the server: " + ((err && err.message) || 'please check your connection and try again.'), 'high', 'tasks');
+            const message = "Couldn't save that task to the server: " + ((err && err.message) || 'please check your connection and try again.');
+            recordSyncError('tasks', message);
+            if (!silentFailure) toast(message, 'high', 'tasks');
+            return { ok: false, error: err };
         }
     }
 
@@ -725,7 +892,8 @@
         const toDelete = [...last.calendarEvents.keys()].filter(id => !newIds.has(id));
         try {
             if (toDelete.length) {
-                await supabase.from('calendar_events').delete().in('id', toDelete);
+                const { error } = await supabase.from('calendar_events').delete().in('id', toDelete);
+                if (error) throw error;
                 toDelete.forEach(id => dropSemFor('calendarEvents', id));
             }
             for (const e of newList) {
@@ -736,6 +904,7 @@
                 setSemFor('calendarEvents', e.id, e.semesterId);
             }
             last.calendarEvents = new Map(newList.map(e => [e.id, true]));
+            setDirtyCollection('calendarEvents', {});
             clearSyncError('calendar');
         } catch (err) {
             console.warn('Cloud sync (calendar events) failed', err);
@@ -751,7 +920,8 @@
         const toDelete = [...last.notes.keys()].filter(id => !newIds.has(id));
         try {
             if (toDelete.length) {
-                await supabase.from('notes').delete().in('id', toDelete);
+                const { error } = await supabase.from('notes').delete().in('id', toDelete);
+                if (error) throw error;
                 toDelete.forEach(id => dropSemFor('notes', id));
             }
             for (const n of newList) {
@@ -761,6 +931,7 @@
                 setSemFor('notes', n.id, n.semesterId);
             }
             last.notes = new Map(newList.map(n => [n.id, true]));
+            setDirtyCollection('notes', {});
             clearSyncError('notes');
         } catch (err) {
             console.warn('Cloud sync (notes) failed', err);
@@ -808,44 +979,46 @@
             console.warn('Cloud sync (attendance) failed', failure);
             toast("Couldn't save attendance to the server: " + (failure.message || 'unknown error'), 'high', 'attendance');
         } else {
+            setDirtyCollection('attendance', {});
             clearSyncError('attendance');
         }
     }
 
-    // A freshly added row (or one whose grade was just cleared) starts out as
-    // { label: '', units: '', grade: '' } — that's a local-only draft, not
-    // real data yet. The grading scale here is 1.00–5.00 (see gwa.js), so 0
-    // is never a valid grade; pushing it as a placeholder tripped the
-    // database's gwa_calculator_grade_check constraint on every sync, and
-    // since the old loop threw on the first error, one blank row blocked
-    // every other (valid) row from syncing too. Only sync rows that actually
-    // have a real grade entered; a row that regresses back to blank is
-    // treated as deleted from the cloud, same as removing it outright.
+    // Drafts and incomplete entries stay local until they have a valid
+    // semester, positive units, and a 1.00–5.00 grade. These rows are not
+    // academic records yet and must not be sent to the database trigger.
     function isSyncableGwaRow(r) {
-        if (r.grade === '' || r.grade == null) return false;
+        if (!r.semesterId || r.units === '' || r.units == null || r.grade === '' || r.grade == null) return false;
+        const units = +r.units;
         const n = +r.grade;
-        return !isNaN(n) && n > 0;
+        return Number.isFinite(units) && units > 0 && Number.isFinite(n) && n >= 1 && n <= 5;
     }
 
     async function pushGwaCalc(newList) {
-        const userId = await getUserId();
-        if (!userId) return;
-        const supabase = await getClient();
         const syncable = newList.filter(isSyncableGwaRow);
-        const newIds = new Set(syncable.map(r => r.id));
-        const toDelete = [...last.gwaCalc.keys()].filter(id => !newIds.has(id));
         try {
-            if (toDelete.length) await supabase.from('gwa_calculator').delete().in('id', toDelete);
+            const userId = await getUserId();
+            if (!userId) return;
+            const supabase = await getClient();
+            const newIds = new Set(syncable.map(r => r.id));
+            const toDelete = [...last.gwaCalc.keys()].filter(id => !newIds.has(id));
+            if (toDelete.length) {
+                const { error } = await supabase.from('gwa_calculator').delete().eq('user_id', userId).in('id', toDelete);
+                if (error) throw error;
+            }
             for (const r of syncable) {
-                if (!isUuid(r.id)) continue;
+                if (!isUuid(r.id)) throw new Error('This calculator entry has an invalid record ID. Keep the entry open and contact support.');
                 const { error } = await supabase.from('gwa_calculator').upsert(gwaLocalToRow(r, userId), { onConflict: 'id' });
                 if (error) throw error;
             }
             last.gwaCalc = new Map(syncable.map(r => [r.id, true]));
+            setDirtyCollection('gwaCalc', {});
             clearSyncError('gwa');
         } catch (err) {
             console.warn('Cloud sync (GWA calculator) failed', err);
-            toast("Couldn't save the GWA calculator to the server: " + ((err && err.message) || 'please check your connection and try again.'), 'high', 'gwa');
+            const message = (err && err.message) || 'please check your connection and try again.';
+            recordSyncError('gwa', message);
+            toast("Couldn't save the GWA calculator to the server: " + message, 'high', 'gwa');
         }
     }
 
@@ -913,14 +1086,21 @@
     }
 
     let _gradesQueue = Promise.resolve();
-    function pushGrades(newList) {
-        _gradesQueue = _gradesQueue.then(() => doPushGrades(newList)).catch(() => {});
+    function pushGrades(newList, silentFailure) {
+        _gradesQueue = _gradesQueue
+            .then(() => doPushGrades(newList, silentFailure))
+            .catch(error => {
+                const message = "Couldn't save that grade to the server: " + (error && error.message || 'unknown error');
+                recordSyncError('grades', message);
+                if (!silentFailure) toast(message, 'high', 'grades');
+                return { ok: false, error };
+            });
         return _gradesQueue;
     }
 
-    async function doPushGrades(newList) {
+    async function doPushGrades(newList, silentFailure) {
         const userId = await getUserId();
-        if (!userId) return;
+        if (!userId) throw new Error('Sign in before syncing grades.');
         const supabase = await getClient();
 
         let mutated = false;
@@ -932,14 +1112,13 @@
         const dirty = getDirtyGrades();
         let failure = null;
         try {
-            const serverSemId = await getServerSemesterId(userId);
-
             for (const gradeId of toDelete) {
-                const { data: comps } = await supabase.from('grade_components').select('id').eq('grade_id', gradeId);
+                const { data: comps, error: compsError } = await supabase.from('grade_components').select('id').eq('grade_id', gradeId);
+                if (compsError) throw compsError;
                 const compIds = (comps || []).map(c => c.id);
-                if (compIds.length) await supabase.from('grade_assessments').delete().in('component_id', compIds);
-                await supabase.from('grade_components').delete().eq('grade_id', gradeId);
-                await supabase.from('grades').delete().eq('id', gradeId);
+                if (compIds.length) { const { error } = await supabase.from('grade_assessments').delete().in('component_id', compIds); if (error) throw error; }
+                { const { error } = await supabase.from('grade_components').delete().eq('grade_id', gradeId); if (error) throw error; }
+                { const { error } = await supabase.from('grades').delete().eq('id', gradeId); if (error) throw error; }
                 dropSemFor('grades', gradeId);
                 last.grades.delete(gradeId);
             }
@@ -949,38 +1128,48 @@
                     failure = failure || new Error('A grade record has an invalid id');
                     continue;
                 }
+                if (last.grades.has(g.id) && !dirty.has(g.id)) continue;
                 let gradeFailed = false;
+                const serverSemester = serverSemesterId(g.semesterId);
+                if (!serverSemester) {
+                    failure = failure || new Error('Select a valid semester before saving this grade.');
+                    continue;
+                }
                 const { error: gErr } = await supabase.from('grades').upsert({
-                    id: g.id, user_id: userId, semester_id: serverSemId, subject_id: g.subjectId,
+                    id: g.id, user_id: userId, semester_id: serverSemester, subject_id: g.subjectId,
                     updated_at: new Date().toISOString(),
                 }, { onConflict: 'id' });
                 if (gErr) { failure = failure || gErr; continue; }
                 setSemFor('grades', g.id, g.semesterId);
 
-                const { data: existingComps } = await supabase.from('grade_components').select('id').eq('grade_id', g.id);
+                const { data: existingComps, error: existingCompsError } = await supabase.from('grade_components').select('id').eq('grade_id', g.id);
+                if (existingCompsError) throw existingCompsError;
                 const keepCompIds = new Set((g.components || []).map(c => c.id));
                 const removedComps = (existingComps || []).map(c => c.id).filter(id => !keepCompIds.has(id));
                 if (removedComps.length) {
-                    await supabase.from('grade_assessments').delete().in('component_id', removedComps);
-                    await supabase.from('grade_components').delete().in('id', removedComps);
+                    const { error: assessmentDeleteError } = await supabase.from('grade_assessments').delete().in('component_id', removedComps);
+                    if (assessmentDeleteError) throw assessmentDeleteError;
+                    const { error: componentDeleteError } = await supabase.from('grade_components').delete().in('id', removedComps);
+                    if (componentDeleteError) throw componentDeleteError;
                 }
 
                 for (let ci = 0; ci < (g.components || []).length; ci++) {
                     const c = g.components[ci];
-                    if (!isUuid(c.id)) { gradeFailed = true; continue; }
+                    if (!isUuid(c.id)) { failure = failure || new Error('A grading component has an invalid id.'); gradeFailed = true; continue; }
                     const { error: cErr } = await supabase.from('grade_components').upsert({
                         id: c.id, grade_id: g.id, name: c.name || '', weight: c.weight || 0, position: ci,
                     }, { onConflict: 'id' });
                     if (cErr) { failure = failure || cErr; gradeFailed = true; continue; }
 
-                    const { data: existingAss } = await supabase.from('grade_assessments').select('id').eq('component_id', c.id);
+                    const { data: existingAss, error: existingAssessmentsError } = await supabase.from('grade_assessments').select('id').eq('component_id', c.id);
+                    if (existingAssessmentsError) throw existingAssessmentsError;
                     const keepAssIds = new Set((c.assessments || []).map(a => a.id));
                     const removedAss = (existingAss || []).map(a => a.id).filter(id => !keepAssIds.has(id));
-                    if (removedAss.length) await supabase.from('grade_assessments').delete().in('id', removedAss);
+                    if (removedAss.length) { const { error } = await supabase.from('grade_assessments').delete().in('id', removedAss); if (error) throw error; }
 
                     for (let ai = 0; ai < (c.assessments || []).length; ai++) {
                         const a = c.assessments[ai];
-                        if (!isUuid(a.id)) { gradeFailed = true; continue; }
+                        if (!isUuid(a.id)) { failure = failure || new Error('An assessment has an invalid id.'); gradeFailed = true; continue; }
                         const { error: aErr } = await supabase.from('grade_assessments').upsert({
                             id: a.id, component_id: c.id, name: a.name || '',
                             score: a.score != null ? a.score : 0,
@@ -999,85 +1188,69 @@
         setDirtyGrades(dirty);
         if (failure) {
             console.warn('Cloud sync (grades) failed', failure);
-            toast("Couldn't save that grade to the server: " + (failure.message || 'unknown error'), 'high', 'grades');
+            const message = "Couldn't save that grade to the server: " + (failure.message || 'unknown error');
+            if (silentFailure) recordSyncError('grades', message);
+            else toast(message, 'high', 'grades');
+            return { ok: false, error: failure };
         } else {
+            setDirtyCollection('grades', {});
             clearSyncError('grades');
-        }
-    }
-
-    let _semQueue = Promise.resolve();
-    function pushSemesters(newList) {
-        _semQueue = _semQueue.then(() => doPushSemesters(newList)).catch(() => {});
-        return _semQueue;
-    }
-
-    async function doPushSemesters(newList) {
-        const userId = await getUserId();
-        if (!userId) return;
-        const supabase = await getClient();
-        const newIds = new Set(newList.map(s => s.id));
-        const toDelete = [...last.semesters.keys()].filter(id => !newIds.has(id));
-        const dirty = getDirtySem();
-        let failure = null;
-        try {
-            if (toDelete.length) {
-                const { error } = await supabase.from('semesters').delete().eq('user_id', userId).in('client_id', toDelete);
-                if (error) failure = error;
-                else toDelete.forEach(id => last.semesters.delete(id));
-            }
-            const activeId = DB.get('activeSemesterId', null) || (newList[0] && newList[0].id) || null;
-            if (activeId) {
-                const { error: deactErr } = await supabase.from('semesters')
-                    .update({ is_active: false })
-                    .eq('user_id', userId)
-                    .eq('is_active', true)
-                    .or(`client_id.is.null,client_id.neq.${activeId}`);
-                if (deactErr) failure = failure || deactErr;
-            }
-            for (const s of newList) {
-                const { error } = await supabase.from('semesters')
-                    .upsert(semesterLocalToRow(s, userId, activeId), { onConflict: 'user_id,client_id' });
-                if (error) { failure = failure || error; continue; }
-                last.semesters.set(s.id, true);
-                dirty.delete(s.id);
-            }
-        } catch (err) {
-            failure = failure || err;
-        }
-        setDirtySem(dirty);
-        if (failure) {
-            console.warn('Cloud sync (semesters) failed', failure);
-            toast("Couldn't save that semester to the server: " + (failure.message || 'unknown error'), 'high', 'semesters');
-        } else {
-            clearSyncError('semesters');
+            return { ok: true };
         }
     }
 
     const _saveSubjects = DB.saveSubjects.bind(DB);
     DB.saveSubjects = function (list) {
-        const prev = new Map(DB.getSubjects().map(s => [s.id, JSON.stringify(s)]));
+        const previous = DB.getSubjects().slice();
+        const prev = new Map(previous.map(s => [s.id, JSON.stringify(s)]));
         const r = _saveSubjects(list);
+        markChangedCollectionDirty('subjects', previous, list);
         const dirty = getDirty();
         list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
+        list.forEach(s => { if (prev.get(s.id) === JSON.stringify(s) && !serverSemesterId(s.semesterId)) dirty.delete(s.id); });
         setDirty(dirty);
         trackPush(pushSubjects(list.slice()));
         return r;
     };
+    DB.saveSubjectsAndSync = async function (list) {
+        const previous = DB.getSubjects().slice();
+        markChangedCollectionDirty('subjects', previous, list);
+        const dirty = getDirty();
+        const previousById = new Map(previous.map(s => [s.id, JSON.stringify(s)]));
+        list.forEach(s => { if (previousById.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
+        list.forEach(s => { if (previousById.get(s.id) === JSON.stringify(s) && !serverSemesterId(s.semesterId)) dirty.delete(s.id); });
+        setDirty(dirty);
+        const result = await trackPush(pushSubjects(list.slice(), true));
+        if (!result || !result.ok) return result || { ok: false, error: new Error('Subject synchronization did not complete.') };
+        if (_saveSubjects(list) === false) return { ok: false, error: new Error('Subject was saved to the server, but could not be cached on this device.') };
+        return { ok: true };
+    };
     const _saveTasks = DB.saveTasks.bind(DB);
     DB.saveTasks = function (list) {
         const r = _saveTasks(list);
+        markTasksDirty(list);
         trackPush(pushTasks(list.slice()));
         return r;
+    };
+    DB.saveTasksAndSync = async function (list) {
+        markTasksDirty(list);
+        const result = await trackPush(pushTasks(list.slice(), null, true));
+        if (!result || !result.ok) return result || { ok: false, error: new Error('Task sync did not complete.') };
+        if (_saveTasks(list) === false) return { ok: false, error: new Error('Task was saved to the server, but could not be cached on this device.') };
+        setDirtyTasks({});
+        return { ok: true };
     };
     const _saveCalendarEvents = DB.saveCalendarEvents.bind(DB);
     DB.saveCalendarEvents = function (list) {
         const r = _saveCalendarEvents(list);
+        markCollectionDirty('calendarEvents', list);
         trackPush(pushCalendarEvents(list.slice()));
         return r;
     };
     const _saveNotes = DB.saveNotes.bind(DB);
     DB.saveNotes = function (list) {
         const r = _saveNotes(list);
+        markCollectionDirty('notes', list);
         trackPush(pushNotes(list.slice()));
         return r;
     };
@@ -1085,6 +1258,7 @@
     DB.saveAttendance = function (list) {
         const prev = new Map(DB.getAttendance().map(r => [r.id, JSON.stringify(r)]));
         const r = _saveAttendance(list);
+        markCollectionDirty('attendance', list);
         const dirty = getDirtyAtt();
         list.forEach(x => { if (prev.get(x.id) !== JSON.stringify(x)) dirty.add(x.id); });
         setDirtyAtt(dirty);
@@ -1093,35 +1267,38 @@
     };
     const _saveGrades = DB.saveGrades.bind(DB);
     DB.saveGrades = function (list) {
+        const previous = DB.getGrades().slice();
         list.forEach(g => { if (!g.id) g.id = DB.uid(); });
-        const prev = new Map(DB.getGrades().map(g => [g.id, JSON.stringify(g)]));
+        const prev = new Map(previous.map(g => [g.id, JSON.stringify(g)]));
         const r = _saveGrades(list);
+        markChangedCollectionDirty('grades', previous, list);
         const dirty = getDirtyGrades();
         list.forEach(g => { if (prev.get(g.id) !== JSON.stringify(g)) dirty.add(g.id); });
         setDirtyGrades(dirty);
         trackPush(pushGrades(list.slice()));
         return r;
     };
+    DB.saveGradesAndSync = async function (list) {
+        const previous = DB.getGrades().slice();
+        list.forEach(g => { if (!g.id) g.id = DB.uid(); });
+        markChangedCollectionDirty('grades', previous, list);
+        const previousById = new Map(previous.map(g => [g.id, JSON.stringify(g)]));
+        const dirty = getDirtyGrades();
+        list.forEach(g => {
+            if (previousById.get(g.id) !== JSON.stringify(g)) dirty.add(g.id);
+        });
+        setDirtyGrades(dirty);
+        const result = await trackPush(pushGrades(list.slice(), true));
+        if (!result || !result.ok) return result || { ok: false, error: new Error('Grade synchronization did not complete.') };
+        if (_saveGrades(list) === false) return { ok: false, error: new Error('Grade was saved to the server, but could not be cached on this device.') };
+        setDirtyGrades(new Set());
+        return { ok: true };
+    };
     const _saveGwaCalcRows = DB.saveGwaCalcRows.bind(DB);
     DB.saveGwaCalcRows = function (list) {
         const r = _saveGwaCalcRows(list);
-        trackPush(pushGwaCalc(list.slice()));
-        return r;
-    };
-    const _saveSemesters = DB.saveSemesters.bind(DB);
-    DB.saveSemesters = function (list) {
-        const prev = new Map(DB.getSemesters().map(s => [s.id, JSON.stringify(s)]));
-        const r = _saveSemesters(list);
-        const dirty = getDirtySem();
-        list.forEach(s => { if (prev.get(s.id) !== JSON.stringify(s)) dirty.add(s.id); });
-        setDirtySem(dirty);
-        trackPush(pushSemesters(list.slice()));
-        return r;
-    };
-    const _setActiveSemester = DB.setActiveSemester.bind(DB);
-    DB.setActiveSemester = function (id) {
-        const r = _setActiveSemester(id);
-        trackPush(pushSemesters(DB.getSemesters().slice()));
+        markCollectionDirty('gwaCalc', list);
+        trackPush(queueGwaCalcSync(list.slice()));
         return r;
     };
     const _saveCancelledOccurrences = DB.saveCancelledOccurrences.bind(DB);
@@ -1140,6 +1317,13 @@
 
     showLoader();
     DB.cloudReady = hydrate().finally(hideLoader);
+    window.setInterval(() => {
+        if (document.visibilityState === 'visible') window.CloudSync.refreshAcademicCalendar();
+    }, 60000);
+    window.addEventListener('focus', () => window.CloudSync.refreshAcademicCalendar());
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') window.CloudSync.refreshAcademicCalendar();
+    });
 
     DB.whenCloudReady = function (fn) {
         if (typeof fn !== 'function') return;
@@ -1158,34 +1342,40 @@
     // itself runs, same order, still scoped to this user's id and still
     // subject to every table's own RLS policy — just not wrapped in a
     // single transaction.
+    async function checkedResetQuery(query) {
+        const result = await query;
+        if (result && result.error) throw result.error;
+        return result || {};
+    }
+
     async function wipeCloudDataFallback(supabase, userId) {
-        const { data: myQuizzes } = await supabase.from('ai_quizzes').select('id').eq('user_id', userId);
+        const { data: myQuizzes } = await checkedResetQuery(supabase.from('ai_quizzes').select('id').eq('user_id', userId));
         if ((myQuizzes || []).length) {
-            await supabase.from('ai_quiz_questions').delete().eq('user_id', userId);
-            await supabase.from('ai_quiz_attempts').delete().eq('user_id', userId);
+            await checkedResetQuery(supabase.from('ai_quiz_questions').delete().eq('user_id', userId));
+            await checkedResetQuery(supabase.from('ai_quiz_attempts').delete().eq('user_id', userId));
         }
-        await supabase.from('ai_quizzes').delete().eq('user_id', userId);
-        await supabase.from('ai_flashcards').delete().eq('user_id', userId);
-        await supabase.from('ai_flashcard_decks').delete().eq('user_id', userId);
-        await supabase.from('ai_chat_messages').delete().eq('user_id', userId);
-        await supabase.from('ai_chat_conversations').delete().eq('user_id', userId);
+        await checkedResetQuery(supabase.from('ai_quizzes').delete().eq('user_id', userId));
+        await checkedResetQuery(supabase.from('ai_flashcards').delete().eq('user_id', userId));
+        await checkedResetQuery(supabase.from('ai_flashcard_decks').delete().eq('user_id', userId));
+        await checkedResetQuery(supabase.from('ai_chat_messages').delete().eq('user_id', userId));
+        await checkedResetQuery(supabase.from('ai_chat_conversations').delete().eq('user_id', userId));
 
-        const { data: myTasks } = await supabase.from('tasks').select('id').eq('user_id', userId);
+        const { data: myTasks } = await checkedResetQuery(supabase.from('tasks').select('id').eq('user_id', userId));
         const taskIds = (myTasks || []).map(t => t.id);
-        if (taskIds.length) await supabase.from('task_checklist_items').delete().in('task_id', taskIds);
-        await supabase.from('tasks').delete().eq('user_id', userId);
+        if (taskIds.length) await checkedResetQuery(supabase.from('task_checklist_items').delete().in('task_id', taskIds));
+        await checkedResetQuery(supabase.from('tasks').delete().eq('user_id', userId));
 
-        const { data: myGrades } = await supabase.from('grades').select('id').eq('user_id', userId);
+        const { data: myGrades } = await checkedResetQuery(supabase.from('grades').select('id').eq('user_id', userId));
         const gradeIds = (myGrades || []).map(g => g.id);
         if (gradeIds.length) {
-            const { data: comps } = await supabase.from('grade_components').select('id').in('grade_id', gradeIds);
+            const { data: comps } = await checkedResetQuery(supabase.from('grade_components').select('id').in('grade_id', gradeIds));
             const compIds = (comps || []).map(c => c.id);
-            if (compIds.length) await supabase.from('grade_assessments').delete().in('component_id', compIds);
-            await supabase.from('grade_components').delete().in('grade_id', gradeIds);
+            if (compIds.length) await checkedResetQuery(supabase.from('grade_assessments').delete().in('component_id', compIds));
+            await checkedResetQuery(supabase.from('grade_components').delete().in('grade_id', gradeIds));
         }
-        await supabase.from('grades').delete().eq('user_id', userId);
+        await checkedResetQuery(supabase.from('grades').delete().eq('user_id', userId));
 
-        const results = await Promise.all([
+        await Promise.all([
             supabase.from('notes').delete().eq('user_id', userId),
             supabase.from('calendar_events').delete().eq('user_id', userId),
             supabase.from('attendance').delete().eq('user_id', userId),
@@ -1195,9 +1385,7 @@
             supabase.from('subjects').delete().eq('user_id', userId),
             supabase.from('user_preferences').delete().eq('user_id', userId),
             supabase.from('semesters').delete().eq('user_id', userId),
-        ]);
-        const firstError = results.map(r => r && r.error).find(Boolean);
-        if (firstError) throw firstError;
+        ].map(checkedResetQuery));
     }
 
     async function wipeCloudData(userId) {
@@ -1211,12 +1399,11 @@
             if (!fnMissing) throw rpcError;
             await wipeCloudDataFallback(supabase, userId);
         }
-        try { localStorage.removeItem(DIRTY_SEM_KEY); localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
+        try { localStorage.removeItem(DIRTY_GRADES_KEY); } catch (e) { /* ignore */ }
         Object.keys(last).forEach(k => last[k] = new Map());
         _lastCancelledJson = '[]';
         try {
             localStorage.removeItem(MAP_KEY);
-            localStorage.removeItem(SERVER_SEM_KEY);
         } catch (e) { /* ignore */ }
         clearSyncError();
     }

@@ -109,7 +109,7 @@
             '<input type="text" class="form-control sch-time-input" id="' + id + 'Text" value="' + (v ? fmt12(v) : '') + '" placeholder="' + esc(o.placeholder || '') + '" ' +
             'inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" role="combobox" aria-autocomplete="list" ' +
             'aria-haspopup="listbox" aria-expanded="false" aria-controls="' + id + 'Menu" aria-invalid="false" aria-describedby="' + id + 'Error">' +
-            '<button type="button" class="sch-time-btn" id="' + id + 'Btn" aria-label="Pick ' + esc(String(o.label).toLowerCase()) + ' from list" aria-haspopup="listbox"><i class="bi bi-clock" aria-hidden="true"></i></button>' +
+            '<button type="button" class="sch-time-btn" id="' + id + 'Btn" aria-label="Pick ' + esc(String(o.label).toLowerCase()) + ' from list" aria-haspopup="listbox"><i class="icon-lucide-clock" aria-hidden="true"></i></button>' +
             '<input type="hidden" id="' + id + '" value="' + v + '">' +
             '<div class="sch-time-menu" id="' + id + 'Menu" role="listbox" aria-label="' + esc(o.label) + ' options" hidden></div>' +
             '</div><p class="sch-subject-error" id="' + id + 'Error" hidden></p>' +
@@ -135,7 +135,7 @@
             var sm = s ? toMins(s.value) : null, em = e ? toMins(e.value) : null;
             var parts = [];
             if (sm != null && em != null && em > sm)
-                parts.push('<i class="bi bi-hourglass-split" aria-hidden="true"></i> ' + fmtLen(em - sm));
+                parts.push('<i class="icon-lucide-hourglass" aria-hidden="true"></i> ' + fmtLen(em - sm));
             var notes = notesFor([h.dataset.start, h.dataset.end]);
             if (notes.length) parts.push(notes.join(' '));
             h.innerHTML = parts.length ? parts.join(' · ') : 'Type a time (9:30 AM, 930, 14:30) or tap the clock to pick.';

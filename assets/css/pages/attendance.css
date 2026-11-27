@@ -679,7 +679,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     user-select: none;
 }
 
-.att-online-pill-inner i {
+.att-online-pill-inner .lucide-icon {
     font-size: .82rem;
     transition: color .18s;
 }
@@ -690,7 +690,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     color: #06b6d4;
 }
 
-.att-online-check:checked ~ .att-online-pill-inner i {
+.att-online-check:checked ~ .att-online-pill-inner .lucide-icon {
     color: #06b6d4;
 }
 
@@ -1094,19 +1094,6 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     text-align: center;
 }
 
-.att-log-empty i {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
-}
-
 .att-log-empty strong { color: var(--text); font-size: .92rem; }
 .att-log-empty span { max-width: 28rem; color: var(--text-soft); font-size: .8rem; line-height: 1.5; }
 
@@ -1119,17 +1106,10 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     text-align: center;
 }
 
-.att-card-empty > i {
-    display: grid;
-    place-items: center;
+.att-card-empty > .empty-icon-circle {
     width: 2.75rem;
     height: 2.75rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.1rem;
 }
 
 .att-card-empty strong { color: var(--text); font-size: .88rem; }
@@ -1655,7 +1635,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     font-weight: 700 !important;
 }
 
-.att-online-check:checked ~ .att-online-pill-inner i {
+.att-online-check:checked ~ .att-online-pill-inner .lucide-icon {
     color: #06b6d4 !important;
 }
 
@@ -1938,7 +1918,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     flex-shrink: 0;
 }
 
-.tk-repeat-badge i {
+.tk-repeat-badge .lucide-icon {
     font-size: .7rem;
 }
 
@@ -3408,7 +3388,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     gap: 8px;
 }
 
-.att-heatmap-filter-btn > i {
+.att-heatmap-filter-btn > .lucide-icon {
     margin: 0 !important;
 }
 
@@ -3595,7 +3575,7 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
     text-overflow: clip;
 }
 
-.att-log-form #attDatePicker .bi {
+.att-log-form #attDatePicker .lucide-icon {
     flex: 0 0 auto;
     margin-left: 0.5rem;
 }
@@ -3653,3 +3633,32 @@ html[data-motion="reduced"] .att-stat-card.att-stat-skeleton::after { animation:
   border: 1px solid rgba(251, 113, 133, .35);
 }
 .att-edit-btn:hover { color: rgb(var(--accent, 36, 87, 214)); }
+
+/* Keep the flattened mobile attendance stack on one spacing rhythm and clear
+   Bootstrap card margins so they do not accumulate with the grid gap. */
+@media (max-width: 991.98px) {
+    .student-app .main-content:has(.attendance-columns) > .topbar {
+        margin-bottom: 0;
+    }
+
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card,
+    .student-app .main-content:has(.attendance-columns) .att-log-form,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats),
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap),
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot,
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown),
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog),
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard {
+        margin-block: 0 !important;
+    }
+
+    .student-app .main-content:has(.attendance-columns) .att-consec-alerts {
+        margin-block: 0 !important;
+    }
+
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot:empty,
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts:empty {
+        display: none;
+    }
+}

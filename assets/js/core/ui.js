@@ -12,20 +12,20 @@ const Toast = {
         }
         return c;
     },
-    show(msg, type = 'accent', icon = 'bi-check-circle') {
+    show(msg, type = 'accent', icon = 'icon-lucide-circle-check') {
         const c = this.container();
         const el = document.createElement('div');
         const kind = { high: 'danger', error: 'danger', danger: 'danger', medium: 'warning', warning: 'warning', info: 'info' }[type] || 'success';
         el.className = `app-toast app-toast-${kind} fade-in`;
         el.setAttribute('role', kind === 'danger' ? 'alert' : 'status');
-        el.innerHTML = `<i class="bi ${icon} toast-item-icon" aria-hidden="true"></i><span class="toast-item-msg">${escHtml(msg)}</span>`;
+        el.innerHTML = `<i class="${icon} toast-item-icon" aria-hidden="true"></i><span class="toast-item-msg">${escHtml(msg)}</span>`;
         c.appendChild(el);
         const isUrgent = kind === 'danger' || kind === 'warning';
         el.addEventListener('click', () => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); });
         if (isUrgent) el.style.cursor = 'pointer';
         setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 300); }, isUrgent ? 12000 : 2600);
     },
-    confirmExport() { window.exportData ? window.exportData() : this.show('Open Settings to export data', 'accent', 'bi-download'); }
+    confirmExport() { window.exportData ? window.exportData() : this.show('Open Settings to export data', 'accent', 'icon-lucide-download'); }
 };
 window.Toast = Toast;
 
@@ -96,7 +96,7 @@ function confirmAction(opts) {
     const iconEl = document.getElementById('confirmIcon');
     iconWrap.style.background = danger ? 'rgba(251,113,133,.15)' : 'rgba(var(--accent),.15)';
     iconEl.style.color = danger ? '#fb7185' : 'rgb(var(--accent))';
-    iconEl.className = 'bi ' + (icon || (danger ? 'bi-exclamation-triangle' : 'bi-question-circle'));
+    window.setLucideIcon(iconEl, icon || (danger ? 'icon-lucide-triangle-alert' : 'icon-lucide-circle-help'));
 
     const reasonWrap = document.getElementById('confirmReasonWrap');
     const reasonLabel = document.getElementById('confirmReasonLabel');
@@ -277,7 +277,7 @@ function ensureChoiceModal() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content card-pad text-center">
         <div class="confirm-icon-wrap" id="choiceActionIconWrap">
-          <i id="choiceActionIcon" class="confirm-icon bi bi-question-circle" aria-hidden="true"></i>
+          <i id="choiceActionIcon" class="confirm-icon icon-lucide-circle-help" aria-hidden="true"></i>
         </div>
         <h5 id="choiceActionTitle" class="mb-1">Choose an option</h5>
         <p class="text-soft mb-0 confirm-message" id="choiceActionMessage"></p>
@@ -297,11 +297,11 @@ function ensureChoiceModal() {
 
 // opts: { title, message, icon, options: [{ label, value, primary }], onChoose(value) }
 function chooseAction(opts) {
-    const { title = 'Choose an option', message = '', icon = 'bi-question-circle', options = [], onChoose } = opts;
+    const { title = 'Choose an option', message = '', icon = 'icon-lucide-circle-help', options = [], onChoose } = opts;
     ensureChoiceModal();
     document.getElementById('choiceActionTitle').textContent = title;
     document.getElementById('choiceActionMessage').textContent = message;
-    document.getElementById('choiceActionIcon').className = 'confirm-icon bi ' + icon;
+    window.setLucideIcon(document.getElementById('choiceActionIcon'), icon);
 
     const buttonsWrap = document.getElementById('choiceActionButtons');
     buttonsWrap.innerHTML = '';

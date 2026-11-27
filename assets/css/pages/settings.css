@@ -156,11 +156,11 @@
     margin-top: var(--space-2);
 }
 
-/* bi-download sits flush at the left of its glyph box (unlike most bootstrap
+/* icon-lucide-download sits flush at the left of its glyph box (unlike most bootstrap
    icons, which have built-in breathing room), so it reads as touching the
    button text even with the same gap as other buttons — nudge it over to
    match. */
-#settingsExportBtn i {
+#settingsExportBtn .lucide-icon {
     margin-right: .5rem !important;
 }
 
@@ -186,6 +186,11 @@
 
 .sync-status-row.is-error .sync-status-dot {
     background: #fb7185;
+}
+
+.sync-status-row.is-pending .sync-status-dot {
+    background: rgb(var(--accent));
+    box-shadow: 0 0 0 .2rem rgba(var(--accent), .14);
 }
 
 .sync-status-row.is-error .pref-help {
@@ -319,4 +324,289 @@
         gap: 6px;
         max-width: 100%;
     }
+}
+.settings-academic-period {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .82rem;
+    line-height: 1.5;
+}
+
+.settings-academic-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.settings-academic-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid rgba(var(--accent), .24);
+    border-radius: var(--radius-sm);
+    background: rgba(var(--accent), .1);
+    color: rgb(var(--accent));
+}
+
+.settings-academic-icon .lucide-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0 !important;
+}
+
+.settings-academic-copy {
+    min-width: 0;
+}
+
+.settings-academic-name {
+    color: var(--text);
+    font-size: .9rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.settings-academic-dates {
+    margin-top: 3px;
+    color: var(--text-soft);
+    font-size: .8rem;
+}
+
+.settings-academic-period.is-unconfigured {
+    color: var(--text-faint);
+}
+
+/* Academic Preferences: compact semester details, scoped to this section. */
+.settings-academic-section {
+    padding-bottom: var(--space-3);
+}
+
+.settings-academic-description {
+    margin: .25rem 0 .65rem;
+    color: var(--text-faint);
+    font-size: .78rem;
+    line-height: 1.45;
+}
+
+.settings-academic-period {
+    padding: 11px 13px;
+    font-size: .8rem;
+    line-height: 1.4;
+}
+
+.settings-academic-card {
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-academic-icon {
+    flex-basis: 2rem;
+    width: 2rem;
+    height: 2rem;
+}
+
+.settings-academic-icon .lucide-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.settings-academic-name {
+    font-size: .86rem;
+    line-height: 1.35;
+}
+
+.settings-academic-dates {
+    margin-top: 2px;
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+.settings-workspace-label {
+    display: block;
+    margin: .65rem 0 .3rem;
+    font-size: .82rem;
+}
+
+.settings-academic-section > .custom-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.settings-academic-section .cs-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .55rem;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-align: left;
+    white-space: nowrap;
+    font-size: .82rem;
+    background-image: none;
+}
+
+.settings-academic-section .cs-trigger::after {
+    display: none;
+    content: none;
+}
+
+.settings-academic-section .cs-trigger-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-academic-section .cs-trigger-status {
+    flex: 0 0 auto;
+    padding: .15rem .4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    color: var(--text-soft);
+    font-size: .68rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.settings-academic-section .cs-trigger-status.is-active {
+    border-color: rgba(31, 146, 84, .3);
+    background: rgba(31, 146, 84, .11);
+    color: var(--success);
+}
+
+.settings-academic-section .cs-trigger-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 1rem;
+    width: 1rem;
+    height: 1rem;
+    margin-left: auto;
+    color: var(--text-faint);
+}
+
+.settings-academic-section .cs-trigger-chevron .lucide-icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    margin: 0 !important;
+}
+
+.settings-academic-section .cs-option.active::after {
+    display: none;
+    content: none;
+}
+
+.settings-academic-section .cs-menu {
+    max-width: calc(100vw - 2rem);
+    max-height: min(60vh, 24rem);
+    overflow-y: auto;
+}
+
+.settings-academic-section .cs-option {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.settings-academic-section #settingsSemesterHint {
+    margin-top: .15rem !important;
+    margin-bottom: .55rem;
+    font-size: .74rem;
+    line-height: 1.4;
+}
+
+.settings-academic-section .settings-academic-period {
+    padding: 10px 12px;
+}
+
+.settings-academic-section .settings-academic-card {
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-academic-section .settings-academic-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.settings-academic-section .settings-academic-name {
+    font-size: .76rem;
+    line-height: 1.3;
+}
+
+.settings-academic-details {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    margin-top: 3px;
+}
+
+.settings-academic-details > .lucide-icon {
+    flex: 0 0 auto;
+    width: .78rem;
+    height: .78rem;
+    margin: 0 !important;
+    color: var(--text-faint);
+}
+
+.settings-academic-section .settings-academic-dates {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: .68rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-academic-side {
+    flex: 0 0 38%;
+    min-width: 0;
+    text-align: right;
+}
+
+.settings-academic-progress {
+    color: rgb(var(--accent));
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.settings-academic-section .settings-academic-status {
+    margin: 3px 0 0;
+    color: var(--text-soft);
+    font-size: .68rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.settings-academic-section .settings-workspace-label {
+    display: block;
+    margin: .65rem 0 0;
+}
+
+.settings-workspace-help {
+    margin-top: .15rem;
+    margin-bottom: .55rem;
+}
+
+.settings-workspace-help:empty {
+    display: none;
+}
+
+.settings-academic-section > .custom-select {
+    width: 100%;
+    min-width: 0;
 }

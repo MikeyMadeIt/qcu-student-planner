@@ -277,7 +277,7 @@ async function loadCommsStats() {
             <tr>
                 <td data-label="Subject" class="adm-col-primary">${escHtml(m.subject)}</td>
                 <td data-label="Category" class="adm-col-secondary">${escHtml(MESSAGE_CATEGORY_LABELS[m.category] || m.category)}</td>
-                <td data-label="Recipients" class="adm-col-status"><i class="bi bi-people" aria-hidden="true"></i> ${m.recipient_count}</td>
+                <td data-label="Recipients" class="adm-col-status"><i class="icon-lucide-users-round" aria-hidden="true"></i> ${m.recipient_count}</td>
                 <td data-label="Sent" class="adm-col-hide-compact">${formatDateTime(m.sent_at)}</td>
             </tr>`).join('');
     }
@@ -366,7 +366,7 @@ async function loadDashboard() {
                 <td data-label="Campus" class="adm-col-hide-compact">${escHtml(r.school || '—')}</td>
                 <td data-label="Submitted" class="adm-col-hide-compact">${formatDateTime(r.created_at)}</td>
                 <td data-label="Status" class="adm-col-status">${statusBadge(r.account_status)}</td>
-                <td class="text-end adm-actions"><a class="btn btn-ghost btn-sm" href="${reviewHref}"><i class="bi bi-arrow-right" aria-hidden="true"></i> <span class="adm-actions-label">${r.account_status === 'pending' ? 'Review' : 'View'}</span></a></td>
+                <td class="text-end adm-actions"><a class="btn btn-ghost btn-sm" href="${reviewHref}"><i class="icon-lucide-arrow-right" aria-hidden="true"></i> <span class="adm-actions-label">${r.account_status === 'pending' ? 'Review' : 'View'}</span></a></td>
             </tr>`;
         }).join('');
     }

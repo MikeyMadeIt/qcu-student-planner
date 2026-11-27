@@ -73,7 +73,7 @@
     function stateHTML(opts) {
         opts = opts || {};
         const status = opts.status || 'loading';
-        const icon = opts.icon || (status === 'error' ? 'bi-exclamation-triangle' : status === 'empty' ? 'bi-inbox' : 'bi-arrow-repeat');
+        const icon = opts.icon || (status === 'error' ? 'icon-lucide-triangle-alert' : status === 'empty' ? 'icon-lucide-inbox' : 'icon-lucide-repeat');
         const title = opts.title || (status === 'error' ? 'Something went wrong' : status === 'empty' ? 'Nothing here yet' : 'Loading…');
         const message = opts.message || '';
         const spin = status === 'loading' && opts.spinIcon !== false;
@@ -82,7 +82,7 @@
             actions = `<div class="ld-state-actions"><button type="button" class="btn btn-ghost btn-sm" data-ld-retry>${opts.retryLabel || 'Retry'}</button></div>`;
         }
         return `<div class="ld-state ld-state-${status}" role="${status === 'error' ? 'alert' : 'status'}">
-            <i class="bi ${icon} ld-state-icon${spin ? ' ld-spin-icon' : ''}" aria-hidden="true"></i>
+            <span class="ld-state-icon" aria-hidden="true"><i class="${icon}${spin ? ' ld-spin-icon' : ''}"></i></span>
             <div class="ld-state-title">${window.escHtml ? window.escHtml(title) : title}</div>
             ${message ? `<p class="ld-state-msg">${window.escHtml ? window.escHtml(message) : message}</p>` : ''}
             ${actions}
@@ -159,9 +159,9 @@
             return `<span class="ld-save-status" role="status"><span class="ld-spin" style="width:.75rem;height:.75rem;border-width:1.5px"></span> ${opts.savingText || 'Saving…'}</span>`;
         }
         if (status === 'error') {
-            return `<span class="ld-save-status is-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i> ${opts.errorText || 'Not saved'}</span>`;
+            return `<span class="ld-save-status is-error" role="alert"><i class="icon-lucide-circle-alert" aria-hidden="true"></i> ${opts.errorText || 'Not saved'}</span>`;
         }
-        return `<span class="ld-save-status is-saved" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i> ${opts.savedText || 'Saved'}</span>`;
+        return `<span class="ld-save-status is-saved" role="status"><i class="icon-lucide-circle-check" aria-hidden="true"></i> ${opts.savedText || 'Saved'}</span>`;
     }
 
     window.Loading = {
@@ -181,9 +181,9 @@
     // Small CSS-only spin animation for the ld-state-icon when used as the
     // loading glyph (kept lightweight; reuses the .ld-spin keyframes).
     const style = document.createElement('style');
-    style.textContent = '.ld-state-icon.ld-spin-icon{animation:ld-spin-rotate 1s linear infinite;display:inline-block}' +
-        '@media (prefers-reduced-motion: reduce){.ld-state-icon.ld-spin-icon{animation-duration:2s}}' +
-        'html[data-motion="reduced"] .ld-state-icon.ld-spin-icon{animation-duration:2s}';
+    style.textContent = '.ld-state-icon .ld-spin-icon{animation:ld-spin-rotate 1s linear infinite;display:inline-block}' +
+        '@media (prefers-reduced-motion: reduce){.ld-state-icon .ld-spin-icon{animation-duration:2s}}' +
+        'html[data-motion="reduced"] .ld-state-icon .ld-spin-icon{animation-duration:2s}';
     document.head.appendChild(style);
 
 })();

@@ -50,18 +50,18 @@ async function loadRows() {
         <td data-label="Account Status" class="adm-col-hide-mobile">${statusBadge(r.account_status)}</td>
         <td data-label="Registration Date" class="adm-col-hide-mobile">${formatDate(r.created_at)}</td>
         <td class="text-end adm-actions">
-          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="bi bi-eye" aria-hidden="true"></i></button>
-          ${r.account_status === 'approved' ? `<button class="btn btn-ghost btn-sm adm-icon-btn" data-act="suspend" data-id="${r.id}" title="Suspend" aria-label="Suspend account"><i class="bi bi-pause-circle" aria-hidden="true"></i></button>` : ''}
-          ${r.account_status === 'suspended' ? `<button class="btn btn-accent btn-sm adm-icon-btn" data-act="restore" data-id="${r.id}" title="Restore" aria-label="Restore account"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button>` : ''}
+          <button class="btn btn-ghost btn-sm adm-icon-btn" data-act="view" data-id="${r.id}" title="View" aria-label="View account details"><i class="icon-lucide-eye" aria-hidden="true"></i></button>
+          ${r.account_status === 'approved' ? `<button class="btn btn-ghost btn-sm adm-icon-btn" data-act="suspend" data-id="${r.id}" title="Suspend" aria-label="Suspend account"><i class="icon-lucide-circle-pause" aria-hidden="true"></i></button>` : ''}
+          ${r.account_status === 'suspended' ? `<button class="btn btn-accent btn-sm adm-icon-btn" data-act="restore" data-id="${r.id}" title="Restore" aria-label="Restore account"><i class="icon-lucide-rotate-ccw" aria-hidden="true"></i></button>` : ''}
         </td>
       </tr>`).join('');
 
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     pagination.hidden = totalPages <= 1;
     pagination.innerHTML = `
-        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        <button class="btn btn-ghost btn-sm" id="pagePrev" aria-label="Previous page" title="Previous page" ${currentPage <= 1 ? 'disabled' : ''}><i class="icon-lucide-chevron-left" aria-hidden="true"></i></button>
         <span>Page ${currentPage} of ${totalPages}</span>
-        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right" aria-hidden="true"></i></button>`;
+        <button class="btn btn-ghost btn-sm" id="pageNext" ${currentPage >= totalPages ? 'disabled' : ''}><i class="icon-lucide-chevron-right" aria-hidden="true"></i></button>`;
 
     const prevBtn = document.getElementById('pagePrev');
     const nextBtn = document.getElementById('pageNext');
@@ -72,7 +72,7 @@ async function loadRows() {
 async function viewDetail(id) {
     const result = await AdminService.getAccount(id);
     if (!result.ok) {
-        Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
+        Toast.show(result.message, 'danger', 'icon-lucide-triangle-alert');
         return;
     }
 
@@ -97,7 +97,7 @@ function onAction(e) {
         message: 'This will be recorded in the activity log.' + (isSuspend ? ' The student will lose access until restored.' : ''),
         confirmLabel: isSuspend ? 'Suspend' : 'Restore',
         danger: isSuspend,
-        icon: isSuspend ? 'bi-pause-circle' : 'bi-arrow-counterclockwise',
+        icon: isSuspend ? 'icon-lucide-circle-pause' : 'icon-lucide-rotate-ccw',
         reasonField: isSuspend ? { label: 'Reason for suspension (optional)', placeholder: 'e.g. Reported duplicate account' } : null,
         async onConfirm(reason) {
             const result = await AdminService.reviewAccount({
@@ -107,7 +107,7 @@ function onAction(e) {
             });
 
             if (!result.ok) {
-                Toast.show(result.message, 'danger', 'bi-exclamation-triangle');
+                Toast.show(result.message, 'danger', 'icon-lucide-triangle-alert');
                 return;
             }
 

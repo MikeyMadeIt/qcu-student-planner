@@ -216,7 +216,7 @@ function setupAttendanceResponsiveAbsenceLimits() {
 function initAttendance() {
     setupAttendanceResponsiveAbsenceLimits();
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const attDate = document.getElementById('attDate');
     if (attDate) {
         updateAttendanceDateBounds();
@@ -256,9 +256,9 @@ function renderHeatmapFilterMenu(subs) {
     const current = sel.value;
     const items = [{ id: '', label: 'All Subjects' }].concat(subs.map(s => ({ id: s.id, label: s.code, color: s.color })));
     menu.innerHTML = items.map(it => `<button type="button" class="dropdown-item att-heatmap-option ${it.id === current ? 'active' : ''}" role="radio" aria-checked="${it.id === current ? 'true' : 'false'}" data-id="${escapeAttHtml(it.id)}">
-      ${it.color ? `<span class="att-heatmap-option-dot" style="background:${it.color}"></span>` : '<i class="bi bi-grid-3x3-gap att-heatmap-option-icon" aria-hidden="true"></i>'}
+      ${it.color ? `<span class="att-heatmap-option-dot" style="background:${it.color}"></span>` : '<i class="icon-lucide-grid-3x3 att-heatmap-option-icon" aria-hidden="true"></i>'}
       <span class="att-heatmap-option-text">${escapeAttHtml(it.label)}</span>
-      <i class="bi bi-check2 att-heatmap-option-check" aria-hidden="true"></i>
+      <i class="icon-lucide-check att-heatmap-option-check" aria-hidden="true"></i>
     </button>`).join('');
     menu.querySelectorAll('.att-heatmap-option').forEach(btn => {
         btn.addEventListener('click', () => chooseHeatmapSubject(btn.dataset.id));
@@ -275,7 +275,7 @@ function chooseHeatmapSubject(id) {
         return;
     sel.value = id;
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     renderHeatmapFilterMenu(subs);
     renderHeatmap();
 }
@@ -294,7 +294,7 @@ function logAttendance() {
         online: row.querySelector('.att-subject-online-check').checked
     })) : [];
     if (!date || !selected.length) {
-        Toast.show('Select a date and at least one subject', 'high', 'bi-exclamation-triangle');
+        Toast.show('Select a date and at least one subject', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     const semId = DB.getActiveSemesterId();
@@ -354,7 +354,7 @@ function logAttendance() {
             title: replacements.length === 1 ? 'Replace attendance record?' : 'Replace attendance records?',
             message: `A record already exists for ${names.join(', ')} on ${formatDisplayDate(date)}. Replace ${replacements.length === 1 ? 'it' : 'them'}?`,
             confirmLabel: 'Replace',
-            icon: 'bi-arrow-repeat',
+            icon: 'icon-lucide-repeat',
             onConfirm: saveSelected
         });
     }
@@ -380,7 +380,7 @@ function getAttendanceSubjectsForDate(date) {
     const dow = DAY_NAMES[dateObj.getDay()].slice(0, 3).toLowerCase();
     const semId = DB.getActiveSemesterId();
     return DB.getSubjects()
-        .filter(s => s.semesterId === semId && !s.archived && Array.isArray(s.days) &&
+        .filter(s => semId && s.semesterId === semId && !s.archived && Array.isArray(s.days) &&
             s.days.some(day => String(day).slice(0, 3).toLowerCase() === dow))
         .sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
 }
@@ -418,6 +418,11 @@ function setupAttendanceSemesterRefresh() {
     window.addEventListener('planner:cloud-synced', () => {
         updateAttendanceDateBounds();
         renderAttendanceSubjectList();
+    });
+    window.addEventListener('planner:academic-calendar-changed', () => {
+        updateAttendanceDateBounds();
+        renderAttendanceSubjectList();
+        renderAttendanceAll();
     });
 }
 
@@ -495,7 +500,7 @@ function applyBulkAttendanceStatus() {
         title: 'Apply bulk attendance?',
         message,
         confirmLabel: 'Apply',
-        icon: 'bi-check2-all',
+        icon: 'icon-lucide-list-checks',
         onConfirm() {
             const latestRecords = DB.getAttendance();
             for (const subject of subjects) {
@@ -544,7 +549,7 @@ function renderAttendanceSubjectList() {
     }
     const subjects = getAttendanceSubjectsForDate(date);
     if (!subjects.length) {
-        root.innerHTML = '<div class="att-subject-empty text-faint"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i>No classes scheduled on this day</div>';
+        root.innerHTML = '<div class="att-subject-empty text-faint"><i class="icon-lucide-calendar-x-2 me-2" aria-hidden="true"></i>No classes scheduled on this day</div>';
         updateAttendanceLogButton();
         updateAttendanceBulkControl();
         return;
@@ -572,7 +577,7 @@ function renderAttendanceSubjectList() {
                     <span class="att-subject-code">${escapeAttHtml(subject.code)}</span>
                     <span class="att-subject-meta${description ? ' has-description' : ''}">
                       ${description ? `<span class="att-subject-description">${escapeAttHtml(description)}</span>` : ''}
-                      <span class="att-subject-time"><i class="bi bi-clock me-1" aria-hidden="true"></i>${escapeAttHtml(time)}</span>
+                      <span class="att-subject-time"><i class="icon-lucide-clock me-1" aria-hidden="true"></i>${escapeAttHtml(time)}</span>
                     </span>
                   </span>
                 </label>
@@ -638,7 +643,7 @@ function renderStatistics() {
     const records = getLiveSemesterAttendance(semId);
     const wrap = document.getElementById('attendanceStats');
     if (!records.some(r => r.status !== 'No Classes')) {
-        wrap.innerHTML = `<div class="att-empty-state att-stats-empty"><span class="att-empty-icon"><i class="bi bi-bar-chart" aria-hidden="true"></i></span><strong>No attendance statistics yet</strong><span>Log attendance to see your totals and percentages.</span></div>`;
+        wrap.innerHTML = `<div class="att-empty-state att-stats-empty"><span class="att-empty-icon empty-icon-circle"><i class="icon-lucide-chart-column" aria-hidden="true"></i></span><strong>No attendance statistics yet</strong><span>Log attendance to see your totals and percentages.</span></div>`;
         return;
     }
     const presentCount = records.filter(r => r.status === 'Present').length;
@@ -689,8 +694,8 @@ function renderConsecutiveAbsenceAlerts() {
     if (!wrap)
         return;
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const warnings = [];
     for (const s of subs) {
         const streak = getCurrentConsecutiveAbsences(s.id, records);
@@ -705,7 +710,7 @@ function renderConsecutiveAbsenceAlerts() {
     wrap.innerHTML = `<div class="att-consec-alerts mb-3">` +
         warnings.map(({ s, streak }) => `
       <div class="att-consec-alert fade-in" role="alert">
-        <div class="att-consec-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="att-consec-icon"><i class="icon-lucide-triangle-alert"></i></div>
         <div class="att-consec-body">
           <div class="att-consec-title">Consecutive Absences</div>
           <div class="att-consec-msg">
@@ -735,13 +740,13 @@ function renderHeatmap() {
             _hmResizeFrame = requestAnimationFrame(renderHeatmap);
         }, { passive: true });
     }
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const filterSubId = document.getElementById('heatmapSubjectFilter')?.value || '';
     const filteredRecords = filterSubId ? records.filter(r => r.subjectId === filterSubId) : records;
     if (!filteredRecords.length) {
         const title = filterSubId ? 'No attendance for this subject yet' : 'No attendance data yet';
         const message = filterSubId ? 'Choose another subject or log attendance for this one.' : 'Log attendance to build your activity heatmap.';
-        wrap.innerHTML = `<div class="att-empty-state att-heatmap-empty"><span class="att-empty-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span><strong>${title}</strong><span>${message}</span></div>`;
+        wrap.innerHTML = `<div class="att-empty-state att-heatmap-empty"><span class="att-empty-icon empty-icon-circle"><i class="icon-lucide-calendar-days" aria-hidden="true"></i></span><strong>${title}</strong><span>${message}</span></div>`;
         if (legend) legend.innerHTML = '';
         return;
     }
@@ -1030,13 +1035,13 @@ if (!window._hmTooltipGlobalBound) {
 
 function renderAbsenceWarnings() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const wrap = document.getElementById('absenceWarnings');
     if (!wrap)
         return;
     if (!subs.length) {
-        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects in Schedule to start tracking attendance.</span></div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div><strong>No subjects yet</strong><span>Add subjects in Schedule to start tracking attendance.</span></div>`;
         return;
     }
     const rows = subs.map(s => {
@@ -1064,11 +1069,11 @@ function renderAbsenceWarnings() {
 
 function openAbsenceLimitModal() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const body = document.getElementById('absenceLimitModalBody');
     if (!subs.length) {
-        body.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects for this semester in Schedule first.</span></div>`;
+        body.innerHTML = `<div class="att-card-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div><strong>No subjects yet</strong><span>Add subjects for this semester in Schedule first.</span></div>`;
         new bootstrap.Modal(document.getElementById('absenceLimitModal')).show();
         return;
     }
@@ -1092,9 +1097,9 @@ function openAbsenceLimitModal() {
             <span class="al-code">${escapeAttHtml(s.code)}</span>
           </div>
           <div class="al-status-badge ${reached ? 'danger' : nearLimit ? 'warn' : 'ok'}">
-            ${reached ? '<i class="bi bi-exclamation-triangle"></i> Limit reached' :
-        nearLimit ? `<i class="bi bi-exclamation-circle"></i> ${remaining} remaining` :
-            `<i class="bi bi-check-circle"></i> ${remaining} remaining`}
+            ${reached ? '<i class="icon-lucide-triangle-alert"></i> Limit reached' :
+        nearLimit ? `<i class="icon-lucide-circle-alert"></i> ${remaining} remaining` :
+            `<i class="icon-lucide-circle-check"></i> ${remaining} remaining`}
           </div>
         </div>
         <div class="al-stats-row">
@@ -1125,7 +1130,7 @@ function saveAbsenceLimitFromInput(btn, subjectId, subjectCode) {
     const input = row.querySelector('.al-limit-input');
     const val = parseInt(input.value);
     if (isNaN(val) || val < 0) {
-        Toast.show('Enter a valid number (0 or more)', 'high', 'bi-exclamation-triangle');
+        Toast.show('Enter a valid number (0 or more)', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     setAbsenceLimitForSubject(subjectId, val);
@@ -1141,13 +1146,13 @@ function saveAbsenceLimitFromInput(btn, subjectId, subjectCode) {
 
 function renderSubjectBreakdown() {
     const semId = DB.getActiveSemesterId();
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
-    const records = DB.getAttendance().filter(r => r.semesterId === semId);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId);
     const wrap = document.getElementById('subjectBreakdown');
     if (!wrap)
         return;
     if (!subs.length) {
-        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-journal-x" aria-hidden="true"></i><strong>No subjects yet</strong><span>Add subjects in Schedule to set absence limits.</span></div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div><strong>No subjects yet</strong><span>Add subjects in Schedule to set absence limits.</span></div>`;
         return;
     }
     const subData = subs.map(s => {
@@ -1165,7 +1170,7 @@ function renderSubjectBreakdown() {
         return { s, present, presentOnline, late, excused, absent, noClass, relevant, rate, limit, limitPct, limitColor, consec, rateLabel };
     }).filter(d => d.relevant > 0 || d.noClass > 0);
     if (!subData.length) {
-        wrap.innerHTML = `<div class="att-card-empty"><i class="bi bi-calendar2-x" aria-hidden="true"></i><strong>No attendance logged yet</strong><span>Log attendance to see subject breakdown.</span></div>`;
+        wrap.innerHTML = `<div class="att-card-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-x-2"></i></div><strong>No attendance logged yet</strong><span>Log attendance to see subject breakdown.</span></div>`;
         return;
     }
     wrap.innerHTML = subData.map(({ s, present, presentOnline, late, excused, absent, noClass, rate, limit, limitPct, limitColor, consec, rateLabel }) => {
@@ -1203,7 +1208,7 @@ function renderSubjectBreakdown() {
         </div>
         <div class="progress att-bd-limit-bar"><div class="progress-bar" style="width:${limitPct}%;background:${limitColor};transition:width .4s ease"></div></div>
       </div>
-      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="bi bi-exclamation-triangle"></i> ${consec} consecutive absences</div>` : ''}
+      ${consec >= 3 ? `<div class="att-bd-consec-warn"><i class="icon-lucide-triangle-alert"></i> ${consec} consecutive absences</div>` : ''}
     </div>`;
     }).join('');
 }
@@ -1218,11 +1223,11 @@ function renderLog(showAll) {
     showAll = _attLogShowAll;
     const semId = DB.getActiveSemesterId();
     const subs = DB.getSubjects();
-    const records = [...DB.getAttendance().filter(r => r.semesterId === semId)]
+    const records = [...DB.getAttendance().filter(r => semId && r.semesterId === semId)]
         .sort((a, b) => b.date.localeCompare(a.date));
     const wrap = document.getElementById('attendanceLog');
     if (!records.length) {
-        wrap.innerHTML = `<div class="att-log-empty"><i class="bi bi-calendar-check" aria-hidden="true"></i><strong>No attendance logged yet</strong><span>Attendance records you add will appear here.</span></div>`;
+        wrap.innerHTML = `<div class="att-log-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-check-2"></i></div><strong>No attendance logged yet</strong><span>Attendance records you add will appear here.</span></div>`;
         const cl = document.getElementById('attLogCountLabel');
         if (cl)
             cl.textContent = '';
@@ -1251,15 +1256,15 @@ function renderLog(showAll) {
       <td class="att-tbl-status"><span class="att-status-badge ${statusClass}">${statusDisplay}${onlinePill}</span></td>
         <td class="att-tbl-actions">
         ${hasNotes
-            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="bi bi-chat-left-text"></i></button>`
+            ? `<button class="att-action-btn att-notes-btn" onclick="showAttNoteById(event,'${r.id}')" title="View note" aria-label="View note"><i class="icon-lucide-message-square-text"></i></button>`
             : ''}
-        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="bi bi-pencil-square" aria-hidden="true"></i></button>
-        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+        <button class="att-action-btn att-edit-btn" onclick="openAttendanceEdit('${r.id}')" title="Edit record" aria-label="Edit attendance record"><i class="icon-lucide-square-pen" aria-hidden="true"></i></button>
+        <button class="att-action-btn att-delete-btn" onclick="deleteAttendance('${r.id}')" title="Delete record" aria-label="Delete attendance record"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>
       </td>
     </tr>`;
     }
     const showMoreHtml = hasMore
-        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="bi bi-chevron-down me-1" aria-hidden="true"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
+        ? `<div class="att-log-show-more"><button class="btn btn-ghost btn-sm att-log-show-more-btn" onclick="renderLog(true)"><i class="icon-lucide-chevron-down me-1" aria-hidden="true"></i>Show More <span class="att-log-more-count">(${total - displayCount} more)</span></button></div>`
         : '';
     wrap.innerHTML = `<table class="att-log-table" role="grid">
     <thead>
@@ -1306,7 +1311,7 @@ function deleteAttendance(id) {
         message: 'This log entry will be permanently removed.',
         confirmLabel: 'Remove',
         danger: true,
-        icon: 'bi-trash',
+        icon: 'icon-lucide-trash-2',
         onConfirm() {
             DB.saveAttendance(DB.getAttendance().filter(r => r.id !== id));
             Toast.show('Record removed');
@@ -1339,7 +1344,7 @@ function setupAttendanceEditModal() {
 function openAttendanceEdit(id, draft) {
     const rec = DB.getAttendance().find(r => r.id === id);
     if (!rec) {
-        Toast.show('Record not found', 'high', 'bi-exclamation-triangle');
+        Toast.show('Record not found', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     _attEditId = id;
@@ -1355,7 +1360,7 @@ function openAttendanceEdit(id, draft) {
 
     // Active-semester subjects, plus the record's current subject even if archived
     const subjects = DB.getSubjects().filter(s =>
-        (s.semesterId === semId && !s.archived) || s.id === rec.subjectId);
+        (semId && s.semesterId === semId && !s.archived) || s.id === rec.subjectId);
     const subjectSel = document.getElementById('attEditSubject');
     subjectSel.innerHTML = subjects.map(s =>
         `<option value="${escapeAttHtml(s.id)}">${escapeAttHtml(s.code)}${s.archived ? ' (archived)' : ''}</option>`).join('');
@@ -1454,7 +1459,7 @@ function saveAttendanceEdit() {
             title: 'Save changes?',
             message: `Update this attendance record: ${changes.join('; ')}.`,
             confirmLabel: 'Save',
-            icon: 'bi-pencil-square',
+            icon: 'icon-lucide-square-pen',
             onConfirm: () => applyAttendanceEdit(id, next),
             onCancel: () => openAttendanceEdit(id, next)
         });
@@ -1466,7 +1471,7 @@ function applyAttendanceEdit(id, next) {
     const latest = DB.getAttendance();
     const rec = latest.find(r => r.id === id);
     if (!rec) {
-        Toast.show('Record not found', 'high', 'bi-exclamation-triangle');
+        Toast.show('Record not found', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     const subject = DB.getSubject(next.subjectId);
@@ -1488,11 +1493,11 @@ function applyAttendanceEdit(id, next) {
 function exportAttendanceCSV() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId)
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId)
         .sort((a, b) => a.date.localeCompare(b.date));
     const subs = DB.getSubjects();
     if (!records.length) {
-        Toast.show('No attendance records to export.', 'high', 'bi-exclamation-circle');
+        Toast.show('No attendance records to export.', 'high', 'icon-lucide-circle-alert');
         return;
     }
     const esc = v => {
@@ -1524,18 +1529,18 @@ function exportAttendanceCSV() {
 function exportAttendancePDF() {
     const semId = DB.getActiveSemesterId();
     const sem = DB.getActiveSemester();
-    const records = DB.getAttendance().filter(r => r.semesterId === semId)
+    const records = DB.getAttendance().filter(r => semId && r.semesterId === semId)
         .sort((a, b) => a.date.localeCompare(b.date));
-    const subs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const subs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     if (!records.length) {
-        Toast.show('No attendance records to export.', 'high', 'bi-exclamation-circle');
+        Toast.show('No attendance records to export.', 'high', 'icon-lucide-circle-alert');
         return;
     }
     // Calculate overall stats
     // Same counting as the Attendance page (shared helper) so the printed report matches the screen.
     const overall = summarizeAttendance(getLiveSemesterAttendance(semId));
     const overallRate = overall.rate === null ? '—' : overall.rate + '%';
-    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'Current Semester';
+    const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'No active university academic period';
     const settings = DB.getSettings();
     const studentName = settings.name || '';
     // Build per-subject summary

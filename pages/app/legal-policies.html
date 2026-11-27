@@ -9,23 +9,23 @@
 <link rel="manifest" href="../../manifest.json">
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/legal.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <!-- Shown instead of the app shell when the visitor is not signed in (this page is public). -->
 <header class="lg-public-bar" id="lgPublicBar">
   <a class="lg-public-brand" href="../../index.html">
-    <span class="lg-public-mark" aria-hidden="true"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
+    <span class="lg-public-mark" aria-hidden="true"><i class="icon-lucide-graduation-cap" aria-hidden="true"></i></span>
     <span class="lg-public-name">QCU Student Planner</span>
   </a>
   <div class="lg-public-tools">
-    <a class="btn btn-ghost lg-public-home" href="../../index.html"><i class="bi bi-house" aria-hidden="true"></i><span>Home</span></a>
-    <a class="btn btn-accent" href="../auth/login.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i><span>Sign in</span></a>
+    <a class="btn btn-ghost lg-public-home" href="../../index.html"><i class="icon-lucide-house" aria-hidden="true"></i><span>Home</span></a>
+    <a class="btn btn-accent" href="../auth/login.html"><i class="icon-lucide-log-in" aria-hidden="true"></i><span>Sign in</span></a>
     <button type="button" class="lg-public-theme" data-theme-toggle aria-label="Switch to light theme">
-      <i class="bi bi-sun theme-icon-sun" aria-hidden="true"></i>
-      <i class="bi bi-moon-stars theme-icon-moon" aria-hidden="true"></i>
+      <i class="icon-lucide-sun theme-icon-sun" aria-hidden="true"></i>
+      <i class="icon-lucide-moon-star theme-icon-moon" aria-hidden="true"></i>
     </button>
   </div>
 </header>
@@ -37,18 +37,20 @@
 
     <!-- Non-affiliation notice -->
     <aside class="lg-notice" role="note" aria-label="Important disclaimer">
-      <i class="bi bi-info-circle" aria-hidden="true"></i>
+      <i class="icon-lucide-info" aria-hidden="true"></i>
       <p><strong>Important disclaimer:</strong> QCU Student Planner is an independent student developed project. It is NOT affiliated with, owned by, sponsored by, endorsed by, or officially managed by Quezon City University (QCU). This platform is developed and maintained independently by SBCS 2A Students for educational and academic purposes only.</p>
     </aside>
 
     <!-- Table of contents (top of page, all screen sizes). The five main sections are always visible; the full list opens below. -->
     <nav class="glass card-pad lg-toc-card" id="lgToc" aria-labelledby="lgTocTitle">
-      <h2 class="lg-toc-title" id="lgTocTitle"><i class="bi bi-list-ul" aria-hidden="true"></i>Table of contents</h2>
+      <h2 class="lg-toc-title" id="lgTocTitle"><i class="icon-lucide-list" aria-hidden="true"></i>Table of contents</h2>
       <ol class="lg-toc-main" id="lgTocMain"></ol>
-      <details class="lg-toc-details" id="lgTocDetails">
-        <summary><i class="bi bi-chevron-down" aria-hidden="true"></i>All subsections</summary>
-        <div class="lg-toc-full" id="lgTocFull"></div>
-      </details>
+      <div class="lg-toc-details" id="lgTocDetails">
+        <button class="lg-toc-toggle" id="lgTocToggle" type="button" aria-expanded="false" aria-controls="lgTocFull">
+          <i class="icon-lucide-chevron-down" aria-hidden="true"></i>All subsections
+        </button>
+        <div class="lg-toc-full" id="lgTocFull" hidden></div>
+      </div>
     </nav>
 
     <div class="lg-layout">
@@ -153,7 +155,7 @@
             <p>We may update this Privacy Policy from time to time. Any revised version will be posted on this page, and your continued use of the platform following such updates constitutes acceptance of the revised terms.</p>
           </article>
 
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
         <!-- 2. TERMS OF SERVICE -->
@@ -223,7 +225,7 @@
             <p>These Terms are governed by the laws of the Republic of the Philippines. Questions or concerns regarding these Terms may be directed to the official project contact information provided within the Platform.</p>
           </article>
 
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
         <!-- 3. ACCEPTABLE USE POLICY -->
@@ -273,7 +275,7 @@
             <p>Violations may result in enforcement actions at the discretion of the platform administrators, including account suspension, permanent termination, and removal of content. Severe or unlawful activities, such as unauthorized system access, database abuse, or security interference, may be reported to the appropriate authorities under applicable Philippine laws, including Republic Act No. 10175 (Cybercrime Prevention Act of 2012).</p>
           </article>
 
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
         <!-- 4. AI FEATURES DISCLAIMER -->
@@ -332,7 +334,7 @@
             <p>AI features are provided on an “as is” basis. Their availability depends on third-party API uptime, server stability, and usage limits, and access may be interrupted, delayed, or restricted without notice.</p>
           </article>
 
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
         <!-- 5. COOKIE AND DATA STORAGE NOTICE -->
@@ -406,13 +408,13 @@
             </div>
           </article>
 
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
         <!-- REFERENCES -->
         <section class="glass card-pad lg-section" id="legal-references" aria-labelledby="legal-references-title" data-lg-section>
           <header class="lg-section-head">
-            <span class="lg-section-num" aria-hidden="true"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>
+            <span class="lg-section-num" aria-hidden="true"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>
             <h2 class="lg-h2" id="legal-references-title">References</h2>
           </header>
           <ul class="lg-refs">
@@ -422,7 +424,7 @@
             <li>National Privacy Commission. (2016, August 24). Implementing rules and regulations of the Data Privacy Act of 2012. Republic of the Philippines. <a href="https://privacy.gov.ph/implementing-rules-regulations-data-privacy-act-2012" target="_blank" rel="noopener noreferrer">privacy.gov.ph/implementing-rules-regulations-data-privacy-act-2012</a></li>
             <li>National Privacy Commission. (n.d.). Advisories &amp; circulars. Republic of the Philippines. Retrieved November 13, 2026, from <a href="https://privacy.gov.ph/pips-and-pics/advisories-circulars" target="_blank" rel="noopener noreferrer">privacy.gov.ph/pips-and-pics/advisories-circulars</a></li>
           </ul>
-          <a class="lg-top" href="#legalTop"><i class="bi bi-arrow-up" aria-hidden="true"></i>Back to top</a>
+          <a class="lg-top" href="#legalTop"><i class="icon-lucide-arrow-up" aria-hidden="true"></i>Back to top</a>
         </section>
 
       </div>

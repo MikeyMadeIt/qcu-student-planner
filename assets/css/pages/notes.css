@@ -185,7 +185,7 @@
     color: rgb(var(--accent));
 }
 
-.note-md-btn i {
+.note-md-btn .lucide-icon {
     font-size: .82rem;
     pointer-events: none;
 }
@@ -347,7 +347,7 @@
     width: 16px;
     height: 16px;
     min-width: 16px;
-    border-radius: 4px;
+    border-radius: 50%;
     border: 1.5px solid var(--border);
     display: flex;
     align-items: center;
@@ -363,6 +363,15 @@
     background: rgb(var(--accent));
     border-color: rgb(var(--accent));
     color: #fff;
+}
+
+.md-cl-checked::after {
+    content: "";
+    width: 4px;
+    height: 7px;
+    border: solid currentColor;
+    border-width: 0 1.7px 1.7px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .md-cl-text {
@@ -607,7 +616,7 @@ ol ol,
     background: rgba(180, 83, 9, .15);
 }
 
-.note-fav-btn i {
+.note-fav-btn .lucide-icon {
     pointer-events: none;
 }
 
@@ -682,19 +691,6 @@ ol ol,
     gap: var(--space-2);
     margin: 0;
     color: var(--text-soft);
-}
-
-.nt-empty > i {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
 }
 
 .nt-empty > strong {
@@ -792,7 +788,7 @@ ol ol,
     background: rgba(var(--accent), .1);
 }
 
-.nt-edit-btn i {
+.nt-edit-btn .lucide-icon {
     pointer-events: none;
 }
 
@@ -897,7 +893,7 @@ ol ol,
     border: 1px solid rgba(251,113,133,.2);
 }
 
-.nt-link-item i {
+.nt-link-item .lucide-icon {
     font-size: .6rem;
     flex-shrink: 0;
 }
@@ -948,7 +944,7 @@ ol ol,
     width: auto !important;
 }
 
-.nt-select-btn i {
+.nt-select-btn .lucide-icon {
     font-size: .82rem;
 }
 
@@ -967,7 +963,7 @@ ol ol,
     width: auto !important;
 }
 
-.nt-select-all-btn i {
+.nt-select-all-btn .lucide-icon {
     font-size: .86rem;
 }
 
@@ -1043,7 +1039,7 @@ ol ol,
     line-height: 1;
 }
 
-.nt-bulk-btn i {
+.nt-bulk-btn .lucide-icon {
     font-size: .78rem;
     flex-shrink: 0;
 }
@@ -1145,7 +1141,7 @@ ol ol,
     background: rgba(0,0,0,.1);
 }
 
-.nt-tag-remove i {
+.nt-tag-remove .lucide-icon {
     pointer-events: none;
 }
 
@@ -1214,7 +1210,7 @@ ol ol,
     color: rgb(var(--accent));
 }
 
-.nt-template-item i {
+.nt-template-item .lucide-icon {
     font-size: .88rem;
     flex-shrink: 0;
 }
@@ -1400,7 +1396,7 @@ ol ol,
     font-weight: 600;
 }
 
-.nt-prev-meta-item i {
+.nt-prev-meta-item .lucide-icon {
     font-size: .68rem;
     color: rgb(var(--accent));
 }
@@ -1421,7 +1417,7 @@ ol ol,
     color: var(--text-faint);
 }
 
-.nt-prev-wc i {
+.nt-prev-wc .lucide-icon {
     font-size: .66rem;
 }
 
@@ -1535,7 +1531,7 @@ ol ol,
 }
 
 @media (max-width: 320px) {
-    .nt-select-btn i {
+    .nt-select-btn .lucide-icon {
         margin-right: 0 !important;
     }
     .nt-select-btn span,
@@ -1670,7 +1666,7 @@ ol ol,
     line-height: 1;
 }
 
-.nt-card-action-box i {
+.nt-card-action-box .lucide-icon {
     pointer-events: none;
     font-size: .78rem;
 }
@@ -1724,8 +1720,8 @@ ol ol,
     line-height: 1.4;
 }
 
-.nt-bm-sub i,
-.nt-bm-task i {
+.nt-bm-sub .lucide-icon,
+.nt-bm-task .lucide-icon {
     font-size: .58rem;
     flex-shrink: 0;
 }
@@ -1818,18 +1814,6 @@ ol ol,
     background: var(--surface-2) !important;
 }
 
-[data-theme="dark"] .note-card.glass {
-    background: rgba(255,255,255,.07) !important;
-}
-
-[data-theme="light"] .note-card.glass {
-    background: rgba(255,255,255,.90) !important;
-}
-
-[data-theme="amoled"] .note-card.glass {
-    background: rgba(255,255,255,.04) !important;
-}
-
 @media (max-width: 575.98px) {
     .nt-card-actions {
         gap: 3px;
@@ -1869,21 +1853,9 @@ ol ol,
 /* Note preview panel: solid background */
 
 .nt-preview-panel {
-    background: var(--bg) !important;
+    background: var(--elevated) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-}
-
-[data-theme="dark"] .nt-preview-panel {
-    background: #141824 !important;
-}
-
-[data-theme="light"] .nt-preview-panel {
-    background: #ffffff !important;
-}
-
-[data-theme="amoled"] .nt-preview-panel {
-    background: #0e0e0e !important;
 }
 
 /* Remove old conflicting rules */

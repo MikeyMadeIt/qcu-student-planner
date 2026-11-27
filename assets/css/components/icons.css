@@ -1,17 +1,41 @@
-/* Bootstrap Icons — shared sizing, alignment, and control behavior. */
-.bi {
+/* Lucide SVG icons inherit surrounding text size and color. */
+.lucide-icon {
     display: inline-block;
     font-size: 1em;
     line-height: 1;
     flex: 0 0 auto;
     vertical-align: -0.125em;
-    font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.bi::before {
-    display: inline-block;
+/* Empty states use a consistent circle container with a compact Lucide glyph. */
+.empty-icon-circle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: rgb(var(--accent));
+}
+
+.empty-icon-circle > .lucide-icon {
+    display: block;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0 !important;
+    font-size: 1.15rem;
     line-height: 1;
 }
 
@@ -79,25 +103,25 @@ button[class*="icon-btn"] {
     flex: 0 0 auto;
 }
 
-.btn-icon > .bi,
-.shell-icon-btn > .bi,
-.lp-icon-btn > .bi,
-button[class*="-icon-btn"] > .bi,
-button[class*="icon-btn"] > .bi {
+.btn-icon > .lucide-icon,
+.shell-icon-btn > .lucide-icon,
+.lp-icon-btn > .lucide-icon,
+button[class*="-icon-btn"] > .lucide-icon,
+button[class*="icon-btn"] > .lucide-icon {
     font-size: inherit;
     line-height: 1;
     margin: 0;
 }
 
-.btn i,
-.btn-accent i,
-.btn-ghost i,
-.btn-danger i,
-.btn-text i,
-.badge i,
-.chip i,
-.section-title i,
-.dropdown-item i {
+.btn .lucide-icon,
+.btn-accent .lucide-icon,
+.btn-ghost .lucide-icon,
+.btn-danger .lucide-icon,
+.btn-text .lucide-icon,
+.badge .lucide-icon,
+.chip .lucide-icon,
+.section-title .lucide-icon,
+.dropdown-item .lucide-icon {
     flex-shrink: 0;
     margin: 0 !important;
 }

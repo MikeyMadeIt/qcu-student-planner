@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="blue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Academic Calendar · QCU Student Planner</title>
+<script src="../../assets/js/core/theme.js"></script>
+<meta name="theme-color" content="#0F172A">
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../assets/icons/icon-192.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../../assets/css/main.css" rel="stylesheet">
+<link href="../../assets/css/pages/admin.css" rel="stylesheet">
+<link href="../../assets/css/pages/academic-calendar.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main-content">
+    <div class="ac-intro glass card-pad">
+      <div><h1 class="page-title mb-1">Academic Calendar</h1><p class="page-sub mb-0">Manage the single academic period shared across Quezon City University.</p></div>
+      <div class="ac-intro-actions"><button type="button" class="btn btn-ghost" id="acAddYear"><i class="icon-lucide-calendar-plus-2 me-1" aria-hidden="true"></i>Add academic year</button><button type="button" class="btn btn-accent" id="acAddSemester" disabled><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add semester</button></div>
+    </div>
+
+    <section class="glass card-pad ac-active-panel" aria-labelledby="acActiveTitle">
+      <div class="section-title" id="acActiveTitle"><i class="icon-lucide-calendar-check-2" aria-hidden="true"></i>University active period</div>
+      <div id="acActive" role="status" aria-live="polite"><div class="ac-loading">Loading academic calendar…</div></div>
+    </section>
+
+    <section class="glass card-pad" aria-labelledby="acYearsTitle">
+      <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3"><div class="section-title mb-0" id="acYearsTitle"><i class="icon-lucide-calendar-range" aria-hidden="true"></i>Academic years and semesters</div><span class="text-faint small">Dates and status are enforced by Supabase.</span></div>
+      <div id="acYears" aria-live="polite"><div class="ac-loading">Loading academic periods…</div></div>
+    </section>
+  </main>
+</div>
+
+<div class="modal fade" id="acModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="acModalTitle">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title fs-5" id="acModalTitle">Academic period</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body" id="acModalBody"></div>
+  </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../../assets/js/utils/dates.js"></script>
+<script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/data/storage.js"></script>
+<script src="../../assets/js/core/ui.js"></script>
+<script src="../../assets/js/core/custom-select.js"></script>
+<script src="../../assets/js/core/layout.js"></script>
+<script src="../../assets/js/core/pwa.js"></script>
+<script type="module" src="../../assets/js/modules/admin-academic-calendar.js"></script>
+<script src="../../assets/js/core/date-picker.js"></script>
+</body>
+</html>

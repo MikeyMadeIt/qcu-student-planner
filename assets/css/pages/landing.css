@@ -515,7 +515,7 @@ html {
     padding-top: 0;
 }
 
-.lp-points > li > i {
+.lp-points > li > .lucide-icon {
     flex: 0 0 auto;
     width: 2rem;
     color: rgb(var(--accent));
@@ -572,7 +572,7 @@ html {
     border-color: rgb(var(--accent));
 }
 
-.lp-link-card > i:first-child {
+.lp-link-card > .lucide-icon:first-child {
     flex: 0 0 auto;
     color: rgb(var(--accent));
     font-size: 1.4rem;
@@ -750,4 +750,19 @@ html {
 
 .lp-copy {
     color: var(--text-faint);
+}
+
+/* TEAM: auto-scrolling strip you can also drag or swipe. Wrapped static grid when motion is reduced. */
+.lt-marquee{position:relative;overflow-x:auto;overflow-y:hidden;margin-top:var(--space-5);scrollbar-width:none;touch-action:pan-x pan-y;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.lt-marquee::-webkit-scrollbar{display:none}
+.lt-marquee.is-dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+.lt-marquee.is-dragging a{pointer-events:none}
+.lt-team{list-style:none;margin:0;padding:0;display:flex;gap:var(--space-4);width:max-content}
+.lt-member{display:flex;flex-direction:column;align-items:center;gap:.6rem;width:8.5rem;padding:1rem .5rem;text-decoration:none;color:inherit;border:1px solid var(--border);border-radius:var(--radius-md);min-height:2.75rem;transition:border-color .15s;-webkit-user-drag:none}
+.lt-member:hover,.lt-member:focus-visible{border-color:var(--accent)}
+.lt-avatar{width:5rem;height:5rem;border-radius:50%;object-fit:cover;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;-webkit-user-drag:none;user-select:none}
+.lt-name{font-size:.85rem;font-weight:600;word-break:break-all;text-align:center}
+@media (prefers-reduced-motion: reduce){
+  .lt-marquee{overflow:visible;cursor:auto;-webkit-mask-image:none;mask-image:none}
+  .lt-team{width:auto;flex-wrap:wrap}
 }

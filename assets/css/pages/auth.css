@@ -1,47 +1,27 @@
 /* Authentication pages: log in, sign up, password reset and status screens. */
 
-/* Theme tokens (dark and light share structure, differ in value) */
+/* Authentication pages share the same theme surfaces as the application. */
 
 .auth-page {
     --auth-rule: 1px;
 
-    --auth-bg: #0F172A;
-    --auth-surface: #111827;
-    --auth-elevated: #1E293B;
-    --auth-control-surface: #182131;
-    --auth-text: #F8FAFC;
-    --auth-text-soft: #94A3B8;
-    --auth-text-faint: #7C8BA1;
-    --auth-border: rgba(148, 163, 184, 0.24);
-    --auth-border-strong: rgba(148, 163, 184, 0.4);
-    --auth-input-bg: #0B1120;
-    --auth-input-border: rgba(148, 163, 184, 0.32);
+    --auth-bg: var(--bg);
+    --auth-surface: var(--surface);
+    --auth-elevated: var(--surface-2);
+    --auth-control-surface: var(--surface-2);
+    --auth-text: var(--text);
+    --auth-text-soft: var(--text-soft);
+    --auth-text-faint: var(--text-faint);
+    --auth-border: var(--border);
+    --auth-border-strong: var(--border-strong, var(--border));
+    --auth-input-bg: var(--surface-2);
+    --auth-input-border: var(--border);
     --auth-link: rgb(var(--accent));
-    --auth-danger: #FB7185;
-    --auth-success: #34D399;
-    --auth-info: #38BDF8;
-    --auth-scroll-thumb: #64748B;
-    --auth-scroll-track: rgba(148, 163, 184, 0.14);
-}
-
-[data-theme="light"] .auth-page {
-    --auth-bg: #F4F6FA;
-    --auth-surface: #FFFFFF;
-    --auth-elevated: #F1F5F9;
-    --auth-control-surface: #F6F8FB;
-    --auth-text: #0F172A;
-    --auth-text-soft: #475569;
-    --auth-text-faint: #64748B;
-    --auth-border: #D5DCE6;
-    --auth-border-strong: #B9C3D1;
-    --auth-input-bg: #FFFFFF;
-    --auth-input-border: #BAC4D3;
-    --auth-link: rgb(var(--accent));
-    --auth-danger: #BE123C;
-    --auth-success: #047857;
-    --auth-info: #0369A1;
-    --auth-scroll-thumb: #94A3B8;
-    --auth-scroll-track: #E2E8F0;
+    --auth-danger: var(--danger);
+    --auth-success: var(--success);
+    --auth-info: var(--info);
+    --auth-scroll-thumb: var(--text-faint);
+    --auth-scroll-track: var(--surface-2);
 }
 
 body.auth-page {
@@ -183,7 +163,7 @@ body.auth-page {
     outline-offset: 2px;
 }
 
-.theme-toggle .bi {
+.theme-toggle .lucide-icon {
     line-height: 1;
 }
 
@@ -316,7 +296,7 @@ body.auth-page {
     text-decoration: underline;
 }
 
-.auth-link i {
+.auth-link .lucide-icon {
     margin-right: var(--space-2);
 }
 
@@ -550,7 +530,7 @@ html[data-motion="reduced"] .auth-spin {
     display: none;
 }
 
-.auth-alert i {
+.auth-alert .lucide-icon {
     flex: 0 0 auto;
     margin-top: 0.15rem;
     color: var(--auth-info);
@@ -849,7 +829,7 @@ body.auth-page {
     font-size: .78rem;
 }
 
-.auth-feature-list i {
+.auth-feature-list .lucide-icon {
     color: rgb(var(--accent));
     font-size: .9rem;
 }

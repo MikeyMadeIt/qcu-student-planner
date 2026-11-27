@@ -1,37 +1,38 @@
 // NAV
 const NAV_ITEMS = [
-    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
-    { href: 'notifications.html', icon: 'bi-bell', label: 'Notifications', key: 'notifications', base: 'app' },
-    { href: 'dashboard.html', icon: 'bi-grid-1x2', label: 'Dashboard', key: 'dashboard', base: 'app' },
-    { href: 'news.html', icon: 'bi-megaphone', label: 'News & Announcements', key: 'news', base: 'app' },
-    { href: 'schedule.html', icon: 'bi-calendar2-week', label: 'Schedule', key: 'schedule', base: 'app' },
-    { href: 'tasks.html', icon: 'bi-check2-square', label: 'Tasks', key: 'tasks', base: 'app' },
-    { href: 'calendar.html', icon: 'bi-calendar3', label: 'Calendar', key: 'calendar', base: 'app' },
-    { href: 'grades.html', icon: 'bi-mortarboard', label: 'Grades', key: 'grades', base: 'app' },
-    { href: 'attendance.html', icon: 'bi-person-check', label: 'Attendance', key: 'attendance', base: 'app' },
-    { href: 'notes.html', icon: 'bi-journal-text', label: 'Notes', key: 'notes', base: 'app' },
-    { href: 'curriculum.html', icon: 'bi-book-half', label: 'Curriculum', key: 'curriculum', base: 'app' },
-    { href: 'ai-quiz-maker.html', icon: 'bi-patch-question', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
-    { href: 'ai-flashcard-maker.html', icon: 'bi-layers', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
-    { href: 'ai-study-assistant.html', icon: 'bi-stars', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
-    { href: 'wallpaper.html', icon: 'bi-phone', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
-    { href: 'settings.html', icon: 'bi-gear', label: 'Settings', key: 'settings', base: 'app' },
-    { href: 'help.html', icon: 'bi-question-circle', label: 'Help Center', key: 'help', base: 'app' },
-    { href: 'report.html', icon: 'bi-flag', label: 'Report a Problem', key: 'report', base: 'app' },
-    { href: 'legal-policies.html', icon: 'bi-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
-    { href: 'dashboard.html', icon: 'bi-speedometer2', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
-    { href: 'university-events.html', icon: 'bi-bank2', label: 'University Events', key: 'admin-university-events', base: 'admin' },
-    { href: 'users.html', icon: 'bi-people', label: 'All Users', key: 'admin-users', base: 'admin' },
-    { href: 'verification.html', icon: 'bi-person-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
-    { href: 'rejected.html', icon: 'bi-person-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
-    { href: 'inbox.html', icon: 'bi-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
-    { href: 'tickets.html', icon: 'bi-life-preserver', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
-    { href: 'activity-log.html', icon: 'bi-clock-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
+    { href: 'inbox.html', icon: 'icon-lucide-inbox', label: 'Inbox', key: 'inbox', base: 'app' },
+    { href: 'notifications.html', icon: 'icon-lucide-bell', label: 'Notifications', key: 'notifications', base: 'app' },
+    { href: 'dashboard.html', icon: 'icon-lucide-layout-dashboard', label: 'Dashboard', key: 'dashboard', base: 'app' },
+    { href: 'news.html', icon: 'icon-lucide-megaphone', label: 'News & Announcements', key: 'news', base: 'app' },
+    { href: 'schedule.html', icon: 'icon-lucide-calendar-days', label: 'Schedule', key: 'schedule', base: 'app' },
+    { href: 'tasks.html', icon: 'icon-lucide-list-check', label: 'Tasks', key: 'tasks', base: 'app' },
+    { href: 'calendar.html', icon: 'icon-lucide-calendar-days', label: 'Calendar', key: 'calendar', base: 'app' },
+    { href: 'grades.html', icon: 'icon-lucide-graduation-cap', label: 'Grades', key: 'grades', base: 'app' },
+    { href: 'attendance.html', icon: 'icon-lucide-user-round-check', label: 'Attendance', key: 'attendance', base: 'app' },
+    { href: 'notes.html', icon: 'icon-lucide-notebook-text', label: 'Notes', key: 'notes', base: 'app' },
+    { href: 'curriculum.html', icon: 'icon-lucide-book-open', label: 'Curriculum', key: 'curriculum', base: 'app' },
+    { href: 'ai-quiz-maker.html', icon: 'icon-lucide-badge-help', label: 'AI Quiz Maker', key: 'ai-quiz-maker', base: 'app' },
+    { href: 'ai-flashcard-maker.html', icon: 'icon-lucide-layers-2', label: 'AI Flashcard Maker', key: 'ai-flashcard-maker', base: 'app' },
+    { href: 'ai-study-assistant.html', icon: 'icon-lucide-sparkles', label: 'AI Study Assistant', key: 'ai-study-assistant', base: 'app' },
+    { href: 'wallpaper.html', icon: 'icon-lucide-file-image', label: 'Wallpaper', key: 'wallpaper', base: 'app' },
+    { href: 'settings.html', icon: 'icon-lucide-settings', label: 'Settings', key: 'settings', base: 'app' },
+    { href: 'help.html', icon: 'icon-lucide-circle-help', label: 'Help Center', key: 'help', base: 'app' },
+    { href: 'report.html', icon: 'icon-lucide-flag', label: 'Report a Problem', key: 'report', base: 'app' },
+    { href: 'legal-policies.html', icon: 'icon-lucide-shield-check', label: 'Legal & Policies', key: 'legal-policies', base: 'app' },
+    { href: 'dashboard.html', icon: 'icon-lucide-gauge', label: 'Overview', key: 'admin-dashboard', base: 'admin' },
+    { href: 'academic-calendar.html', icon: 'icon-lucide-calendar-range', label: 'Academic Calendar', key: 'admin-academic-calendar', base: 'admin' },
+    { href: 'university-events.html', icon: 'icon-lucide-landmark', label: 'University Events', key: 'admin-university-events', base: 'admin' },
+    { href: 'users.html', icon: 'icon-lucide-users-round', label: 'All Users', key: 'admin-users', base: 'admin' },
+    { href: 'verification.html', icon: 'icon-lucide-user-round-check', label: 'Pending Approvals', key: 'admin-verification', base: 'admin' },
+    { href: 'rejected.html', icon: 'icon-lucide-user-round-x', label: 'Rejected Accounts', key: 'admin-rejected', base: 'admin' },
+    { href: 'inbox.html', icon: 'icon-lucide-inbox', label: 'Inbox', key: 'admin-inbox', base: 'admin' },
+    { href: 'tickets.html', icon: 'icon-lucide-life-buoy', label: 'Support Tickets', key: 'admin-tickets', base: 'admin' },
+    { href: 'activity-log.html', icon: 'icon-lucide-history', label: 'Audit Logs', key: 'admin-activity', base: 'admin' },
 ];
 const THEME_OPTIONS = [
-    { value: 'dark', label: 'Dark', icon: 'bi-moon-stars' },
-    { value: 'light', label: 'Light', icon: 'bi-sun' },
-    { value: 'amoled', label: 'AMOLED', icon: 'bi-circle' }
+    { value: 'dark', label: 'Dark', icon: 'icon-lucide-moon-star' },
+    { value: 'light', label: 'Light', icon: 'icon-lucide-sun' },
+    { value: 'amoled', label: 'AMOLED', icon: 'icon-lucide-circle' }
 ];
 const PAGE_TITLES = Object.fromEntries(NAV_ITEMS.map(n => [n.key, n.label]));
 
@@ -56,6 +57,7 @@ const PAGE_SECTIONS = {
     report: 'Safety & Support',
     'legal-policies': 'Safety & Support',
     'admin-dashboard': 'Overview',
+    'admin-academic-calendar': 'University',
     'admin-university-events': 'Events',
     'admin-users': 'User Management',
     'admin-verification': 'User Management',
@@ -75,24 +77,32 @@ const STUDENT_NAV_GROUPS = [
 ];
 const ADMIN_NAV_GROUPS = [
     { label: 'Overview', keys: ['admin-dashboard'] },
-    { label: 'Events', keys: ['admin-university-events'] },
+    { label: 'University', keys: ['admin-academic-calendar', 'admin-university-events'] },
     { label: 'User Management', keys: ['admin-users', 'admin-verification', 'admin-rejected'] },
     { label: 'Communications', keys: ['admin-inbox', 'admin-tickets'] },
     { label: 'System', keys: ['admin-activity'] },
 ];
 const NAV_GROUP_ICONS = {
-    Communication: 'bi-chat-dots', Communications: 'bi-chat-dots', Overview: 'bi-grid-1x2',
-    Academics: 'bi-mortarboard', 'AI Tools': 'bi-stars', University: 'bi-bank',
-    Personalization: 'bi-palette', 'Safety & Support': 'bi-shield-check',
-    Events: 'bi-calendar-event', 'User Management': 'bi-people', System: 'bi-cpu'
+    Communication: 'icon-lucide-messages-square', Communications: 'icon-lucide-messages-square', Overview: 'icon-lucide-layout-dashboard',
+    Academics: 'icon-lucide-graduation-cap', 'AI Tools': 'icon-lucide-sparkles', University: 'icon-lucide-landmark',
+    Personalization: 'icon-lucide-palette', 'Safety & Support': 'icon-lucide-shield-check',
+    Events: 'icon-lucide-calendar-days', 'User Management': 'icon-lucide-users-round', System: 'icon-lucide-cpu'
 };
 // Sign out
 async function signOutAndRedirect(button) {
     if (button) button.disabled = true;
     try {
         const { AuthService } = await import('../services/auth-service.js');
-        await AuthService.signOut();
+        const result = await AuthService.signOut();
+        if (!result.ok) {
+            if (window.Toast) Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+            if (button) button.disabled = false;
+            return;
+        }
     } catch (error) {
+        if (window.Toast) Toast.show('Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+        if (button) button.disabled = false;
+        return;
     }
     location.href = '../auth/login.html';
 }
@@ -107,15 +117,22 @@ function formatSemesterCardDate(ymd) {
 }
 function renderShellSemesterCardHtml() {
     const sem = (typeof DB !== 'undefined') ? DB.getActiveSemester() : null;
-    if (!sem) return '';
+    if (!sem) return `
+        <div class="shell-semester-card shell-semester-card-empty" id="shellSemesterCard">
+            <div class="shell-semester-info">
+                <div class="shell-semester-name">No active academic period</div>
+                <div class="shell-semester-dates">The university administrator has not set one yet.</div>
+            </div>
+            <span class="shell-semester-status shell-semester-status-empty">Not set</span>
+        </div>`;
     const range = `${formatSemesterCardDate(sem.startDate)} &ndash; ${formatSemesterCardDate(sem.endDate)}`;
     return `
         <div class="shell-semester-card" id="shellSemesterCard">
             <div class="shell-semester-info">
-                <div class="shell-semester-name">${escHtml(sem.name)}</div>
-                <div class="shell-semester-dates">${range}</div>
+                <div class="shell-semester-name">${escHtml(sem.schoolYear)} · ${escHtml(sem.name)}</div>
+                <div class="shell-semester-dates">${range} · Managed by QCU</div>
             </div>
-            <span class="shell-semester-status"><i class="bi bi-check-lg" aria-hidden="true"></i>Active</span>
+            <span class="shell-semester-status"><i class="icon-lucide-check" aria-hidden="true"></i>Active</span>
         </div>`;
 }
 
@@ -125,7 +142,7 @@ function renderThemeSwitchHtml() {
     return THEME_OPTIONS.map(option => `
         <button type="button" class="theme-switch-btn" data-theme-value="${option.value}"
             role="radio" aria-checked="${option.value === currentTheme}" aria-label="${option.label} theme" title="${option.label}">
-            <i class="bi ${option.icon}" aria-hidden="true"></i>
+            <i class="${option.icon}" aria-hidden="true"></i>
         </button>`).join('');
 }
 function syncThemeSwitches() {
@@ -166,7 +183,7 @@ function renderThemeOptionsHtml() {
     return THEME_OPTIONS.map(option => `
         <button type="button" class="theme-option" data-theme-value="${option.value}"
             role="radio" aria-checked="${option.value === currentTheme}">
-            <i class="bi ${option.icon}" aria-hidden="true"></i>
+            <i class="${option.icon}" aria-hidden="true"></i>
             <span>${option.label}</span>
         </button>`).join('');
 }
@@ -177,10 +194,10 @@ function syncThemeOptions() {
     });
     const option = THEME_OPTIONS.find(item => item.value === currentTheme) || THEME_OPTIONS[0];
     document.querySelectorAll('[data-mobile-theme-icon]').forEach(icon => {
-        icon.className = `bi ${option.icon}`;
+        window.setLucideIcon(icon, option.icon);
     });
     document.querySelectorAll('[data-desktop-theme-icon]').forEach(icon => {
-        icon.className = `bi ${option.icon}`;
+        window.setLucideIcon(icon, option.icon);
     });
 }
 function initThemeOptions() {
@@ -225,7 +242,7 @@ function ensureDesktopFloatingTools() {
     tools.className = 'desktop-floating-tools';
     tools.innerHTML = `<div class="desktop-floating-theme" id="desktopFloatingTheme">
         <button type="button" class="shell-icon-btn desktop-floating-theme-trigger" id="desktopFloatingThemeTrigger" aria-haspopup="true" aria-expanded="false" aria-controls="desktopFloatingThemePanel" aria-label="Choose theme" title="Choose theme">
-            <i class="bi bi-moon-stars" data-desktop-theme-icon aria-hidden="true"></i>
+            <i class="icon-lucide-moon-star" data-desktop-theme-icon aria-hidden="true"></i>
         </button>
         <div class="desktop-floating-theme-panel" id="desktopFloatingThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
     </div>`;
@@ -249,12 +266,12 @@ function syncSidebarToggleIcon(isOpen) {
     document.querySelectorAll('[data-sidebar-toggle]').forEach(btn => {
         btn.setAttribute('aria-expanded', String(isOpen));
         btn.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
-        const icon = btn.querySelector('i');
+        const icon = btn.querySelector('.lucide-icon, i');
         if (icon) {
             const isMobileApp = document.body.classList.contains('mobile-nav-app');
-            icon.className = isMobileApp
-                ? (isOpen ? 'bi bi-x-lg' : 'bi bi-list')
-                : (isOpen ? 'bi bi-layout-sidebar-reverse' : 'bi bi-layout-sidebar');
+            window.setLucideIcon(icon, isMobileApp
+                ? (isOpen ? 'icon-lucide-x' : 'icon-lucide-list')
+                : (isOpen ? 'icon-lucide-panel-right' : 'icon-lucide-panel-left'));
         }
     });
 }
@@ -354,10 +371,10 @@ function renderNotifPanelBody() {
         readMap = getNotificationReadMap();
     } catch (error) {
         console.error('Unable to load notifications.', error);
-        return `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Notifications could not be loaded.</div>`;
+        return `<div class="header-panel-empty" role="status"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-circle-alert"></i></div>Notifications could not be loaded.</div>`;
     }
     if (!items.length)
-        return `<div class="header-panel-empty"><i class="bi bi-check2-circle" aria-hidden="true"></i>Nothing due soon</div><a class="header-panel-footer" href="../app/notifications.html">View all notifications</a>`;
+        return `<div class="header-panel-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-circle-check"></i></div>Nothing due soon</div><a class="header-panel-footer" href="../app/notifications.html">View all notifications</a>`;
     return items.slice(0, 5).map(n => `
         <a class="header-panel-item ${readMap[n.id] ? 'is-read' : 'is-unread'}" href="../app/notifications.html?item=${encodeURIComponent(n.id)}">
             <span class="header-panel-dot ${n.overdue ? 'is-overdue' : ''}" aria-hidden="true"></span>
@@ -369,19 +386,19 @@ function renderNotifPanelBody() {
 }
 
 function renderInboxPanelLoading() {
-    return `<div class="header-panel-empty"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Loading…</div>`;
+    return `<div class="header-panel-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-hourglass"></i></div>Loading…</div>`;
 }
 
 // Mirrors the admin/student inbox page's own message-row layout (pill
 function renderInboxPanelItems(rows, icons, categoryBadge) {
     if (!rows.length)
-        return `<div class="header-panel-empty"><i class="bi bi-inbox" aria-hidden="true"></i>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
+        return `<div class="header-panel-empty"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-inbox"></i></div>Nothing here yet<span>Messages from your administrators will appear here.</span></div><a class="header-panel-footer" href="../app/inbox.html">View all messages</a>`;
     return `<div class="msg-list msg-list-compact">` + rows.slice(0, 5).map(r => {
         const m = r.message;
-        const icon = icons[m.category] || 'bi-chat-square-text';
+        const icon = icons[m.category] || 'icon-lucide-message-square-text';
         return `
         <a class="msg-row ${r.read_at ? '' : 'is-unread'}" href="../app/inbox.html">
-            <span class="msg-row-icon" aria-hidden="true"><i class="bi ${icon}" aria-hidden="true"></i></span>
+            <span class="msg-row-icon" aria-hidden="true"><i class="${icon}" aria-hidden="true"></i></span>
             <span class="msg-row-body">
                 <span class="msg-pill">${categoryBadge(escHtml, m.category)}</span>
                 <span class="msg-subject">${escHtml(m.subject)}</span>
@@ -412,7 +429,7 @@ async function refreshInboxPreview({ refreshList = true, throttle = false } = {}
             if (badge) badge.hidden = true;
             document.querySelectorAll('[data-inbox-badge]').forEach(item => { item.hidden = true; });
             document.querySelectorAll('[data-inbox-dot]').forEach(d => { d.hidden = true; });
-            if (body) body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(countResult.message || '')}</span></div>`;
+            if (body) body.innerHTML = `<div class="header-panel-empty" role="status"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-circle-alert"></i></div>Could not load your inbox.<span>${escHtml(countResult.message || '')}</span></div>`;
             return;
         }
 
@@ -435,14 +452,14 @@ async function refreshInboxPreview({ refreshList = true, throttle = false } = {}
             body.innerHTML = renderInboxPanelItems(listResult.data.rows, MESSAGE_CATEGORY_ICONS, messageCategoryBadge);
         } else if (body && listResult) {
             console.error('Inbox preview list failed:', listResult.message);
-            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml(listResult.message || '')}</span></div>`;
+            body.innerHTML = `<div class="header-panel-empty" role="status"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-circle-alert"></i></div>Could not load your inbox.<span>${escHtml(listResult.message || '')}</span></div>`;
         }
     } catch (error) {
         console.error('Could not load inbox preview.', error);
         if (badge) badge.hidden = true;
         document.querySelectorAll('[data-inbox-badge]').forEach(item => { item.hidden = true; });
-        if (body && body.innerHTML.includes('bi-hourglass-split')) {
-            body.innerHTML = `<div class="header-panel-empty" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>Could not load your inbox.<span>${escHtml((error && error.message) || '')}</span></div>`;
+        if (body && body.innerHTML.includes('icon-lucide-hourglass')) {
+            body.innerHTML = `<div class="header-panel-empty" role="status"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-circle-alert"></i></div>Could not load your inbox.<span>${escHtml((error && error.message) || '')}</span></div>`;
         }
     }
 }
@@ -482,13 +499,13 @@ function renderAdminShellBar(activeKey, admin) {
     bar.className = 'shell-bar';
     bar.innerHTML = `
         <a class="mobile-shell-brand" href="../admin/dashboard.html" aria-label="QCU Planner Admin home">
-            <span class="dot"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+            <span class="dot"><i class="icon-lucide-shield-lock" aria-hidden="true"></i></span>
             <span>Planner Admin</span>
         </a>
         <div class="shell-bar-left">
             <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
                 aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
-                <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
+                <i class="icon-lucide-panel-left" aria-hidden="true"></i>
             </button>
             <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
         </div>
@@ -496,13 +513,13 @@ function renderAdminShellBar(activeKey, admin) {
             <div class="mobile-theme-menu" id="mobileThemeMenu">
                 <button type="button" class="mobile-shell-icon-btn" id="mobileThemeTrigger" aria-haspopup="true"
                     aria-expanded="false" aria-controls="mobileThemePanel" aria-label="Choose theme">
-                    <i class="bi bi-moon-stars" data-mobile-theme-icon aria-hidden="true"></i>
+                    <i class="icon-lucide-moon-star" data-mobile-theme-icon aria-hidden="true"></i>
                 </button>
                 <div class="mobile-theme-panel" id="mobileThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
             </div>
             <button type="button" class="shell-menu-btn mobile-nav-trigger" data-sidebar-toggle aria-haspopup="true"
                 aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
-                <i class="bi bi-list" aria-hidden="true"></i>
+                <i class="icon-lucide-list" aria-hidden="true"></i>
             </button>
         </div>
         <div class="shell-bar-right">
@@ -525,12 +542,13 @@ function renderAdminShellBar(activeKey, admin) {
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
                     </div>
                     <div class="profile-panel-section">
-                        <button type="button" class="profile-item profile-item-btn js-admin-logout" role="menuitem"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+                        <button type="button" class="profile-item profile-item-btn js-admin-logout" role="menuitem"><i class="icon-lucide-log-out" aria-hidden="true"></i>Log out</button>
                     </div>
                 </div>
             </div>
         </div>`;
     main.insertBefore(bar, main.firstChild);
+    if (!document.body.classList.contains('admin-app')) ensureAcademicPeriodBanner(main);
     initHeaderPanel(bar, 'profileTrigger', 'profilePanel', 'profileMenu');
     initMobileThemeMenu();
 }
@@ -548,37 +566,37 @@ function renderShellBar(activeKey) {
     bar.className = 'shell-bar';
     bar.innerHTML = `
         <a class="mobile-shell-brand" href="../app/dashboard.html" aria-label="QCU Student Planner home">
-            <span class="dot"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
+            <span class="dot"><i class="icon-lucide-graduation-cap" aria-hidden="true"></i></span>
             <span>QCU Student Planner</span>
         </a>
         <div class="shell-bar-left">
             <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
                 aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
-                <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
+                <i class="icon-lucide-panel-left" aria-hidden="true"></i>
             </button>
             <h1 class="shell-page-title" id="shellPageTitle" title="${escHtml(pageTitle)}">${escHtml(pageTitle)}</h1>
         </div>
         <div class="mobile-shell-actions">
             <button type="button" class="mobile-shell-icon-btn pomodoro-mobile-trigger" data-pomodoro-trigger aria-label="Open Pomodoro timer" title="Pomodoro timer" aria-expanded="false">
-                <i class="bi bi-stopwatch" aria-hidden="true"></i>
+                <i class="icon-lucide-timer" aria-hidden="true"></i>
             </button>
             <div class="mobile-theme-menu" id="mobileThemeMenu">
                 <button type="button" class="mobile-shell-icon-btn" id="mobileThemeTrigger" aria-haspopup="true"
                     aria-expanded="false" aria-controls="mobileThemePanel" aria-label="Choose theme">
-                    <i class="bi bi-moon-stars" data-mobile-theme-icon aria-hidden="true"></i>
+                    <i class="icon-lucide-moon-star" data-mobile-theme-icon aria-hidden="true"></i>
                 </button>
                 <div class="mobile-theme-panel" id="mobileThemePanel" role="radiogroup" aria-label="Theme" data-theme-options hidden></div>
             </div>
             <button type="button" class="shell-menu-btn mobile-nav-trigger" data-sidebar-toggle aria-haspopup="true"
                 aria-expanded="false" aria-controls="mobileAppNavMenu" aria-label="Open navigation">
-                <i class="bi bi-list" aria-hidden="true"></i>
+                <i class="icon-lucide-list" aria-hidden="true"></i>
             </button>
         </div>
         <div class="shell-bar-right">
             <div class="header-panel-wrap" id="notifMenu">
                 <button type="button" class="shell-icon-btn" id="notifTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="notifPanel" aria-label="Notifications">
-                    <i class="bi bi-bell" aria-hidden="true"></i>
+                    <i class="icon-lucide-bell" aria-hidden="true"></i>
                     <span class="notification-count" id="notificationUnreadCount" aria-hidden="true" hidden></span>
                 </button>
                 <div class="header-panel" id="notifPanel" role="region" aria-label="Notifications" hidden>
@@ -589,7 +607,7 @@ function renderShellBar(activeKey) {
             <div class="header-panel-wrap" id="inboxMenu">
                 <button type="button" class="shell-icon-btn" id="inboxTrigger"
                     aria-haspopup="true" aria-expanded="false" aria-controls="inboxPanel" aria-label="Inbox">
-                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <i class="icon-lucide-inbox" aria-hidden="true"></i>
                     <span class="notification-count" id="inboxUnreadCount" aria-hidden="true" hidden></span>
                 </button>
                 <div class="header-panel" id="inboxPanel" role="region" aria-label="Inbox" hidden>
@@ -616,12 +634,12 @@ function renderShellBar(activeKey) {
                         <div class="theme-options" role="radiogroup" aria-label="Theme" data-theme-options></div>
                     </div>
                     <div class="profile-panel-section">
-                        <a class="profile-item" role="menuitem" href="../app/settings.html"><i class="bi bi-sliders" aria-hidden="true"></i>Settings</a>
-                        <a class="profile-item" role="menuitem" href="../app/help.html"><i class="bi bi-question-circle" aria-hidden="true"></i>Help</a>
-                        <a class="profile-item" role="menuitem" href="../app/report.html"><i class="bi bi-flag" aria-hidden="true"></i>Report</a>
+                        <a class="profile-item" role="menuitem" href="../app/settings.html"><i class="icon-lucide-sliders-horizontal" aria-hidden="true"></i>Settings</a>
+                        <a class="profile-item" role="menuitem" href="../app/help.html"><i class="icon-lucide-circle-help" aria-hidden="true"></i>Help</a>
+                        <a class="profile-item" role="menuitem" href="../app/report.html"><i class="icon-lucide-flag" aria-hidden="true"></i>Report</a>
                     </div>
                     <div class="profile-panel-section">
-                        <button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" id="topbarProfileLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+                        <button type="button" class="profile-item profile-item-btn profile-item-danger" role="menuitem" id="topbarProfileLogoutBtn" onclick="signOutAndRedirect(this);return false;"><i class="icon-lucide-log-out" aria-hidden="true"></i>Log out</button>
                     </div>
                 </div>
             </div>
@@ -643,6 +661,10 @@ function renderShellBar(activeKey) {
         if (!document.hidden) refreshInboxPreview({ refreshList: false, throttle: true });
     });
     window.addEventListener('planner:cloud-synced', refreshShellSemesterCard);
+    window.addEventListener('planner:academic-calendar-changed', () => {
+        refreshShellSemesterCard();
+        refreshAcademicPeriodBanner();
+    });
     setupInboxBadgeRealtime();
     initMobileThemeMenu();
 }
@@ -650,6 +672,32 @@ function renderShellBar(activeKey) {
 function refreshShellSemesterCard() {
     const wrap = document.getElementById('shellSemesterCardWrap');
     if (wrap) wrap.innerHTML = renderShellSemesterCardHtml();
+}
+
+function academicPeriodBannerHtml() {
+    const sem = typeof DB !== 'undefined' ? DB.getActiveSemester() : null;
+    return sem
+        ? `<i class="icon-lucide-calendar-days" aria-hidden="true"></i><span><strong>${escHtml(sem.schoolYear)} · ${escHtml(sem.name)}</strong><span>University academic period · Managed by QCU</span></span>`
+        : `<i class="icon-lucide-calendar-x-2" aria-hidden="true"></i><span><strong>No active academic period</strong><span>The university administrator has not published the academic calendar yet.</span></span>`;
+}
+
+function ensureAcademicPeriodBanner(main) {
+    let banner = document.getElementById('academicPeriodBanner');
+    if (!banner) {
+        banner = document.createElement('aside');
+        banner.id = 'academicPeriodBanner';
+        banner.className = 'academic-period-banner';
+        banner.setAttribute('aria-live', 'polite');
+        const shellBar = main.querySelector('#shellBar');
+        if (shellBar && shellBar.nextSibling) main.insertBefore(banner, shellBar.nextSibling);
+        else main.insertBefore(banner, main.firstChild);
+    }
+    banner.innerHTML = academicPeriodBannerHtml();
+}
+
+function refreshAcademicPeriodBanner() {
+    const banner = document.getElementById('academicPeriodBanner');
+    if (banner) banner.innerHTML = academicPeriodBannerHtml();
 }
 
 function refreshNotificationPreview() {
@@ -727,7 +775,7 @@ function wireModalDefaults() {
             message: 'Discard unsaved changes and close this dialog?',
             confirmLabel: 'Discard',
             danger: true,
-            icon: 'bi-exclamation-triangle',
+            icon: 'icon-lucide-triangle-alert',
             onConfirm: onDiscard,
         });
     };
@@ -831,9 +879,9 @@ function renderShell(activeKey, admin) {
         const name = (sidebarSettings.name || '').trim() || 'Student';
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
         const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
-        const brandIcon = isAdminArea ? 'bi-shield-lock' : 'bi-mortarboard';
+        const brandIcon = isAdminArea ? 'icon-lucide-shield-lock' : 'icon-lucide-graduation-cap';
         let hasMenuHeading = false;
-        let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="bi ${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
+        let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
         sidebarGroups.forEach((g, index) => {
             const groupId = `sidebarGroup${index}`;
@@ -847,7 +895,7 @@ function renderShell(activeKey, admin) {
                 ${directGroup
                     ? `<div class="sidebar-group-heading"><span>${escHtml(g.label || 'Navigation')}</span></div>`
                     : `<button type="button" class="nav-group-toggle" aria-expanded="${expanded}" aria-controls="${groupId}">
-                        <i class="bi ${NAV_GROUP_ICONS[g.label] || 'bi-folder'} sidebar-group-icon" aria-hidden="true"></i><span>${escHtml(g.label || 'Navigation')}</span><i class="bi bi-chevron-down sidebar-group-chevron" aria-hidden="true"></i>
+                        <i class="${NAV_GROUP_ICONS[g.label] || 'icon-lucide-folder'} sidebar-group-icon" aria-hidden="true"></i><span>${escHtml(g.label || 'Navigation')}</span><i class="icon-lucide-chevron-down sidebar-group-chevron" aria-hidden="true"></i>
                     </button>`}
                 <div class="sidebar-group-items${directGroup ? '' : ' sidebar-tree'}" id="${groupId}"${directGroup || expanded ? '' : ' hidden'}>`;
             g.keys.forEach(k => {
@@ -857,7 +905,7 @@ function renderShell(activeKey, admin) {
                 const isActive = n.key === activeKey;
                 const badgeHtml = isAdminArea ? `<span class="nav-badge" data-admin-badge="${n.key}" hidden></span>`
                     : n.key === 'inbox' ? `<span class="nav-dot" data-inbox-dot hidden></span>` : '';
-                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${directGroup ? '' : ' sidebar-tree-link'}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}>${directGroup ? `<i class="bi ${n.icon}" aria-hidden="true"></i>` : ''}<span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
+                sidebarHtml += `<a class="nav-link${isActive ? ' active' : ''}${directGroup ? '' : ' sidebar-tree-link'}" href="../${n.base}/${n.href}" ${isActive ? 'aria-current="page"' : ''}>${directGroup ? `<i class="${n.icon}" aria-hidden="true"></i>` : ''}<span class="nav-link-label">${n.label}</span>${badgeHtml}</a>`;
             });
             sidebarHtml += `</div></section>`;
             if (directGroup) sidebarHtml += `<div class="sidebar-group-divider" aria-hidden="true"></div>`;
@@ -876,7 +924,7 @@ function renderShell(activeKey, admin) {
       </div>
     </div>
     <div class="sidebar-utility">
-      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
+      <button type="button" class="nav-link sidebar-logout-btn js-admin-logout" id="admSidebarLogoutBtn"><i class="icon-lucide-log-out" aria-hidden="true"></i><span>Log out</span></button>
     </div>`;
         } else {
             sidebarHtml += `<div class="sidebar-profile" id="sidebarProfile">
@@ -887,7 +935,7 @@ function renderShell(activeKey, admin) {
       </div>
     </div>`;
             sidebarHtml += `<div class="sidebar-utility">
-      <button type="button" class="nav-link sidebar-logout-btn" onclick="signOutAndRedirect(this);return false;"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>
+      <button type="button" class="nav-link sidebar-logout-btn" onclick="signOutAndRedirect(this);return false;"><i class="icon-lucide-log-out" aria-hidden="true"></i><span>Log out</span></button>
     </div>`;
         }
         sidebarHtml += `</div>`;
@@ -1084,7 +1132,7 @@ function ensureMobileAppNavMenu(activeKey, admin) {
                 : key === 'inbox' ? '<span class="mobile-nav-badge" data-inbox-badge hidden></span>'
                     : key === 'notifications' ? '<span class="mobile-nav-badge" data-notification-badge hidden></span>' : '';
             return `<a class="mobile-nav-card${isActive ? ' active' : ''}" href="../${item.base}/${item.href}"${isActive ? ' aria-current="page"' : ''}>
-                <i class="bi ${item.icon}" aria-hidden="true"></i><span class="mobile-nav-card-label">${escHtml(item.label)}</span>${badge}
+                <i class="${item.icon}" aria-hidden="true"></i><span class="mobile-nav-card-label">${escHtml(item.label)}</span>${badge}
             </a>`;
         }).join('')}
             </div>
@@ -1096,8 +1144,8 @@ function ensureMobileAppNavMenu(activeKey, admin) {
         ? `<span>${escHtml(admin && admin.role ? admin.role.replace(/_/g, ' ') : 'Administrator')}</span>`
         : '<span id="mobileProfileEmail">Signed in on this device</span>';
     const logoutButton = isAdminArea
-        ? '<button type="button" class="mobile-nav-logout js-admin-logout" id="admMobileMenuLogoutBtn" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>'
-        : '<button type="button" class="mobile-nav-logout" onclick="signOutAndRedirect(this);return false;" aria-label="Log out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Log out</span></button>';
+        ? '<button type="button" class="mobile-nav-logout js-admin-logout" id="admMobileMenuLogoutBtn" aria-label="Log out"><i class="icon-lucide-log-out" aria-hidden="true"></i><span>Log out</span></button>'
+        : '<button type="button" class="mobile-nav-logout" onclick="signOutAndRedirect(this);return false;" aria-label="Log out"><i class="icon-lucide-log-out" aria-hidden="true"></i><span>Log out</span></button>';
     const menu = document.createElement('div');
     menu.id = 'mobileAppNavMenu';
     menu.className = 'mobile-app-nav-menu';

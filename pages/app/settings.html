@@ -10,9 +10,9 @@
 <link rel="manifest" href="../../manifest.json">
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/settings.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -35,24 +35,25 @@
       <div class="glass card-pad fade-in settings-groups">
 
         <!-- Academic preferences -->
-        <section class="settings-section" aria-labelledby="settingsAcademicTitle">
-          <div class="section-title" id="settingsAcademicTitle"><i class="bi bi-calendar3" aria-hidden="true"></i>Academic Preferences</div>
-          <p class="pref-help-lg text-faint">Create, manage, and switch between semesters. Each semester has its own subjects, attendance, grades, tasks, and notes.</p>
-          <div id="semesterManager" aria-busy="true"></div>
+        <section class="settings-section settings-academic-section" aria-labelledby="settingsAcademicTitle">
+          <div class="section-title" id="settingsAcademicTitle"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>Academic Preferences</div>
+          <p class="pref-help-lg text-faint settings-academic-description">The university administrator manages the active semester. Switch to previous semesters to access saved planner data.</p>
+          <div class="settings-academic-period" id="settingsAcademicPeriod" role="status">Loading the university academic period…</div>
+          <label class="pref-label settings-workspace-label" for="settingsSemesterSelect">Workspace semester</label>
+          <div class="pref-help settings-workspace-help" id="settingsSemesterHint" role="status"></div>
+          <select class="form-select settings-workspace-select" id="settingsSemesterSelect" aria-label="Workspace semester" disabled><option>Loading semesters…</option></select>
         </section>
-
-        <hr class="divider">
 
         <!-- Appearance -->
         <section class="settings-section" aria-labelledby="settingsAppearanceTitle">
-          <div class="section-title" id="settingsAppearanceTitle"><i class="bi bi-palette2" aria-hidden="true"></i>Appearance</div>
+          <div class="section-title" id="settingsAppearanceTitle"><i class="icon-lucide-palette" aria-hidden="true"></i>Appearance</div>
 
           <div class="pref-stack">
             <div><div class="pref-label">Theme</div><div class="pref-help">Dark, Light or AMOLED (true black).</div></div>
             <div class="theme-btn-row" role="group" aria-label="Theme">
-              <button class="btn btn-ghost theme-opt-btn" id="theme_dark" onclick="chooseTheme('dark')"><i class="bi bi-moon-stars" aria-hidden="true"></i>Dark</button>
-              <button class="btn btn-ghost theme-opt-btn" id="theme_light" onclick="chooseTheme('light')"><i class="bi bi-sun" aria-hidden="true"></i>Light</button>
-              <button class="btn btn-ghost theme-opt-btn" id="theme_amoled" onclick="chooseTheme('amoled')"><i class="bi bi-circle" aria-hidden="true"></i>AMOLED</button>
+              <button class="btn btn-ghost theme-opt-btn" id="theme_dark" onclick="chooseTheme('dark')"><i class="icon-lucide-moon-star" aria-hidden="true"></i>Dark</button>
+              <button class="btn btn-ghost theme-opt-btn" id="theme_light" onclick="chooseTheme('light')"><i class="icon-lucide-sun" aria-hidden="true"></i>Light</button>
+              <button class="btn btn-ghost theme-opt-btn" id="theme_amoled" onclick="chooseTheme('amoled')"><i class="icon-lucide-circle" aria-hidden="true"></i>AMOLED</button>
             </div>
           </div>
 
@@ -75,30 +76,30 @@
 
         <!-- Notifications -->
         <section class="settings-section" aria-labelledby="settingsNotifTitle">
-          <div class="section-title" id="settingsNotifTitle"><i class="bi bi-bell"></i>Notifications</div>
+          <div class="section-title" id="settingsNotifTitle"><i class="icon-lucide-bell"></i>Notifications</div>
           <div id="notifToggles"></div>
-          <button class="btn btn-ghost btn-sm settings-inline-btn" onclick="requestNotifPermission()"><i class="bi bi-bell me-1" aria-hidden="true"></i>Enable browser notifications</button>
+          <button class="btn btn-ghost btn-sm settings-inline-btn" onclick="requestNotifPermission()"><i class="icon-lucide-bell me-1" aria-hidden="true"></i>Enable browser notifications</button>
         </section>
 
         <hr class="divider">
 
         <!-- Data & Storage -->
         <section class="settings-section" aria-labelledby="settingsDataTitle">
-          <div class="section-title" id="settingsDataTitle"><i class="bi bi-hdd"></i>Data &amp; Storage</div>
+          <div class="section-title" id="settingsDataTitle"><i class="icon-lucide-hard-drive"></i>Data &amp; Storage</div>
 
           <div class="pref-row sync-status-row" id="syncStatusRow">
             <div>
               <div class="pref-label"><span class="sync-status-dot" id="syncStatusDot" aria-hidden="true"></span>Sync status</div>
               <div class="pref-help" id="syncStatusMsg">Checking…</div>
             </div>
-            <button class="btn btn-ghost btn-sm" id="syncStatusRetryBtn" onclick="location.reload()" hidden><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Retry</button>
+            <button class="btn btn-ghost btn-sm" id="syncStatusRetryBtn" onclick="retryCloudSync()" hidden><i class="icon-lucide-rotate-cw me-1" aria-hidden="true"></i>Retry</button>
           </div>
 
           <div class="pref-stack">
             <div><div class="pref-label">Backup &amp; delete data</div><div class="pref-help">Export a copy of your planner data, or permanently erase it from your account.</div></div>
             <div class="settings-action-list">
-              <button class="btn btn-ghost" id="settingsExportBtn" onclick="exportData()"><i class="bi bi-download me-1" aria-hidden="true"></i>Export all data (JSON)</button>
-              <button class="btn btn-ghost btn-danger-ghost" id="settingsResetBtn" onclick="confirmReset()"><i class="bi bi-trash3 me-1" aria-hidden="true"></i>Delete all data</button>
+              <button class="btn btn-ghost" id="settingsExportBtn" onclick="exportData()"><i class="icon-lucide-download me-1" aria-hidden="true"></i>Export all data (JSON)</button>
+              <button class="btn btn-ghost btn-danger-ghost" id="settingsResetBtn" onclick="confirmReset()"><i class="icon-lucide-trash-2 me-1" aria-hidden="true"></i>Delete all data</button>
             </div>
           </div>
         </section>
@@ -107,7 +108,7 @@
 
         <!-- About -->
         <section class="settings-section" aria-labelledby="settingsAboutTitle">
-          <div class="section-title" id="settingsAboutTitle"><i class="bi bi-info-circle"></i>About</div>
+          <div class="section-title" id="settingsAboutTitle"><i class="icon-lucide-info"></i>About</div>
           <p class="text-faint pref-help-lg settings-disclaimer">QCU Student Planner is an independent student-developed project and is not an official system of or affiliated with Quezon City University (QCU). It is not a substitute for official university services, announcements, or academic records.</p>
         </section>
 
@@ -115,28 +116,12 @@
 
       <!-- Account actions -->
       <div class="glass card-pad fade-in settings-account-actions">
-        <button class="btn btn-ghost btn-danger-ghost w-100" id="settingsSignOutBtn" onclick="confirmSignOut()"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Sign out</button>
+        <button class="btn btn-ghost btn-danger-ghost w-100" id="settingsSignOutBtn" onclick="confirmSignOut()"><i class="icon-lucide-log-out me-1" aria-hidden="true"></i>Sign out</button>
       </div>
 
     </div>
   </main>
 </div>
-
-<!-- Semester Modal -->
-<div class="modal fade" id="semModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="semModalTitle">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass" style="border:1px solid var(--border)">
-      <div class="modal-body p-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h5 class="mb-0 fw-bold" id="semModalTitle">Add Semester</h5>
-          <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div id="semModalBody"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -155,13 +140,6 @@
 <script>
   renderShell('settings');
   applyTheme();
-  if (window.Loading) {
-    Loading.showSkeleton(document.getElementById('semesterManager'),
-      Loading.skeletonRows(2, { lines: 2, widths: ['55%', '35%'] }));
-  }
-  DB.whenCloudReady(function () {
-    if (window.initSettings) window.initSettings();
-  });
 </script>
 <script src="../../assets/js/core/date-picker.js"></script>
 </body>

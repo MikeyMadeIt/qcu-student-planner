@@ -403,10 +403,12 @@ function drawWallpaperHeading(ctx, W, H, t, scale, pad) {
     y += 68 * scale;
     if (wpToggleState.semester) {
         const sem = DB.getSemester();
-        ctx.fillStyle = t.sub;
-        ctx.font = `${26 * scale}px 'Inter', sans-serif`;
-        ctx.fillText(`${sem.name || ''} · ${sem.schoolYear || ''}`, pad, y);
-        y += 38 * scale;
+        if (sem) {
+            ctx.fillStyle = t.sub;
+            ctx.font = `${26 * scale}px 'Inter', sans-serif`;
+            ctx.fillText(`${sem.name || ''} · ${sem.schoolYear || ''}`, pad, y);
+            y += 38 * scale;
+        }
     }
     y += 6 * scale;
     ctx.strokeStyle = t.line;

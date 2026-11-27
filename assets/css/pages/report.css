@@ -129,7 +129,7 @@
     line-height: 1.45;
 }
 
-.rp-form-error i {
+.rp-form-error .lucide-icon {
     flex: 0 0 auto;
     margin-top: 2px;
     color: var(--danger, #fb7185);
@@ -147,7 +147,7 @@
     line-height: 1.45;
 }
 
-.rp-success i {
+.rp-success .lucide-icon {
     flex: 0 0 auto;
     margin-top: 2px;
     color: var(--success, #34d399);
@@ -197,12 +197,7 @@
     min-width: 0;
 }
 
-.rp-empty > i {
-    display: block;
-    margin-bottom: var(--space-2);
-    font-size: 1.6rem;
-    opacity: .5;
-}
+.rp-empty > .empty-icon-circle { margin-bottom: var(--space-2); color: var(--text-faint); }
 
 .rp-empty p {
     margin: 0;
@@ -225,7 +220,7 @@
     font-size: .88rem;
 }
 
-.rp-error-box > i {
+.rp-error-box > .lucide-icon {
     display: block;
     margin-bottom: var(--space-2);
     color: var(--danger, #fb7185);

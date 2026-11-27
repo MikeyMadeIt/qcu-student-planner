@@ -70,13 +70,13 @@ function restoreOccurrence(subjectId, dateStr) {
 
 function getAttendanceRecord(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    return DB.getAttendance().find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId) || null;
+    return DB.getAttendance().find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId) || null;
 }
 
 function logQuickAttendance(subjectId, dateStr, status) {
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
-    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId);
+    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId);
     if (existing) {
         existing.status = status;
     }
@@ -98,7 +98,7 @@ function getSubjectGradeAvg(subjectId) {
 
 function getSubjectAttendanceRate(subjectId) {
     const semId = DB.getActiveSemesterId();
-    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && r.semesterId === semId)).rate;
+    return summarizeAttendance(DB.getAttendance().filter(r => r.subjectId === subjectId && semId && r.semesterId === semId)).rate;
 }
 
 // Init
@@ -115,6 +115,13 @@ function initSchedule() {
     renderAllViews();
     startTick();
     setupPinchZoom();
+    if (!window._scheduleAcademicCalendarBound) {
+        window._scheduleAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', () => {
+            setSchedView('day');
+            renderNav(); renderAllViews(); renderNextCard(); renderDaySummary();
+        });
+    }
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             renderNextCard();
@@ -143,9 +150,9 @@ function setSchedView(v) {
 }
 
 const SCHED_VIEWS = [
-    { id: 'day', label: 'Day', icon: 'bi-calendar-day', desc: 'Classes for the selected day' },
-    { id: 'timetable', label: 'Week', icon: 'bi-calendar2-week', desc: 'Weekly timetable grid' },
-    { id: 'list', label: 'Subject List', icon: 'bi-list-ul', desc: 'All subjects in this semester' }
+    { id: 'day', label: 'Day', icon: 'icon-lucide-calendar-days', desc: 'Classes for the selected day' },
+    { id: 'timetable', label: 'Week', icon: 'icon-lucide-calendar-days', desc: 'Weekly timetable grid' },
+    { id: 'list', label: 'Subject List', icon: 'icon-lucide-list', desc: 'All subjects in this semester' }
 ];
 
 function renderViewMenu() {
@@ -153,9 +160,9 @@ function renderViewMenu() {
     if (!menu)
         return;
     menu.innerHTML = SCHED_VIEWS.map(v => `<button type="button" class="dropdown-item sch-view-option ${v.id === schedView ? 'active' : ''}" data-view="${v.id}" role="radio" aria-checked="${v.id === schedView ? 'true' : 'false'}" onclick="chooseView('${v.id}')">
-      <i class="bi ${v.icon} sch-view-option-icon" aria-hidden="true"></i>
+      <i class="${v.icon} sch-view-option-icon" aria-hidden="true"></i>
       <span class="sch-view-option-text"><span class="sch-view-option-title">${v.label}</span><span class="sch-view-option-desc">${v.desc}</span></span>
-      <i class="bi bi-check2 sch-view-option-check" aria-hidden="true"></i>
+      <i class="icon-lucide-check sch-view-option-check" aria-hidden="true"></i>
     </button>`).join('');
 }
 
@@ -164,7 +171,7 @@ function syncViewButton() {
     const icon = document.getElementById('schViewBtnIcon');
     const label = document.getElementById('schViewBtnLabel');
     if (icon)
-        icon.className = 'bi ' + cur.icon;
+        window.setLucideIcon(icon, cur.icon);
     if (label)
         label.textContent = cur.label;
     renderViewMenu();
@@ -237,7 +244,7 @@ function getSubjectsForDay(date) {
         return [];
     const dayName = DAY_SHORT[date.getDay()];
     return DB.getSubjects()
-        .filter(s => s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))
+        .filter(s => semId && s.semesterId === semId && !s.archived && s.days && s.days.includes(dayName))
         .sort((a, b) => toMins(a.start) - toMins(b.start));
 }
 
@@ -265,13 +272,13 @@ function getSemesterEmptyState(date) {
 function getTasksDueToday(subjectId) {
     const today = isoDate(new Date());
     const semId = DB.getActiveSemesterId();
-    return DB.getTasks().filter(t => t.semesterId === semId && t.subjectId === subjectId && t.dueDate === today);
+    return DB.getTasks().filter(t => semId && t.semesterId === semId && t.subjectId === subjectId && t.dueDate === today);
 }
 
 function getAllTasksDueToday() {
     const today = isoDate(new Date());
     const semId = DB.getActiveSemesterId();
-    return DB.getTasks().filter(t => t.semesterId === semId && t.dueDate === today);
+    return DB.getTasks().filter(t => semId && t.semesterId === semId && t.dueDate === today);
 }
 
 // Next/current class logic (skips cancelled)
@@ -318,7 +325,7 @@ function detectConflicts(classes) {
 
 function detectAllWeekConflicts() {
     const semId = DB.getActiveSemesterId();
-    const allSubs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const allSubs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const conflictSubjectIds = new Set();
     DAY_SHORT.forEach(dayName => {
         const daySubs = allSubs.filter(s => s.days && s.days.includes(dayName));
@@ -378,7 +385,7 @@ function renderNextCard() {
         const semesterState = getSemesterEmptyState(today);
         if (semesterState) {
             host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
-      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-calendar-x" aria-hidden="true"></i></div>
+      <div class="sch-next-badge done" aria-hidden="true"><i class="icon-lucide-calendar-x-2" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">${semesterState.title.toUpperCase()}</div>
         ${semesterState.detail ? `<div class="sch-next-subject">${semesterState.detail}</div>` : ''}
@@ -389,7 +396,7 @@ function renderNextCard() {
         const classes = getSubjectsForDay(today);
         const hadClasses = classes.length > 0;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-done fade-in">
-      <div class="sch-next-badge done" aria-hidden="true"><i class="bi bi-check2-circle" aria-hidden="true"></i></div>
+      <div class="sch-next-badge done" aria-hidden="true"><i class="icon-lucide-circle-check" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">${hadClasses ? 'NO MORE CLASSES TODAY' : 'NO CLASSES TODAY'}</div>
         <div class="sch-next-subject">${hadClasses ? 'All done for today!' : 'No scheduled classes.'}</div>
@@ -410,12 +417,12 @@ function renderNextCard() {
         const pct = Math.min(100, Math.round((elapsed / total) * 100));
         const remaining = toMins(s.end) - nm;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-now fade-in" style="--sc-color:${s.color}">
-      <div class="sch-next-badge now" aria-hidden="true"><i class="bi bi-broadcast" aria-hidden="true"></i></div>
+      <div class="sch-next-badge now" aria-hidden="true"><i class="icon-lucide-radio-tower" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">NOW IN SESSION</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>
         <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span></div>
-        ${location ? `<div class="sch-next-loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</div>` : ''}
+        ${location ? `<div class="sch-next-loc"><i class="icon-lucide-map-pin" aria-hidden="true"></i>${esc(location)}</div>` : ''}
         <div class="sch-now-progress-wrap mt-2">
           <div class="d-flex justify-content-between mb-1" style="font-size:.7rem;color:var(--text-faint)">
             <span>${pct}% through</span><span>${remaining}m remaining</span>
@@ -425,7 +432,7 @@ function renderNextCard() {
       </div>
       <div class="sch-next-actions">
         ${buildAttendanceIconBtn(s.id, todayStr, attStatus)}
-        <button class="btn btn-ghost btn-sm sch-next-edit" onclick="openSubjectModal('${s.id}')" title="Edit subject" aria-label="Edit ${esc(s.code)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+        <button class="btn btn-ghost btn-sm sch-next-edit" onclick="openSubjectModal('${s.id}')" title="Edit subject" aria-label="Edit ${esc(s.code)}"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
       </div>
     </div>`;
     }
@@ -433,17 +440,17 @@ function renderNextCard() {
         const minsAway = toMins(s.start) - nm;
         const awayStr = minsAway < 60 ? `In ${minsAway}m` : `In ${Math.floor(minsAway / 60)}h ${minsAway % 60}m`;
         host.innerHTML = `<div class="glass card-pad sch-next-card sch-upcoming fade-in" style="--sc-color:${s.color}">
-      <div class="sch-next-badge next" aria-hidden="true"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i></div>
+      <div class="sch-next-badge next" aria-hidden="true"><i class="icon-lucide-circle-arrow-right" aria-hidden="true"></i></div>
       <div class="sch-next-body">
         <div class="sch-next-label">NEXT CLASS</div>
         <div class="sch-next-subject">${esc(s.desc)}</div>
         <div class="sch-next-meta"><span class="text-faint">${esc(s.code)}</span><span class="sch-dot-sep" aria-hidden="true">·</span><span class="text-faint">${timeStr}</span></div>
-        ${location ? `<div class="sch-next-loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</div>` : ''}
+        ${location ? `<div class="sch-next-loc"><i class="icon-lucide-map-pin" aria-hidden="true"></i>${esc(location)}</div>` : ''}
         <div class="sch-next-away">${awayStr}</div>
       </div>
       <div class="sch-next-actions">
         ${buildAttendanceIconBtn(s.id, todayStr, attStatus)}
-        <button class="btn btn-ghost btn-sm sch-next-edit" onclick="openSubjectModal('${s.id}')" title="Edit subject" aria-label="Edit ${esc(s.code)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+        <button class="btn btn-ghost btn-sm sch-next-edit" onclick="openSubjectModal('${s.id}')" title="Edit subject" aria-label="Edit ${esc(s.code)}"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
       </div>
     </div>`;
     }
@@ -465,27 +472,27 @@ function buildLocation(s) {
 function buildAttendanceBtn(subjectId, dateStr, existingStatus, size = 'normal') {
     const isSmall = size === 'small';
     if (existingStatus && existingStatus !== 'No Classes') {
-        const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
+        const icons = { Present: 'icon-lucide-circle-check', Late: 'icon-lucide-clock', Absent: 'icon-lucide-circle-x', Excused: 'icon-lucide-shield-check' };
         const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
-        const ic = icons[existingStatus] || 'bi-check-circle';
+        const ic = icons[existingStatus] || 'icon-lucide-circle-check';
         const col = colors[existingStatus] || 'var(--text-faint)';
-        return `<div class="sch-att-logged" style="color:${col}"><i class="bi ${ic}" aria-hidden="true"></i> ${existingStatus}</div>`;
+        return `<div class="sch-att-logged" style="color:${col}"><i class="${ic}" aria-hidden="true"></i> ${existingStatus}</div>`;
     }
     const btnClass = isSmall ? 'btn btn-ghost btn-sm sch-att-btn' : 'btn btn-ghost btn-sm sch-att-btn';
-    return `<button class="${btnClass}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" aria-label="Log attendance for this class"><i class="bi bi-person-check" aria-hidden="true"></i> Attendance</button>`;
+    return `<button class="${btnClass}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" aria-label="Log attendance for this class"><i class="icon-lucide-user-round-check" aria-hidden="true"></i> Attendance</button>`;
 }
 
 // Attendance icon button (compact, for card header)
 
 function buildAttendanceIconBtn(subjectId, dateStr, existingStatus) {
     if (existingStatus && existingStatus !== 'No Classes') {
-        const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
+        const icons = { Present: 'icon-lucide-circle-check', Late: 'icon-lucide-clock', Absent: 'icon-lucide-circle-x', Excused: 'icon-lucide-shield-check' };
         const colors = { Present: '#34d399', Late: '#b45309', Absent: '#fb7185', Excused: '#60a5fa' };
-        const ic = icons[existingStatus] || 'bi-check-circle';
+        const ic = icons[existingStatus] || 'icon-lucide-circle-check';
         const col = colors[existingStatus] || 'var(--text-faint)';
-        return `<button class="btn-icon sched-icon-btn sch-att-icon-logged" style="color:${col}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Attendance: ${existingStatus}" aria-label="Attendance logged: ${existingStatus}"><i class="bi ${ic}" aria-hidden="true"></i></button>`;
+        return `<button class="btn-icon sched-icon-btn sch-att-icon-logged" style="color:${col}" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Attendance: ${existingStatus}" aria-label="Attendance logged: ${existingStatus}"><i class="${ic}" aria-hidden="true"></i></button>`;
     }
-    return `<button class="btn-icon sched-icon-btn" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Log attendance" aria-label="Log attendance"><i class="bi bi-person-check" aria-hidden="true"></i></button>`;
+    return `<button class="btn-icon sched-icon-btn" onclick="openQuickAttModal('${subjectId}','${dateStr}')" title="Log attendance" aria-label="Log attendance"><i class="icon-lucide-user-round-check" aria-hidden="true"></i></button>`;
 }
 
 // Quick Attendance Modal
@@ -495,7 +502,7 @@ function openQuickAttModal(subjectId, dateStr) {
     if (!s)
         return;
     if (isOccurrenceCancelled(subjectId, dateStr)) {
-        Toast.show('This class was cancelled — attendance not applicable', 'high', 'bi-ban');
+        Toast.show('This class was cancelled — attendance not applicable', 'high', 'icon-lucide-ban');
         return;
     }
     const existing = getAttendanceRecord(subjectId, dateStr);
@@ -515,16 +522,16 @@ function openQuickAttModal(subjectId, dateStr) {
       </div>
     </div>
     <div class="sch-att-date-info mb-3">
-      <i class="bi bi-calendar3" aria-hidden="true"></i>
+      <i class="icon-lucide-calendar-days" aria-hidden="true"></i>
       <span>${displayDate} · ${fmtTime(s.start)} – ${fmtTime(s.end)}</span>
     </div>
     <div class="sch-att-status-grid mb-3" role="group" aria-label="Attendance status">
       ${statuses.map(st => {
-        const icons = { Present: 'bi-check-circle', Late: 'bi-clock', Absent: 'bi-x-circle', Excused: 'bi-shield-check' };
+        const icons = { Present: 'icon-lucide-circle-check', Late: 'icon-lucide-clock', Absent: 'icon-lucide-circle-x', Excused: 'icon-lucide-shield-check' };
         const colors = { Present: '34d399', Late: 'b45309', Absent: 'fb7185', Excused: '60a5fa' };
         const isActive = currentStatus === st;
         return `<button class="sch-att-status-btn ${isActive ? 'active' : ''}" data-status="${st}" style="--att-color:#${colors[st]}" onclick="selectQuickAtt('${st}')" aria-pressed="${isActive ? 'true' : 'false'}">
-          <i class="bi ${icons[st]}" aria-hidden="true"></i>
+          <i class="${icons[st]}" aria-hidden="true"></i>
           <span>${st}</span>
         </button>`;
     }).join('')}
@@ -532,8 +539,8 @@ function openQuickAttModal(subjectId, dateStr) {
     <input type="hidden" id="quickAttSubjectId" value="${subjectId}">
     <input type="hidden" id="quickAttDate" value="${dateStr}">
     <div class="d-flex gap-2">
-      <button class="btn btn-accent flex-grow-1" onclick="saveQuickAtt()" aria-label="Save attendance"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Save</button>
-      ${existing ? `<button class="btn btn-ghost" onclick="clearQuickAtt('${subjectId}','${dateStr}')" aria-label="Clear attendance record"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveQuickAtt()" aria-label="Save attendance"><i class="icon-lucide-check me-1" aria-hidden="true"></i>Save</button>
+      ${existing ? `<button class="btn btn-ghost" onclick="clearQuickAtt('${subjectId}','${dateStr}')" aria-label="Clear attendance record"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
     </div>`;
     new bootstrap.Modal(document.getElementById('quickAttModal')).show();
 }
@@ -546,7 +553,7 @@ function ensureQuickAttModal() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
-          <h5 class="modal-title" id="quickAttModalLabel"><i class="bi bi-person-check me-2" aria-hidden="true"></i>Log Attendance</h5>
+          <h5 class="modal-title" id="quickAttModalLabel"><i class="icon-lucide-user-round-check me-2" aria-hidden="true"></i>Log Attendance</h5>
           <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="quickAttModalBody"></div>
@@ -569,7 +576,7 @@ function saveQuickAtt() {
     const dateStr = document.getElementById('quickAttDate').value;
     const statusBtn = document.querySelector('.sch-att-status-btn.active');
     if (!statusBtn) {
-        Toast.show('Select an attendance status', 'high', 'bi-exclamation-triangle');
+        Toast.show('Select an attendance status', 'high', 'icon-lucide-triangle-alert');
         return;
     }
     const status = statusBtn.dataset.status;
@@ -583,7 +590,7 @@ function saveQuickAtt() {
 
 function clearQuickAtt(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId));
+    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId));
     DB.saveAttendance(records);
     const modal = bootstrap.Modal.getInstance(document.getElementById('quickAttModal'));
     if (modal)
@@ -608,14 +615,14 @@ function openCancelModal(subjectId, dateStr) {
         const info = getCancellationInfo(subjectId, dateStr);
         body.innerHTML = `
       <div class="sch-cancel-info">
-        <i class="bi bi-ban" aria-hidden="true"></i>
+        <i class="icon-lucide-ban" aria-hidden="true"></i>
         <div>
           <div class="fw-bold">${displayDate} — ${esc(s.code)} is cancelled</div>
           ${info && info.reason ? `<div class="text-faint" style="font-size:.8rem">${esc(info.reason)}</div>` : ''}
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-accent flex-grow-1" onclick="doRestoreOccurrence('${subjectId}','${dateStr}')"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore Class</button>
+        <button class="btn btn-accent flex-grow-1" onclick="doRestoreOccurrence('${subjectId}','${dateStr}')"><i class="icon-lucide-rotate-ccw me-1" aria-hidden="true"></i>Restore Class</button>
         <button class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
       </div>`;
     }
@@ -629,7 +636,7 @@ function openCancelModal(subjectId, dateStr) {
         </div>
       </div>
       <div class="sch-att-date-info mb-3">
-        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        <i class="icon-lucide-calendar-days" aria-hidden="true"></i>
         <span>${displayDate}</span>
       </div>
       <div class="mb-3">
@@ -640,7 +647,7 @@ function openCancelModal(subjectId, dateStr) {
       <input type="hidden" id="cancelDate" value="${dateStr}">
       <div class="d-flex gap-2">
         <button class="btn btn-ghost flex-grow-1" data-bs-dismiss="modal">Keep Class</button>
-        <button class="btn sch-cancel-btn flex-grow-1" onclick="doCancel()"><i class="bi bi-ban me-1" aria-hidden="true"></i>Cancel Class</button>
+        <button class="btn sch-cancel-btn flex-grow-1" onclick="doCancel()"><i class="icon-lucide-ban me-1" aria-hidden="true"></i>Cancel Class</button>
       </div>`;
     }
     new bootstrap.Modal(document.getElementById('cancelModal')).show();
@@ -654,7 +661,7 @@ function ensureCancelModal() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content card-pad">
         <div class="modal-header" style="border:none;padding-bottom:8px">
-          <h5 class="modal-title" id="cancelModalLabel"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i>Cancel Class</h5>
+          <h5 class="modal-title" id="cancelModalLabel"><i class="icon-lucide-calendar-x-2 me-2" aria-hidden="true"></i>Cancel Class</h5>
           <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="cancelModalBody"></div>
@@ -670,7 +677,7 @@ function doCancel() {
     const reason = (document.getElementById('cancelReason')?.value || '').trim();
     const semId = DB.getActiveSemesterId();
     const records = DB.getAttendance();
-    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId);
+    const existing = records.find(r => r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId);
     if (existing) {
         existing.status = 'No Classes';
     }
@@ -687,7 +694,7 @@ function doCancel() {
 
 function doRestoreOccurrence(subjectId, dateStr) {
     const semId = DB.getActiveSemesterId();
-    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && r.semesterId === semId && r.status === 'No Classes'));
+    const records = DB.getAttendance().filter(r => !(r.subjectId === subjectId && r.date === dateStr && semId && r.semesterId === semId && r.status === 'No Classes'));
     DB.saveAttendance(records);
     restoreOccurrence(subjectId, dateStr);
     const modal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
@@ -731,7 +738,7 @@ function renderDaySummary() {
     let conflictHtml = '';
     if (conflicts.length) {
         conflictHtml = `<div class="sch-conflict-banner glass card-pad mb-2 fade-in" role="alert" aria-live="polite">
-      <i class="bi bi-exclamation-triangle sch-conflict-icon" aria-hidden="true"></i>
+      <i class="icon-lucide-triangle-alert sch-conflict-icon" aria-hidden="true"></i>
       <div>
         <div class="sch-conflict-title">Schedule Conflict${conflicts.length > 1 ? 's' : ''}</div>
         ${conflicts.map(c => `<div class="sch-conflict-body">${esc(c.a.code)} (${fmtTime(c.a.start)}–${fmtTime(c.a.end)}) overlaps ${esc(c.b.code)} (${fmtTime(c.b.start)}–${fmtTime(c.b.end)}) by ${c.overlapMins}m</div>`).join('')}
@@ -741,12 +748,12 @@ function renderDaySummary() {
     let timelineHtml = '';
     if (!classes.length) {
         const semesterState = getSemesterEmptyState(_selectedDate);
-        timelineHtml = `<div class="glass card-pad sch-empty-day fade-in">
-      <i class="bi bi-calendar-x" aria-hidden="true"></i>
-      <div class="mt-2 fw-bold" style="color:var(--text)">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</div>
-      ${semesterState ? (semesterState.detail ? `<div class="sch-empty-copy">${semesterState.detail}</div>` : '') : `<div class="sch-empty-copy">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</div>`}
-      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
-      <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>
+        timelineHtml = `<div class="glass empty-state sch-empty-day fade-in">
+      <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-x-2"></i></div>
+      <strong class="empty-state-title">${semesterState ? semesterState.title : `No Classes ${isToday ? 'Today' : 'This Day'}`}</strong>
+      ${semesterState ? (semesterState.detail ? `<span class="empty-state-sub">${semesterState.detail}</span>` : '') : `<span class="empty-state-sub">You have no scheduled classes for ${DAY_LONG[_selectedDate.getDay()]}.</span>`}
+      <span class="empty-state-sub sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</span>
+      <div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Subject</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="icon-lucide-book-open me-1" aria-hidden="true"></i>Use Curriculum</a></div>
     </div>`;
     }
     else {
@@ -756,7 +763,7 @@ function renderDaySummary() {
                 return `<div class="sch-timeline-free" role="listitem">
           <div class="sch-tl-connector free" aria-hidden="true"></div>
           <div class="sch-free-block">
-            <i class="bi bi-cup-hot sch-free-icon" aria-hidden="true"></i>
+            <i class="icon-lucide-coffee sch-free-icon" aria-hidden="true"></i>
             FREE TIME · ${fmtDuration(item.mins)}
           </div>
         </div>`;
@@ -781,8 +788,8 @@ function renderDaySummary() {
           ${!isLast ? '<div class="sch-tl-line"></div>' : ''}
         </div>
         <div class="sch-tl-card glass ${isConflict && !cancelled ? 'sch-conflict-card' : ''}" style="--sc-color:${s.color}">
-          ${isNow ? '<div class="sch-now-badge" aria-label="In session now"><i class="bi bi-broadcast" aria-hidden="true"></i> NOW</div>' : ''}
-          ${cancelled ? `<div class="sch-cancelled-badge" aria-label="Cancelled"><i class="bi bi-ban" aria-hidden="true"></i> CANCELLED${cancelInfo && cancelInfo.reason ? ' · ' + esc(cancelInfo.reason) : ''}</div>` : ''}
+          ${isNow ? '<div class="sch-now-badge" aria-label="In session now"><i class="icon-lucide-radio-tower" aria-hidden="true"></i> NOW</div>' : ''}
+          ${cancelled ? `<div class="sch-cancelled-badge" aria-label="Cancelled"><i class="icon-lucide-ban" aria-hidden="true"></i> CANCELLED${cancelInfo && cancelInfo.reason ? ' · ' + esc(cancelInfo.reason) : ''}</div>` : ''}
           <div class="sch-tl-header">
             <div class="sch-tl-dot" style="background:${s.color}" aria-hidden="true"></div>
             <div class="sch-tl-info">
@@ -791,20 +798,20 @@ function renderDaySummary() {
             </div>
             <div class="d-flex gap-1 ms-auto flex-shrink-0">
               ${!cancelled && isToday ? buildAttendanceIconBtn(s.id, dateStr, attStatus) : ''}
-              <button class="btn-icon sched-icon-btn" onclick="openCancelModal('${s.id}','${dateStr}')" title="${cancelled ? 'Restore' : 'Cancel'} this class" aria-label="${cancelled ? 'Restore' : 'Cancel'} ${esc(s.code)} on this date"><i class="bi bi-${cancelled ? 'arrow-counterclockwise' : 'calendar-x'}" aria-hidden="true"></i></button>
-              <button class="btn-icon sched-icon-btn" onclick="openSubjectModal('${s.id}')" title="Edit" aria-label="Edit ${esc(s.code)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+              <button class="btn-icon sched-icon-btn" onclick="openCancelModal('${s.id}','${dateStr}')" title="${cancelled ? 'Restore' : 'Cancel'} this class" aria-label="${cancelled ? 'Restore' : 'Cancel'} ${esc(s.code)} on this date"><i class="${cancelled ? 'icon-lucide-rotate-ccw' : 'icon-lucide-calendar-x-2'}" aria-hidden="true"></i></button>
+              <button class="btn-icon sched-icon-btn" onclick="openSubjectModal('${s.id}')" title="Edit" aria-label="Edit ${esc(s.code)}"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
             </div>
           </div>
           ${!cancelled ? `<div class="sch-tl-meta">
-            <span><i class="bi bi-clock" aria-hidden="true"></i>${fmtTime(s.start)} – ${fmtTime(s.end)}</span>
-            ${location ? `<span><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</span>` : ''}
-            ${s.professor ? `<span><i class="bi bi-person" aria-hidden="true"></i>${esc(s.professor)}</span>` : ''}
+            <span><i class="icon-lucide-clock" aria-hidden="true"></i>${fmtTime(s.start)} – ${fmtTime(s.end)}</span>
+            ${location ? `<span><i class="icon-lucide-map-pin" aria-hidden="true"></i>${esc(location)}</span>` : ''}
+            ${s.professor ? `<span><i class="icon-lucide-user-round" aria-hidden="true"></i>${esc(s.professor)}</span>` : ''}
           </div>` : ''}
           ${isNow ? `<div class="sch-tl-now-bar mt-2" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div class="sch-tl-now-fill" style="width:${pct}%;background:${s.color}"></div></div>` : ''}
           ${tasks.length && !cancelled ? `<div class="sch-tl-tasks" onclick="location.href='tasks.html'" role="button" tabindex="0" aria-label="${tasks.length} task${tasks.length === 1 ? '' : 's'} due today">
-            <i class="bi bi-check2-square" aria-hidden="true"></i>
+            <i class="icon-lucide-list-check" aria-hidden="true"></i>
             <span>${tasks.length} task${tasks.length === 1 ? '' : 's'} due today</span>
-            <i class="bi bi-arrow-right ms-auto sch-task-arrow" aria-hidden="true"></i>
+            <i class="icon-lucide-arrow-right ms-auto sch-task-arrow" aria-hidden="true"></i>
           </div>` : ''}
         </div>
       </div>`;
@@ -824,18 +831,18 @@ function renderTasksPanel() {
     const tasks = getAllTasksDueToday();
     host.innerHTML = `<div class="glass card-pad mb-3 fade-in">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="section-title mb-0"><i class="bi bi-check2-square" aria-hidden="true"></i>Today's Tasks</div>
+      <div class="section-title mb-0"><i class="icon-lucide-list-check" aria-hidden="true"></i>Today's Tasks</div>
       <a href="tasks.html" class="btn btn-ghost btn-sm" aria-label="View all tasks">View All</a>
     </div>
     ${tasks.length
         ? `<div class="sch-task-list" role="list">${tasks.map(t => `
           <div class="sch-task-row ${t.status === 'completed' ? 'done' : ''}" role="listitem">
-            <i class="bi ${t.status === 'completed' ? 'bi-check-circle' : 'bi-circle'} sch-task-icon" aria-hidden="true"></i>
+            <i class="${t.status === 'completed' ? 'icon-lucide-circle-check' : 'icon-lucide-circle'} sch-task-icon" aria-hidden="true"></i>
             <span class="sch-task-title">${esc(t.title)}</span>
             ${t.priority === 'high' ? '<span class="chip high" style="font-size:.6rem" aria-label="High priority">!</span>' : ''}
           </div>`).join('')}
         </div>`
-        : `<div class="sch-tasks-empty"><span class="sch-tasks-empty-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span><strong>No tasks due today</strong><span>You’re all caught up. Tasks due today will appear here.</span></div>`}
+        : `<div class="sch-tasks-empty"><span class="sch-tasks-empty-icon empty-icon-circle"><i class="icon-lucide-list-check" aria-hidden="true"></i></span><strong>No tasks due today</strong><span>You’re all caught up. Tasks due today will appear here.</span></div>`}
   </div>`;
 }
 
@@ -875,7 +882,7 @@ function renderTimetable() {
     updateZoomUI();
     const wrap = document.getElementById('ttGrid');
     const semId = DB.getActiveSemesterId();
-    const allSubs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived);
+    const allSubs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived);
     const startHour = 6, endHour = 21;
     const today = new Date();
     const nm = nowMins();
@@ -884,10 +891,10 @@ function renderTimetable() {
     const conflictIds = detectAllWeekConflicts();
     const selectedDayName = DAY_SHORT[_selectedDate.getDay()];
     if (!allSubs.length) {
-        wrap.innerHTML = `<div class="sch-empty-day" style="min-height:200px">
-      <i class="bi bi-calendar2-week" aria-hidden="true"></i>
-      <div class="mt-2 fw-bold" style="color:var(--text)">No Classes Scheduled</div>
-      <div class="text-faint" style="font-size:.85rem">Add subjects to see your weekly timetable.</div>
+        wrap.innerHTML = `<div class="empty-state sch-empty-day">
+      <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-calendar-days"></i></div>
+      <strong class="empty-state-title">No Classes Scheduled</strong>
+      <span class="empty-state-sub">Add subjects to see your weekly timetable.</span>
     </div>`;
         return;
     }
@@ -969,7 +976,7 @@ function showTimetablePopup(subjectId, dateStr) {
       <div class="d-flex align-items-center gap-2 flex-wrap" style="flex:1;min-width:0">
         <span style="width:9px;height:9px;border-radius:50%;background:${s.color};display:inline-block;flex-shrink:0" aria-hidden="true"></span>
         <span class="fw-bold" style="font-size:.82rem;font-family:var(--font-mono);color:var(--text-faint)">${esc(s.code)}</span>
-        ${cancelled ? '<span class="sch-cancelled-chip"><i class="bi bi-ban" aria-hidden="true"></i> CANCELLED</span>' : ''}
+        ${cancelled ? '<span class="sch-cancelled-chip"><i class="icon-lucide-ban" aria-hidden="true"></i> CANCELLED</span>' : ''}
       </div>
       <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
@@ -977,23 +984,23 @@ function showTimetablePopup(subjectId, dateStr) {
       <div class="sch-tt-popup-name">${esc(s.desc)}</div>
       <div class="sch-tt-popup-rows">
         <div class="sch-tt-popup-row">
-          <i class="bi bi-clock" aria-hidden="true"></i>
+          <i class="icon-lucide-clock" aria-hidden="true"></i>
           <span>${fmtTime(s.start)} – ${fmtTime(s.end)}</span>
         </div>
         ${location ? `<div class="sch-tt-popup-row">
-          <i class="bi bi-geo-alt" aria-hidden="true"></i>
+          <i class="icon-lucide-map-pin" aria-hidden="true"></i>
           <span>${esc(location)}</span>
         </div>` : ''}
         ${s.professor ? `<div class="sch-tt-popup-row">
-          <i class="bi bi-person" aria-hidden="true"></i>
+          <i class="icon-lucide-user-round" aria-hidden="true"></i>
           <span>${esc(s.professor)}${s.email ? ' · ' + esc(s.email) : ''}</span>
         </div>` : ''}
         <div class="sch-tt-popup-row">
-          <i class="bi bi-mortarboard" aria-hidden="true"></i>
+          <i class="icon-lucide-graduation-cap" aria-hidden="true"></i>
           <span>${s.units || 0} unit${s.units === 1 ? '' : 's'}${s.type ? ' · ' + esc(s.type) : ''}</span>
         </div>
         ${s.notes ? `<div class="sch-tt-popup-row">
-          <i class="bi bi-sticky" aria-hidden="true"></i>
+          <i class="icon-lucide-sticky-note" aria-hidden="true"></i>
           <span>${esc(s.notes)}</span>
         </div>` : ''}
       </div>
@@ -1040,13 +1047,13 @@ function computeOverlaps(classes) {
 // Show imported subjects that still need schedule details in both schedule views.
 function getCurriculumSetupHtml() {
     const semId = DB.getActiveSemesterId();
-    const pending = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.source === 'curriculum' && s.setupStatus === 'needs_setup');
+    const pending = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived && s.source === 'curriculum' && s.setupStatus === 'needs_setup');
     if (!pending.length) return '';
     return `<div class="glass card-pad sch-curriculum-setup mb-3" aria-live="polite">
       <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-3">
-        <div><div class="section-title mb-1"><i class="bi bi-book-half" aria-hidden="true"></i>From Curriculum</div><div class="text-faint sch-curriculum-setup-sub">${pending.length} subject${pending.length === 1 ? '' : 's'} awaiting setup</div></div>
+        <div><div class="section-title mb-1"><i class="icon-lucide-book-open" aria-hidden="true"></i>From Curriculum</div><div class="text-faint sch-curriculum-setup-sub">${pending.length} subject${pending.length === 1 ? '' : 's'} awaiting setup</div></div>
       </div>
-      <div class="sch-curriculum-setup-list">${pending.map(s => `<div class="sch-curriculum-setup-item"><div class="min-w-0"><div class="fw-bold" style="font-family:var(--font-mono);font-size:.82rem">${esc(s.code)}</div><div class="text-soft sch-curriculum-subject-name">${esc(s.desc)}</div><div class="text-faint" style="font-size:.72rem">${s.units} unit${s.units === 1 ? '' : 's'} · Additional details needed</div></div><button class="btn btn-accent btn-sm flex-shrink-0" onclick="openSubjectModal('${s.id}')"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Set Up</button></div>`).join('')}</div>
+      <div class="sch-curriculum-setup-list">${pending.map(s => `<div class="sch-curriculum-setup-item"><div class="min-w-0"><div class="fw-bold" style="font-family:var(--font-mono);font-size:.82rem">${esc(s.code)}</div><div class="text-soft sch-curriculum-subject-name">${esc(s.desc)}</div><div class="text-faint" style="font-size:.72rem">${s.units} unit${s.units === 1 ? '' : 's'} · Additional details needed</div></div><button class="btn btn-accent btn-sm flex-shrink-0" onclick="openSubjectModal('${s.id}')"><i class="icon-lucide-pencil me-1" aria-hidden="true"></i>Set Up</button></div>`).join('')}</div>
     </div>`;
 }
 
@@ -1080,11 +1087,11 @@ function renderListView() {
             s.professor.toLowerCase().includes(q) || s.room.toLowerCase().includes(q));
     const sem = DB.getActiveSemester();
     if (!list.length) {
-        wrap.innerHTML = `<div class="col-12"><div class="glass card-pad text-center py-4 sch-empty-day">
-      <i class="bi bi-journal-x" aria-hidden="true"></i>
-      <strong>${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</strong>
-      <div class="sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</div>
-      ${!showArchived ? `<div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Use Curriculum</a></div>` : ''}
+        wrap.innerHTML = `<div class="col-12"><div class="glass empty-state sch-empty-day sch-empty-subject">
+      <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-book-x"></i></div>
+      <strong class="empty-state-title">${sem ? `No subjects for ${sem.schoolYear} · ${sem.name}` : 'No subjects yet'}</strong>
+      <span class="empty-state-sub sch-subject-empty-copy">Add a subject manually, or use your program curriculum to bring your subjects into this semester.</span>
+      ${!showArchived ? `<div class="sch-subject-empty-actions"><button class="btn btn-accent btn-sm" onclick="openSubjectModal()"><i class="icon-lucide-plus me-1" aria-hidden="true"></i>Add Manually</button><a class="btn btn-ghost btn-sm" href="curriculum.html"><i class="icon-lucide-book-open me-1" aria-hidden="true"></i>Use Curriculum</a></div>` : ''}
     </div></div>`;
         return;
     }
@@ -1092,7 +1099,7 @@ function renderListView() {
         const gradeAvg = getSubjectGradeAvg(s.id);
         const attRate = getSubjectAttendanceRate(s.id);
         const location = buildLocation(s);
-        const locationLine = location ? `<span><i class="bi bi-geo-alt" aria-hidden="true"></i>${esc(location)}</span>` : '';
+        const locationLine = location ? `<span><i class="icon-lucide-map-pin" aria-hidden="true"></i>${esc(location)}</span>` : '';
         return `<div class="col-md-6 col-xl-4">
       <div class="glass subject-card hover-lift ${s.archived ? 'subject-card-archived' : ''}" style="--sc-color:${s.color}">
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -1106,15 +1113,15 @@ function renderListView() {
             <div class="text-soft" style="font-size:.78rem;line-height:1.3;overflow-wrap:anywhere">${esc(s.desc)}</div>
           </div>
           <div class="d-flex gap-1 flex-shrink-0">
-            <button class="btn-icon sched-icon-btn" onclick="openSubjectModal('${s.id}')" title="Edit" aria-label="Edit ${esc(s.code)}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
-            <button class="btn-icon sched-icon-btn" onclick="deleteSubject('${s.id}')" title="Delete" aria-label="Delete ${esc(s.code)}"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            <button class="btn-icon sched-icon-btn" onclick="openSubjectModal('${s.id}')" title="Edit" aria-label="Edit ${esc(s.code)}"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
+            <button class="btn-icon sched-icon-btn" onclick="deleteSubject('${s.id}')" title="Delete" aria-label="Delete ${esc(s.code)}"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>
           </div>
         </div>
 
         <div class="sched-meta mb-2">
-          <span><i class="bi bi-clock" aria-hidden="true"></i>${s.days.join(', ')} · ${fmtTime(s.start)}–${fmtTime(s.end)}</span>
+          <span><i class="icon-lucide-clock" aria-hidden="true"></i>${s.days.join(', ')} · ${fmtTime(s.start)}–${fmtTime(s.end)}</span>
           ${locationLine}
-          ${s.professor ? `<span><i class="bi bi-person" aria-hidden="true"></i>${esc(s.professor)}</span>` : ''}
+          ${s.professor ? `<span><i class="icon-lucide-user-round" aria-hidden="true"></i>${esc(s.professor)}</span>` : ''}
         </div>
 
         <div class="sch-subject-stats">
@@ -1135,9 +1142,9 @@ function renderListView() {
         </div>
 
         <div class="d-flex gap-1 mt-2 pt-2" style="border-top:1px solid var(--border)">
-          <button class="btn btn-ghost btn-sm sched-action-btn flex-grow-1" onclick="openAttendanceForSubject('${s.id}')" aria-label="Log attendance for ${esc(s.code)}"><i class="bi bi-person-check me-1" aria-hidden="true"></i>Attendance</button>
-          <button class="btn btn-ghost btn-sm sched-action-btn flex-grow-1" onclick="archiveSubject('${s.id}')" aria-label="${s.archived ? 'Restore' : 'Archive'} ${esc(s.code)}"><i class="bi bi-archive me-1" aria-hidden="true"></i>${s.archived ? 'Restore' : 'Archive'}</button>
-          <button class="btn btn-ghost btn-sm sched-action-btn" onclick="duplicateSubject('${s.id}')" aria-label="Duplicate ${esc(s.code)}" title="Duplicate"><i class="bi bi-copy" aria-hidden="true"></i></button>
+          <button class="btn btn-ghost btn-sm sched-action-btn flex-grow-1" onclick="openAttendanceForSubject('${s.id}')" aria-label="Log attendance for ${esc(s.code)}"><i class="icon-lucide-user-round-check me-1" aria-hidden="true"></i>Attendance</button>
+          <button class="btn btn-ghost btn-sm sched-action-btn flex-grow-1" onclick="archiveSubject('${s.id}')" aria-label="${s.archived ? 'Restore' : 'Archive'} ${esc(s.code)}"><i class="icon-lucide-archive me-1" aria-hidden="true"></i>${s.archived ? 'Restore' : 'Archive'}</button>
+          <button class="btn btn-ghost btn-sm sched-action-btn" onclick="duplicateSubject('${s.id}')" aria-label="Duplicate ${esc(s.code)}" title="Duplicate"><i class="icon-lucide-copy" aria-hidden="true"></i></button>
         </div>
       </div>
     </div>`;
@@ -1154,7 +1161,7 @@ function openAttendanceForSubject(subjectId) {
     const todayDayName = DAY_SHORT[new Date().getDay()];
     const isClassDay = s.days && s.days.includes(todayDayName);
     if (isClassDay && isOccurrenceCancelled(subjectId, today)) {
-        Toast.show("Today's class was cancelled — attendance not applicable", 'high', 'bi-ban');
+        Toast.show("Today's class was cancelled — attendance not applicable", 'high', 'icon-lucide-ban');
         return;
     }
     openQuickAttModal(subjectId, today);
@@ -1186,11 +1193,11 @@ function showSubjectDetail(id) {
     </div>
     <p class="text-soft mb-3" style="font-size:.88rem">${esc(s.desc)}</p>
     <div class="d-flex flex-column gap-2 mb-3" style="font-size:.83rem">
-      <div class="d-flex gap-2"><i class="bi bi-clock text-faint" aria-hidden="true"></i><span>${s.days.join(', ')} · ${fmtTime(s.start)}–${fmtTime(s.end)}</span></div>
-      ${location ? `<div class="d-flex gap-2"><i class="bi bi-geo-alt text-faint" aria-hidden="true"></i><span>${esc(location)}</span></div>` : ''}
-      ${s.professor ? `<div class="d-flex gap-2"><i class="bi bi-person text-faint" aria-hidden="true"></i><span>${esc(s.professor)}${s.email ? ' · ' + esc(s.email) : ''}</span></div>` : ''}
-      <div class="d-flex gap-2"><i class="bi bi-mortarboard text-faint" aria-hidden="true"></i><span>${s.units} units · ${s.type}</span></div>
-      ${s.notes ? `<div class="d-flex gap-2"><i class="bi bi-sticky text-faint" aria-hidden="true"></i><span>${esc(s.notes)}</span></div>` : ''}
+      <div class="d-flex gap-2"><i class="icon-lucide-clock text-faint" aria-hidden="true"></i><span>${s.days.join(', ')} · ${fmtTime(s.start)}–${fmtTime(s.end)}</span></div>
+      ${location ? `<div class="d-flex gap-2"><i class="icon-lucide-map-pin text-faint" aria-hidden="true"></i><span>${esc(location)}</span></div>` : ''}
+      ${s.professor ? `<div class="d-flex gap-2"><i class="icon-lucide-user-round text-faint" aria-hidden="true"></i><span>${esc(s.professor)}${s.email ? ' · ' + esc(s.email) : ''}</span></div>` : ''}
+      <div class="d-flex gap-2"><i class="icon-lucide-graduation-cap text-faint" aria-hidden="true"></i><span>${s.units} units · ${s.type}</span></div>
+      ${s.notes ? `<div class="d-flex gap-2"><i class="icon-lucide-sticky-note text-faint" aria-hidden="true"></i><span>${esc(s.notes)}</span></div>` : ''}
     </div>
     <div class="sch-subject-stats mb-3">
       <div class="sch-subject-stat">
@@ -1204,8 +1211,8 @@ function showSubjectDetail(id) {
       </div>
     </div>
     <div class="d-flex gap-2">
-      <button class="btn btn-accent flex-grow-1 btn-sm" onclick="bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();openSubjectModal('${s.id}')"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit</button>
-      <button class="btn btn-ghost btn-sm" onclick="bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();openCancelModal('${s.id}','${isoDate(new Date())}')" aria-label="Cancel today's occurrence"><i class="bi bi-calendar-x me-1" aria-hidden="true"></i>Cancel Today</button>
+      <button class="btn btn-accent flex-grow-1 btn-sm" onclick="bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();openSubjectModal('${s.id}')"><i class="icon-lucide-pencil me-1" aria-hidden="true"></i>Edit</button>
+      <button class="btn btn-ghost btn-sm" onclick="bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();openCancelModal('${s.id}','${isoDate(new Date())}')" aria-label="Cancel today's occurrence"><i class="icon-lucide-calendar-x-2 me-1" aria-hidden="true"></i>Cancel Today</button>
     </div>`;
     new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
@@ -1217,17 +1224,17 @@ function deleteSubject(id) {
     confirmAction({
         title: 'Delete subject?',
         message: `"${s.code} — ${s.desc}" will be permanently removed.`,
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash', hideCloseButton: true,
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2', hideCloseButton: true,
         onConfirm() {
             if (DB.saveSubjects(DB.getSubjects().filter(x => x.id !== id)) === false) {
-                Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+                Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'icon-lucide-triangle-alert');
                 return;
             }
             const subjectModal = document.getElementById('subjectModal');
             if (subjectModal)
                 bootstrap.Modal.getOrCreateInstance(subjectModal).hide();
             Toast.show('Subject deleted');
-            renderAllViews();
+            document.dispatchEvent(new CustomEvent('subjects:changed'));
         }
     });
 }
@@ -1239,11 +1246,11 @@ function duplicateSubject(id) {
         return;
     subjects.push({ ...s, id: DB.uid(), code: s.code + ' (copy)' });
     if (DB.saveSubjects(subjects) === false) {
-        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'icon-lucide-triangle-alert');
         return;
     }
     Toast.show('Subject duplicated');
-    renderAllViews();
+    document.dispatchEvent(new CustomEvent('subjects:changed'));
 }
 
 function archiveSubject(id) {
@@ -1253,11 +1260,11 @@ function archiveSubject(id) {
         return;
     s.archived = !s.archived;
     if (DB.saveSubjects(subjects) === false) {
-        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
+        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'icon-lucide-triangle-alert');
         return;
     }
     Toast.show(s.archived ? 'Subject archived' : 'Subject restored');
-    renderAllViews();
+    document.dispatchEvent(new CustomEvent('subjects:changed'));
 }
 
 // Pinch-to-zoom for timetable
@@ -1287,4 +1294,7 @@ function setupPinchZoom() {
 }
 
 function escapeHtml(s) { return escHtml(s); }
-document.addEventListener('subjects:changed', function () { renderAllViews(); });
+document.addEventListener('subjects:changed', function () {
+    renderNav();
+    renderAllViews();
+});

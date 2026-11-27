@@ -57,9 +57,9 @@ function renderErrorBox(container, message, withRetry) {
     container.hidden = false;
     container.innerHTML = `
         <div class="rp-error-box" role="alert">
-            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <i class="icon-lucide-triangle-alert" aria-hidden="true"></i>
             <p>${escHtml(message)}</p>
-            ${withRetry ? '<button type="button" class="btn btn-ghost btn-sm" data-retry><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Try again</button>' : ''}
+            ${withRetry ? '<button type="button" class="btn btn-ghost btn-sm" data-retry><i class="icon-lucide-rotate-cw me-1" aria-hidden="true"></i>Try again</button>' : ''}
         </div>`;
 }
 
@@ -77,7 +77,7 @@ function rowHtml(r) {
             <td class="rp-col-status">${ticketStatusBadge(escHtml, r.status)}</td>
             <td class="rp-col-act">
                 <button type="button" class="btn btn-ghost adm-icon-btn" data-view title="View details" aria-label="View details for ${subject}">
-                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <i class="icon-lucide-eye" aria-hidden="true"></i>
                 </button>
             </td>
         </tr>`;
@@ -98,7 +98,7 @@ function itemHtml(r) {
             <div class="rp-item-side">
                 <span class="rp-badge" title="${category}">${category}</span>
                 <button type="button" class="btn btn-ghost adm-icon-btn" data-view title="View details" aria-label="View details for ${subject}">
-                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <i class="icon-lucide-eye" aria-hidden="true"></i>
                 </button>
             </div>
         </li>`;
@@ -140,7 +140,7 @@ async function loadHistory({ silent = false } = {}) {
         if (silent && hasResults) {
             // Keep the list that is already on screen and just tell the user.
             results.hidden = false;
-            toast('Your reports could not be refreshed.', 'danger', 'bi-exclamation-triangle');
+            toast('Your reports could not be refreshed.', 'danger', 'icon-lucide-triangle-alert');
             return;
         }
         hasResults = false;
@@ -175,7 +175,7 @@ async function viewReport(id) {
     const token = ++detailToken;
     const bodyEl = $('rpDetailBody');
     $('rpDetailTitle').textContent = 'Report details';
-    bodyEl.innerHTML = `<div class="adm-loading" role="status"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Loading…</div>`;
+    bodyEl.innerHTML = `<div class="adm-loading" role="status"><i class="icon-lucide-hourglass" aria-hidden="true"></i> Loading…</div>`;
     bootstrap.Modal.getOrCreateInstance($('reportDetailModal')).show();
 
     let result;
@@ -239,13 +239,13 @@ function clearFormMessages() {
 
 function showFormError(message) {
     const box = $('rpFormError');
-    box.innerHTML = `<i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>${escHtml(message)}</span>`;
+    box.innerHTML = `<i class="icon-lucide-triangle-alert" aria-hidden="true"></i><span>${escHtml(message)}</span>`;
     box.hidden = false;
 }
 
 function showSuccess(ticketRef) {
     const box = $('rpSuccess');
-    box.innerHTML = `<i class="bi bi-check-circle" aria-hidden="true"></i><span>Report sent. Your ticket reference is <strong>${escHtml(ticketRef)}</strong>. You can follow its status under Your reports.</span>`;
+    box.innerHTML = `<i class="icon-lucide-circle-check" aria-hidden="true"></i><span>Report sent. Your ticket reference is <strong>${escHtml(ticketRef)}</strong>. You can follow its status under Your reports.</span>`;
     box.hidden = false;
 }
 
@@ -255,8 +255,8 @@ function setSubmitting(on) {
     $('rpFieldset').disabled = on;
     btn.setAttribute('aria-busy', on ? 'true' : 'false');
     btn.innerHTML = on
-        ? `<i class="bi bi-arrow-repeat adm-spin" aria-hidden="true"></i><span>Sending…</span>`
-        : `<i class="bi bi-send" aria-hidden="true"></i><span>Send report</span>`;
+        ? `<i class="icon-lucide-repeat adm-spin" aria-hidden="true"></i><span>Sending…</span>`
+        : `<i class="icon-lucide-send" aria-hidden="true"></i><span>Send report</span>`;
 }
 
 async function onSubmit(e) {
@@ -304,11 +304,11 @@ async function onSubmit(e) {
         if (result.message === NOT_SIGNED_IN)
             $('rpSignInNotice').hidden = false;
         showFormError(result.message || 'Could not send your report. Please try again.');
-        toast(result.message, 'danger', 'bi-exclamation-triangle');
+        toast(result.message, 'danger', 'icon-lucide-triangle-alert');
         return;
     }
 
-    toast(`Report submitted. Your ticket reference is ${result.data.ticketRef}.`, 'accent', 'bi-check-circle');
+    toast(`Report submitted. Your ticket reference is ${result.data.ticketRef}.`, 'accent', 'icon-lucide-circle-check');
     $('reportForm').reset();
     updateCounter('rpSubject', 'rpSubjectCount', SUBJECT_MAX);
     updateCounter('rpDetails', 'rpDetailsCount', DETAILS_MAX);
