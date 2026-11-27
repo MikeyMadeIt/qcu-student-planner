@@ -988,6 +988,10 @@ body.auth-page {
         display: none;
     }
 
+    .auth-login-main > .auth-login-card {
+        display: contents;
+    }
+
     .auth-login-card,
     .auth-card {
         width: 100%;
@@ -999,6 +1003,15 @@ body.auth-page {
         border-radius: 0;
         box-shadow: none;
     }
+
+    .auth-login-card > .auth-mobile-symbol { order: 0; }
+    .auth-login-card > .auth-title { order: 1; width: 100%; max-width: 30rem; }
+    .auth-login-card > .auth-sub { order: 2; width: 100%; }
+    .auth-login-card > .auth-alert { order: 3; width: 100%; }
+    .auth-login-card > .auth-hint { order: 4; width: 100%; }
+    .auth-login-card > .auth-independent-note { order: 5; width: 100%; }
+    .auth-login-card > [data-google-signin] { order: 6; }
+    .auth-login-card > .auth-consent-mobile { order: 7; width: 100%; }
 
     .auth-title-desktop,
     .auth-sub-desktop {
