@@ -114,6 +114,18 @@ function renderGradesOverview() {
     const { rows, scoredRows, gwa } = computeSemesterGWA(subjects, grades);
     const totalSubjects = subjects.length;
     const scoredSubjects = scoredRows.length;
+    const overviewStats = document.getElementById('gwaOverviewStats');
+    const overviewEmpty = document.getElementById('gwaOverviewEmpty');
+    if (overviewStats) overviewStats.classList.toggle('d-none', scoredSubjects === 0);
+    if (overviewEmpty) {
+        overviewEmpty.classList.toggle('d-none', scoredSubjects !== 0);
+        const emptyMessage = overviewEmpty.querySelector('.empty-state-sub');
+        if (emptyMessage) {
+            emptyMessage.textContent = totalSubjects
+                ? 'Add assessment scores to see your GWA and subject highlights.'
+                : 'Add subjects in Schedule to start tracking your GWA.';
+        }
+    }
     let highestRow = null, lowestRow = null;
     if (scoredRows.length) {
         highestRow = scoredRows.reduce((best, r) => r.point < best.point ? r : best, scoredRows[0]);
@@ -172,7 +184,7 @@ function renderGradeCards() {
     const grades = DB.getGrades().map(normalizeGradeRecord);
     if (!subs.length) {
         const msg = sem ? `Add subjects in Schedule to start tracking grades for ${sem.schoolYear} · ${sem.name}.` : 'Add subjects in Schedule to start tracking grades.';
-        wrap.innerHTML = `<div class="col-12"><div class="grade-empty glass card-pad"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-column"></i></div><strong>No grades to show yet</strong><span>${msg}</span></div></div>`;
+        wrap.innerHTML = `<div class="col-12"><div class="glass empty-state"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-column"></i></div><strong class="empty-state-title">No grades to show yet</strong><span class="empty-state-sub">${msg}</span></div></div>`;
         return;
     }
     const gradeCards = subs.map(s => {
@@ -196,9 +208,6 @@ function renderGradeCards() {
         else if (hasComponents && !hasAnyScores) {
             statusBadge = `<span class="grade-pass-badge no-data"><i class="icon-lucide-circle-minus" aria-hidden="true"></i> No data</span>`;
         }
-        const equivBadge = gradeEquivBadgeHtml(point);
-        const sparkPoints = getSparklineDatapoints(g.components);
-        const hasSparkline = sparkPoints.length >= 2;
         return `<div class="grade-subject-item">
       <div class="grade-card hover-lift" style="border-left:3px solid ${s.color}">
         <!-- Card top: compact three-column layout -->
@@ -209,31 +218,28 @@ function renderGradeCards() {
           </div>
           <div class="grade-card-center">
             <div class="grade-card-pct">${pct === null ? '--' : pct.toFixed(1) + '%'}</div>
-            <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}${equivBadge}</div>
-            ${weightWarn ? `<div class="weight-warn-badge" title="Weights total ${totalWeight}%, not 100% — grade is normalised automatically"><i class="icon-lucide-triangle-alert me-1"></i>${totalWeight}%</div>` : ''}
+            <div class="grade-card-gwa">${point === null ? '—' : 'GWA ' + point.toFixed(2)}</div>
           </div>
           <div class="grade-card-actions">
             <button class="btn-icon btn-icon-xs" onclick="openGradeModal('${s.id}')" title="Edit grades"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>
             <button class="btn-icon btn-icon-xs chev-toggle" data-bs-toggle="collapse" data-bs-target="#${collapseId}" title="Toggle details"><i class="icon-lucide-chevron-down" aria-hidden="true"></i></button>
           </div>
         </div>
-        ${hasSparkline ? renderSparklineHtml(sparkPoints) : ''}
-        <div class="progress grade-card-bar"><div class="progress-bar" style="width:${Math.min(pct || 0, 100)}%;background:${pct !== null && !isPassingPct(pct) ? '#fb7185' : ''}"></div></div>
         <!-- Expanded detail -->
         <div class="collapse" id="${collapseId}">
           <div class="grade-card-detail">
             ${s.desc ? `<div class="text-faint mb-2" style="font-size:.76rem">${escapeHtml(s.desc)}</div>` : ''}
             ${g.components.length ? `
-              <div class="d-flex flex-column gap-1 mb-2">
+              <div class="grade-component-list">
                 ${g.components.map(c => {
             const ws = componentWeightedScore(c);
             const avg = componentAvgPct(c);
             const cPassing = avg !== null ? isPassingPct(avg) : null;
-            return `<div class="d-flex justify-content-between align-items-center" style="font-size:.75rem">
-                    <span class="text-soft">${escapeHtml(c.name)} <span class="text-faint">(${c.weight}%)</span></span>
-                    <div class="d-flex gap-2 align-items-center">
+            return `<div class="grade-component-row">
+                    <span class="grade-component-name">${escapeHtml(c.name)} <span class="text-faint">(${c.weight}%)</span></span>
+                    <div class="grade-component-values">
                       <span style="color:${cPassing === null ? 'var(--text-faint)' : cPassing ? '#34d399' : '#fb7185'}">${avg === null ? '—' : avg.toFixed(1) + '%'}</span>
-                      <span class="mono fw-bold" style="min-width:36px;text-align:right">${ws === null ? '—' : ws.toFixed(2)}</span>
+                      <span class="mono fw-bold">${ws === null ? '—' : ws.toFixed(2)}</span>
                     </div>
                   </div>`;
         }).join('')}
@@ -563,11 +569,19 @@ async function saveGradeComponents() {
             grades.push({ subjectId: gradeDraftSubjectId, semesterId: subject.semesterId, components: cleaned });
         }
 
-        if (typeof DB.saveGradesAndSync !== 'function')
-            throw new Error('Grade synchronization is unavailable. Your changes are still in this form.');
-        const result = await DB.saveGradesAndSync(grades);
-        if (!result || !result.ok)
-            throw result && result.error || new Error('The server did not confirm the save. Please retry.');
+        if (typeof DB.saveGrades === 'function') {
+            // Persist locally and let cloud-sync push in the background so the
+            // grade cards can refresh without waiting for a network round trip.
+            if (DB.saveGrades(grades) === false)
+                throw new Error("Couldn't save the grading breakdown on this device. Check available storage and retry.");
+        } else if (typeof DB.saveGradesAndSync === 'function') {
+            // Compatibility with adapters that only expose the server-sync API.
+            const result = await DB.saveGradesAndSync(grades);
+            if (!result || !result.ok)
+                throw result && result.error || new Error('The server did not confirm the save. Please retry.');
+        } else {
+            throw new Error('Grade storage is unavailable. Your changes are still in this form.');
+        }
 
         const inst = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
         if (inst) inst.hide();

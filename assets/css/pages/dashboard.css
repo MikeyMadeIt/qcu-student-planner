@@ -184,7 +184,7 @@
     font-weight: 800;
     font-size: 1.05rem;
     letter-spacing: -.01em;
-    white-space: pre-line;
+    white-space: normal;
 }
 
 .sem-meta {

@@ -35,16 +35,14 @@
       <div class="glass card-pad fade-in settings-groups">
 
         <!-- Academic preferences -->
-        <section class="settings-section" aria-labelledby="settingsAcademicTitle">
+        <section class="settings-section settings-academic-section" aria-labelledby="settingsAcademicTitle">
           <div class="section-title" id="settingsAcademicTitle"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>Academic Preferences</div>
-          <p class="pref-help-lg text-faint">The university administrator sets the active period. Choose a previous period to view and continue working with its saved planner data.</p>
+          <p class="pref-help-lg text-faint settings-academic-description">The university administrator manages the active semester. Switch to previous semesters to access saved planner data.</p>
           <div class="settings-academic-period" id="settingsAcademicPeriod" role="status">Loading the university academic period…</div>
-          <label class="pref-label mt-3" for="settingsSemesterSelect">Workspace semester</label>
-          <select class="form-select" id="settingsSemesterSelect" aria-label="Workspace semester" disabled><option>Loading semesters…</option></select>
-          <div class="pref-help mt-2" id="settingsSemesterHint" role="status"></div>
+          <label class="pref-label settings-workspace-label" for="settingsSemesterSelect">Workspace semester</label>
+          <div class="pref-help settings-workspace-help" id="settingsSemesterHint" role="status"></div>
+          <select class="form-select settings-workspace-select" id="settingsSemesterSelect" aria-label="Workspace semester" disabled><option>Loading semesters…</option></select>
         </section>
-
-        <hr class="divider">
 
         <!-- Appearance -->
         <section class="settings-section" aria-labelledby="settingsAppearanceTitle">
@@ -142,9 +140,6 @@
 <script>
   renderShell('settings');
   applyTheme();
-  DB.whenCloudReady(function () {
-    if (window.initSettings) window.initSettings();
-  });
 </script>
 <script src="../../assets/js/core/date-picker.js"></script>
 </body>

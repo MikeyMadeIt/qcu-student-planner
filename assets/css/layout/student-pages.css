@@ -510,7 +510,8 @@
     .student-app .main-content:has(.attendance-columns) {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        row-gap: 0;
+        row-gap: var(--grid-gap);
+        align-content: start;
     }
 
     .student-app .attendance-columns,
@@ -520,21 +521,24 @@
         display: contents;
     }
 
-    .student-app .main-content:has(.attendance-columns) > .topbar { grid-row: 1; }
-    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { grid-row: 2; }
-    .student-app .main-content:has(.attendance-columns) .att-log-form { grid-row: 3; margin-bottom: var(--page-gap) !important; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { grid-row: 4; }
-    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { grid-row: 5; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { grid-row: 6; }
-    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot { grid-row: 7; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { grid-row: 8; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { grid-row: 9; }
-    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { margin-bottom: var(--grid-gap) !important; }
+    /* Let optional alerts and the mobile absence-limit slot leave the layout
+       naturally. Explicit row numbers left empty tracks and oversized gaps. */
+    .student-app .main-content:has(.attendance-columns) > .topbar { order: 1; }
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { order: 2; }
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard { order: 3; }
+    .student-app .main-content:has(.attendance-columns) .att-log-form { order: 4; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { order: 5; }
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { order: 6; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { order: 7; }
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsMobileSlot { order: 8; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { order: 9; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { order: 10; }
 
     .student-app .main-content:has(.schedule-columns) {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        row-gap: 0;
+        row-gap: var(--page-gap);
+        align-content: start;
     }
 
     .student-app .main-content:has(.schedule-columns) > .sch-topbar,
@@ -543,16 +547,21 @@
         display: contents;
     }
 
-    .student-app .main-content:has(.schedule-columns) .sch-topbar-left { grid-row: 1; margin-bottom: 10px; }
-    .student-app .main-content:has(.schedule-columns) .sch-add-btn { grid-row: 2; width: 100%; margin-bottom: calc(14px + var(--page-gap)) !important; }
-    .student-app .main-content:has(.schedule-columns) .sch-nav-card { grid-row: 3; }
-    .student-app .main-content:has(.schedule-columns) #schNextCard { grid-row: 4; }
-    .student-app .main-content:has(.schedule-columns) #schDayView { grid-row: 5; }
-    .student-app .main-content:has(.schedule-columns) #schTimetableView { grid-row: 6; }
-    .student-app .main-content:has(.schedule-columns) #schCurriculumSetup { grid-row: 7; }
-    .student-app .main-content:has(.schedule-columns) #schListView { grid-row: 8; }
-    .student-app .main-content:has(.schedule-columns) #schTasksPanel { grid-row: 9; }
+    .student-app .main-content:has(.schedule-columns) > .sch-topbar { margin: 0; }
+    .student-app .main-content:has(.schedule-columns) .sch-topbar-left { order: 1; margin-bottom: 0; }
+    .student-app .main-content:has(.schedule-columns) .sch-add-btn { order: 2; width: 100%; }
+    .student-app .main-content:has(.schedule-columns) .sch-nav-card { order: 3; }
+    .student-app .main-content:has(.schedule-columns) #schNextCard { order: 4; }
+    .student-app .main-content:has(.schedule-columns) #schDayView { order: 5; }
+    .student-app .main-content:has(.schedule-columns) #schTimetableView { order: 6; }
+    .student-app .main-content:has(.schedule-columns) #schCurriculumSetup { order: 7; }
+    .student-app .main-content:has(.schedule-columns) #schListView { order: 8; }
+    .student-app .main-content:has(.schedule-columns) #schTasksPanel { order: 9; }
     .student-app .main-content:has(#schListView.d-none) #schCurriculumSetup { display: none !important; }
+    .student-app .main-content:has(.schedule-columns) .schedule-column > * { margin-block: 0 !important; }
+    .student-app .main-content:has(.schedule-columns) .sch-add-btn { margin-bottom: var(--space-2) !important; }
+    .student-app .main-content:has(.schedule-columns) #schNextCard:empty { display: none; }
+    .student-app .main-content:has(.schedule-columns) #schTasksPanel:empty { display: none; }
 
     .student-app .main-content:has(.grades-columns) {
         display: grid;
@@ -570,15 +579,9 @@
     .student-app .grades-subject-column { display: contents; }
 
     .student-app .grades-subject-column > .grade-subject-item {
-        min-width: 0;
-        padding-inline: calc(var(--bs-gutter-x, .5rem) * .5);
-    }
-
-    .student-app .grades-subject-column > .grade-subject-item {
         flex: 0 0 100%;
         max-width: 100%;
         padding-inline: 6px;
-        margin-bottom: 10px;
     }
 
     .student-app .main-content:has(.grades-columns) > .topbar { grid-row: 1; }
@@ -594,11 +597,12 @@
         max-width: 50%;
     }
 
-    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard { grid-row: 3; }
-    .student-app .main-content:has(.attendance-columns) .att-log-form { grid-row: 4; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { grid-row: 5; }
-    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { grid-row: 6; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { grid-row: 7; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { grid-row: 8; }
-    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { grid-row: 9; }
+    .student-app .main-content:has(.attendance-columns) .att-overall-rate-card { order: 2; }
+    .student-app .main-content:has(.attendance-columns) #absenceLimitsCard { order: 3; }
+    .student-app .main-content:has(.attendance-columns) .att-log-form { order: 4; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceStats) { order: 5; }
+    .student-app .main-content:has(.attendance-columns) #consecutiveAbsenceAlerts { order: 6; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceHeatmap) { order: 7; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#subjectBreakdown) { order: 9; }
+    .student-app .main-content:has(.attendance-columns) .glass:has(#attendanceLog) { order: 10; }
 }

@@ -373,13 +373,24 @@ async function saveTask() {
         }
         tasks[tasks.findIndex(function (t) { return t.id === id; })] = nextTask;
     }
-    const saveResult = typeof DB.saveTasksAndSync === 'function'
-        ? await DB.saveTasksAndSync(tasks)
-        : { ok: false, error: new Error('Task synchronization is unavailable. Please retry when the connection is restored.') };
-    if (!saveResult.ok) {
+    let saveError = null;
+    if (typeof DB.saveTasks === 'function') {
+        // Write to local storage first so the task appears immediately; cloud
+        // synchronization continues in the background through cloud-sync.js.
+        if (DB.saveTasks(tasks) === false) {
+            saveError = new Error("Couldn't save the task on this device. Check available storage and retry.");
+        }
+    } else if (typeof DB.saveTasksAndSync === 'function') {
+        // Compatibility for adapters that only expose the server-sync API.
+        const saveResult = await DB.saveTasksAndSync(tasks);
+        if (!saveResult || !saveResult.ok) saveError = saveResult && saveResult.error || new Error('Task synchronization failed.');
+    } else {
+        saveError = new Error('Task storage is unavailable. Please retry when the connection is restored.');
+    }
+    if (saveError) {
         tkSaving = false;
         if (saveButton) { saveButton.disabled = false; saveButton.removeAttribute('aria-busy'); }
-        Toast.show('Task was not saved: ' + ((saveResult.error && saveResult.error.message) || 'server synchronization failed. Your entries are still in this form; retry to save.'), 'high', 'icon-lucide-cloud-off');
+        Toast.show('Task was not saved: ' + saveError.message, 'high', 'icon-lucide-cloud-off');
         return;
     }
     bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();

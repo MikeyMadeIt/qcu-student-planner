@@ -225,14 +225,27 @@ async function saveSubject() {
             ...data,
         });
     }
-    if (typeof DB.saveSubjectsAndSync !== 'function') {
-        Toast.show('Subject synchronization is unavailable. Keep this form open and retry.', 'high', 'icon-lucide-cloud-off');
-        finishSaving();
-        return;
+    if (typeof DB.saveSubjects === 'function') {
+        // Persist locally and let cloud-sync push in the background. Waiting
+        // for the server before closing the modal made a successful save feel
+        // stalled even though the subject can be rendered from local data.
+        if (DB.saveSubjects(subjects) === false) {
+            Toast.show("Couldn't save the subject on this device. Check available storage and retry.", 'high', 'icon-lucide-triangle-alert');
+            finishSaving();
+            return;
+        }
     }
-    const saveResult = await DB.saveSubjectsAndSync(subjects);
-    if (!saveResult || !saveResult.ok) {
-        Toast.show("Couldn't save the subject: " + ((saveResult && saveResult.error && saveResult.error.message) || 'server synchronization failed. Your entries are still in this form; retry to save.'), 'high', 'icon-lucide-cloud-off');
+    else if (typeof DB.saveSubjectsAndSync === 'function') {
+        // Compatibility with adapters that only expose the server-sync API.
+        const saveResult = await DB.saveSubjectsAndSync(subjects);
+        if (!saveResult || !saveResult.ok) {
+            Toast.show("Couldn't save the subject: " + ((saveResult && saveResult.error && saveResult.error.message) || 'server synchronization failed. Your entries are still in this form; retry to save.'), 'high', 'icon-lucide-cloud-off');
+            finishSaving();
+            return;
+        }
+    }
+    else {
+        Toast.show('Subject storage is unavailable. Keep this form open and retry.', 'high', 'icon-lucide-cloud-off');
         finishSaving();
         return;
     }

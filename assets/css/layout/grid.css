@@ -393,6 +393,22 @@ td {
     line-height: 1.5;
 }
 
+.empty-state > .empty-state-title {
+    color: var(--text);
+    font-size: .9rem;
+    font-weight: 650;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.empty-state > .empty-state-sub {
+    max-width: 30rem;
+    color: var(--text-soft);
+    font-size: .8rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* Schedule toggle buttons (archive + view switchers) */
 
 .sched-toggle-btn {
