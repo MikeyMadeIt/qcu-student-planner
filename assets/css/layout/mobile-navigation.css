@@ -39,8 +39,8 @@
     }
 
     .mobile-nav-app .mobile-shell-brand .app-brand-logo {
-        width: min(9.25rem, 42vw);
-        max-height: 2.75rem;
+        width: min(8.5rem, 39vw);
+        max-height: 2.5rem;
         flex: 0 1 auto;
     }
 
