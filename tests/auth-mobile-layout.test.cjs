@@ -79,6 +79,11 @@ function createCallbackContext(profile) {
 }
 
 test('callback shows distinct verification stages and preserves approval routing', async () => {
+  assert.doesNotMatch(callback, /class="auth-card"/);
+  assert.match(callback, /auth-main auth-callback-main/);
+  assert.match(authCss, /\.auth-callback-main\s*\{[^}]*justify-content:\s*center;/s);
+  assert.match(authCss, /\.auth-page \.grid-bg::before\s*\{\s*opacity:\s*0\.4;/);
+  assert.match(authCss, /\.auth-page \.grid-bg::after\s*\{\s*opacity:\s*0\.2;/);
   const context = createCallbackContext({ role: 'student', account_status: 'approved', course: 'BSIT', year_level: '1', school: 'Main' });
   await context.handleCallback();
   const titles = context.progress.filter(([selector]) => selector === '[data-callback-title]').map(([, value]) => value);

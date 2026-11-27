@@ -23,22 +23,20 @@
         <i class="icon-lucide-moon-star theme-icon-moon" aria-hidden="true"></i>
     </button>
 
-    <main class="auth-main" id="main">
-        <div class="auth-card">
-            <a class="auth-brand" href="login.html">
-                <img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner">
-            </a>
+    <main class="auth-main auth-callback-main" id="main">
+        <a class="auth-brand auth-callback-brand" href="login.html">
+            <img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner">
+        </a>
 
-            <div class="auth-center">
-                <div class="status-icon status-icon-loading" data-callback-spinner>
-                    <span class="auth-spinner" aria-hidden="true"></span>
-                </div>
-                <h1 class="auth-title" data-callback-title>Finishing sign-in&hellip;</h1>
-                <p class="auth-sub" data-callback-subtitle>Verifying your Google sign-in&hellip;</p>
-                <div class="auth-alert error" data-callback-message role="alert" hidden></div>
-                <div class="auth-actions" data-callback-actions hidden>
-                    <a class="btn btn-accent auth-submit" href="login.html">Back to log in</a>
-                </div>
+        <div class="auth-center auth-callback-content">
+            <div class="status-icon status-icon-loading" data-callback-spinner>
+                <span class="auth-spinner" aria-hidden="true"></span>
+            </div>
+            <h1 class="auth-title" data-callback-title>Finishing sign-in&hellip;</h1>
+            <p class="auth-sub" data-callback-subtitle>Verifying your Google sign-in&hellip;</p>
+            <div class="auth-alert error" data-callback-message role="alert" hidden></div>
+            <div class="auth-actions" data-callback-actions hidden>
+                <a class="btn btn-accent auth-submit" href="login.html">Back to log in</a>
             </div>
         </div>
         <p class="auth-note">Approval is decided by an administrator, never by this page.</p>

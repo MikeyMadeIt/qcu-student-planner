@@ -39,7 +39,11 @@ body.auth-page {
 }
 
 .auth-page .grid-bg::after {
-    opacity: 0.6;
+    opacity: 0.2;
+}
+
+.auth-page .grid-bg::before {
+    opacity: 0.4;
 }
 
 /* Layout */
@@ -899,6 +903,76 @@ body.auth-page {
     max-width: 29rem;
 }
 
+.auth-callback-main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 5rem) 1.5rem calc(env(safe-area-inset-bottom, 0px) + 3.5rem);
+}
+
+.auth-callback-brand {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
+    left: max(1.5rem, env(safe-area-inset-left, 0px));
+    z-index: 10;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.auth-callback-content {
+    width: min(100%, 28rem);
+    margin: auto;
+}
+
+.auth-callback-content .status-icon-loading {
+    position: relative;
+    width: 4.25rem;
+    height: 4.25rem;
+    margin-bottom: 1.5rem;
+    background: rgba(var(--accent), .08);
+    border: 1px solid rgba(var(--accent), .22);
+    box-shadow: 0 0 0 .4rem rgba(var(--accent), .035);
+}
+
+.auth-callback-content .status-icon-loading::before {
+    position: absolute;
+    inset: -.42rem;
+    border: 1px solid transparent;
+    border-right-color: rgba(var(--accent), .5);
+    border-top-color: rgba(var(--accent), .2);
+    border-radius: 50%;
+    content: "";
+    animation: auth-spin 2.8s linear infinite reverse;
+}
+
+.auth-callback-content .status-icon-loading::after {
+    position: absolute;
+    width: .34rem;
+    height: .34rem;
+    border-radius: 50%;
+    background: rgb(var(--accent));
+    content: "";
+}
+
+.auth-callback-content .auth-spinner {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-width: 2px;
+    border-color: rgba(var(--accent), .18);
+    border-top-color: rgb(var(--accent));
+    border-right-color: rgb(var(--accent));
+}
+
+.auth-callback-main > .auth-note {
+    position: absolute;
+    right: 1.25rem;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+    left: 1.25rem;
+    max-width: 28rem;
+    margin-inline: auto;
+}
+
 /* The callback page gets the same theme control on mobile. */
 .auth-mobile-theme-toggle {
     display: none;
@@ -1234,13 +1308,15 @@ body.auth-page {
 
 @media (prefers-reduced-motion: reduce) {
     .auth-spinner,
-    .auth-page .status-icon .auth-spin {
+    .auth-page .status-icon .auth-spin,
+    .auth-callback-content .status-icon-loading::before {
         animation: none;
     }
 }
 
 html[data-motion="reduced"] .auth-spinner,
-html[data-motion="reduced"] .auth-page .status-icon .auth-spin {
+html[data-motion="reduced"] .auth-page .status-icon .auth-spin,
+html[data-motion="reduced"] .auth-callback-content .status-icon-loading::before {
     animation: none;
 }
 
