@@ -252,6 +252,23 @@ body.auth-page {
     background-image: none;
 }
 
+.auth-profile-content .cs-trigger-lucide-chevron::after {
+    display: none;
+}
+
+.auth-profile-content .cs-trigger-chevron {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    margin-left: auto;
+    color: var(--auth-text-soft);
+}
+
+.auth-profile-content .cs-trigger-chevron .lucide-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
 .auth-page .form-select option,
 .auth-page .form-select optgroup {
     background: var(--auth-surface);
@@ -702,8 +719,19 @@ html[data-motion="reduced"] .auth-spin {
 }
 
 .auth-consent-field > .auth-error::before {
+    display: none;
+}
+
+.auth-consent-field > .auth-error > .lucide-icon {
+    flex: 0 0 auto;
     align-self: center;
-    margin-top: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+}
+
+.auth-consent-field > .auth-error > span {
+    min-width: 0;
 }
 
 /* Status screens */
@@ -774,7 +802,7 @@ html[data-motion="reduced"] .auth-spin {
         z-index: 9;
         height: calc(env(safe-area-inset-top, 0px) + 3.75rem);
         border-bottom: 1px solid var(--auth-border);
-        background: var(--nav-bg);
+        background: color-mix(in srgb, var(--bg) 88%, var(--surface) 12%);
         content: "";
     }
 
