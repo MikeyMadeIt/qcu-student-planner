@@ -646,24 +646,9 @@ html:has(.legal-page) {
     text-decoration: none;
 }
 
-.lg-public-mark {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-sm);
-    background: rgb(var(--accent));
-    color: var(--on-accent);
-    font-size: 1.1rem;
-}
-
-.lg-public-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.95rem;
+.lg-public-brand .app-brand-logo {
+    width: 8.5rem;
+    max-height: 2.6rem;
 }
 
 .lg-public-tools {

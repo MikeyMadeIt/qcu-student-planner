@@ -1,5 +1,21 @@
 /* Top bar: brand on the left; profile circle + sidebar toggle on the right. */
 
+.app-brand-logo {
+    display: block;
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 2.75rem;
+    object-fit: contain;
+    object-position: left center;
+}
+
+[data-theme="dark"] .app-brand-logo,
+[data-theme="amoled"] .app-brand-logo {
+    filter: invert(1);
+}
+
 /* position: fixed instead of sticky — deliberately. */
 .shell-bar {
     position: fixed;

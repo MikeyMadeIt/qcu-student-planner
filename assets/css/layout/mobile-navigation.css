@@ -38,6 +38,12 @@
         text-overflow: ellipsis;
     }
 
+    .mobile-nav-app .mobile-shell-brand .app-brand-logo {
+        width: min(9.25rem, 42vw);
+        max-height: 2.75rem;
+        flex: 0 1 auto;
+    }
+
     .mobile-nav-app .mobile-shell-brand .dot {
         display: grid;
         flex: 0 0 auto;
