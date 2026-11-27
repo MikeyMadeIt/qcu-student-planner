@@ -899,6 +899,333 @@ body.auth-page {
     max-width: 29rem;
 }
 
+/* The callback page gets the same theme control on mobile. */
+.auth-mobile-theme-toggle {
+    display: none;
+}
+
+.auth-title-mobile,
+.auth-sub-mobile {
+    display: none;
+}
+
+.auth-mobile-only {
+    display: none;
+}
+
+.auth-desktop-only {
+    display: inline;
+}
+
+.auth-consent-mobile {
+    display: none;
+}
+
+.auth-mobile-symbol,
+.auth-independent-note,
+.auth-hint-mobile-extra {
+    display: none;
+}
+
+@media (max-width: 575.98px) {
+    body.auth-page {
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+    }
+
+    .auth-main {
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        padding: calc(env(safe-area-inset-top, 0px) + 5.25rem) max(1.25rem, env(safe-area-inset-left, 0px)) calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+        gap: 1rem;
+    }
+
+    .auth-brand {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 1.05rem);
+        left: max(1.25rem, env(safe-area-inset-left, 0px));
+        z-index: 11;
+        width: max-content;
+        max-width: calc(100vw - 6rem);
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .auth-brand .app-brand-logo {
+        display: block;
+        width: 6.75rem;
+        max-width: 100%;
+        max-height: 1.65rem;
+        object-fit: contain;
+        object-position: left center;
+    }
+
+    .auth-page .theme-toggle {
+        top: calc(env(safe-area-inset-top, 0px) + .7rem);
+        right: max(1.1rem, env(safe-area-inset-right, 0px));
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .auth-mobile-theme-toggle {
+        display: inline-flex;
+    }
+
+    .auth-login-main {
+        display: flex;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
+        align-items: stretch;
+        justify-content: center;
+    }
+
+    .auth-login-intro {
+        display: none;
+    }
+
+    .auth-login-card,
+    .auth-card {
+        width: 100%;
+        max-width: 30rem;
+        margin: auto;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .auth-title-desktop,
+    .auth-sub-desktop {
+        display: none;
+    }
+
+    .auth-title-mobile,
+    .auth-sub-mobile {
+        display: inline;
+    }
+
+    .auth-mobile-only {
+        display: inline;
+    }
+
+    .auth-consent-desktop {
+        display: none;
+    }
+
+    .auth-consent-mobile {
+        display: block;
+    }
+
+    .auth-desktop-only {
+        display: none;
+    }
+
+    .auth-login-card .auth-title {
+        margin: 0 0 .65rem;
+        font-size: clamp(1.55rem, 6vw, 1.8rem);
+        line-height: 1.2;
+        text-align: center;
+        white-space: normal;
+        overflow: visible;
+    }
+
+    .auth-mobile-symbol {
+        display: grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        margin: 0 auto 1.1rem;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(var(--accent), .12);
+        color: rgb(var(--accent));
+        font-size: 1.2rem;
+    }
+
+    .auth-login-card .auth-sub {
+        max-width: 22rem;
+        margin: 0 auto 1.35rem;
+        font-size: .92rem;
+        text-align: center;
+    }
+
+    .auth-login-card .btn-google {
+        min-height: 3.35rem;
+        width: 100%;
+        border-radius: var(--btn-radius);
+        font-size: .96rem;
+    }
+
+    .auth-login-card .auth-hint {
+        margin: 1.15rem 0 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        font-size: .78rem;
+        line-height: 1.55;
+        text-align: center;
+    }
+
+    .auth-hint-label {
+        margin-bottom: .3rem;
+        font-size: .66rem;
+    }
+
+    .auth-inline-code {
+        display: inline-block;
+        padding: 0;
+        background: transparent;
+        font-size: .8rem;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+    .auth-hint-mobile-extra {
+        display: block;
+        margin-top: .25rem;
+    }
+
+    .auth-independent-note {
+        display: block;
+        max-width: 27rem;
+        margin: .85rem auto 0;
+        color: var(--auth-text-faint);
+        font-size: .7rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .auth-consent-note {
+        max-width: 22rem;
+        margin: 1rem auto 0;
+        font-size: .75rem;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .auth-alert {
+        margin-top: 0;
+    }
+
+    .auth-profile-main {
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding-top: calc(env(safe-area-inset-top, 0px) + 5rem);
+    }
+
+    .auth-profile-card {
+        max-width: 38rem;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .auth-profile-card .auth-title {
+        font-size: 1.55rem;
+        white-space: normal;
+        overflow: visible;
+    }
+
+    .auth-profile-card .auth-sub {
+        margin-bottom: 1.1rem;
+        font-size: .88rem;
+    }
+
+    .auth-profile-content[hidden] {
+        display: none;
+    }
+
+    .auth-profile-main:not(.is-profile-ready) .auth-profile-content {
+        display: none;
+    }
+
+    .auth-profile-content .auth-field {
+        margin-bottom: 1rem;
+    }
+
+    .auth-profile-content .auth-field > label:not(.auth-check) {
+        margin-bottom: .4rem;
+        font-family: var(--font-sans);
+        font-size: .84rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--auth-text);
+    }
+
+    .auth-profile-content .form-control,
+    .auth-profile-content .form-select {
+        height: 3.15rem;
+    }
+
+    .auth-profile-content .legal-box {
+        max-height: none;
+        overflow: visible;
+        padding: .8rem;
+    }
+
+    .auth-profile-content .legal-block {
+        margin-bottom: 1.1rem;
+    }
+
+    .auth-profile-content .legal-text p {
+        font-size: .82rem;
+        line-height: 1.55;
+    }
+
+    .auth-profile-content .auth-submit {
+        position: sticky;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + .5rem);
+        z-index: 2;
+        min-height: 3.25rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+    }
+
+    .auth-main > .auth-card:not(.auth-login-card):not(.auth-profile-card) {
+        margin-block: auto;
+    }
+
+    .auth-main > .auth-card:not(.auth-login-card):not(.auth-profile-card) .auth-center {
+        max-width: 26rem;
+        margin-inline: auto;
+    }
+
+    .auth-note {
+        max-width: 28rem;
+        margin: 0 auto;
+        padding-bottom: .25rem;
+    }
+}
+
+@media (max-width: 359.98px) {
+    .auth-login-card .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-login-card .auth-hint,
+    .auth-consent-note {
+        font-size: .72rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-spinner,
+    .auth-page .status-icon .auth-spin {
+        animation: none;
+    }
+}
+
+html[data-motion="reduced"] .auth-spinner,
+html[data-motion="reduced"] .auth-page .status-icon .auth-spin {
+    animation: none;
+}
+
 .auth-status-card .auth-center .auth-title {
     white-space: normal;
 }
@@ -914,6 +1241,14 @@ body.auth-page {
 
 .auth-profile-card > .auth-title {
     font-size: 1.9rem;
+}
+
+.auth-profile-content > .auth-title {
+    font-size: 1.9rem;
+}
+
+.auth-required {
+    color: var(--auth-danger);
 }
 
 @media (max-width: 900px) {
@@ -932,4 +1267,30 @@ body.auth-page {
 
 @media (prefers-reduced-motion: reduce) {
     .auth-spinner { animation-duration: 2s; }
+}
+
+@media (max-width: 575.98px) {
+    .auth-login-main {
+        padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
+    }
+
+    .auth-profile-main {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 5rem);
+    }
+
+    .auth-profile-card {
+        max-width: 38rem;
+    }
+
+    .auth-profile-main:not(.is-profile-ready) {
+        justify-content: center;
+    }
+
+    .auth-profile-main:not(.is-profile-ready) .auth-profile-card {
+        margin-block: auto;
+    }
+
+    .auth-profile-card .auth-profile-content > .auth-title {
+        font-size: 1.55rem;
+    }
 }

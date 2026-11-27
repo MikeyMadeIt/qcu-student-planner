@@ -18,6 +18,11 @@
 <body class="auth-page" data-auth-callback>
     <div class="grid-bg" aria-hidden="true"></div>
 
+    <button type="button" class="theme-toggle auth-mobile-theme-toggle" data-theme-toggle aria-label="Switch theme">
+        <i class="icon-lucide-sun theme-icon-sun" aria-hidden="true"></i>
+        <i class="icon-lucide-moon-star theme-icon-moon" aria-hidden="true"></i>
+    </button>
+
     <main class="auth-main" id="main">
         <div class="auth-card">
             <a class="auth-brand" href="login.html">
@@ -29,7 +34,7 @@
                     <span class="auth-spinner" aria-hidden="true"></span>
                 </div>
                 <h1 class="auth-title" data-callback-title>Finishing sign-in&hellip;</h1>
-                <p class="auth-sub">Hang tight while we confirm your Google account.</p>
+                <p class="auth-sub" data-callback-subtitle>Verifying your Google sign-in&hellip;</p>
                 <div class="auth-alert error" data-callback-message role="alert" hidden></div>
                 <div class="auth-actions" data-callback-actions hidden>
                     <a class="btn btn-accent auth-submit" href="login.html">Back to log in</a>

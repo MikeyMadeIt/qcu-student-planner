@@ -115,6 +115,8 @@ async function submitDetails(form, submitButton) {
 }
 
 async function guardAndPrefill(form) {
+    const loadingMessage = $('[data-finish-profile-loading-message]');
+    if (loadingMessage) loadingMessage.textContent = 'Verifying your account status and access…';
     const profileResult = await AuthService.getCurrentProfile();
 
     if (!profileResult.ok) {
@@ -140,7 +142,9 @@ async function guardAndPrefill(form) {
 
     if (profile.full_name) form.elements.fullName.value = profile.full_name;
 
+    if (loadingMessage) loadingMessage.textContent = 'Preparing your profile form…';
     form.hidden = false;
+    $('[data-finish-profile-content]')?.closest('.auth-profile-main')?.classList.add('is-profile-ready');
     $('[data-finish-profile-loading]')?.setAttribute('hidden', '');
 }
 

@@ -29,11 +29,12 @@
                 <img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner">
             </a>
 
-            <div class="auth-center" data-finish-profile-loading>
+            <div class="auth-center" data-finish-profile-loading aria-live="polite">
                 <div class="status-icon"><i class="icon-lucide-repeat auth-spin" aria-hidden="true"></i></div>
-                <p class="auth-sub">Loading your account&hellip;</p>
+                <p class="auth-sub" data-finish-profile-loading-message>Checking your account and profile&hellip;</p>
             </div>
 
+            <div class="auth-profile-content" data-finish-profile-content>
             <h1 class="auth-title">Almost there</h1>
             <p class="auth-sub">You signed in with Google. We still need a few academic details so an administrator can verify your account.</p>
 
@@ -41,28 +42,28 @@
                 <div class="auth-alert error" data-alert role="alert" hidden></div>
 
                 <div class="auth-field">
-                    <label for="fullName">Full Name</label>
-                    <input class="form-control" id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Juan Dela Cruz" data-rule="fullName" aria-describedby="fullName-err" aria-invalid="false">
+                    <label for="fullName">Full Name <span class="auth-required" aria-hidden="true">*</span></label>
+                    <input class="form-control" id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Juan Dela Cruz" data-rule="fullName" aria-describedby="fullName-err" aria-invalid="false" aria-required="true">
                     <p class="auth-error" id="fullName-err" hidden></p>
                 </div>
 
                 <div class="auth-field">
-                    <label for="program">Program</label>
-                    <select class="form-select" id="program" name="program" aria-describedby="program-err" aria-invalid="false">
+                    <label for="program">Program <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="program" name="program" aria-describedby="program-err" aria-invalid="false" aria-required="true">
                         <option value="" selected disabled>Select your program</option>
                     </select>
                     <p class="auth-error" id="program-err" hidden></p>
                 </div>
                 <div class="auth-field">
-                    <label for="campus">Campus</label>
-                    <select class="form-select" id="campus" name="campus" aria-describedby="campus-err" aria-invalid="false">
+                    <label for="campus">Campus <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="campus" name="campus" aria-describedby="campus-err" aria-invalid="false" aria-required="true">
                         <option value="" selected disabled>Select your campus</option>
                     </select>
                     <p class="auth-error" id="campus-err" hidden></p>
                 </div>
                 <div class="auth-field">
-                    <label for="yearLevel">Year Level</label>
-                    <select class="form-select" id="yearLevel" name="yearLevel" aria-describedby="yearLevel-err" aria-invalid="false">
+                    <label for="yearLevel">Year Level <span class="auth-required" aria-hidden="true">*</span></label>
+                    <select class="form-select" id="yearLevel" name="yearLevel" aria-describedby="yearLevel-err" aria-invalid="false" aria-required="true">
                         <option value="" selected disabled>Select your year level</option>
                     </select>
                     <p class="auth-error" id="yearLevel-err" hidden></p>
@@ -114,7 +115,7 @@
 
                 <div class="auth-field">
                     <label class="auth-check" for="acceptTerms">
-                        <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false">
+                        <input type="checkbox" id="acceptTerms" name="acceptTerms" aria-describedby="acceptTerms-err" aria-invalid="false" aria-required="true">
                         <span>I have read and agree to the <a class="auth-link" href="#terms-box-title">Terms and Conditions</a> and <a class="auth-link" href="#privacy-box-title">Privacy Notice</a>.</span>
                     </label>
                     <p class="auth-error" id="acceptTerms-err" hidden></p>
@@ -122,6 +123,7 @@
 
                 <button class="btn btn-accent auth-submit" type="submit" data-submit>Submit for review</button>
             </form>
+            </div>
         </div>
         <p class="auth-note">Your details are sent securely and reviewed by an administrator before you can log in.</p>
     </main>
