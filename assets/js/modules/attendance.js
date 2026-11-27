@@ -1502,7 +1502,7 @@ function exportAttendanceCSV() {
     }
     const esc = v => {
         const s = String(v == null ? '' : v);
-        return s.includes(',') || s.includes('"') || s.includes('\n')
+        return /[,"\r\n]/.test(s)
             ? '"' + s.replace(/"/g, '""') + '"'
             : s;
     };
@@ -1543,6 +1543,12 @@ function exportAttendancePDF() {
     const semLabel = sem ? `${sem.name} · ${sem.schoolYear}` : 'No active university academic period';
     const settings = DB.getSettings();
     const studentName = settings.name || '';
+    const accentTokens = window.getComputedStyle
+        ? window.getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
+        : '36, 87, 214';
+    const reportAccent = /^\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}$/.test(accentTokens)
+        ? `rgb(${accentTokens})`
+        : '#2457d6';
     // Build per-subject summary
     const subRows = subs.map(s => {
         const recs = records.filter(r => r.subjectId === s.id);
@@ -1561,53 +1567,63 @@ function exportAttendancePDF() {
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Attendance Report</title>
 <style>
-  body{font-family:Arial,sans-serif;font-size:11pt;color:#111;margin:0;padding:20mm}
-  h1{font-size:16pt;margin-bottom:2pt}
-  h2{font-size:12pt;margin:14pt 0 6pt;border-bottom:1px solid #ddd;padding-bottom:4pt}
-  .sub{font-size:10pt;color:#555}
-  .stat-row{display:flex;gap:20pt;margin:8pt 0}
-  .stat-box{text-align:center;border:1px solid #ddd;border-radius:6pt;padding:8pt 14pt}
-  .stat-box .val{font-size:18pt;font-weight:bold}
-  .stat-box .lbl{font-size:8pt;color:#666;text-transform:uppercase}
-  table{width:100%;border-collapse:collapse;font-size:9pt}
-  th{background:#f4f4f4;padding:5pt 7pt;text-align:left;border:1px solid #ddd;font-weight:600}
-  td{padding:4pt 7pt;border:1px solid #ddd}
-  .rate{font-weight:bold}
-  .badge{display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:8pt;font-weight:bold;color:#fff}
-  .pg{page-break-before:always}
-  @media print{body{padding:10mm}}
+  *{box-sizing:border-box} @page{margin:14mm}
+  body{font-family:Inter,Arial,sans-serif;font-size:9pt;color:#20242c;background:#fff;margin:0;padding:24px}
+  header{border-top:4px solid ${reportAccent};padding-top:12px;margin-bottom:18px}
+  h1{font-size:17pt;line-height:1.25;margin:0 0 4px;font-weight:700}
+  h2{font-size:11pt;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid #d8dde6;color:#20242c}
+  .sub{font-size:8.5pt;color:#5d6572;line-height:1.5}
+  .stat-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:10px 0}
+  .stat-box{text-align:left;border:1px solid #d8dde6;border-radius:6px;padding:8px;background:#fff;min-width:0}
+  .stat-box .val{font-size:15pt;font-weight:700;color:${reportAccent}}
+  .stat-box .lbl{font-size:7pt;color:#5d6572;text-transform:uppercase;letter-spacing:.04em}
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8pt}
+  .subject-summary th:first-child,.subject-summary td:first-child{width:27%}
+  .subject-summary th:not(:first-child),.subject-summary td:not(:first-child){width:12.16%}
+  .detailed-log th:nth-child(1),.detailed-log td:nth-child(1){width:16%}
+  .detailed-log th:nth-child(2),.detailed-log td:nth-child(2){width:18%}
+  .detailed-log th:nth-child(3),.detailed-log td:nth-child(3){width:15%}
+  .detailed-log th:nth-child(4),.detailed-log td:nth-child(4){width:13%}
+  .detailed-log th:nth-child(5),.detailed-log td:nth-child(5){width:38%}
+  thead{display:table-header-group} tr{break-inside:avoid;page-break-inside:avoid}
+  th{background:#f1f4f8;padding:6px;text-align:left;border:1px solid #d8dde6;font-weight:700;color:#20242c}
+  td{padding:5px 6px;border:1px solid #d8dde6;vertical-align:top;overflow-wrap:anywhere}
+  .rate{font-weight:700}.badge{display:inline-block;padding:2px 5px;border-radius:3px;font-size:7pt;font-weight:700;color:#fff;white-space:nowrap}
+  .generated{margin-top:18px;font-size:7.5pt;color:#737b87}
+  @media screen{body{max-width:960px;margin:24px auto;padding:28px;box-shadow:0 2px 14px rgba(15,23,42,.12)}}
+  @media(max-width:600px){body{padding:14px}.stat-row{grid-template-columns:repeat(3,minmax(0,1fr))}table{font-size:7pt}th,td{padding:4px}}
+  @media print{body{padding:0;max-width:none;box-shadow:none}.stat-row{break-inside:avoid}}
 </style></head><body>
-<h1>Student Planner — Attendance Report</h1>
-<div class="sub">${semLabel}${studentName ? ' · ' + studentName : ''}</div>
+<header><h1>QCU Student Planner</h1><div class="sub">Attendance Report · ${escapeAttHtml(semLabel)}${studentName ? ' · ' + escapeAttHtml(studentName) : ''}</div></header>
 <h2>Overall Attendance</h2>
 <div class="stat-row">
-  <div class="stat-box"><div class="val">${overallRate}</div><div class="lbl">Overall Rate</div></div>
-  <div class="stat-box"><div class="val">${overall.present}</div><div class="lbl">Present</div></div>
-  <div class="stat-box"><div class="val">${overall.late}</div><div class="lbl">Late</div></div>
-  <div class="stat-box"><div class="val">${overall.excused}</div><div class="lbl">Excused</div></div>
-  <div class="stat-box"><div class="val">${overall.absent}</div><div class="lbl">Absent</div></div>
-  <div class="stat-box"><div class="val">${overall.noClass}</div><div class="lbl">No Class</div></div>
+  <div class="stat-box"><div class="val">${escapeAttHtml(overallRate)}</div><div class="lbl">Overall Rate</div></div>
+  <div class="stat-box"><div class="val">${Number(overall.present) || 0}</div><div class="lbl">Present</div></div>
+  <div class="stat-box"><div class="val">${Number(overall.late) || 0}</div><div class="lbl">Late</div></div>
+  <div class="stat-box"><div class="val">${Number(overall.excused) || 0}</div><div class="lbl">Excused</div></div>
+  <div class="stat-box"><div class="val">${Number(overall.absent) || 0}</div><div class="lbl">Absent</div></div>
+  <div class="stat-box"><div class="val">${Number(overall.noClass) || 0}</div><div class="lbl">No Class</div></div>
 </div>
 ${subRows.length ? `<h2>Subject Summary</h2>
-<table><thead><tr><th>Subject</th><th>Present</th><th>Late</th><th>Excused</th><th>Absent</th><th>No Class</th><th>Rate</th></tr></thead>
+<table class="subject-summary"><thead><tr><th>Subject</th><th>Present</th><th>Late</th><th>Excused</th><th>Absent</th><th>No Class</th><th>Rate</th></tr></thead>
 <tbody>${subRows.map(x => `<tr>
-  <td>${x.code}</td>
+  <td>${escapeAttHtml(x.code)}</td>
   <td>${x.p}</td><td>${x.l}</td><td>${x.e}</td><td>${x.a}</td><td>${x.nc}</td>
   <td class="rate">${x.rate !== null ? x.rate + '%' : '—'}</td>
 </tr>`).join('')}</tbody></table>` : ''}
-<h2 class="${subRows.length ? 'pg' : ''}">Detailed Log</h2>
-<table><thead><tr><th>Date</th><th>Subject</th><th>Status</th><th>Mode</th><th>Notes</th></tr></thead>
+<h2>Detailed Log</h2>
+<table class="detailed-log"><thead><tr><th>Date</th><th>Subject</th><th>Status</th><th>Mode</th><th>Notes</th></tr></thead>
 <tbody>${records.map(r => {
         const s = subs.find(x => x.id === r.subjectId);
         return `<tr>
-    <td>${r.date}</td>
-    <td>${s ? s.code : '?'}</td>
-    <td><span class="badge" style="background:${statusColor(r.status)}">${r.status}</span></td>
+    <td>${escapeAttHtml(r.date)}</td>
+    <td>${escapeAttHtml(s ? s.code : '?')}</td>
+    <td><span class="badge" style="background:${statusColor(r.status)}">${escapeAttHtml(r.status)}</span></td>
     <td>${r.online ? 'Online' : 'Offline'}</td>
-    <td>${r.notes || ''}</td>
+    <td>${escapeAttHtml(r.notes || '')}</td>
   </tr>`;
     }).join('')}</tbody></table>
-<div style="margin-top:16pt;font-size:8pt;color:#999">Generated ${new Date().toLocaleString()} · Student Planner</div>
+<div class="generated">Generated ${escapeAttHtml(new Date().toLocaleString())} · QCU Student Planner</div>
 </body></html>`;
     const win = window.open('', '_blank');
     if (!win) {
@@ -1617,6 +1633,6 @@ ${subRows.length ? `<h2>Subject Summary</h2>
     win.document.write(html);
     win.document.close();
     win.focus();
-    setTimeout(() => { win.print(); }, 400);
+    win.requestAnimationFrame(() => win.print());
     Toast.show('PDF report opened for printing');
 }

@@ -57,8 +57,8 @@
             </div>
             <div class="cal-toolbar-actions">
               <button class="btn btn-ghost btn-sm" onclick="goToToday()" aria-label="Go to today"><i class="icon-lucide-corner-down-left" aria-hidden="true"></i></button>
-              <div class="dropdown">
-                <button class="btn btn-ghost btn-sm" data-bs-toggle="dropdown" aria-label="Jump to date" id="jumpDateBtn"><i class="icon-lucide-search" aria-hidden="true"></i></button>
+              <div class="dropdown" id="jumpDateDropdown">
+                <button class="btn btn-ghost btn-sm" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-label="Jump to date" id="jumpDateBtn"><i class="icon-lucide-search" aria-hidden="true"></i></button>
                 <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px">
                   <label class="form-label mb-1" style="font-size:.75rem;font-weight:700">Jump to Date</label>
                   <div class="d-flex gap-2">
@@ -70,9 +70,11 @@
               <div class="dropdown">
                 <button class="btn btn-ghost btn-sm" data-bs-toggle="dropdown" aria-label="Export calendar"><i class="icon-lucide-share" aria-hidden="true"></i></button>
                 <ul class="dropdown-menu dropdown-menu-end">
+                  <li><h6 class="dropdown-header">Calendar</h6></li>
+                  <li><a class="dropdown-item" href="#" onclick="openCalendarImport();return false;"><i class="icon-lucide-file-text me-2" aria-hidden="true"></i>Import .ics file</a></li>
                   <li><h6 class="dropdown-header">Export Calendar</h6></li>
                   <li><a class="dropdown-item" href="#" onclick="exportICS();return false;"><i class="icon-lucide-file-text me-2" aria-hidden="true"></i>Download .ics</a></li>
-                  <li><a class="dropdown-item" href="#" onclick="exportGoogleCalendar();return false;"><i class="icon-lucide-school me-2" aria-hidden="true"></i>Google Calendar</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="exportGoogleCalendar();return false;"><i class="icon-lucide-school me-2" aria-hidden="true"></i>Download for Google Calendar</a></li>
                 </ul>
               </div>
               <div class="dropdown">
@@ -126,6 +128,7 @@
       </div>
 
     </div><!-- end cal-layout -->
+      <input type="file" id="calendarImportFile" accept=".ics,text/calendar" hidden aria-label="Choose an ICS calendar file">
 
   </main>
 </div>
@@ -165,6 +168,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../../assets/js/utils/dates.js"></script>
 <script src="../../assets/js/utils/dom.js"></script>
+<script src="../../assets/js/utils/ics-import.js"></script>
 <script src="../../assets/js/utils/event-details.js"></script>
 <script src="../../assets/js/data/storage.js"></script>
 <script src="../../assets/js/core/notification-engine.js"></script>
