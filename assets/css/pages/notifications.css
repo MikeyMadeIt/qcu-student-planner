@@ -248,6 +248,8 @@
 .notification-detail-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
     margin-top: var(--space-5);
 }
@@ -259,6 +261,22 @@
     padding: 0 var(--space-2);
     color: var(--text-faint);
     font-size: 0.8rem;
+}
+
+/* "View tasks" as a plain link, pushed to the right of the actions row */
+.notification-view-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+    color: rgb(var(--accent));
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.notification-view-link:hover {
+    text-decoration: underline;
 }
 
 @media (max-width: 767.98px) {
@@ -307,5 +325,9 @@
 
     .notification-read-label {
         font-size: 0.74rem;
+    }
+
+    .notification-view-link {
+        font-size: 0.76rem;
     }
 }

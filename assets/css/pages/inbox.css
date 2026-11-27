@@ -83,14 +83,21 @@
 
 .msg-detail-header {
     align-items: flex-start;
+    justify-content: space-between;
     gap: var(--space-3);
     padding: var(--card-pad-md) var(--card-pad);
     border-bottom: 1px solid var(--border);
 }
 
+.msg-detail-header > .min-w-0 {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* margin-left: auto pushes the X to the far right of the header */
 .msg-detail-header .btn-close {
     flex: 0 0 auto;
-    margin: 0;
+    margin: 0 0 0 auto;
 }
 
 .msg-detail-eyebrow {
