@@ -129,7 +129,7 @@ function renderNotificationDetail(item, readMap) {
         <div class="notification-detail-actions">
             ${read ? '<span class="notification-read-label"><i class="icon-lucide-circle-check" aria-hidden="true"></i> Read</span>' :
                 '<button type="button" class="btn btn-ghost" id="markSelectedReadBtn"><i class="icon-lucide-check" aria-hidden="true"></i> Mark as read</button>'}
-            <a class="btn btn-accent" href="../app/tasks.html"><i class="icon-lucide-arrow-up-right" aria-hidden="true"></i> View tasks</a>
+            <a class="notification-view-link" href="../app/tasks.html">View tasks <i class="icon-lucide-arrow-up-right" aria-hidden="true"></i></a>
         </div>
     </div>`;
     const markRead = document.getElementById('markSelectedReadBtn');
