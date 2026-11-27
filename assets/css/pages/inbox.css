@@ -66,7 +66,54 @@
     color: var(--text-soft);
 }
 
-/* Message detail modal body (both admin + student) */
+/* Student message detail modal */
+
+.msg-detail-dialog {
+    max-width: min(42rem, calc(100vw - 2rem));
+}
+
+.msg-detail-modal {
+    max-height: min(44rem, calc(100dvh - 2rem));
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--elevated);
+    color: var(--text);
+}
+
+.msg-detail-header {
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--card-pad-md) var(--card-pad);
+    border-bottom: 1px solid var(--border);
+}
+
+.msg-detail-header .btn-close {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.msg-detail-eyebrow {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--text-faint);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.msg-detail-header .modal-title {
+    overflow-wrap: anywhere;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.msg-detail-modal-body {
+    min-height: 0;
+    padding: var(--card-pad);
+    overscroll-behavior: contain;
+}
 
 .msg-detail-meta {
     display: flex;
@@ -83,10 +130,7 @@
     line-height: 1.7;
     font-size: .9rem;
     color: var(--text-soft);
-    max-height: 22rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
 }
 
 .msg-detail-footer {
@@ -98,4 +142,16 @@
     margin-top: var(--space-3);
     padding-top: var(--space-3);
     border-top: 1px solid var(--border);
+}
+
+@media (max-width: 575.98px) {
+    .msg-detail-modal {
+        max-height: calc(100dvh - 1rem);
+        border-radius: var(--radius-md);
+    }
+
+    .msg-detail-header,
+    .msg-detail-modal-body {
+        padding: var(--card-pad-sm);
+    }
 }

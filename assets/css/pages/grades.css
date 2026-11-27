@@ -1135,44 +1135,6 @@
     color: rgb(var(--accent));
 }
 
-/* share btn is icon-only like info btn — no extra overrides needed */
-
-.gwa-share-btn {
-    padding: 0;
-}
-
-.gwa-toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%) translateY(12px);
-    background: var(--elevated);
-    border: 1px solid rgba(var(--accent), .3);
-    color: var(--text);
-    padding: 9px 22px;
-    border-radius: 6px;
-    font-size: .82rem;
-    font-weight: 600;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .22s, transform .22s;
-    z-index: 9999;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0,0,0,.35);
-}
-
-.gwa-toast.gwa-toast-visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-.gwa-toast.gwa-toast-error {
-    border-color: rgba(251,113,133,.4);
-    background: var(--elevated);
-    color: var(--danger);
-}
-
 /* Feature 2: GWA Target Planner */
 
 .gwa-target-grid {

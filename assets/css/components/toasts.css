@@ -1,4 +1,4 @@
-/* Toasts: solid, theme-aware surface with a status-coloured accent. */
+/* Compact, theme-aware toast feedback. */
 
 .toast-container {
     z-index: 9999;
@@ -8,17 +8,16 @@
 .app-toast {
     --toast-color: var(--success);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-3);
     min-width: 15rem;
     max-width: min(24rem, calc(100vw - 2rem));
     margin-bottom: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-3);
     background: var(--elevated);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--toast-color);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow), 0 0 0 1px rgba(0, 0, 0, .04);
+    box-shadow: var(--shadow);
     color: var(--text);
     transition: opacity .3s var(--ease), transform .3s var(--ease);
 }
@@ -36,14 +35,28 @@
 }
 
 .app-toast .toast-item-icon {
-    flex-shrink: 0;
+    display: grid;
+    flex: 0 0 2rem;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--toast-color) 14%, var(--elevated));
     color: var(--toast-color);
-    font-size: 1.1rem;
+    font-size: .95rem;
 }
 
 .app-toast .toast-item-msg {
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: .86rem;
     font-weight: 600;
     line-height: 1.4;
     color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-toast { transition: none; }
 }

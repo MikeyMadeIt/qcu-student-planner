@@ -35,17 +35,46 @@ async function initCalendar() {
     if (ji)
         ji.value = todayKey();
     if (ji && window.DatePicker) DatePicker.refresh('jumpDateInput');
+    if (ji && !ji.dataset.jumpDateNavigationReady) {
+        ji.dataset.jumpDateNavigationReady = 'true';
+        ji.addEventListener('change', doJumpDate);
+    }
+    const importInput = document.getElementById('calendarImportFile');
+    if (importInput && !importInput.dataset.calendarImportReady) {
+        importInput.dataset.calendarImportReady = 'true';
+        importInput.addEventListener('change', handleICSImportFile);
+    }
+    if (!document.documentElement.dataset.calendarJumpDismissReady) {
+        document.documentElement.dataset.calendarJumpDismissReady = 'true';
+        document.addEventListener('click', event => {
+            const dropdown = document.getElementById('jumpDateDropdown');
+            const button = document.getElementById('jumpDateBtn');
+            if (!dropdown || !button || button.getAttribute('aria-expanded') !== 'true') return;
+            if (dropdown.contains(event.target) || event.target.closest('.date-picker-panel')) return;
+            hideJumpDateDropdown();
+        });
+        document.addEventListener('keydown', event => {
+            const dropdown = document.getElementById('jumpDateDropdown');
+            const button = document.getElementById('jumpDateBtn');
+            if (event.key !== 'Escape' || !dropdown || !button || button.getAttribute('aria-expanded') !== 'true') return;
+            hideJumpDateDropdown();
+            document.getElementById('jumpDateBtn')?.focus();
+        });
+    }
     // Re-fetch when the tab regains focus, so admin edits made elsewhere
     // show up without the student needing to reload the page.
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            fetchUnivEvents().then(() => {
-                renderCalendar();
-                if (calSelectedDate)
-                    renderAgenda(calSelectedDate);
-            });
-        }
-    });
+    if (!window._calendarVisibilityListenerBound) {
+        window._calendarVisibilityListenerBound = true;
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchUnivEvents().then(() => {
+                    renderCalendar();
+                    if (calSelectedDate)
+                        renderAgenda(calSelectedDate);
+                });
+            }
+        });
+    }
 }
 
 // Subject Colors (stable)
@@ -200,6 +229,63 @@ function doJumpDate() {
         if (bsdd)
             bsdd.hide();
     }
+}
+
+function hideJumpDateDropdown() {
+    const panel = document.getElementById('jumpDateInputPickerPanel');
+    if (panel && !panel.hidden && panel._datePickerClose) panel._datePickerClose();
+    const button = document.getElementById('jumpDateBtn');
+    const dropdown = button && window.bootstrap && bootstrap.Dropdown.getInstance(button);
+    if (dropdown) dropdown.hide();
+}
+
+function openCalendarImport() {
+    const input = document.getElementById('calendarImportFile');
+    if (!DB.getActiveSemesterId()) {
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
+    if (input) input.click();
+}
+
+async function handleICSImportFile(event) {
+    const input = event.currentTarget;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    try {
+        const semesterId = DB.getActiveSemesterId();
+        const semester = DB.getActiveSemester();
+        if (!semesterId || !semester) throw new Error('The university has not configured an active academic period yet.');
+        const result = ICSImport.parse(await file.text(), { ...semester, id: semesterId });
+        const all = DB.getCalendarEvents();
+        const signatures = new Set(all.filter(item => item.semesterId === semesterId).map(calendarEventSignature));
+        const added = [];
+        let duplicates = 0;
+        result.events.forEach(item => {
+            const signature = calendarEventSignature(item);
+            if (signatures.has(signature)) { duplicates++; return; }
+            signatures.add(signature);
+            added.push({ id: DB.uid(), createdAt: Date.now(), ...item });
+        });
+        if (!added.length) {
+            Toast.show(duplicates ? 'These calendar events are already imported.' : 'No events were imported.', duplicates ? 'info' : 'warning', 'icon-lucide-info');
+            return;
+        }
+        DB.saveCalendarEvents([...all, ...added]);
+        renderCalendar();
+        if (calSelectedDate) renderAgenda(calSelectedDate);
+        const details = [duplicates ? `${duplicates} duplicate${duplicates === 1 ? '' : 's'} skipped` : '', result.skipped ? `${result.skipped} unsupported or invalid event${result.skipped === 1 ? '' : 's'} skipped` : ''].filter(Boolean);
+        Toast.show(`${added.length} event${added.length === 1 ? '' : 's'} imported${details.length ? `; ${details.join(', ')}` : ''}.`, 'success', 'icon-lucide-circle-check');
+    } catch (error) {
+        console.warn('Calendar import failed.', error);
+        Toast.show(error.message || 'Could not read this ICS file.', 'danger', 'icon-lucide-triangle-alert');
+    }
+}
+
+function calendarEventSignature(event) {
+    return [event.semesterId || '', event.date || '', event.startTime || '', event.endTime || '', event.title || '', event.description || '']
+        .map(value => String(value).trim().toLocaleLowerCase()).join('\u001f');
 }
 
 // Filter Toggles
@@ -1013,8 +1099,8 @@ function googleCalDate(dateStr, timeStr) {
     const d = dateStr.replace(/-/g, '');
     if (!timeStr)
         return d;
-    const t = timeStr.replace(':', '') + '00';
-    return d + 'T' + t + 'Z';
+    const localDateTime = new Date(`${dateStr}T${timeStr}:00`);
+    return isNaN(localDateTime.getTime()) ? '' : localDateTime.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 }
 
 // HELPER

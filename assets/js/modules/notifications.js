@@ -22,8 +22,9 @@ function initNotifications() {
         if (!button) return;
         notificationSelection = button.dataset.notificationId;
         try {
-            setNotificationRead(notificationSelection);
-            renderNotifications();
+            const readMap = getNotificationReadMap();
+            if (!readMap[notificationSelection]) setNotificationRead(notificationSelection);
+            else renderNotifications();
         } catch (error) {
             showNotificationError(error);
         }
@@ -32,7 +33,6 @@ function initNotifications() {
     document.getElementById('markAllReadBtn').addEventListener('click', () => {
         try {
             markAllNotificationsRead();
-            renderNotifications();
         } catch (error) {
             showNotificationError(error);
         }
@@ -47,8 +47,9 @@ function initNotifications() {
     if (requestedId) {
         notificationSelection = requestedId;
         try {
-            if (getTaskNotifications().some(item => item.id === requestedId))
-                setNotificationRead(requestedId);
+            if (getTaskNotifications().some(item => item.id === requestedId)) {
+                if (!getNotificationReadMap()[requestedId]) setNotificationRead(requestedId);
+            }
         } catch (error) {
             showNotificationError(error);
             return;
@@ -89,7 +90,7 @@ function renderNotifications() {
                 <span class="notification-row-icon ${item.overdue ? 'is-overdue' : ''}" aria-hidden="true"><i class="icon-lucide-book-check" aria-hidden="true"></i></span>
                 <span class="notification-row-copy">
                     <span class="notification-row-top"><strong>${escHtml(item.title)}</strong><span class="notification-unread-dot" aria-hidden="true"></span></span>
-                    <span class="notification-row-meta">${escHtml(item.category)} · ${label} · ${escHtml(item.due.toLocaleDateString([], { month: 'short', day: 'numeric' }))}</span>
+                    <span class="notification-row-meta">${escHtml(item.category)} · ${label} · ${escHtml(item.due.toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }))}</span>
                 </span>
             </button>`;
         }).join('');
@@ -123,7 +124,7 @@ function renderNotificationDetail(item, readMap) {
         <span class="notification-category"><i class="icon-lucide-book-check" aria-hidden="true"></i>${escHtml(item.category)}</span>
         <h2>${escHtml(item.title)}</h2>
         <p class="notification-detail-date"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>
-            ${item.overdue ? 'Overdue' : 'Due'} ${escHtml(item.due.toLocaleString([], { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</p>
+            ${item.overdue ? 'Overdue' : 'Due'} ${escHtml(item.due.toLocaleString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }))}</p>
         ${item.description ? `<p class="notification-description">${escHtml(item.description)}</p>` : ''}
         <div class="notification-detail-actions">
             ${read ? '<span class="notification-read-label"><i class="icon-lucide-circle-check" aria-hidden="true"></i> Read</span>' :
@@ -135,7 +136,6 @@ function renderNotificationDetail(item, readMap) {
     if (markRead) markRead.addEventListener('click', () => {
         try {
             setNotificationRead(item.id);
-            renderNotifications();
         } catch (error) {
             showNotificationError(error);
         }

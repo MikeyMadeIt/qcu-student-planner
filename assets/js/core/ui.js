@@ -15,7 +15,7 @@ const Toast = {
     show(msg, type = 'accent', icon = 'icon-lucide-circle-check') {
         const c = this.container();
         const el = document.createElement('div');
-        const kind = { high: 'danger', error: 'danger', danger: 'danger', medium: 'warning', warning: 'warning', info: 'info' }[type] || 'success';
+        const kind = { high: 'danger', error: 'danger', danger: 'danger', medium: 'warning', warn: 'warning', warning: 'warning', info: 'info' }[type] || 'success';
         el.className = `app-toast app-toast-${kind} fade-in`;
         el.setAttribute('role', kind === 'danger' ? 'alert' : 'status');
         el.innerHTML = `<i class="${icon} toast-item-icon" aria-hidden="true"></i><span class="toast-item-msg">${escHtml(msg)}</span>`;
