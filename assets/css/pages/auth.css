@@ -206,6 +206,26 @@ body.auth-page {
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+.auth-profile-content .auth-select-control {
+    position: relative;
+}
+
+.auth-profile-content .auth-select-control .form-select {
+    padding-right: 2.9rem;
+    background-image: none;
+}
+
+.auth-profile-content .auth-select-chevron {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    z-index: 1;
+    transform: translateY(-50%);
+    color: var(--auth-text-soft);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
 .auth-page .form-control::placeholder {
     color: var(--auth-text-faint);
     opacity: 1;
@@ -569,9 +589,10 @@ html[data-motion="reduced"] .auth-spin {
 }
 
 .legal-box {
-    max-height: 14rem;
+    height: 14rem;
     padding: var(--space-4);
-    overflow-y: scroll;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--auth-input-bg);
     border: var(--auth-rule) solid var(--auth-input-border);
     border-radius: var(--radius-sm);
@@ -609,6 +630,48 @@ html[data-motion="reduced"] .auth-spin {
     margin-top: 0;
 }
 
+.legal-text .lg-h3,
+.legal-text .lg-h4 {
+    margin: var(--space-4) 0 var(--space-1);
+    font-size: .86rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--auth-text);
+}
+
+.legal-text .lg-h3 .lg-num,
+.legal-text .lg-h4 .lg-num {
+    margin-right: .35rem;
+    color: var(--auth-text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.legal-text .lg-nested {
+    padding-left: .75rem;
+    border-left: 1px solid var(--auth-border);
+}
+
+.legal-text .lg-list {
+    margin: .5rem 0 .8rem;
+    padding-left: 1.25rem;
+    color: var(--auth-text-soft);
+    font-size: .86rem;
+    line-height: 1.55;
+}
+
+.legal-text .lg-sub > p,
+.legal-text .lg-nested > p {
+    margin: 0 0 .75rem;
+    color: var(--auth-text-soft);
+    font-size: .86rem;
+    line-height: 1.6;
+}
+
+.legal-text a {
+    color: var(--auth-link);
+    overflow-wrap: anywhere;
+}
+
 .legal-text p {
     margin: 0;
     font-size: 0.88rem;
@@ -637,6 +700,12 @@ html[data-motion="reduced"] .auth-spin {
     top: 0;
     accent-color: rgb(var(--accent));
     cursor: pointer;
+}
+
+.auth-check input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: .15rem 0 0;
 }
 
 /* Status screens */
@@ -684,6 +753,16 @@ html[data-motion="reduced"] .auth-spin {
 }
 
 @media (max-width: 575.98px) {
+    .auth-profile-page::before {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 9;
+        height: calc(env(safe-area-inset-top, 0px) + 3.75rem);
+        border-bottom: 1px solid var(--auth-border);
+        background: var(--auth-bg);
+        content: "";
+    }
+
     .auth-main {
         justify-content: center;
         padding: max(4.5rem, env(safe-area-inset-top) + 3.5rem) var(--space-4) var(--space-5);
@@ -1212,10 +1291,19 @@ body.auth-page {
         padding-top: calc(env(safe-area-inset-top, 0px) + 5rem);
     }
 
+    .auth-profile-page .theme-toggle {
+        z-index: 11;
+        border-color: var(--auth-border);
+        background: var(--auth-elevated);
+    }
+
     .auth-profile-card {
         max-width: 38rem;
         margin: 0 auto;
         padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
     .auth-profile-card .auth-title {
@@ -1257,8 +1345,7 @@ body.auth-page {
     }
 
     .auth-profile-content .legal-box {
-        max-height: none;
-        overflow: visible;
+        height: 14rem;
         padding: .8rem;
     }
 
@@ -1269,6 +1356,25 @@ body.auth-page {
     .auth-profile-content .legal-text p {
         font-size: .82rem;
         line-height: 1.55;
+    }
+
+    .auth-profile-content .legal-text .lg-h3,
+    .auth-profile-content .legal-text .lg-h4,
+    .auth-profile-content .legal-text .lg-list,
+    .auth-profile-content .legal-text .lg-sub > p,
+    .auth-profile-content .legal-text .lg-nested > p {
+        font-size: .82rem;
+    }
+
+    .auth-profile-content .auth-check {
+        align-items: flex-start;
+        gap: .65rem;
+        line-height: 1.5;
+    }
+
+    .auth-profile-content .auth-check input[type="checkbox"] {
+        flex: 0 0 1.1rem;
+        margin-top: .15rem;
     }
 
     .auth-profile-content .auth-submit {
