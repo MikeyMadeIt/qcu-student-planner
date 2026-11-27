@@ -62,8 +62,8 @@
 }
 
 .brand .app-brand-logo {
-    width: 8rem;
-    max-height: 2rem;
+    width: 7.5rem;
+    max-height: 1.8rem;
 }
 
 .sidebar-nav {
@@ -403,7 +403,7 @@
     }
 
     .brand .app-brand-logo {
-        max-height: 2rem;
+        max-height: 1.8rem;
     }
 
     .nav-group-toggle {
