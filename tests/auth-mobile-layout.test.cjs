@@ -1,0 +1,100 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+
+const login = fs.readFileSync('pages/auth/login.html', 'utf8');
+const callback = fs.readFileSync('pages/auth/callback.html', 'utf8');
+const finishProfile = fs.readFileSync('pages/auth/finish-profile.html', 'utf8');
+const authCss = fs.readFileSync('assets/css/pages/auth.css', 'utf8');
+
+test('mobile login retains QCU sign-in and legal links without the independent-project disclaimer', () => {
+  assert.match(login, /images\/logo\/kyusiyu-student-planner\.png/);
+  assert.match(login, /data-theme-toggle/);
+  assert.match(login, /data-google-signin/);
+  assert.match(login, /Sign in to continue/);
+  assert.match(login, /lastname\.firstname\.middlename@gmail\.com/);
+  assert.doesNotMatch(login, /independent student-developed project/i);
+  assert.match(login, /legal-policies\.html#terms-of-service/);
+  assert.match(login, /legal-policies\.html#privacy-policy/);
+  assert.match(authCss, /@media \(max-width: 575\.98px\)/);
+  assert.match(authCss, /min-height: 100dvh/);
+  assert.match(authCss, /env\(safe-area-inset-top/);
+  assert.match(authCss, /\.auth-login-main\s*\{[^}]*justify-content:\s*flex-start;/s);
+  assert.match(authCss, /\.auth-login-main\s*\{[^}]*padding-inline:\s*max\(1\.25rem, env\(\s*safe-area-inset-left/s);
+  assert.match(authCss, /\.auth-login-card \.auth-hint\s*\{[^}]*margin:\s*auto 0 0;/s);
+  assert.match(authCss, /\.auth-approval-note\s*\{[^}]*margin:\s*\.65rem auto 0;/s);
+  assert.match(authCss, /\.auth-login-intro\s*\{\s*display:\s*none;/);
+  assert.match(authCss, /\.auth-login-main > \.auth-login-card\s*\{\s*display:\s*contents;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-hint\s*\{\s*order:\s*4;/);
+  assert.match(authCss, /\.auth-login-card > \[data-google-signin\]\s*\{\s*order:\s*5;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-approval-note\s*\{\s*order:\s*6;/);
+  assert.match(authCss, /\.auth-login-card > \.auth-consent-mobile\s*\{\s*order:\s*7;/);
+  assert.match(authCss, /\.auth-mobile-symbol\s*\{[^}]*margin:\s*auto auto 1\.1rem;/s);
+  assert.match(authCss, /\.auth-login-card \.btn-google\s*\{[^}]*border-radius:\s*var\(--radius-pill\);/s);
+});
+
+test('finish profile keeps its required fields and uses a mobile-only readiness state', () => {
+  for (const name of ['fullName', 'program', 'campus', 'yearLevel', 'acceptTerms']) {
+    assert.match(finishProfile, new RegExp(`name="${name}"`));
+  }
+  assert.match(finishProfile, /data-finish-profile-form/);
+  assert.match(finishProfile, /data-finish-profile-loading/);
+  assert.match(authCss, /\.auth-profile-main:not\(\.is-profile-ready\) \.auth-profile-content\s*\{\s*display:\s*none;/);
+  assert.match(finishProfile, /data-theme-toggle/);
+});
+
+function createCallbackContext(profile) {
+  const progress = [];
+  const elements = Object.fromEntries([
+    '[data-callback-title]', '[data-callback-subtitle]', '[data-callback-message]',
+    '[data-callback-actions]', '[data-callback-spinner]',
+  ].map(selector => [selector, {
+    hidden: selector === '[data-callback-message]' || selector === '[data-callback-actions]' ? true : false,
+    set textContent(value) { this._textContent = value; progress.push([selector, value]); },
+    get textContent() { return this._textContent || ''; },
+    setAttribute(name) { if (name === 'hidden') this.hidden = true; },
+  }]));
+  const location = { search: '', hash: '', replace: value => { location.destination = value; } };
+  const context = {
+    URLSearchParams,
+    location,
+    document: { body: { dataset: { authCallback: 'true' } } },
+    AuthService: {
+      waitForOAuthSession: async () => ({ user: { id: 'user-1' } }),
+      getCurrentProfile: async () => ({ ok: true, data: profile }),
+      signOut: async () => { context.signedOut = true; },
+    },
+    $: selector => elements[selector],
+    progress,
+  };
+  vm.createContext(context);
+  const routingSource = fs.readFileSync('assets/js/utils/auth-routing.js', 'utf8').replace(/export /g, '');
+  vm.runInContext(routingSource, context);
+  const callbackSource = fs.readFileSync('assets/js/modules/auth-callback.js', 'utf8')
+    .replace(/^import .*;\s*$/gm, '')
+    .replace('export function initAuthCallback()', 'function initAuthCallback()');
+  vm.runInContext(callbackSource, context);
+  return context;
+}
+
+test('callback shows distinct verification stages and preserves approval routing', async () => {
+  assert.doesNotMatch(callback, /class="auth-card"/);
+  assert.match(callback, /auth-main auth-callback-main/);
+  assert.match(authCss, /\.auth-callback-main\s*\{[^}]*justify-content:\s*center;/s);
+  assert.match(authCss, /\.auth-page \.grid-bg::before\s*\{\s*opacity:\s*0\.4;/);
+  assert.match(authCss, /\.auth-page \.grid-bg::after\s*\{\s*opacity:\s*0\.2;/);
+  const context = createCallbackContext({ role: 'student', account_status: 'approved', course: 'BSIT', year_level: '1', school: 'Main' });
+  await context.handleCallback();
+  const titles = context.progress.filter(([selector]) => selector === '[data-callback-title]').map(([, value]) => value);
+  assert.deepEqual(titles, ['Verifying your sign-in', 'Loading your profile', 'Checking account access']);
+  assert.equal(context.location.destination, '../app/dashboard.html');
+
+  const pending = createCallbackContext({ role: 'student', account_status: 'pending', course: '', year_level: '', school: '' });
+  await pending.handleCallback();
+  assert.equal(pending.location.destination, 'finish-profile.html');
+
+  const rejected = createCallbackContext({ role: 'student', account_status: 'rejected', rejection_reason: 'Not eligible', course: 'BSIT', year_level: '1', school: 'Main' });
+  await rejected.handleCallback();
+  assert.equal(rejected.signedOut, true);
+});

@@ -21,6 +21,7 @@
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to light theme">
         <i class="icon-lucide-sun theme-icon-sun" aria-hidden="true"></i>
         <i class="icon-lucide-moon-star theme-icon-moon" aria-hidden="true"></i>
+        <i class="icon-lucide-circle theme-icon-amoled" aria-hidden="true"></i>
     </button>
 
     <main class="auth-main auth-status-main" id="main">
@@ -36,7 +37,7 @@
                 <div class="auth-alert info" data-status-message role="status" hidden></div>
                 <div class="auth-actions">
                     <button type="button" class="btn btn-accent auth-submit" data-status-action>Check status</button>
-                    <a class="btn btn-ghost" href="login.html">Back to log in</a>
+                    <a class="btn btn-ghost" href="login.html" data-status-login>Back to log in</a>
                 </div>
             </div>
 
@@ -45,8 +46,9 @@
                 <h1 class="auth-title">Registration Submitted</h1>
                 <p class="auth-sub">Your account has been created and your registration details have been recorded. An administrator will review your account before you can log in.</p>
                 <p class="auth-detail">The program, campus and year level you provided will help administrators review your account.</p>
+                <div class="auth-alert error" data-status-signout-message role="alert" hidden></div>
                 <div class="auth-actions">
-                    <a class="btn btn-accent auth-submit" href="login.html">Back to log in</a>
+                    <a class="btn btn-accent auth-submit" href="login.html" data-status-login>Back to log in</a>
                 </div>
             </div>
         </div>

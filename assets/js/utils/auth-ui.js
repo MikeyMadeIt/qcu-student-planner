@@ -13,7 +13,20 @@ export function setFieldError(input, message) {
     input.setAttribute('aria-invalid', message ? 'true' : 'false');
 
     if (errorElement) {
-        errorElement.textContent = message;
+        if (field.classList.contains('auth-consent-field')) {
+            let messageNode = $('.auth-error-message', errorElement);
+            if (!messageNode) {
+                const icon = document.createElement('i');
+                icon.className = 'icon-lucide-triangle-alert';
+                icon.setAttribute('aria-hidden', 'true');
+                messageNode = document.createElement('span');
+                messageNode.className = 'auth-error-message';
+                errorElement.replaceChildren(icon, messageNode);
+            }
+            messageNode.textContent = message;
+        } else {
+            errorElement.textContent = message;
+        }
         errorElement.hidden = !message;
     }
 }
