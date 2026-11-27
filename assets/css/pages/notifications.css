@@ -129,10 +129,9 @@
 }
 
 .notification-row-top strong {
-    overflow: hidden;
     font-size: 0.86rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .notification-row.is-read .notification-row-top strong {
@@ -224,6 +223,7 @@
 .notification-detail-content h2 {
     margin: var(--space-3) 0;
     font-size: 1.15rem;
+    line-height: 1.35;
     overflow-wrap: anywhere;
 }
 
@@ -239,9 +239,10 @@
 }
 
 .notification-description {
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--border);
+    margin: 0;
+    padding-top: var(--space-1);
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .notification-detail-actions {

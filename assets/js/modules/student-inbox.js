@@ -141,7 +141,7 @@ async function openMessage(messageId) {
             <p class="msg-detail-note"><i class="icon-lucide-info" aria-hidden="true"></i><span>This is a one-way message. You cannot reply from this inbox.</span></p>
         </div>`;
 
-    const modal = new bootstrap.Modal(document.getElementById('messageDetailModal'));
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('messageDetailModal'));
     modal.show();
 
     document.getElementById('toggleReadBtn').addEventListener('click', () => toggleRead(messageId));
@@ -154,7 +154,7 @@ async function openMessage(messageId) {
             window.dispatchEvent(new Event('planner:inbox-changed'));
             const btn = document.getElementById('toggleReadBtn');
             if (btn) btn.innerHTML = `<i class="icon-lucide-mail" aria-hidden="true"></i> Mark as unread`;
-        }
+        } else Toast.show(result.message || 'Could not update this message status.', 'danger', 'icon-lucide-triangle-alert');
     }
 }
 

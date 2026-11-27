@@ -566,8 +566,7 @@ function renderShellBar(activeKey) {
     bar.className = 'shell-bar';
     bar.innerHTML = `
         <a class="mobile-shell-brand" href="../app/dashboard.html" aria-label="QCU Student Planner home">
-            <span class="dot"><i class="icon-lucide-graduation-cap" aria-hidden="true"></i></span>
-            <span>QCU Student Planner</span>
+            <img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner">
         </a>
         <div class="shell-bar-left">
             <button type="button" class="shell-menu-btn" data-sidebar-toggle aria-haspopup="true"
@@ -878,10 +877,10 @@ function renderShell(activeKey, admin) {
         const sidebarSettings = (typeof DB !== 'undefined') ? DB.getSettings() : {};
         const name = (sidebarSettings.name || '').trim() || 'Student';
         const initial = escHtml(name.charAt(0).toUpperCase() || 'S');
-        const brandLabel = isAdminArea ? 'Planner Admin' : 'QCU Planner';
-        const brandIcon = isAdminArea ? 'icon-lucide-shield-lock' : 'icon-lucide-graduation-cap';
         let hasMenuHeading = false;
-        let sidebarHtml = `<div class="brand" role="banner"><span class="dot"><i class="${brandIcon}" aria-hidden="true"></i></span> ${brandLabel}</div>`;
+        let sidebarHtml = isAdminArea
+            ? '<div class="brand" role="banner"><span class="dot"><i class="icon-lucide-shield-lock" aria-hidden="true"></i></span> Planner Admin</div>'
+            : `<div class="brand" role="banner"><img class="app-brand-logo" src="../../images/logo/kyusiyu-student-planner.png" alt="Kyusiyu Student Planner"></div>`;
         sidebarHtml += `<nav class="sidebar-nav" aria-label="Main navigation">`;
         sidebarGroups.forEach((g, index) => {
             const groupId = `sidebarGroup${index}`;

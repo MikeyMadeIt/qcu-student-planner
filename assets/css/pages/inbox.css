@@ -66,7 +66,54 @@
     color: var(--text-soft);
 }
 
-/* Message detail modal body (both admin + student) */
+/* Student message detail modal */
+
+.msg-detail-dialog {
+    max-width: min(42rem, calc(100vw - 2rem));
+}
+
+.msg-detail-modal {
+    max-height: min(44rem, calc(100dvh - 2rem));
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--elevated);
+    color: var(--text);
+}
+
+.msg-detail-header {
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--card-pad-md) var(--card-pad);
+    border-bottom: 1px solid var(--border);
+}
+
+.msg-detail-header .btn-close {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.msg-detail-eyebrow {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--text-faint);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.msg-detail-header .modal-title {
+    overflow-wrap: anywhere;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.msg-detail-modal-body {
+    min-height: 0;
+    padding: var(--card-pad);
+    overscroll-behavior: contain;
+}
 
 .msg-detail-meta {
     display: flex;
@@ -83,10 +130,7 @@
     line-height: 1.7;
     font-size: .9rem;
     color: var(--text-soft);
-    max-height: 22rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
 }
 
 .msg-detail-footer {
@@ -100,76 +144,11 @@
     border-top: 1px solid var(--border);
 }
 
-/* INBOX MESSAGE MODAL REDESIGN (student inbox only: scoped to #messageDetailModal).
-   Header: icon, "Inbox message" label, title, and the close button pinned to the far right.
-   Body: category + date row, sender with avatar, message in its own card,
+/* INBOX MESSAGE BODY REDESIGN (student inbox only: scoped to #messageDetailModal).
+   Category + date row, sender with avatar, message in its own card,
    full-width Mark as read/unread button and a quiet one-way note.
-   Needs the new modal markup in inbox.html (msg-modal-* classes).
-   Delete this block to go back to the old look. */
-
-#messageDetailModal .modal-dialog {
-    max-width: 560px;
-}
-
-#messageDetailModal .modal-content {
-    padding: 0;
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.msg-modal-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(var(--accent), .10), transparent);
-}
-
-.msg-modal-icon {
-    display: grid;
-    place-items: center;
-    flex: 0 0 40px;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: rgba(var(--accent), .15);
-    color: rgb(var(--accent));
-    font-size: 1.1rem;
-}
-
-.msg-modal-titles {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.msg-modal-eyebrow {
-    font-size: .66rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: rgb(var(--accent));
-}
-
-#messageDetailModal #msgDetailTitle {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-}
-
-.msg-modal-head .btn-close {
-    flex: 0 0 auto;
-    margin: 0 0 0 auto;
-}
-
-.msg-modal-body {
-    padding: 16px 18px 18px;
-}
+   Works with the header and scrolling modal above (from main).
+   Delete this block to go back to the old body. */
 
 .msg-detail-top {
     display: flex;
@@ -237,8 +216,6 @@
     background: var(--surface-2);
     font-size: .9rem;
     line-height: 1.65;
-    max-height: min(22rem, 45vh);
-    overflow-wrap: anywhere;
 }
 
 #messageDetailModal .msg-detail-footer {
@@ -278,5 +255,17 @@
     #messageDetailModal #toggleReadBtn {
         width: auto;
         align-self: flex-start;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .msg-detail-modal {
+        max-height: calc(100dvh - 1rem);
+        border-radius: var(--radius-md);
+    }
+
+    .msg-detail-header,
+    .msg-detail-modal-body {
+        padding: var(--card-pad-sm);
     }
 }

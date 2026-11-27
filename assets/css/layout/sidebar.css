@@ -61,6 +61,11 @@
     font-size: 1rem;
 }
 
+.brand .app-brand-logo {
+    width: 7.5rem;
+    max-height: 1.8rem;
+}
+
 .sidebar-nav {
     display: flex;
     flex: 1 1 auto;
@@ -395,6 +400,10 @@
 
     .brand {
         padding-bottom: 0.35rem;
+    }
+
+    .brand .app-brand-logo {
+        max-height: 1.8rem;
     }
 
     .nav-group-toggle {

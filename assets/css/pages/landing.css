@@ -82,24 +82,9 @@ html {
     text-decoration: none;
 }
 
-.lp-brand-mark {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-sm);
-    background: rgb(var(--accent));
-    color: var(--on-accent);
-    font-size: 1.1rem;
-}
-
-.lp-brand-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.98rem;
+.lp-brand .app-brand-logo {
+    width: 7.25rem;
+    max-height: 2rem;
 }
 
 .lp-nav {

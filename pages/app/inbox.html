@@ -53,17 +53,13 @@
 
 <!-- Message detail modal -->
 <div class="modal fade" id="messageDetailModal" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="msgDetailTitle">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="msg-modal-head">
-        <span class="msg-modal-icon" aria-hidden="true"><i class="icon-lucide-mail-open"></i></span>
-        <div class="msg-modal-titles">
-          <span class="msg-modal-eyebrow">Inbox message</span>
-          <h5 id="msgDetailTitle">Message details</h5>
-        </div>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg msg-detail-dialog">
+    <div class="modal-content msg-detail-modal">
+      <div class="modal-header msg-detail-header">
+        <div class="min-w-0"><span class="msg-detail-eyebrow">Inbox message</span><h5 id="msgDetailTitle" class="modal-title">Message details</h5></div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div id="msgDetailBody" class="msg-modal-body"></div>
+      <div class="modal-body msg-detail-modal-body" id="msgDetailBody"></div>
     </div>
   </div>
 </div>
