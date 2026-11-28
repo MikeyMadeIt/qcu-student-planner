@@ -29,6 +29,13 @@ function formatTime(value) {
     }
 }
 
+// First letter of the first and last word of a name, for the sender avatar.
+function initialsOf(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'A';
+    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
 function renderSignInPrompt() {
     const list = document.getElementById('inboxList');
     const state = document.getElementById('inboxListState');
@@ -110,21 +117,28 @@ async function openMessage(messageId) {
 
     const m = row.message;
     const wasUnread = !row.read_at;
+    const senderName = m.sender && m.sender.full_name ? m.sender.full_name : 'Administrator';
 
     document.getElementById('msgDetailTitle').textContent = m.subject;
     const bodyEl = document.getElementById('msgDetailBody');
     bodyEl.innerHTML = `
-        <div class="msg-detail-meta">
+        <div class="msg-detail-top">
             ${messageCategoryBadge(escHtml, m.category)}
-            <span>From ${escHtml(m.sender && m.sender.full_name ? m.sender.full_name : 'Administrator')}</span>
-            <span>&middot; ${formatDateTime(m.sent_at)}</span>
+            <span class="msg-detail-date"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>${formatDateTime(m.sent_at)}</span>
+        </div>
+        <div class="msg-detail-sender">
+            <span class="msg-detail-avatar" aria-hidden="true">${escHtml(initialsOf(senderName))}</span>
+            <span class="msg-detail-sender-text">
+                <span class="msg-detail-from">From</span>
+                <strong>${escHtml(senderName)}</strong>
+            </span>
         </div>
         <div class="msg-detail-body">${escHtml(m.body)}</div>
         <div class="msg-detail-footer">
             <button type="button" class="btn btn-ghost btn-sm" id="toggleReadBtn">
                 <i class="${wasUnread ? 'icon-lucide-mail-open' : 'icon-lucide-mail'}" aria-hidden="true"></i> Mark as ${wasUnread ? 'read' : 'unread'}
             </button>
-            <p class="text-faint" style="font-size:.76rem;margin:0">This is a one-way message. You cannot reply from this inbox.</p>
+            <p class="msg-detail-note"><i class="icon-lucide-info" aria-hidden="true"></i><span>This is a one-way message. You cannot reply from this inbox.</span></p>
         </div>`;
 
     const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('messageDetailModal'));
