@@ -824,6 +824,7 @@
 }
 
 .dash-stats .stat-card {
+    position: relative;
     min-height: 104px;
     justify-content: space-between;
     align-items: flex-start;
