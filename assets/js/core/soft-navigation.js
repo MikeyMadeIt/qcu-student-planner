@@ -396,7 +396,7 @@ export function initSoftNavigation() {
     });
     // The mobile menu and desktop sidebar profile popover are part of the
     // persistent shell even though layout.js mounts them directly on body.
-    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu)')
+    document.querySelectorAll('body > :not(.app-shell):not(#mobileAppNavMenu):not(#desktopFloatingTools):not(#pomodoroWidget)')
         .forEach(node => node.dataset.softNavOverlay = 'true');
     document.addEventListener('click', onClick);
     if (window.MutationObserver && document.body) {
