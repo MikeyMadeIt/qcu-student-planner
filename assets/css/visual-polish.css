@@ -1,0 +1,141 @@
+/* Soft Modern SaaS visual system. Shared across student, admin and auth pages. */
+:root {
+    --shadow: 0 1px 2px rgba(18, 28, 45, .035), 0 5px 18px rgba(18, 28, 45, .035);
+    --shadow-popover: 0 14px 40px rgba(18, 28, 45, .14), 0 2px 8px rgba(18, 28, 45, .06);
+    --shadow-card-hover: 0 6px 18px rgba(18, 28, 45, .07);
+    --border-strong: color-mix(in srgb, var(--border) 62%, var(--text-faint));
+    --surface-hover: color-mix(in srgb, var(--surface-2) 72%, var(--surface));
+}
+
+[data-theme="dark"], [data-theme="amoled"] {
+    --shadow: 0 1px 2px rgba(0, 0, 0, .22), 0 8px 24px rgba(0, 0, 0, .12);
+    --shadow-popover: 0 16px 44px rgba(0, 0, 0, .42), 0 2px 8px rgba(0, 0, 0, .24);
+    --shadow-card-hover: 0 7px 20px rgba(0, 0, 0, .2);
+}
+
+html { scroll-behavior: smooth; }
+body { line-height: 1.55; text-rendering: optimizeLegibility; }
+::selection { background: rgba(var(--accent), .22); }
+
+h1, h2, h3, h4, h5, h6, .page-title, .section-title {
+    color: var(--text);
+    text-wrap: pretty;
+}
+h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; }
+html body .main-content .page-title { font-size: clamp(1.5rem, 1.2rem + .8vw, 1.9rem); font-weight: 650; letter-spacing: -.04em; line-height: 1.2; }
+.page-sub, .text-muted, .text-secondary { color: var(--text-soft) !important; }
+.section-title, .dash-section-title { font-weight: 650; letter-spacing: -.015em; }
+
+/* App shell retains its existing navigation placement. */
+.sidebar, .main-content {
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+}
+.sidebar { background: var(--nav-bg); }
+.main-content { background: var(--surface); }
+.sidebar .brand .dot { border-radius: 9px; }
+.nav-link { transition: background-color var(--transition), color var(--transition); }
+.nav-link:hover { background: var(--surface-2); }
+.nav-link.active, .nav-link[aria-current="page"] { font-weight: 650; }
+
+/* Content surfaces and page-level grouping. */
+.glass, .card, .modal-content, .profile-panel, .header-panel,
+.dropdown-menu, .popover, .toast, .offcanvas {
+    border-color: var(--border);
+    background-color: var(--surface);
+    color: var(--text);
+}
+html body .main-content .glass, html body .main-content .card { border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.glass:hover, .card:hover { border-color: var(--border-strong); }
+.hover-lift:hover { transform: translateY(-1px); box-shadow: var(--shadow-card-hover); }
+.modal-content { border-radius: 16px; box-shadow: var(--shadow-popover); }
+.modal-header, .modal-footer, .dropdown-divider { border-color: var(--border); }
+.dropdown-menu, .popover, .profile-panel, .header-panel { box-shadow: var(--shadow-popover); }
+.dropdown-item { color: var(--text-soft); }
+.dropdown-item:hover, .dropdown-item:focus, .dropdown-item.active, .dropdown-item:active { background: var(--surface-2); color: var(--text); }
+
+/* Buttons, fields, segmented controls and keyboard focus. */
+.btn, .btn-accent, .btn-ghost, .btn-danger, .btn-icon, .form-control, .form-select,
+.date-picker-trigger, .input-group-text { border-radius: 9px; }
+html body :is(.main-content, .auth-page, .modal, .offcanvas) :is(button, .btn, .btn-icon, .form-control, .form-select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea, .cs-trigger) {
+    border-radius: 9px !important;
+}
+html body :is(.main-content, .auth-page) :is(.task-check, .color-swatch-btn, .accent-swatch-btn, .wp-swatch) {
+    border-radius: 7px !important;
+}
+.btn-accent, .btn-primary { font-weight: 600; box-shadow: 0 1px 2px rgba(15, 23, 42, .1); }
+.btn-accent:hover, .btn-primary:hover { filter: brightness(.97); }
+.btn-ghost, .btn-icon, .btn-secondary { border-color: var(--border); background-color: var(--surface-2); }
+.btn-ghost:hover, .btn-icon:hover, .btn-secondary:hover { border-color: color-mix(in srgb, rgb(var(--accent)) 32%, var(--border)); }
+.form-control, .form-select, .date-picker-trigger { border-color: var(--border) !important; transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition); }
+.form-control:hover:not(:disabled):not(:focus), .form-select:hover:not(:disabled):not(:focus), .date-picker-trigger:hover { border-color: var(--border-strong) !important; }
+.form-control:focus, .form-select:focus { border-color: rgb(var(--accent)) !important; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline-color: rgb(var(--accent)); }
+
+/* Compact semantic labels and status. */
+.badge, .chip, .status-badge { border-radius: 7px; font-weight: 600; letter-spacing: .005em; }
+.status-badge { padding: 4px 9px; }
+.empty-state { color: var(--text-soft); }
+.empty-state-title { color: var(--text); font-weight: 600; }
+.empty-state-sub, .empty-state p { color: var(--text-soft); }
+.empty-icon-circle { border-color: var(--border); background: var(--surface-2); }
+.skel, .skeleton, .skel-text, .skel-title, .skel-circle-sm { background-color: var(--surface-2); }
+
+/* Data tables and list rows. */
+.table, .adm-table { --bs-table-bg: transparent; --bs-table-color: var(--text); --bs-table-border-color: var(--border); color: var(--text); }
+.table > :not(caption) > * > *, .adm-table th, .adm-table td { border-color: var(--border); }
+.table thead th, .adm-table thead th { color: var(--text-soft); font-size: .75rem; font-weight: 650; letter-spacing: .025em; }
+.table-hover > tbody > tr:hover > *, .adm-table tbody tr:hover { background-color: var(--surface-hover); color: var(--text); }
+.list-row { border-radius: 8px; }
+
+/* Page-specific hierarchy and useful responsive compositions. */
+.dashboard-page .dash-stats { gap: var(--grid-gap); }
+.dashboard-page .dash-panel { height: 100%; }
+.dashboard-page .dash-section { margin-top: var(--page-gap); }
+.dashboard-page .dash-stats > *, .dashboard-page .dash-two-col > * { min-width: 0; }
+.dashboard-page .stat-num { letter-spacing: -.04em; }
+.dashboard-page .sem-overview { border-radius: var(--radius-lg); }
+
+.tk-main-body { gap: var(--page-gap); }
+.tk-stats-row { flex-basis: 10rem; margin-right: 0; }
+.tk-stat-card { border-radius: var(--radius-md); }
+html body .main-content .task-row { border-radius: 9px; background: var(--surface); }
+html body .main-content .task-row:hover { transform: translateY(-1px); }
+
+html body .main-content .note-card, html body .main-content .sem-item,
+html body .main-content .att-log-row, html body .main-content .cal-view-btn,
+html body .main-content .cal-filter-btn, html body .main-content .uc-event-chip,
+html body .main-content .sch-subject-card, html body .main-content .grade-subject-card { border-radius: 9px; }
+html body .main-content .note-card { border-color: var(--border); background: var(--surface); }
+html body .main-content .note-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-card-hover); }
+.cal-view-btn, .cal-filter-btn { text-transform: none; letter-spacing: 0; }
+.main-content .sem-item { border-radius: var(--radius-md); background: var(--surface); }
+html body .main-content :is(.cal-view-bar, .wp-mode-tabs, .cal-cell, .uc-cell, .uc-week-cell) { border-radius: 9px !important; }
+html body .date-picker-panel { border-radius: 14px; }
+html body .date-picker-panel :is(.dp-head button, .dp-day) { border-radius: 8px !important; }
+
+.main-content .settings-page { max-width: 54rem; }
+.main-content .settings-section { padding-block: var(--space-4); }
+.main-content .settings-profile { padding: var(--card-pad); border-radius: var(--radius-lg); }
+.main-content .pref-row { align-items: center; }
+
+.admin-app .main-content > .topbar { margin-bottom: var(--space-5); }
+.admin-app .adm-panel, .admin-app .glass { border-radius: var(--radius-lg); }
+.admin-app .adm-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: auto; }
+
+/* Landing and sign-in surfaces use the same quiet, open visual language. */
+.auth-page .auth-card, .auth-page .glass { border-radius: 16px; box-shadow: var(--shadow-popover); }
+.lp-card, .lp-access { border-radius: var(--radius-lg); }
+
+@media (max-width: 767.98px) {
+    .tk-main-body { flex-direction: column; }
+    .tk-stats-row { width: 100%; flex: 0 0 auto; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+    .main-content .settings-page { max-width: none; }
+    .main-content { padding-inline: max(1rem, var(--content-padding-x)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: .01ms !important; }
+}

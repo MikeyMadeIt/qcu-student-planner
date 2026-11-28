@@ -1,5 +1,21 @@
 /* Top bar: brand on the left; profile circle + sidebar toggle on the right. */
 
+.app-brand-logo {
+    display: block;
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 2.1rem;
+    object-fit: contain;
+    object-position: left center;
+}
+
+[data-theme="dark"] .app-brand-logo,
+[data-theme="amoled"] .app-brand-logo {
+    filter: invert(1);
+}
+
 /* position: fixed instead of sticky — deliberately. */
 .shell-bar {
     position: fixed;
@@ -233,17 +249,10 @@
     font-size: 0.84rem;
 }
 
-.header-panel-empty i {
-    display: grid;
-    place-items: center;
+.header-panel-empty .empty-icon-circle {
     width: 2.5rem;
     height: 2.5rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1rem;
 }
 
 .header-panel-empty span {
@@ -344,7 +353,7 @@
     color: var(--text-faint);
 }
 
-.shell-crumbs i {
+.shell-crumbs .lucide-icon {
     font-size: 0.65rem;
 }
 
@@ -499,8 +508,45 @@
     white-space: nowrap;
 }
 
-.shell-semester-status i {
+.shell-semester-status .lucide-icon {
     font-size: 0.72rem;
+}
+
+.shell-semester-status-empty {
+    background: var(--surface);
+    color: var(--text-faint);
+    border-color: var(--border);
+}
+
+.academic-period-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 var(--space-3);
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+.academic-period-banner > .lucide-icon {
+    flex: 0 0 auto;
+    color: rgb(var(--accent));
+}
+
+.academic-period-banner > span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.academic-period-banner strong {
+    color: var(--text);
+    font-size: .8rem;
+    font-weight: 650;
 }
 
 /* Logout row, shared by the header popup and the sidebar footer menu — same */
@@ -595,7 +641,7 @@
     color: var(--text);
 }
 
-.profile-item i {
+.profile-item .lucide-icon {
     width: 1.1rem;
     text-align: center;
 }
@@ -647,7 +693,7 @@
     font-size: 1.25rem;
 }
 
-.shell-menu-btn i {
+.shell-menu-btn .lucide-icon {
     font-size: 1.25rem;
 }
 
@@ -663,7 +709,7 @@
     gap: var(--space-2);
 }
 
-.shell-crumb-current i {
+.shell-crumb-current .lucide-icon {
     font-size: 0.9rem;
     color: rgb(var(--accent));
 }

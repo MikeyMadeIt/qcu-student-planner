@@ -129,10 +129,9 @@
 }
 
 .notification-row-top strong {
-    overflow: hidden;
     font-size: 0.86rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .notification-row.is-read .notification-row-top strong {
@@ -173,18 +172,11 @@
     display: none;
 }
 
-.notification-list-empty > i,
-.notification-detail-empty > i {
-    display: grid;
-    place-items: center;
+.notification-list-empty > .empty-icon-circle,
+.notification-detail-empty > .empty-icon-circle {
     width: 3rem;
     height: 3rem;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.2rem;
 }
 
 .notification-list-empty strong,
@@ -231,6 +223,7 @@
 .notification-detail-content h2 {
     margin: var(--space-3) 0;
     font-size: 1.15rem;
+    line-height: 1.35;
     overflow-wrap: anywhere;
 }
 
@@ -241,19 +234,22 @@
     line-height: 1.6;
 }
 
-.notification-detail-date i {
+.notification-detail-date .lucide-icon {
     margin-right: var(--space-1);
 }
 
 .notification-description {
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--border);
+    margin: 0;
+    padding-top: var(--space-1);
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .notification-detail-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-2);
     margin-top: var(--space-5);
 }
@@ -265,6 +261,22 @@
     padding: 0 var(--space-2);
     color: var(--text-faint);
     font-size: 0.8rem;
+}
+
+/* "View tasks" as a plain link, pushed to the right of the actions row */
+.notification-view-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+    color: rgb(var(--accent));
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.notification-view-link:hover {
+    text-decoration: underline;
 }
 
 @media (max-width: 767.98px) {
@@ -279,5 +291,43 @@
     .notification-device-note {
         width: 100%;
         margin-left: 0;
+    }
+
+    /* Smaller text in the notification details card on phones.
+       Only font sizes and spacing change; the buttons keep their height.
+       Delete this group to go back to the bigger text. */
+    .notification-detail-content {
+        padding: var(--space-4);
+    }
+
+    .notification-category {
+        font-size: 0.68rem;
+    }
+
+    .notification-detail-content h2 {
+        margin: var(--space-2) 0;
+        font-size: 0.98rem;
+    }
+
+    .notification-detail-date,
+    .notification-description {
+        font-size: 0.74rem;
+        line-height: 1.5;
+    }
+
+    .notification-detail-actions {
+        margin-top: var(--space-4);
+    }
+
+    .notification-detail-actions .btn {
+        font-size: 0.76rem;
+    }
+
+    .notification-read-label {
+        font-size: 0.74rem;
+    }
+
+    .notification-view-link {
+        font-size: 0.76rem;
     }
 }

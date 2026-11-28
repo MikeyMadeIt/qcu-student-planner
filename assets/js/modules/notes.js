@@ -9,20 +9,20 @@ let ntSelected = new Set();
 let ntTagFilter = '';
 var ntEditorSelection = null;
 const NOTE_TEMPLATES = {
-    blank: { label: 'Blank Note', icon: 'bi-file-earmark', content: '' },
+    blank: { label: 'Blank Note', icon: 'icon-lucide-file', content: '' },
     lecture: {
         label: 'Lecture Notes',
-        icon: 'bi-journal-text',
+        icon: 'icon-lucide-notebook-text',
         content: '# Topic\n\n## Key Concepts\n\n- \n\n## Important Details\n\n- \n\n## Questions\n\n- \n\n## Summary\n\n- '
     },
     meeting: {
         label: 'Meeting Minutes',
-        icon: 'bi-people',
+        icon: 'icon-lucide-users-round',
         content: '# Meeting\n\nDate: \n\n## Attendees\n\n- \n\n## Agenda\n\n- \n\n## Discussion\n\n- \n\n## Decisions\n\n- \n\n## Action Items\n\n- [ ] '
     },
     study: {
         label: 'Study Plan',
-        icon: 'bi-book',
+        icon: 'icon-lucide-book',
         content: '# Study Plan\n\n## Goal\n\n- \n\n## Topics\n\n- [ ] \n\n## Schedule\n\n- \n\n## Resources\n\n- \n\n## Review Checklist\n\n- [ ] '
     }
 };
@@ -31,6 +31,10 @@ const NOTE_TEMPLATES = {
 
 function initNotes() {
     renderNotes();
+    if (!window._notesAcademicCalendarBound) {
+        window._notesAcademicCalendarBound = true;
+        window.addEventListener('planner:academic-calendar-changed', renderNotes);
+    }
     var searchEl = document.getElementById('noteSearch');
     if (searchEl)
         searchEl.addEventListener('input', debounce(renderNotes, 200));
@@ -61,10 +65,10 @@ function initNotes() {
 }
 
 var NT_DD = {
-    noteCatFilter: { allLabel: 'Categories', icon: 'bi-tags', optIcons: { '': 'bi-grid', Homework: 'bi-pencil', Lecture: 'bi-mortarboard', Project: 'bi-kanban', Personal: 'bi-person', Organization: 'bi-folder2', Ideas: 'bi-lightbulb' } },
-    noteLinkFilterSel: { allLabel: 'All Notes', icon: 'bi-journal-text', optIcons: { all: 'bi-journal-text', subject: 'bi-book', task: 'bi-list-check', unlinked: 'bi-link-45deg' } },
-    noteSubFilterSel: { allLabel: 'Subject', icon: 'bi-book', optIcons: { '': 'bi-grid' }, defaultOptIcon: 'bi-book' },
-    noteTaskFilterSel: { allLabel: 'Task', icon: 'bi-list-check', optIcons: { '': 'bi-grid' }, defaultOptIcon: 'bi-check2-square' }
+    noteCatFilter: { allLabel: 'Categories', icon: 'icon-lucide-tags', optIcons: { '': 'icon-lucide-grid-2x2', Homework: 'icon-lucide-pencil', Lecture: 'icon-lucide-graduation-cap', Project: 'icon-lucide-kanban', Personal: 'icon-lucide-user-round', Organization: 'icon-lucide-folder', Ideas: 'icon-lucide-lightbulb' } },
+    noteLinkFilterSel: { allLabel: 'All Notes', icon: 'icon-lucide-notebook-text', optIcons: { all: 'icon-lucide-notebook-text', subject: 'icon-lucide-book', task: 'icon-lucide-list-checks', unlinked: 'icon-lucide-link' } },
+    noteSubFilterSel: { allLabel: 'Subject', icon: 'icon-lucide-book', optIcons: { '': 'icon-lucide-grid-2x2' }, defaultOptIcon: 'icon-lucide-book' },
+    noteTaskFilterSel: { allLabel: 'Task', icon: 'icon-lucide-list-checks', optIcons: { '': 'icon-lucide-grid-2x2' }, defaultOptIcon: 'icon-lucide-list-check' }
 };
 
 function ntSyncDropdown(id) {
@@ -81,11 +85,11 @@ function ntSyncDropdown(id) {
     var opts = Array.prototype.slice.call(sel.options);
     menu.innerHTML = opts.map(function (o) {
         var on = o.value === cur;
-        var ic = cfg.optIcons[o.value] || cfg.defaultOptIcon || 'bi-dot';
+        var ic = cfg.optIcons[o.value] || cfg.defaultOptIcon || 'icon-lucide-circle';
         return '<button type="button" class="dropdown-item nt-dd-option' + (on ? ' active' : '') + '" role="radio" aria-checked="' + on + '" data-value="' + escapeHtml(o.value) + '">' +
-            '<i class="bi ' + ic + ' nt-dd-option-icon" aria-hidden="true"></i>' +
+            '<i class="' + ic + ' nt-dd-option-icon" aria-hidden="true"></i>' +
             '<span class="nt-dd-option-text">' + escapeHtml(o.textContent) + '</span>' +
-            '<i class="bi bi-check2 nt-dd-option-check" aria-hidden="true"></i></button>';
+            '<i class="icon-lucide-check nt-dd-option-check" aria-hidden="true"></i></button>';
     }).join('');
     menu.querySelectorAll('.nt-dd-option').forEach(function (b) {
         b.addEventListener('click', function () {
@@ -98,15 +102,15 @@ function ntSyncDropdown(id) {
     if (label)
         label.textContent = (isAll || !curOpt) ? cfg.allLabel : curOpt.textContent;
     if (icon)
-        icon.className = 'bi nt-dd-icon ' + (cfg.optIcons[cur] && !isAll ? cfg.optIcons[cur] : cfg.icon);
+        window.setLucideIcon(icon, (cfg.optIcons[cur] && !isAll ? cfg.optIcons[cur] : cfg.icon));
     if (btn)
         btn.classList.toggle('nt-dd-btn-active', !isAll);
 }
 
 function populateNoteLinkFilters() {
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var subSel = document.getElementById('noteSubFilterSel');
     var taskSel = document.getElementById('noteTaskFilterSel');
     if (!subSel || !taskSel)
@@ -128,7 +132,7 @@ function toggleFavFilter() {
     var btn = document.getElementById('favFilterBtn');
     if (btn) {
         btn.classList.toggle('nt-icon-btn-active', favFilterOn);
-        btn.querySelector('i').className = favFilterOn ? 'bi bi-star' : 'bi bi-star';
+        window.setLucideIcon(btn.querySelector('.lucide-icon'), 'star');
         btn.title = favFilterOn ? 'Show all notes' : 'Favorites only';
     }
     renderNotes();
@@ -151,9 +155,9 @@ function clearNoteFilters() {
     var favButton = document.getElementById('favFilterBtn');
     if (favButton) {
         favButton.classList.remove('nt-icon-btn-active');
-        var icon = favButton.querySelector('i');
+        var icon = favButton.querySelector('.lucide-icon');
         if (icon)
-            icon.className = 'bi bi-star';
+            window.setLucideIcon(icon, 'star');
         favButton.title = 'Favorites only';
     }
     var subjectFilter = document.getElementById('noteSubFilterSelDd');
@@ -235,13 +239,13 @@ function renderNtBulkToolbar() {
     wrap.className = 'nt-bulk-toolbar fade-in';
     wrap.setAttribute('aria-label', 'Note bulk actions');
     wrap.innerHTML =
-        '<span class="nt-bulk-count"><i class="bi bi-check2-square" aria-hidden="true"></i>' + count + ' selected</span>' +
+        '<span class="nt-bulk-count"><i class="icon-lucide-list-check" aria-hidden="true"></i>' + count + ' selected</span>' +
             '<div class="nt-bulk-actions">' +
-            '<button class="nt-bulk-btn nt-bulk-all' + (allSel ? ' nt-bulk-all-active' : '') + '" onclick="selectAllVisible()" aria-label="' + allLabel + ' notes" title="' + allLabel + '"><i class="bi ' + (allSel ? 'bi-check2-square' : 'bi-check2-all') + '"></i><span>' + (allSel ? 'None' : 'All') + '</span></button>' +
-            '<button class="nt-bulk-btn nt-bulk-fav" onclick="bulkFavoriteNotes(true)" aria-label="Favorite selected notes" title="Favorite"><i class="bi bi-star"></i><span>Fav</span></button>' +
-            '<button class="nt-bulk-btn nt-bulk-unfav" onclick="bulkFavoriteNotes(false)" aria-label="Unfavorite selected notes" title="Unfavorite"><i class="bi bi-star"></i><span>Unfav</span></button>' +
-            '<button class="nt-bulk-btn nt-bulk-delete" onclick="bulkDeleteNotes()" aria-label="Delete selected notes" title="Delete"><i class="bi bi-trash"></i><span>Delete</span></button>' +
-            '<button class="nt-bulk-btn nt-bulk-clear" onclick="exitSelectMode()" aria-label="Exit selection mode" title="Done"><i class="bi bi-x-lg"></i></button>' +
+            '<button class="nt-bulk-btn nt-bulk-all' + (allSel ? ' nt-bulk-all-active' : '') + '" onclick="selectAllVisible()" aria-label="' + allLabel + ' notes" title="' + allLabel + '"><i class="' + (allSel ? 'icon-lucide-list-check' : 'icon-lucide-list-checks') + '"></i><span>' + (allSel ? 'None' : 'All') + '</span></button>' +
+            '<button class="nt-bulk-btn nt-bulk-fav" onclick="bulkFavoriteNotes(true)" aria-label="Favorite selected notes" title="Favorite"><i class="icon-lucide-star"></i><span>Fav</span></button>' +
+            '<button class="nt-bulk-btn nt-bulk-unfav" onclick="bulkFavoriteNotes(false)" aria-label="Unfavorite selected notes" title="Unfavorite"><i class="icon-lucide-star"></i><span>Unfav</span></button>' +
+            '<button class="nt-bulk-btn nt-bulk-delete" onclick="bulkDeleteNotes()" aria-label="Delete selected notes" title="Delete"><i class="icon-lucide-trash-2"></i><span>Delete</span></button>' +
+            '<button class="nt-bulk-btn nt-bulk-clear" onclick="exitSelectMode()" aria-label="Exit selection mode" title="Done"><i class="icon-lucide-x"></i></button>' +
             '</div>';
     var grid = document.getElementById('notesGrid');
     if (grid)
@@ -271,7 +275,7 @@ function bulkDeleteNotes() {
     confirmAction({
         title: 'Delete ' + count + ' note' + (count !== 1 ? 's' : '') + '?',
         message: 'This will permanently remove the selected notes.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         onConfirm: function () {
             var ids = Array.from(ntSelected);
             DB.saveNotes(DB.getNotes().filter(function (n) { return !ids.includes(n.id); }));
@@ -290,9 +294,9 @@ function getFilteredNotes() {
     q = q.toLowerCase().trim();
     var cat = (document.getElementById('noteCatFilter') || {}).value || '';
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
-    var list = DB.getNotes().filter(function (n) { return n.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
+    var list = DB.getNotes().filter(function (n) { return semId && n.semesterId === semId; });
     if (q) {
         list = list.filter(function (n) {
             var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
@@ -379,16 +383,16 @@ function renderNotes() {
     var list = getFilteredNotes();
     if (!list.length) {
         var semId = DB.getActiveSemesterId();
-        var hasSemesterNotes = DB.getNotes().some(function (note) { return note.semesterId === semId; });
+        var hasSemesterNotes = DB.getNotes().some(function (note) { return semId && note.semesterId === semId; });
         var emptyMessage = hasSemesterNotes
             ? '<p>No notes match your current filters.</p><button type="button" class="btn btn-ghost btn-sm" onclick="clearNoteFilters()">Clear filters</button>'
-            : '<strong>No notes yet</strong><p>Create a note to keep useful details close at hand.</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()"><i class="bi bi-plus-lg" aria-hidden="true"></i>Create note</button>';
-        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center">' + (hasSemesterNotes ? '<i class="bi bi-search" aria-hidden="true"></i><strong>No matching notes</strong>' : '<i class="bi bi-journal-text" aria-hidden="true"></i>') + emptyMessage + '</div>';
+            : '<strong>No notes yet</strong><p>Create a note to keep useful details close at hand.</p><button type="button" class="btn btn-ghost btn-sm" onclick="openNoteModal()"><i class="icon-lucide-plus" aria-hidden="true"></i>Create note</button>';
+        wrap.innerHTML = '<div class="nt-empty glass card-pad text-center"><div class="empty-icon-circle" aria-hidden="true">' + (hasSemesterNotes ? '<i class="icon-lucide-search"></i>' : '<i class="icon-lucide-notebook-text"></i>') + '</div>' + (hasSemesterNotes ? '<strong>No matching notes</strong>' : '') + emptyMessage + '</div>';
         return;
     }
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     wrap.innerHTML = list.map(function (n) {
         var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
         var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
@@ -402,9 +406,9 @@ function renderNotes() {
         var bottomMeta = '';
         var bottomParts = [];
         if (sub)
-            bottomParts.push('<span class="nt-bm-sub"><i class="bi bi-book" aria-hidden="true"></i>' + escapeHtml(sub.code || sub.name) + '</span>');
+            bottomParts.push('<span class="nt-bm-sub"><i class="icon-lucide-book" aria-hidden="true"></i>' + escapeHtml(sub.code || sub.name) + '</span>');
         if (task)
-            bottomParts.push('<span class="nt-bm-task"><i class="bi bi-arrow-up-right-square" aria-hidden="true"></i>' + escapeHtml(task.title) + '</span>');
+            bottomParts.push('<span class="nt-bm-task"><i class="icon-lucide-square-arrow-up-right" aria-hidden="true"></i>' + escapeHtml(task.title) + '</span>');
         if (taskBroken)
             bottomParts.push('<span class="nt-bm-broken">Task unavailable</span>');
         if (tags.length > 0) {
@@ -420,15 +424,15 @@ function renderNotes() {
         return '<div class="nt-masonry-item' + (isSelected ? ' nt-note-selected' : '') + '" id="ntCard_' + n.id + '">' +
             '<div class="glass note-card" data-noteid="' + n.id + '">' +
             '<div class="note-card-header">' +
-            (ntSelectMode ? '<button class="nt-select-check' + (isSelected ? ' selected' : '') + '" onclick="event.stopPropagation();toggleNoteSelect(\'' + n.id + '\')" aria-label="' + (isSelected ? 'Deselect' : 'Select') + ' note" title="' + (isSelected ? 'Deselect' : 'Select') + '">' + (isSelected ? '<i class="bi bi-check-lg" aria-hidden="true"></i>' : '') + '</button>' : '') +
+            (ntSelectMode ? '<button class="nt-select-check' + (isSelected ? ' selected' : '') + '" onclick="event.stopPropagation();toggleNoteSelect(\'' + n.id + '\')" aria-label="' + (isSelected ? 'Deselect' : 'Select') + ' note" title="' + (isSelected ? 'Deselect' : 'Select') + '">' + (isSelected ? '<i class="icon-lucide-check" aria-hidden="true"></i>' : '') + '</button>' : '') +
             '<div class="note-card-title-wrap">' +
-            (n.pinned ? '<i class="bi bi-pin-angle note-pin" title="Pinned" aria-hidden="true"></i>' : '') +
+            (n.pinned ? '<i class="icon-lucide-pin note-pin" title="Pinned" aria-hidden="true"></i>' : '') +
             '<span class="note-card-title">' + escapeHtml(n.title) + '</span>' +
             '</div>' +
             '<div class="nt-card-actions">' +
             '<span class="nt-card-cat-pill">' + escapeHtml(n.category) + '</span>' +
-            '<button class="nt-card-action-box ' + (n.favorite ? 'nt-fav-active' : '') + '" onclick="event.stopPropagation();toggleFavorite(\'' + n.id + '\')" title="' + (n.favorite ? 'Unfavorite' : 'Favorite') + '" aria-label="' + (n.favorite ? 'Remove from favorites' : 'Add to favorites') + '"><i class="bi ' + (n.favorite ? 'bi-star' : 'bi-star') + '"></i></button>' +
-            '<button class="nt-card-action-box" onclick="event.stopPropagation();openNoteModal(\'' + n.id + '\')" title="Edit note" aria-label="Edit note"><i class="bi bi-pencil"></i></button>' +
+            '<button class="nt-card-action-box ' + (n.favorite ? 'nt-fav-active' : '') + '" onclick="event.stopPropagation();toggleFavorite(\'' + n.id + '\')" title="' + (n.favorite ? 'Unfavorite' : 'Favorite') + '" aria-label="' + (n.favorite ? 'Remove from favorites' : 'Add to favorites') + '"><i class="' + (n.favorite ? 'icon-lucide-star' : 'icon-lucide-star') + '"></i></button>' +
+            '<button class="nt-card-action-box" onclick="event.stopPropagation();openNoteModal(\'' + n.id + '\')" title="Edit note" aria-label="Edit note"><i class="icon-lucide-pencil"></i></button>' +
             '</div>' +
             '</div>' +
             '<div class="note-preview-text">' + preview + '</div>' +
@@ -476,22 +480,22 @@ function openNotePreview(id) {
     if (!n)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
     var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
     var tags = n.tags || [];
     var wc = calcWordCount(n.content);
     var metaHtml = '';
     if (sub)
-        metaHtml += '<span class="nt-prev-meta-item"><i class="bi bi-book" aria-hidden="true"></i>' + escapeHtml(sub.code || sub.name) + '</span>';
+        metaHtml += '<span class="nt-prev-meta-item"><i class="icon-lucide-book" aria-hidden="true"></i>' + escapeHtml(sub.code || sub.name) + '</span>';
     if (task)
-        metaHtml += '<span class="nt-prev-meta-item"><i class="bi bi-arrow-up-right-square" aria-hidden="true"></i>' + escapeHtml(task.title) + '</span>';
+        metaHtml += '<span class="nt-prev-meta-item"><i class="icon-lucide-square-arrow-up-right" aria-hidden="true"></i>' + escapeHtml(task.title) + '</span>';
     var tagHtml = tags.length > 0
         ? '<div class="nt-prev-tags">' + tags.map(function (t) { return '<span class="nt-tag-chip">' + escapeHtml(t) + '</span>'; }).join('') + '</div>'
         : '';
-    var wcHtml = wc > 0 ? '<span class="nt-prev-wc"><i class="bi bi-text-paragraph" aria-hidden="true"></i>' + wc.toLocaleString() + ' words · ' + calcReadingTime(wc) + '</span>' : '';
-    var dateHtml = n.createdAt ? '<span class="nt-prev-wc"><i class="bi bi-calendar3" aria-hidden="true"></i>Updated ' + new Date(n.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>' : '';
+    var wcHtml = wc > 0 ? '<span class="nt-prev-wc"><i class="icon-lucide-pilcrow" aria-hidden="true"></i>' + wc.toLocaleString() + ' words · ' + calcReadingTime(wc) + '</span>' : '';
+    var dateHtml = n.createdAt ? '<span class="nt-prev-wc"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>Updated ' + new Date(n.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>' : '';
     var existing = document.getElementById('ntPreviewOverlay');
     if (existing)
         existing.remove();
@@ -506,13 +510,13 @@ function openNotePreview(id) {
             '<div class="nt-preview-panel">' +
             '<div class="nt-preview-header">' +
             '<div class="nt-preview-title-wrap">' +
-            (n.pinned ? '<i class="bi bi-pin-angle nt-preview-pin" aria-hidden="true"></i>' : '') +
+            (n.pinned ? '<i class="icon-lucide-pin nt-preview-pin" aria-hidden="true"></i>' : '') +
             '<h2 class="nt-preview-title">' + escapeHtml(n.title) + '</h2>' +
             '</div>' +
             '<div class="nt-preview-header-actions">' +
-            '<button class="nt-preview-action-btn" onclick="closeNotePreview();openNoteModal(\'' + n.id + '\')" aria-label="Edit note" title="Edit note"><i class="bi bi-pencil" aria-hidden="true"></i></button>' +
-            '<button class="nt-preview-action-btn" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i></button>' +
-            '<button class="nt-preview-close" onclick="closeNotePreview()" aria-label="Close preview"><i class="bi bi-x-lg" aria-hidden="true"></i></button>' +
+            '<button class="nt-preview-action-btn" onclick="closeNotePreview();openNoteModal(\'' + n.id + '\')" aria-label="Edit note" title="Edit note"><i class="icon-lucide-pencil" aria-hidden="true"></i></button>' +
+            '<button class="nt-preview-action-btn" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="icon-lucide-file-down" aria-hidden="true"></i></button>' +
+            '<button class="nt-preview-close" onclick="closeNotePreview()" aria-label="Close preview"><i class="icon-lucide-x" aria-hidden="true"></i></button>' +
             '</div>' +
             '</div>' +
             '<div class="nt-preview-submeta">' +
@@ -1916,7 +1920,7 @@ function renderTagChips() {
         return;
     var chips = ntCurrentTags.map(function (t, i) {
         return '<span class="nt-tag-edit-chip">' + escapeHtml(t) +
-            '<button type="button" class="nt-tag-remove" onclick="removeTag(' + i + ')" aria-label="Remove tag ' + escapeHtml(t) + '"><i class="bi bi-x" aria-hidden="true"></i></button></span>';
+            '<button type="button" class="nt-tag-remove" onclick="removeTag(' + i + ')" aria-label="Remove tag ' + escapeHtml(t) + '"><i class="icon-lucide-x" aria-hidden="true"></i></button></span>';
     }).join('');
     container.innerHTML = chips;
 }
@@ -1946,7 +1950,7 @@ function applyTemplate(key) {
             message: 'Replace current content with the "' + tmpl.label + '" template?',
             confirmLabel: 'Replace',
             danger: true,
-            icon: 'bi-file-earmark-text',
+            icon: 'icon-lucide-file-text',
             onConfirm: doApply,
         });
         return;
@@ -1966,8 +1970,8 @@ function toggleTemplateDropdown() {
 function openNoteModal(id) {
     var n = id ? DB.getNotes().find(function (x) { return x.id === id; }) : null;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var curSubId = n ? (n.subjectId || '') : '';
     var curTaskId = n ? (n.taskId || '') : '';
     document.getElementById('noteModalTitle').textContent = n ? 'Edit Note' : 'New Note';
@@ -1978,11 +1982,11 @@ function openNoteModal(id) {
     var CATS = ['Homework', 'Lecture', 'Project', 'Personal', 'Organization', 'Ideas'];
     // Template buttons
     var tmplHtml = '<div class="nt-template-wrap">' +
-        '<button type="button" class="nt-template-trigger btn-ghost btn btn-sm" onclick="toggleTemplateDropdown()" aria-haspopup="true" aria-expanded="false"><i class="bi bi-layout-text-window me-1" aria-hidden="true"></i>Template</button>' +
+        '<button type="button" class="nt-template-trigger btn-ghost btn btn-sm" onclick="toggleTemplateDropdown()" aria-haspopup="true" aria-expanded="false"><i class="icon-lucide-panel-top me-1" aria-hidden="true"></i>Template</button>' +
         '<div class="nt-template-dropdown" id="ntTemplateDropdown" style="display:none">' +
         Object.entries(NOTE_TEMPLATES).map(function (entry) {
             var k = entry[0], v = entry[1];
-            return '<button type="button" class="nt-template-item" onclick="applyTemplate(\'' + k + '\')" aria-label="Apply ' + v.label + ' template"><i class="bi ' + v.icon + '" aria-hidden="true"></i>' + v.label + '</button>';
+            return '<button type="button" class="nt-template-item" onclick="applyTemplate(\'' + k + '\')" aria-label="Apply ' + v.label + ' template"><i class="' + v.icon + '" aria-hidden="true"></i>' + v.label + '</button>';
         }).join('') +
         '</div></div>';
     document.getElementById('noteModalBody').innerHTML =
@@ -2002,8 +2006,8 @@ function openNoteModal(id) {
             '<div class="col-12">' +
             '<div class="d-flex align-items-center justify-content-between mb-1">' +
             '<div class="note-editor-tabs">' +
-            '<button class="note-tab-btn active" id="noteTabWrite" onclick="switchNoteTab(\'write\')" type="button"><i class="bi bi-pencil" aria-hidden="true"></i> Write</button>' +
-            '<button class="note-tab-btn" id="noteTabPreview" onclick="switchNoteTab(\'preview\')" type="button"><i class="bi bi-eye" aria-hidden="true"></i> Preview</button>' +
+            '<button class="note-tab-btn active" id="noteTabWrite" onclick="switchNoteTab(\'write\')" type="button"><i class="icon-lucide-pencil" aria-hidden="true"></i> Write</button>' +
+            '<button class="note-tab-btn" id="noteTabPreview" onclick="switchNoteTab(\'preview\')" type="button"><i class="icon-lucide-eye" aria-hidden="true"></i> Preview</button>' +
             '</div>' +
             tmplHtml +
             '</div>' +
@@ -2016,17 +2020,17 @@ function openNoteModal(id) {
             '<button type="button" class="note-md-btn" onclick="mdInsertLine(\'## \')" title="Heading 2" aria-label="Heading 2"><span style="font-weight:700;font-size:.72rem">H2</span></button>' +
             '<button type="button" class="note-md-btn" onclick="mdInsertLine(\'### \')" title="Heading 3" aria-label="Heading 3"><span style="font-weight:600;font-size:.68rem">H3</span></button>' +
             '<div class="nt-tb-sep"></div>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'- item\')" title="Bullet list" aria-label="Bullet list"><i class="bi bi-list-ul" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'1. item\')" title="Numbered list" aria-label="Numbered list"><i class="bi bi-list-ol" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'- [ ] item\')" title="Checklist item" aria-label="Checklist item"><i class="bi bi-check2-square" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'- item\')" title="Bullet list" aria-label="Bullet list"><i class="icon-lucide-list" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'1. item\')" title="Numbered list" aria-label="Numbered list"><i class="icon-lucide-list-ordered" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'- [ ] item\')" title="Checklist item" aria-label="Checklist item"><i class="icon-lucide-list-check" aria-hidden="true"></i></button>' +
             '<div class="nt-tb-sep"></div>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsertLink()" title="Link" aria-label="Link"><i class="bi bi-link-45deg" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" data-format="code" onclick="mdToggleInline(\'`\')" title="Inline code" aria-label="Inline code" aria-pressed="false"><i class="bi bi-code" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'```\\n\\n```\')" title="Code block" aria-label="Code block"><i class="bi bi-code-slash" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdToggleQuote()" title="Quote" aria-label="Quote"><i class="bi bi-quote" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertLink()" title="Link" aria-label="Link"><i class="icon-lucide-link" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" data-format="code" onclick="mdToggleInline(\'`\')" title="Inline code" aria-label="Inline code" aria-pressed="false"><i class="icon-lucide-code" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdInsertBlock(\'```\\n\\n```\')" title="Code block" aria-label="Code block"><i class="icon-lucide-code-xml" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdToggleQuote()" title="Quote" aria-label="Quote"><i class="icon-lucide-quote" aria-hidden="true"></i></button>' +
             '<div class="nt-tb-sep"></div>' +
-            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(-1)" title="Outdent list item (Shift+Tab)" aria-label="Outdent list item"><i class="bi bi-text-indent-right" aria-hidden="true"></i></button>' +
-            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(1)" title="Indent list item (Tab)" aria-label="Indent list item"><i class="bi bi-text-indent-left" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(-1)" title="Outdent list item (Shift+Tab)" aria-label="Outdent list item"><i class="icon-lucide-indent-decrease" aria-hidden="true"></i></button>' +
+            '<button type="button" class="note-md-btn" onclick="mdChangeIndent(1)" title="Indent list item (Tab)" aria-label="Indent list item"><i class="icon-lucide-indent-increase" aria-hidden="true"></i></button>' +
             '</div>' +
             '<div id="noteTabWritePane">' +
             '<div class="form-control note-editor-ta" id="nContent" data-markdown="' + escapeHtml(n ? n.content || '' : '') + '" data-placeholder="Write your note here…" aria-label="Note content"></div>' +
@@ -2040,9 +2044,9 @@ function openNoteModal(id) {
             '<div class="form-check"><input class="form-check-input" type="checkbox" id="nFavorite" ' + (n && n.favorite ? 'checked' : '') + '><label class="form-check-label" for="nFavorite">Favorite</label></div>' +
             '</div></div>' +
             '<div class="modal-actions">' +
-            '<button class="btn btn-accent flex-grow-1" type="button" onclick="saveNote()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>' + (n ? 'Update' : 'Save') + ' Note</button>' +
-            (n ? '<button class="btn btn-ghost" type="button" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i></button>' : '') +
-            (n ? '<button class="btn btn-ghost" type="button" onclick="deleteNote(\'' + n.id + '\')" aria-label="Delete note"><i class="bi bi-trash" aria-hidden="true"></i></button>' : '') +
+            '<button class="btn btn-accent flex-grow-1" type="button" onclick="saveNote()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>' + (n ? 'Update' : 'Save') + ' Note</button>' +
+            (n ? '<button class="btn btn-ghost" type="button" onclick="exportNotePdf(\'' + n.id + '\')" aria-label="Export PDF" title="Export PDF"><i class="icon-lucide-file-down" aria-hidden="true"></i></button>' : '') +
+            (n ? '<button class="btn btn-ghost" type="button" onclick="deleteNote(\'' + n.id + '\')" aria-label="Delete note"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>' : '') +
             '</div>';
     wireNoteEditor(document.getElementById('nContent'));
     updateNotePreview();
@@ -2119,6 +2123,11 @@ function saveNote() {
     var subjectId = document.getElementById('nSubject').value || null;
     var taskId = document.getElementById('nTask').value || null;
     var id = document.getElementById('nId').value;
+    if (!id && !DB.getActiveSemesterId()) {
+        ntSaving = false;
+        Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+        return;
+    }
     var tags = ntCurrentTags.slice();
     var notes = DB.getNotes();
     if (id) {
@@ -2147,7 +2156,7 @@ function deleteNote(id) {
     confirmAction({
         title: 'Delete note?',
         message: '"' + n.title + '" will be permanently removed.',
-        confirmLabel: 'Delete', danger: true, icon: 'bi-trash',
+        confirmLabel: 'Delete', danger: true, icon: 'icon-lucide-trash-2',
         onConfirm: function () {
             DB.saveNotes(DB.getNotes().filter(function (x) { return x.id !== id; }));
             var modalEl = document.getElementById('noteModal');
@@ -2168,8 +2177,8 @@ function exportNotePdf(id) {
     if (!n)
         return;
     var semId = DB.getActiveSemesterId();
-    var subs = DB.getSubjects().filter(function (s) { return s.semesterId === semId; });
-    var tasks = DB.getTasks().filter(function (t) { return t.semesterId === semId; });
+    var subs = DB.getSubjects().filter(function (s) { return semId && s.semesterId === semId; });
+    var tasks = DB.getTasks().filter(function (t) { return semId && t.semesterId === semId; });
     var sub = n.subjectId ? subs.find(function (s) { return s.id === n.subjectId; }) : null;
     var task = n.taskId ? tasks.find(function (t) { return t.id === n.taskId; }) : null;
     var tags = n.tags || [];
@@ -2208,7 +2217,7 @@ function exportNotePdf(id) {
         '.md-li,ol li{margin:0 0 3pt;break-inside:avoid}' +
         '.md-inline-code{background:#f0f0f8;border:1px solid #ddd;border-radius:3px;padding:1px 4px;font-family:monospace;font-size:.9em;overflow-wrap:anywhere}' +
         '.md-code-block{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow:hidden;background:#f5f5fa;border:1px solid #ddd;border-radius:4px;padding:10pt;margin:.75em 0;font-family:monospace;font-size:9pt;line-height:1.5}' +
-        '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
+        '.md-checklist{list-style:none;padding-left:0}.md-checklist-item{display:flex;align-items:flex-start;gap:7pt;margin:4pt 0;break-inside:avoid}.md-cl-box{width:11pt;height:11pt;min-width:11pt;border:1px solid #888;border-radius:50%;margin-top:3pt;flex-shrink:0}.md-cl-checked{background:#555}.md-cl-checked::after{content:"✓";display:block;color:#fff;text-align:center;font-size:8pt;line-height:10pt}.md-cl-done{text-decoration:line-through;color:#777}' +
         '.md-quote{margin:.6em 0 .8em;padding:6pt 12pt;border-left:3pt solid #2548a8;background:#f3f5fc;break-inside:avoid}' +
         '.md-ul .md-ul,.md-ul ol,ol .md-ul,ol ol{margin:2pt 0}.md-checklist-item{flex-wrap:wrap}.md-checklist-item>ul,.md-checklist-item>ol{flex:1 1 100%}' +
         'a{color:#2548a8;overflow-wrap:anywhere}' +
@@ -2229,5 +2238,5 @@ function exportNotePdf(id) {
         });
     }
     setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
-    Toast.show('Opening print dialog…', 'accent', 'bi-file-earmark-pdf');
+    Toast.show('Opening print dialog…', 'accent', 'icon-lucide-file-down');
 }

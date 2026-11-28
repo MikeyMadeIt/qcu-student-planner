@@ -9,7 +9,13 @@ const loadedScripts = new Set(
 let navigationSequence = 0;
 let activeNavigation = null;
 let pageScope = null;
+// The page (path + query, never the #hash) that is currently shown.
+let currentRoute = '';
 const originalSetInterval = window.setInterval.bind(window);
+
+function routeKey(url) {
+    return url.pathname + url.search;
+}
 
 window.setInterval = function (callback, delay, ...args) {
     const timer = originalSetInterval(callback, delay, ...args);
@@ -324,6 +330,7 @@ async function swapTo(url, { history = true } = {}) {
     const contentNodes = [...nextMain.childNodes].map(node => node.cloneNode(true));
     currentMain.replaceChildren(...(shellBar ? [shellBar] : []), ...contentNodes);
     updateShellForRoute(currentMain, nextMain, url);
+    currentRoute = routeKey(url);
 
     document.querySelectorAll('[data-soft-nav-overlay]').forEach(node => {
         if (node.id === 'mobileAppNavMenu')
@@ -383,6 +390,7 @@ export function initSoftNavigation() {
     if (window.__spSoftNavigationInitialized) return;
     window.__spSoftNavigationInitialized = true;
     installPageListenerScope();
+    currentRoute = routeKey(new URL(location.href));
     document.querySelectorAll('link[rel="stylesheet"][href*="/assets/css/pages/"]').forEach(link => {
         link.dataset.softNavStyle = 'true';
     });
@@ -405,6 +413,9 @@ export function initSoftNavigation() {
             location.assign(url.href);
             return;
         }
+        // Only the #hash changed (for example a table-of-contents link): the browser has
+        // already scrolled to the section, so do not reload the page content.
+        if (routeKey(url) === currentRoute) return;
         swapTo(url, { history: false }).catch(error => {
             location.reload();
         });

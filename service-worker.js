@@ -3,15 +3,18 @@
    - Cache-first only for images, icons and pinned CDN files.
    - Auth and admin pages and non-GET requests are never cached. */
 
-const CACHE = 'qcu-planner-v8';
+const CACHE = 'qcu-planner-v10';
 const SUPABASE_SDK_URL = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
 let supabaseSdkInFlight = null;
 const PRECACHE = [
     'manifest.json',
     'assets/icons/icon-192.png',
     'assets/icons/icon-512.png',
+    'assets/icons/lucide-sprite.svg',
 ];
-const NEVER_CACHE = ['/pages/auth/', '/pages/admin/'];
+// Keep every personalized application shell out of Cache Storage. Vercel sets
+// no-store too, but the service worker must enforce this across deployments.
+const NEVER_CACHE = ['/pages/auth/', '/pages/admin/', '/pages/app/'];
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).catch(() => { }));
     self.skipWaiting();
@@ -120,53 +123,6 @@ async function supabaseSdkNetworkFirstOnce() {
     }
 }
 
-function isBootstrapIconsRequest(url) {
-    return url.origin === 'https://cdn.jsdelivr.net' &&
-        /^\/npm\/bootstrap-icons@1\.11\.3\/font\/(?:bootstrap-icons\.css|fonts\/bootstrap-icons\.woff2)$/.test(url.pathname);
-}
-
-function isValidBootstrapIconsResponse(url, response) {
-    if (!response || response.status !== 200 || response.type === 'opaque') return false;
-
-    const contentType = (response.headers.get('Content-Type') || '').split(';', 1)[0].trim().toLowerCase();
-    if (url.pathname.endsWith('.css')) return contentType === 'text/css';
-    return contentType === 'font/woff2' || contentType === 'application/font-woff2';
-}
-
-async function bootstrapIconsNetworkFirst(req, url) {
-    let cache = null;
-    let cached = null;
-    try {
-        cache = await caches.open(CACHE);
-        cached = await cache.match(req);
-    } catch (error) {
-        // Cache Storage can be unavailable (for example, due to quota or
-        // browser policy). The network path should still be attempted.
-    }
-
-    try {
-        // Revalidate through the network even though jsDelivr marks this
-        // version immutable. Cache Storage itself does not enforce HTTP
-        // freshness headers.
-        const response = await fetch(req, { cache: 'no-cache' });
-        if (!isValidBootstrapIconsResponse(url, response)) {
-            throw new Error('Invalid Bootstrap Icons response.');
-        }
-
-        if (cache) {
-            try {
-                await cache.put(req, response.clone());
-            } catch (error) {
-                // A storage failure must not block a valid network response.
-            }
-        }
-        return response;
-    } catch (error) {
-        if (cached && isValidBootstrapIconsResponse(url, cached)) return cached;
-        throw error;
-    }
-}
-
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET')
@@ -177,11 +133,6 @@ self.addEventListener('fetch', (event) => {
 
     if (isSupabaseSdkRequest(url)) {
         event.respondWith(supabaseSdkNetworkFirst(req));
-        return;
-    }
-
-    if (isBootstrapIconsRequest(url)) {
-        event.respondWith(bootstrapIconsNetworkFirst(req, url));
         return;
     }
 

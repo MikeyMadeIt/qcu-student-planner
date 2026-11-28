@@ -41,6 +41,8 @@ function updateSubjectTimeValidation() {
 function openSubjectModal(id, opts) {
     ensureSubjectModal();
     opts = opts || {};
+    const subjectModal = document.getElementById('subjectModal');
+    if (!id) delete subjectModal.dataset.pendingSubjectId;
     const s = id ? DB.getSubject(id) : null;
     document.getElementById('subjectModalTitle').textContent = s && s.source === 'curriculum' && s.setupStatus === 'needs_setup' ? 'Set Up Subject' : (s ? 'Edit Subject' : 'Add Subject');
     const body = document.getElementById('subjectModalBody');
@@ -86,8 +88,8 @@ function openSubjectModal(id, opts) {
     </div>
     <div id="subConflictWarning" class="sch-conflict-warning d-none" role="alert"></div>
     <div class="modal-actions">
-      <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="bi bi-check2 me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
-      ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="bi bi-trash3" aria-hidden="true"></i></button>` : ''}
+      <button class="btn btn-accent flex-grow-1" onclick="saveSubject()"><i class="icon-lucide-check me-1" aria-hidden="true"></i>${s ? 'Update' : 'Save'} Subject</button>
+      ${s ? `<button class="btn btn-ghost" onclick="deleteSubject('${s.id}')" aria-label="Delete subject"><i class="icon-lucide-trash-2" aria-hidden="true"></i></button>` : ''}
     </div>`;
     const codeInput = body.querySelector('#subCode');
     const codeError = body.querySelector('#subCodeError');
@@ -107,7 +109,6 @@ function openSubjectModal(id, opts) {
       }
     });
 
-    const subjectModal = document.getElementById('subjectModal');
     subjectModal.dataset.timeValidationAttempted = 'false';
     initSubjectTimeFields();
     subjectModal.addEventListener('hidden.bs.modal', () => {
@@ -126,7 +127,7 @@ function selectColor(c) {
 }
 
 let subSaving = false;
-function saveSubject() {
+async function saveSubject() {
     // Re-entrancy guard against a rapid double-click duplicating the
     // subject before the modal's fade-out finishes.
     if (subSaving) return;
@@ -175,11 +176,17 @@ function saveSubject() {
         notes: document.getElementById('subNotes').value.trim(),
     };
     subSaving = true;
+    const saveButton = subjectModal.querySelector('[onclick="saveSubject()"]');
+    if (saveButton) { saveButton.disabled = true; saveButton.setAttribute('aria-busy', 'true'); }
+    const finishSaving = () => {
+        subSaving = false;
+        if (saveButton) { saveButton.disabled = false; saveButton.removeAttribute('aria-busy'); }
+    };
     const conflicts = checkSaveConflict(data, id || null);
     const warnEl = document.getElementById('subConflictWarning');
     if (conflicts.length) {
         const conflictNames = conflicts.map(c => `${c.code} (${fmtTime(c.start)}–${fmtTime(c.end)})`).join(', ');
-        warnEl.innerHTML = `<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
+        warnEl.innerHTML = `<i class="icon-lucide-triangle-alert me-1" aria-hidden="true"></i>Schedule conflict with: ${escHtml(conflictNames)}. You can still save.`;
         warnEl.classList.remove('d-none');
     }
     else {
@@ -197,13 +204,20 @@ function saveSubject() {
     }
     else {
         const sem = DB.getActiveSemester();
+        if (!sem) {
+            Toast.show('The university has not configured an active academic period yet.', 'high', 'icon-lucide-calendar-x-2');
+            finishSaving();
+            return;
+        }
+        const subjectId = subjectModal.dataset.pendingSubjectId || DB.uid();
+        subjectModal.dataset.pendingSubjectId = subjectId;
         subjects.push({
-            id: DB.uid(),
+            id: subjectId,
             section: '',
             online: false,
-            semester: sem ? sem.name : '1st Semester',
-            schoolYear: sem ? sem.schoolYear : '2026-2027',
-            semesterId: sem ? sem.id : DB.getActiveSemesterId(),
+            semester: sem.name,
+            schoolYear: sem.schoolYear,
+            semesterId: sem.id,
             archived: false,
             source: 'manual',
             setupStatus: 'completed',
@@ -211,22 +225,42 @@ function saveSubject() {
             ...data,
         });
     }
-    if (DB.saveSubjects(subjects) === false) {
-        Toast.show("Couldn't save to this device (storage may be full or blocked).", 'high', 'bi-exclamation-triangle');
-        subSaving = false;
+    if (typeof DB.saveSubjects === 'function') {
+        // Persist locally and let cloud-sync push in the background. Waiting
+        // for the server before closing the modal made a successful save feel
+        // stalled even though the subject can be rendered from local data.
+        if (DB.saveSubjects(subjects) === false) {
+            Toast.show("Couldn't save the subject on this device. Check available storage and retry.", 'high', 'icon-lucide-triangle-alert');
+            finishSaving();
+            return;
+        }
+    }
+    else if (typeof DB.saveSubjectsAndSync === 'function') {
+        // Compatibility with adapters that only expose the server-sync API.
+        const saveResult = await DB.saveSubjectsAndSync(subjects);
+        if (!saveResult || !saveResult.ok) {
+            Toast.show("Couldn't save the subject: " + ((saveResult && saveResult.error && saveResult.error.message) || 'server synchronization failed. Your entries are still in this form; retry to save.'), 'high', 'icon-lucide-cloud-off');
+            finishSaving();
+            return;
+        }
+    }
+    else {
+        Toast.show('Subject storage is unavailable. Keep this form open and retry.', 'high', 'icon-lucide-cloud-off');
+        finishSaving();
         return;
     }
     bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
     Toast.show(id ? 'Subject updated' : 'Subject added');
     document.dispatchEvent(new CustomEvent('subjects:changed'));
-    subSaving = false;
+    delete subjectModal.dataset.pendingSubjectId;
+    finishSaving();
 }
 
 // Check conflict for save (returns array of conflicting subjects)
 
 function checkSaveConflict(data, excludeId) {
     const semId = DB.getActiveSemesterId();
-    const allSubs = DB.getSubjects().filter(s => s.semesterId === semId && !s.archived && s.id !== excludeId);
+    const allSubs = DB.getSubjects().filter(s => semId && s.semesterId === semId && !s.archived && s.id !== excludeId);
     const conflicts = [];
     const newStart = _smToMins(data.start), newEnd = _smToMins(data.end);
     allSubs.forEach(s => {

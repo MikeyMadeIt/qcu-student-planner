@@ -1,7 +1,7 @@
 {
   "redirects": [
-    { "source": "/(attendance|calendar|curriculum|grades|notes|schedule|settings|syllabus|syllabus-view|tasks|university|wallpaper)\\.html", "destination": "/pages/app/$1.html", "permanent": false },
-    { "source": "/(login|register|pending|verify|forgot-password|reset-password)\\.html", "destination": "/pages/auth/$1.html", "permanent": false }
+    { "source": "/(attendance|calendar|curriculum|grades|notes|schedule|settings|tasks|wallpaper)\\.html", "destination": "/pages/app/$1.html", "permanent": false },
+    { "source": "/(login|pending|callback|finish-profile)\\.html", "destination": "/pages/auth/$1.html", "permanent": false }
   ],
   "headers": [
     {

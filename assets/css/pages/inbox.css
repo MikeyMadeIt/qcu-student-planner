@@ -12,7 +12,7 @@
     line-height: 1.55;
 }
 
-.inbox-backend-notice i {
+.inbox-backend-notice .lucide-icon {
     flex: 0 0 auto;
     color: var(--info);
 }
@@ -38,7 +38,7 @@
     margin-bottom: var(--space-3);
 }
 
-.inbox-search > i {
+.inbox-search > .lucide-icon {
     position: absolute;
     top: 50%;
     left: 13px;
@@ -66,7 +66,61 @@
     color: var(--text-soft);
 }
 
-/* Message detail modal body (both admin + student) */
+/* Student message detail modal */
+
+.msg-detail-dialog {
+    max-width: min(42rem, calc(100vw - 2rem));
+}
+
+.msg-detail-modal {
+    max-height: min(44rem, calc(100dvh - 2rem));
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--elevated);
+    color: var(--text);
+}
+
+.msg-detail-header {
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--card-pad-md) var(--card-pad);
+    border-bottom: 1px solid var(--border);
+}
+
+.msg-detail-header > .min-w-0 {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* margin-left: auto pushes the X to the far right of the header */
+.msg-detail-header .btn-close {
+    flex: 0 0 auto;
+    margin: 0 0 0 auto;
+}
+
+.msg-detail-eyebrow {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--text-faint);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.msg-detail-header .modal-title {
+    overflow-wrap: anywhere;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.msg-detail-modal-body {
+    min-height: 0;
+    padding: var(--card-pad);
+    overscroll-behavior: contain;
+}
 
 .msg-detail-meta {
     display: flex;
@@ -83,10 +137,7 @@
     line-height: 1.7;
     font-size: .9rem;
     color: var(--text-soft);
-    max-height: 22rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
 }
 
 .msg-detail-footer {
@@ -98,4 +149,130 @@
     margin-top: var(--space-3);
     padding-top: var(--space-3);
     border-top: 1px solid var(--border);
+}
+
+/* INBOX MESSAGE BODY REDESIGN (student inbox only: scoped to #messageDetailModal).
+   Category + date row, sender with avatar, message in its own card,
+   full-width Mark as read/unread button and a quiet one-way note.
+   Works with the header and scrolling modal above (from main).
+   Delete this block to go back to the old body. */
+
+.msg-detail-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: 12px;
+}
+
+.msg-detail-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .74rem;
+    color: var(--text-faint);
+}
+
+.msg-detail-sender {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.msg-detail-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(var(--accent), .15);
+    color: rgb(var(--accent));
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.msg-detail-sender-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.msg-detail-from {
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.msg-detail-sender-text strong {
+    font-size: .88rem;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+#messageDetailModal .msg-detail-body {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    font-size: .9rem;
+    line-height: 1.65;
+}
+
+#messageDetailModal .msg-detail-footer {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 0;
+    border-top: 0;
+}
+
+#messageDetailModal #toggleReadBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.msg-detail-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 0;
+    font-size: .74rem;
+    line-height: 1.4;
+    color: var(--text-faint);
+}
+
+.msg-detail-note .lucide-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+}
+
+@media (min-width: 576px) {
+    #messageDetailModal #toggleReadBtn {
+        width: auto;
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .msg-detail-modal {
+        max-height: calc(100dvh - 1rem);
+        border-radius: var(--radius-md);
+    }
+
+    .msg-detail-header,
+    .msg-detail-modal-body {
+        padding: var(--card-pad-sm);
+    }
 }

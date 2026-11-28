@@ -196,9 +196,19 @@ export const AuthService = {
         try {
             if (typeof window !== 'undefined' && window.CloudSync && typeof window.CloudSync.waitForPendingSync === 'function') {
                 try { await window.CloudSync.waitForPendingSync(); } catch (e) { /* ignore */ }
+                const syncStatus = typeof window.CloudSync.getSyncStatus === 'function'
+                    ? window.CloudSync.getSyncStatus()
+                    : null;
+                if (syncStatus && syncStatus.pending) {
+                    return fail('Your changes are still syncing. Wait a moment and try signing out again.', 'SYNC_PENDING');
+                }
+                if (syncStatus && syncStatus.error) {
+                    return fail('Some changes could not be saved. Retry synchronization before signing out so your local data is not lost.', 'SYNC_FAILED');
+                }
             }
             const supabase = getSupabase();
-            await supabase.auth.signOut();
+            const { error } = await supabase.auth.signOut();
+            if (error) return fail(readableAuthError(error), 'AUTH_ERROR');
             if (typeof DB !== 'undefined' && typeof DB.clearPrivateCacheOnSignOut === 'function') {
                 DB.clearPrivateCacheOnSignOut();
             }

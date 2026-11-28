@@ -38,6 +38,12 @@
         text-overflow: ellipsis;
     }
 
+    .mobile-nav-app .mobile-shell-brand .app-brand-logo {
+        width: min(7.25rem, 33vw);
+        max-height: 2rem;
+        flex: 0 1 auto;
+    }
+
     .mobile-nav-app .mobile-shell-brand .dot {
         display: grid;
         flex: 0 0 auto;
@@ -137,7 +143,7 @@
         font-weight: 700;
     }
 
-    .mobile-nav-app .mobile-theme-panel .theme-option i {
+    .mobile-nav-app .mobile-theme-panel .theme-option .lucide-icon {
         font-size: 1rem;
         text-align: center;
     }
@@ -222,7 +228,7 @@
         transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     }
 
-    .mobile-nav-app .mobile-nav-card > i {
+    .mobile-nav-app .mobile-nav-card > .lucide-icon {
         display: grid;
         place-items: center;
         width: 1.15rem;
@@ -250,7 +256,7 @@
         box-shadow: none;
     }
 
-    .mobile-nav-app .mobile-nav-card.active > i {
+    .mobile-nav-app .mobile-nav-card.active > .lucide-icon {
         color: rgb(var(--accent));
     }
 

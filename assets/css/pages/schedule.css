@@ -98,7 +98,7 @@ body {
     gap: 5px;
 }
 
-.sched-meta i {
+.sched-meta .lucide-icon {
     font-size: .68rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -178,7 +178,6 @@ body {
     text-overflow: ellipsis;
     cursor: pointer;
     box-shadow: none;
-    border-left: 3px solid rgba(0,0,0,.22);
     transition: filter var(--transition-fast);
 }
 
@@ -279,6 +278,12 @@ body {
 }
 
 .sch-day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    box-sizing: border-box;
     font-size: .95rem;
     font-weight: 800;
     font-family: var(--font-mono);
@@ -634,7 +639,7 @@ body {
     gap: 5px;
 }
 
-.sch-tl-meta i {
+.sch-tl-meta .lucide-icon {
     font-size: .7rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -730,31 +735,7 @@ body {
 
 .sch-empty-day {
     text-align: center;
-    padding: var(--space-6) var(--card-pad);
     margin-bottom: var(--grid-gap);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.sch-empty-day > i {
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: var(--space-1);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: var(--surface-2);
-    color: rgb(var(--accent));
-    font-size: 1.25rem;
-}
-
-.sch-empty-day > .fw-bold {
-    margin-top: 0 !important;
-    color: var(--text) !important;
-    font-size: .96rem;
 }
 
 .sch-empty-copy {
@@ -791,7 +772,7 @@ body {
     border-radius: 50%;
     background: var(--surface-2);
     color: rgb(var(--accent));
-    font-size: 1.1rem;
+    font-size: 1.15rem;
 }
 
 .sch-tasks-empty strong { color: var(--text); font-size: .88rem; }
@@ -903,6 +884,18 @@ body {
     }
     .sch-next-subject {
         font-size: .88rem;
+    }
+    .sch-day-summary {
+        padding: 10px 12px;
+    }
+    .sch-summary-label {
+        margin-bottom: 7px;
+    }
+    .sch-summary-stats {
+        gap: 10px;
+    }
+    .sch-empty-day {
+        margin-bottom: 0;
     }
     .sch-next-card {
         padding: 12px 13px;
@@ -1177,7 +1170,7 @@ body {
     color: var(--text);
 }
 
-.sch-cancel-info i {
+.sch-cancel-info .lucide-icon {
     color: #fb7185;
     font-size: 1rem;
     margin-top: 1px;
@@ -1246,7 +1239,7 @@ body {
     min-height: 64px;
 }
 
-.sch-att-status-btn i {
+.sch-att-status-btn .lucide-icon {
     font-size: 1.1rem;
 }
 
@@ -1380,12 +1373,6 @@ body {
     border-radius: 4px;
     margin-bottom: 8px;
     border: 1px solid rgba(180,83,9,.2);
-}
-
-/* Empty state button */
-
-.sch-empty-day .btn {
-    margin-top: 8px;
 }
 
 /* min-w-0 utility */
@@ -1656,17 +1643,18 @@ body {
 .sch-day-btn.today:not(.selected) .sch-day-num::before {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: 0;
     border-radius: 50%;
     border: 1.5px solid rgba(var(--accent), .45);
     pointer-events: none;
 }
 
-/* Selected: solid accent pill */
+/* Keep the selected day marker circular instead of filling the full date
+   selector button. */
 
 .sch-day-btn.selected {
-    background: rgba(var(--accent), .18) !important;
-    border-color: rgba(var(--accent), .45) !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 
 .sch-day-btn.selected .sch-day-name {
@@ -1674,14 +1662,23 @@ body {
 }
 
 .sch-day-btn.selected .sch-day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    box-sizing: border-box;
+    border: 1px solid rgba(var(--accent), .5);
+    border-radius: 50%;
+    background: rgba(var(--accent), .18);
     color: rgb(var(--accent)) !important;
 }
 
 /* Combined: today + selected */
 
 .sch-day-btn.today.selected {
-    background: rgba(var(--accent), .22) !important;
-    border-color: rgba(var(--accent), .6) !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 
 .sch-day-btn.today.selected .sch-day-num {
@@ -1745,7 +1742,7 @@ body {
     line-height: 1.4;
 }
 
-.sch-tt-popup-row i {
+.sch-tt-popup-row .lucide-icon {
     font-size: .8rem;
     color: rgb(var(--accent));
     opacity: .75;
@@ -1870,7 +1867,7 @@ body {
 .sch-time-opt:hover, .sch-time-opt.is-active { background: rgba(var(--accent, 36, 87, 214), .16); }
 .sch-time-opt[aria-selected="true"] { font-weight: 400; color: rgb(var(--accent, 36, 87, 214)); }
 .sch-time-hint { margin: .4rem 0 0; font-size: .75rem; color: var(--text-faint); }
-.sch-time-hint .bi { margin-right: .15rem; }
+.sch-time-hint .lucide-icon { margin-right: .15rem; }
 @media (max-width: 575.98px) {
   .sch-time-opt { padding: .7rem .7rem; }
 }
@@ -2129,7 +2126,6 @@ body {
 }
 
 /* Curriculum imports awaiting completion */
-.sch-curriculum-setup { border-left: 3px solid rgb(var(--accent)); }
 .sch-curriculum-setup-sub { font-size: .78rem; }
 .sch-curriculum-setup-list { display: grid; gap: 8px; }
 .sch-curriculum-setup-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
@@ -2144,5 +2140,5 @@ body {
   .sch-curriculum-setup { padding: 12px !important; }
 }
 
-.sch-subject-empty-copy { max-width: 420px; margin: 7px auto 0; color: var(--text-faint); font-size: .82rem; line-height: 1.45; }
-.sch-subject-empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.sch-subject-empty-copy { max-width: 420px; margin: 0; color: var(--text-faint); font-size: .82rem; line-height: 1.45; }
+.sch-subject-empty-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 0; }

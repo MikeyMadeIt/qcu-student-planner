@@ -11,10 +11,10 @@
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link rel="apple-touch-icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/dashboard.css" rel="stylesheet">
 <link href="../../assets/css/pages/schedule.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -34,7 +34,7 @@
         <div>
           <div class="sem-label" id="dashSemLabel">—</div>
           <div class="sem-meta">
-            <span id="dashWeekInfo"><i class="bi bi-calendar3-week me-1" aria-hidden="true"></i>–</span>
+            <span id="dashWeekInfo"><i class="icon-lucide-calendar-days me-1" aria-hidden="true"></i>–</span>
             <span class="text-faint">·</span>
             <span id="dashWeeksLeft">– weeks remaining</span>
           </div>
@@ -51,7 +51,7 @@
     <!-- STAT CARDS -->
     <div class="dash-stats dash-card-anim">
       <a class="stat-card dash-stat-link" href="schedule.html" aria-label="View subjects and schedule">
-        <span class="stat-card-icon"><i class="bi bi-journal-bookmark" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="icon-lucide-bookmark" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statSubjects">–</div>
           <div class="stat-card-lbl">Subjects</div>
@@ -59,7 +59,7 @@
         </div>
       </a>
       <a class="stat-card dash-stat-link" href="grades.html" aria-label="View grades">
-        <span class="stat-card-icon"><i class="bi bi-mortarboard" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="icon-lucide-graduation-cap" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statGwa">–</div>
           <div class="stat-card-lbl">GWA</div>
@@ -67,7 +67,7 @@
         </div>
       </a>
       <a class="stat-card dash-stat-link" href="attendance.html" aria-label="View attendance">
-        <span class="stat-card-icon"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="icon-lucide-user-round-check" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statAtt">–</div>
           <div class="stat-card-lbl">Attendance</div>
@@ -75,7 +75,7 @@
         </div>
       </a>
       <a class="stat-card dash-stat-link" href="tasks.html" aria-label="View tasks">
-        <span class="stat-card-icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span>
+        <span class="stat-card-icon"><i class="icon-lucide-list-check" aria-hidden="true"></i></span>
         <div class="stat-card-text">
           <div class="stat-card-val" id="statTasks">–</div>
           <div class="stat-card-lbl">Tasks</div>
@@ -89,7 +89,7 @@
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-calendar2-day" aria-hidden="true"></i>Today's Schedule</div>
+            <div class="dash-section-title"><i class="icon-lucide-calendar-days" aria-hidden="true"></i>Today's Schedule</div>
             <a href="schedule.html" class="view-all-link">Schedule →</a>
           </div>
           <div id="dashTodaySchedule" aria-busy="true"><div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-50"></div><div class="skel skel-text w-25"></div></div></div><div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-60"></div><div class="skel skel-text w-25"></div></div></div></div>
@@ -98,7 +98,7 @@
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-alarm" aria-hidden="true"></i>Upcoming Tasks</div>
+            <div class="dash-section-title"><i class="icon-lucide-alarm-clock" aria-hidden="true"></i>Upcoming Tasks</div>
             <a href="tasks.html" class="view-all-link">View All →</a>
           </div>
           <div id="dashUpcomingTasks" aria-busy="true"><div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-75"></div><div class="skel skel-text w-40"></div></div></div><div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-60"></div><div class="skel skel-text w-40"></div></div></div><div class="skel-row" aria-hidden="true"><div class="skel skel-circle-sm"></div><div class="skel-row-body"><div class="skel skel-text w-50"></div><div class="skel skel-text w-40"></div></div></div></div>
@@ -111,7 +111,7 @@
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-pie-chart"></i>Attendance</div>
+            <div class="dash-section-title"><i class="icon-lucide-chart-pie"></i>Attendance</div>
             <a href="attendance.html" class="view-all-link">Attendance →</a>
           </div>
           <div class="donut-legend-wrap" id="attendanceDonutContent">
@@ -134,7 +134,7 @@
             </div>
           </div>
           <div class="dash-empty" id="attendanceDonutEmpty" hidden>
-            <i class="bi bi-pie-chart" aria-hidden="true"></i>
+            <div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-chart-pie"></i></div>
             <div class="dash-empty-title">No attendance data yet</div>
             <div class="dash-empty-sub">Log attendance to see your breakdown.</div>
           </div>
@@ -144,7 +144,7 @@
       <div class="dash-card-anim">
         <div class="glass card-pad h-100 dash-panel">
           <div class="card-header-row">
-            <div class="dash-section-title"><i class="bi bi-bar-chart"></i>Grade Performance</div>
+            <div class="dash-section-title"><i class="icon-lucide-chart-column"></i>Grade Performance</div>
             <a href="grades.html" class="view-all-link">View Grades →</a>
           </div>
           <div id="dashGradeChart"></div>

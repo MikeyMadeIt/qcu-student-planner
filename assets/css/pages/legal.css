@@ -34,12 +34,11 @@ html:has(.legal-page) {
     margin-bottom: var(--grid-gap);
     padding: var(--space-4);
     border: 1px solid var(--border);
-    border-left: 3px solid rgb(var(--accent));
     border-radius: var(--radius-md);
     background: var(--surface);
 }
 
-.lg-notice > i {
+.lg-notice > .lucide-icon {
     flex: 0 0 auto;
     margin-top: 2px;
     color: rgb(var(--accent));
@@ -73,7 +72,7 @@ html:has(.legal-page) {
     color: var(--text);
 }
 
-.lg-toc-title i {
+.lg-toc-title .lucide-icon {
     color: rgb(var(--accent));
 }
 
@@ -146,40 +145,35 @@ html:has(.legal-page) {
     margin-top: var(--space-3);
 }
 
-.lg-toc-details summary {
+.lg-toc-toggle {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     min-height: 2.75rem;
     padding: 0 var(--space-2);
+    border: 0;
+    background: transparent;
     color: var(--text-soft);
+    font: inherit;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     border-radius: var(--radius-sm);
 }
 
-.lg-toc-details summary {
-    list-style: none;
-}
-
-.lg-toc-details summary::-webkit-details-marker {
-    display: none;
-}
-
-.lg-toc-details summary i {
+.lg-toc-toggle .lucide-icon {
     transition: transform var(--transition-fast);
 }
 
-.lg-toc-details[open] summary i {
+.lg-toc-toggle[aria-expanded="true"] .lucide-icon {
     transform: rotate(180deg);
 }
 
-.lg-toc-details summary:hover {
+.lg-toc-toggle:hover {
     color: var(--text);
 }
 
-.lg-toc-details summary:focus-visible,
+.lg-toc-toggle:focus-visible,
 .lg-toc-card a:focus-visible,
 .lg-rail a:focus-visible,
 .lg-top:focus-visible,
@@ -195,6 +189,10 @@ html:has(.legal-page) {
     margin-top: var(--space-3);
     padding-top: var(--space-4);
     border-top: 1px solid var(--border);
+}
+
+.lg-toc-full[hidden] {
+    display: none;
 }
 
 @media (min-width: 720px) {
@@ -312,14 +310,9 @@ html:has(.legal-page) {
 }
 
 .lg-rail .lg-toc-sub {
-    display: none;
     margin: var(--space-1) 0 var(--space-2);
     padding-left: var(--space-3);
     border-left: 1px solid var(--border);
-}
-
-.lg-rail-group.is-active .lg-toc-sub {
-    display: block;
 }
 
 .lg-rail .lg-toc-sub a {
@@ -653,24 +646,9 @@ html:has(.legal-page) {
     text-decoration: none;
 }
 
-.lg-public-mark {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-sm);
-    background: rgb(var(--accent));
-    color: var(--on-accent);
-    font-size: 1.1rem;
-}
-
-.lg-public-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.95rem;
+.lg-public-brand .app-brand-logo {
+    width: 7rem;
+    max-height: 1.9rem;
 }
 
 .lg-public-tools {
@@ -736,5 +714,128 @@ html:has(.legal-page) {
     .lg-public-tools .btn {
         width: 2.75rem;
         padding: 0;
+    }
+}
+
+/* ---------- MOBILE SPACING (phones only, up to 575px) ----------
+   More room between the cards, inside the cards, and between subsections.
+   Desktop is not affected. To make the page looser or tighter on phones, change the
+   three values below (1.25rem = 20px). */
+@media (max-width: 575.98px) {
+    .legal-page {
+        --lg-m-gap: 1.25rem;    /* space between cards */
+        --lg-m-pad: 1.25rem;    /* padding inside cards */
+        --lg-m-block: 1.25rem;  /* space between subsections */
+    }
+
+    /* Space between the stacked cards */
+    .lg-notice {
+        margin-bottom: var(--lg-m-gap);
+        padding: var(--lg-m-pad);
+        gap: 0.875rem;
+    }
+
+    .lg-toc-card {
+        margin-bottom: var(--lg-m-gap);
+    }
+
+    .lg-layout,
+    .lg-content {
+        gap: var(--lg-m-gap);
+    }
+
+    /* Padding inside the cards */
+    .legal-page .lg-toc-card.card-pad,
+    .legal-page .lg-section.card-pad {
+        padding: var(--lg-m-pad);
+    }
+
+    /* Table of contents */
+    .lg-toc-title {
+        margin-bottom: 1rem;
+    }
+
+    .lg-toc-main {
+        gap: 0.625rem;
+    }
+
+    .lg-toc-main a {
+        gap: 0.875rem;
+        padding: 0.5rem 0.875rem;
+    }
+
+    .lg-toc-details {
+        margin-top: 0.875rem;
+    }
+
+    .lg-toc-full {
+        gap: 1.5rem;
+        margin-top: 0.875rem;
+        padding-top: 1.25rem;
+    }
+
+    .lg-toc-group-title {
+        margin-bottom: 0.5rem;
+    }
+
+    .lg-toc-sub a {
+        padding: 0.5rem 0;
+    }
+
+    /* Policy sections */
+    .lg-section-head {
+        gap: 0.875rem;
+        margin-bottom: var(--lg-m-block);
+        padding-bottom: var(--lg-m-block);
+    }
+
+    .legal-page .lg-sub {
+        padding-top: var(--lg-m-block);
+        padding-bottom: var(--lg-m-block);
+    }
+
+    .legal-page .lg-section-head + .lg-sub {
+        padding-top: 0;
+    }
+
+    .lg-h3 {
+        margin-bottom: 0.625rem;
+    }
+
+    .lg-nested {
+        margin-top: 1rem;
+    }
+
+    .lg-h4 {
+        margin-top: 1.25rem;
+        margin-bottom: 0.375rem;
+    }
+
+    .lg-sub p {
+        margin-bottom: 0.875rem;
+    }
+
+    .lg-list {
+        margin-bottom: 0.875rem;
+    }
+
+    .lg-list li {
+        margin-bottom: 0.375rem;
+    }
+
+    /* 5.8 table (stacked rows) */
+    .lg-table td {
+        padding-top: 0.625rem;
+        padding-bottom: 0.625rem;
+    }
+
+    /* References and back to top */
+    .lg-refs li {
+        padding-top: 0.875rem;
+        padding-bottom: 0.875rem;
+    }
+
+    .lg-top {
+        margin-top: 0.875rem;
     }
 }

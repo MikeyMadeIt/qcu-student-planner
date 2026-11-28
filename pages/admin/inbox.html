@@ -10,10 +10,10 @@
 <link rel="manifest" href="../../manifest.json">
 <link rel="icon" href="../../assets/icons/icon-192.png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
 <link href="../../assets/css/main.css" rel="stylesheet">
 <link href="../../assets/css/pages/admin.css" rel="stylesheet">
 <link href="../../assets/css/pages/inbox.css" rel="stylesheet">
+<script src="../../assets/js/core/icons.js"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -54,7 +54,7 @@
             </select>
           </div>
           <button type="button" id="admFiltersClear" class="btn btn-ghost adm-filters-clear">
-            <i class="bi bi-x-circle" aria-hidden="true"></i> Clear filters
+            <i class="icon-lucide-circle-x" aria-hidden="true"></i> Clear filters
           </button>
         </div>
       </div>
@@ -62,11 +62,11 @@
 
     <div class="glass card-pad">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="section-title mb-0"><i class="bi bi-inbox" aria-hidden="true"></i>Sent messages</div>
+        <div class="section-title mb-0"><i class="icon-lucide-inbox" aria-hidden="true"></i>Sent messages</div>
         <div class="d-flex align-items-center gap-2">
           <span class="text-faint" id="admCount" aria-live="polite"></span>
           <button type="button" class="btn btn-accent btn-sm" id="composeBtn" data-bs-toggle="modal" data-bs-target="#composeModal">
-            <i class="bi bi-pencil-square" aria-hidden="true"></i> Compose message
+            <i class="icon-lucide-square-pen" aria-hidden="true"></i> Compose message
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content card-pad">
       <div class="d-flex justify-content-between align-items-start mb-2">
-        <h5 id="composeTitle" class="mb-0"><i class="bi bi-pencil-square" aria-hidden="true"></i> Compose message</h5>
+        <h5 id="composeTitle" class="mb-0"><i class="icon-lucide-square-pen" aria-hidden="true"></i> Compose message</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <p class="text-faint" style="font-size:.82rem">Sent to the student's own Inbox. Students can read this message but cannot reply to it.</p>
@@ -136,7 +136,7 @@
 
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-accent" id="cmSendBtn"><i class="bi bi-send" aria-hidden="true"></i> Send message</button>
+          <button type="submit" class="btn btn-accent" id="cmSendBtn"><i class="icon-lucide-send" aria-hidden="true"></i> Send message</button>
         </div>
       </form>
     </div>

@@ -49,19 +49,24 @@ export function mountAdminTopbar(admin) {
         logoutBtn.dataset.adminLogoutWired = 'true';
         logoutBtn.addEventListener('click', async () => {
             document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = true);
-            await AuthService.signOut();
+            const result = await AuthService.signOut();
+            if (!result.ok) {
+                if (window.Toast) Toast.show(result.message || 'Could not sign out. Please try again.', 'high', 'icon-lucide-triangle-alert');
+                document.querySelectorAll('.js-admin-logout').forEach(b => b.disabled = false);
+                return;
+            }
             location.href = '../auth/login.html';
         });
     });
 }
 
 export function renderError(container, message) {
-    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><br>${escHtml(message)}</div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-triangle-alert"></i></div>${escHtml(message)}</div>`;
 }
 
 // Same as renderError, plus a Retry button wired to onRetry. Used wherever a failed
 export function renderErrorWithRetry(container, message, onRetry) {
-    container.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><br>${escHtml(message)}<br><button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="bi bi-arrow-clockwise"></i> Retry</button></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon-circle" aria-hidden="true"><i class="icon-lucide-triangle-alert"></i></div>${escHtml(message)}<button type="button" class="btn btn-ghost btn-sm mt-2" id="admErrorRetryBtn"><i class="icon-lucide-rotate-cw" aria-hidden="true"></i> Retry</button></div>`;
     const btn = container.querySelector('#admErrorRetryBtn');
     if (btn) btn.addEventListener('click', onRetry, { once: true });
 }
