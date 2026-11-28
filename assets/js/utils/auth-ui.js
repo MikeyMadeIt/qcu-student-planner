@@ -22,6 +22,7 @@ export function setFieldError(input, message) {
                 messageNode = document.createElement('span');
                 messageNode.className = 'auth-error-message';
                 errorElement.replaceChildren(icon, messageNode);
+                window.setLucideIcon?.(icon, 'triangle-alert');
             }
             messageNode.textContent = message;
         } else {

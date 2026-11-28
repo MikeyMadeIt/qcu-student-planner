@@ -1,7 +1,7 @@
 // Wires every [data-theme-toggle] button to the shared theme system in theme.js.
 
 (function () {
-    var authThemeCycle = document.body.classList.contains('auth-page');
+    var themeCycle = document.body.classList.contains('auth-page') || document.body.classList.contains('lp');
 
     function currentTheme() {
         return document.documentElement.getAttribute('data-theme') || 'dark';
@@ -15,7 +15,7 @@
         var theme = currentTheme();
         var label;
 
-        if (authThemeCycle) {
+        if (themeCycle) {
             label = theme === 'dark' ? 'Switch to light theme'
                 : theme === 'light' ? 'Switch to AMOLED theme'
                     : 'Switch to dark theme';
@@ -31,7 +31,7 @@
 
     document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
         button.addEventListener('click', function (event) {
-            if (authThemeCycle && typeof window.cycleTheme === 'function') {
+            if (themeCycle && typeof window.cycleTheme === 'function') {
                 window.cycleTheme(event);
             } else {
                 window.setTheme(isDark() ? 'light' : 'dark', event);

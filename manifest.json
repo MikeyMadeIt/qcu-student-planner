@@ -1,6 +1,6 @@
 {
-  "name": "QCU Student Planner",
-  "short_name": "QCU Planner",
+  "name": "Kyusiyu Student Planner",
+  "short_name": "Kyusiyu Planner",
   "description": "Student planner for schedule, tasks, grades, attendance and notes.",
   "start_url": "pages/auth/login.html",
   "scope": "./",
